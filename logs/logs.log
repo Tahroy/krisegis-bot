@@ -1,0 +1,5 @@
+{"level":"info","message":"Voici un log simple"}
+{"color":"blue","level":"info","message":"Voici un log avec des métadonnées"}
+{"level":"info","message":"Voici un log simple"}
+{"color":"blue","level":"info","message":"Voici un log avec des métadonnées"}
+{"message":"ALERTE, ALERTE","level":"error"}
