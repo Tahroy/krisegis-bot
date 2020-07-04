@@ -53,9 +53,13 @@ client.on('message', message => {
     const commandName = args.shift().toLowerCase();
 
     // On vérifie que la commande existe bien.
-    if (!client.commands.has(commandName)) return;
+    //if (!client.commands.has(commandName)) return;
 
-    const command = client.commands.get(commandName);
+    //const command = client.commands.get(commandName);
+    const command = client.commands.get(commandName) ||
+        client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+    if (!command) return;
 
     if (command.args > 0 && !args.length) {
         let reply = `Vous devez indiquer des arguments (${command.args}) pour utiliser cette commande !`;
