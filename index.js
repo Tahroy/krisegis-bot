@@ -78,8 +78,12 @@ client.on('message', message => {
     try {
         command.execute(message, args);
     } catch (error) {
-        logger.error(error);
-        logger.error(`Message : ${message.content}`, { 'timestamp': Date.now() });
+        console.log(error);
+        logger.error(error.message, {
+            'timestamp': Date.now(),
+            'Message': message.content,
+            'Utilisateur': message.author.username
+        });
     }
 });
 

@@ -4,9 +4,9 @@ const {
 
 module.exports = {
     name: 'help',
-    description: 'List all of my commands or info about a specific command.',
+    description: 'Liste des commandes ou aide à une commande spécifique.',
     aliases: ['commands', 'man'],
-    usage: '[command name]',
+    usage: '<Nom_commande>',
     execute(message, args) {
         const data = [];
         const {
