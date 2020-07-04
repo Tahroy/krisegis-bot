@@ -71,7 +71,7 @@ client.on('message', message => {
         return message.reply(reply);
     }
 
-    if (command.guildOnly && message.channel.type !== 'test') {
+    if (command.guildOnly && message.channel.type !== 'text') {
         return message.reply('Cette commande est indisponible en MP. :(');
     }
 
