@@ -19,15 +19,6 @@ const logger = createLogger({
 
 module.exports = logger;
 
-// Exemple de logs
-/*
-logger.log('info', 'Voici un log simple');
-logger.info('Voici un log avec des métadonnées', {
-    color: 'blue'
-});
-logger.error('ALERTE, ALERTE');
-*/
-
 /* Configuration du bot */
 
 const Discord = require('discord.js');
@@ -57,18 +48,34 @@ client.once('ready', () => {
 client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
+    // On récupère les arguments et le nom de la commande.
     const args = message.content.slice(prefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
+    const commandName = args.shift().toLowerCase();
 
-    switch (command) {
-        case 'ping':
-            client.commands.get('ping').execute(message, args);
-            break;
-        case 'infos':
-            client.commands.get('infos').execute(message, args);
-            break;
-        case 'delete':
-            client.commands.get('delete').execute(message, args);
+    // On vérifie que la commande existe bien.
+    if (!client.commands.has(commandName)) return;
+
+    const command = client.commands.get(commandName);
+
+    if (command.args > 0 && !args.length) {
+        let reply = `Vous devez indiquer des arguments (${command.args}) pour utiliser cette commande !`;
+
+        if (command.usage) {
+            reply += `\nLa commande demande l'usage suivant : « ${command.usage} »`;
+        }
+
+        return message.reply(reply);
+    }
+
+    if (command.guildOnly && message.channel.type !== 'test') {
+        return message.reply('Cette commande est indisponible en MP. :(');
+    }
+
+    try {
+        command.execute(message, args);
+    } catch (error) {
+        logger.error(error);
+        logger.error(`Message : ${message.content}`, { 'timestamp': Date.now() });
     }
 });
 

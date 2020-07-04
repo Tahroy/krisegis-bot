@@ -1,10 +1,8 @@
 module.exports = {
     name: 'infos',
     description: 'Permet d\'obtenir des informations sur un élément (server, me, user)',
+    args: 1,
     execute(message, args) {
-        if (!args[0]) {
-            return message.reply('Vous devez renseigner un paramètre ! (server, me, user)');
-        }
         switch (args[0]) {
             case 'server':
                 const guilde = message.guild;

@@ -1,5 +1,8 @@
-{"level":"info","message":"Voici un log simple"}
-{"color":"blue","level":"info","message":"Voici un log avec des métadonnées"}
-{"level":"info","message":"Voici un log simple"}
-{"color":"blue","level":"info","message":"Voici un log avec des métadonnées"}
-{"message":"ALERTE, ALERTE","level":"error"}
+{"message":"Tahroy a supprimé h messages","level":"info"}
+{"message":"Tahroy a supprimé gfhgf messages","level":"info"}
+{"message":"Tahroy a supprimé 10 messages","level":"info"}
+{"message":"Tahroy a supprimé NaN messages","level":"info"}
+{"message":"Tahroy a supprimé 50 messages","level":"info"}
+{"message":"Tahroy a supprimé 10 messages","level":"info"}
+{"message":"Tahroy a supprimé 40 messages","level":"info"}
+{"message":"Tahroy a supprimé 10 messages","level":"info"}
