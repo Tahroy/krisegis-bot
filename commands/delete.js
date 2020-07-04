@@ -4,7 +4,7 @@ module.exports = {
     name: 'delete',
     description: 'Supprimer X messages (1er argument)',
     args: 1,
-    usage: `delete <nombre>`,
+    usage: `<nombre>`,
     guildOnly: true,
     execute(message, args) {
         const nombreMessages = Number.parseInt(args[0]);
