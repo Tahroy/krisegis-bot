@@ -4,7 +4,7 @@ const {
     owner
 } = require(`${appRoot}/config/config.json`);
 
-const tuiles = [
+var tuiles = [
     [1, 2, 3, 4],
     [5, 6, 7, 8],
     [1, 2, 3, 4],
@@ -51,7 +51,9 @@ module.exports = {
         }
 
         if (args[0] === 'new' && message.author.id === owner) {
-            shuffle(tuiles);
+            tuiles = shuffleBis([1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]);
+            tuiles = splitArray(tuiles, 4);
+
             for (let i = 0; i < etat.length; i++) {
                 for (let j = 0; j < etat[i].length; j++) {
                     etat[i][j] = 0;
@@ -150,4 +152,32 @@ function shuffle(arguments) {
         }
     }
     return arguments
+}
+
+function shuffleBis(array) {
+    var currentIndex = array.length,
+        temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+}
+
+function splitArray(array, part) {
+    var tmp = [];
+    for (var i = 0; i < array.length; i += part) {
+        tmp.push(array.slice(i, i + part));
+    }
+    return tmp;
 }
