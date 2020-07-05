@@ -7,3 +7,18 @@
 {"message":"Tahroy a supprimé 40 messages","level":"info"}
 {"message":"Tahroy a supprimé 10 messages","level":"info"}
 {"message":"Tahroy a supprimé 50 messages","level":"info"}
+{"message":"Tahroy a supprimé 5 messages","level":"info"}
+{"message":"Tahroy a supprimé 5 messages","level":"info"}
+{"timestamp":1593879338126,"Message":"$role add Apprenti <@!178147970385051649>","Utilisateur":"Tahroy","level":"error","message":"role.name.startWith is not a function"}
+{"timestamp":1593879455974,"Message":"$role add Apprenti <@!178147970385051649>","Utilisateur":"Tahroy","level":"error","message":"role.name.startWith is not a function"}
+{"timestamp":1593885776911,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'startWith' of undefined"}
+{"timestamp":1593886055137,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"Assignment to constant variable."}
+{"timestamp":1593886072539,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"Assignment to constant variable."}
+{"timestamp":1593886099513,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"role.name.startWith is not a function"}
+{"timestamp":1593886119070,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"role.name.startWith is not a function"}
+{"timestamp":1593886148428,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"role.name.startswith is not a function"}
+{"timestamp":1593886368456,"Message":"$role add <@!178147970385051649> Badinage","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'add' of undefined"}
+{"message":"Tahroy a supprimé 50 messages","level":"info"}
+{"message":"Tahroy a supprimé 50 messages","level":"info"}
+{"timestamp":1593887356484,"Message":"$role add <@!202854559662473216> badi","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'name' of undefined"}
+{"timestamp":1593887399344,"Message":"$role add <@!202854559662473216> badi","Utilisateur":"Tahroy","level":"error","message":"Cannot read property '1' of undefined"}

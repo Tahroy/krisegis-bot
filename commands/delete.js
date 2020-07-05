@@ -6,6 +6,7 @@ module.exports = {
     args: 1,
     usage: `<nombre>`,
     guildOnly: true,
+    admin: true,
     execute(message, args) {
         const nombreMessages = Number.parseInt(args[0]);
 
@@ -13,8 +14,13 @@ module.exports = {
             return message.reply('Vous devez mettre un nombre entre 1 et 50.');
         }
 
-        message.channel.bulkDelete(nombreMessages + 1);
-        logger.info(`${message.author.username} a supprimé ${nombreMessages} messages`);
-        return message.channel.send(`${nombreMessages} messages ont été supprimés !`);
+        try {
+            message.channel.bulkDelete(nombreMessages + 1);
+            logger.info(`${message.author.username} a supprimé ${nombreMessages} messages`);
+            return message.channel.send(`${nombreMessages} messages ont été supprimés !`);
+        } catch (error) {
+            message.reply('Je n\'ai pas réussi à supprimer ces messages. :(');
+        }
+
     },
 };
