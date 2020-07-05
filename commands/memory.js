@@ -98,6 +98,15 @@ module.exports = {
             points++;
 
             if (points === 8) {
+                tuiles = shuffleBis([1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8]);
+                tuiles = splitArray(tuiles, 4);
+
+                for (let i = 0; i < etat.length; i++) {
+                    for (let j = 0; j < etat[i].length; j++) {
+                        etat[i][j] = 0;
+                    }
+                }
+                points = 0;
                 return message.reply('Vous avez réussi, bravo !');
             }
 
