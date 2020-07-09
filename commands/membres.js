@@ -35,8 +35,8 @@ module.exports = {
                 value: 'Ash\nAspaco\nJasina\nLinley\nWaf\nZaelya',
                 inline: true
             }, {
-                name: 'Recrues (4)',
-                value: 'Hytori\nMaelys\nMela\nYunah-Marre',
+                name: 'Recrues (5)',
+                value: 'Hytori\nMaelys\nMela\nThiva\nYunah-Marre',
                 inline: true
             }, {
                 name: '\u200B',
