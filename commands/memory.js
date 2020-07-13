@@ -144,25 +144,6 @@ function getMap() {
     return map;
 }
 
-function shuffle(arguments) {
-    for (var k = 0; k < arguments.length; k++) {
-        var i = arguments[k].length;
-        if (i == 0)
-            return false;
-        else {
-            while (--i) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var tempi = arguments[k][i];
-                var tempj = arguments[k][j];
-                arguments[k][i] = tempj;
-                arguments[k][j] = tempi;
-            }
-            return arguments; // remove this line
-        }
-    }
-    return arguments
-}
-
 function shuffleBis(array) {
     var currentIndex = array.length,
         temporaryValue, randomIndex;
