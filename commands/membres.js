@@ -31,7 +31,7 @@ module.exports = {
                 };
 
                 for (const membre of membres) {
-                    rangs[membre.rang].push(membre.name);
+                    rangs[membre.rang].push(`[${membre.name}](${membre.permalink})`);
                 }
 
                 for (const rang in rangs) {
