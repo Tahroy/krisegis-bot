@@ -26,7 +26,8 @@ const {
     prefix,
     token,
     version,
-    owner
+    owner,
+    test_token
 } = require('./config/config.json');
 const client = new Discord.Client();
 
