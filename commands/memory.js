@@ -20,6 +20,18 @@ const etat = [
 
 var points = 0;
 
+const emotesHalouine = {
+    '0': ':white_circle:',
+    '1': ':jack_o_lantern:',
+    '2': ':ghost:',
+    '3': ':wolf:',
+    '4': ':smiling_imp:',
+    '5': ':japanese_goblin:',
+    '6': ':bat:',
+    '7': ':drop_of_blood:',
+    '8': ':skull:',
+};
+
 const emotes = {
     '0': ':white_circle:',
     '1': ':boar:',
@@ -136,7 +148,7 @@ function getMap() {
         ligneActuelle++;
         map += nombres[ligneActuelle];
         for (const colonne of ligne) {
-            map += ' ' + emotes[colonne];
+            map += ' ' + emotesHalouine[colonne];
         }
         map += '\n';
     }
