@@ -5,7 +5,6 @@ const {
     format,
     transports
 } = require('winston');
-
 const logger = createLogger({
     level: 'info',
     exitOnError: false,
@@ -16,8 +15,10 @@ const logger = createLogger({
         }),
     ],
 });
-
 module.exports = logger;
+
+/* Configuration de la base de données */
+const Sequelize = require('sequelize');
 
 /* Configuration du bot */
 
@@ -34,10 +35,10 @@ const client = new Discord.Client();
 /* Configuration des commandes */
 const fs = require('fs');
 client.commands = new Discord.Collection();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
+    const command = require(`./src/commands/${file}`);
     client.commands.set(command.name, command);
 }
 
@@ -96,4 +97,4 @@ client.on('message', message => {
     }
 });
 
-client.login(token);
+client.login(test_token);

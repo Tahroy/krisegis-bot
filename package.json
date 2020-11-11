@@ -1,17 +1,20 @@
 {
-  "name": "krisegis-bot",
-  "version": "1.0.0",
-  "description": "Bot pour Krisegis",
-  "main": "index.js",
-  "scripts": {
-    "lancement": "node index.js"
-  },
-  "author": "Tahroy",
-  "license": "ISC",
-  "dependencies": {
-    "app-root-path": "^3.0.0",
-    "axios": "^0.19.2",
-    "discord.js": "^12.4.1",
-    "winston": "^3.3.3"
-  }
+    "name": "krisegis-bot",
+    "version": "1.0.0",
+    "description": "Bot pour Krisegis",
+    "main": "index.js",
+    "scripts": {
+        "lancement": "node index.js"
+    },
+    "author": "Tahroy",
+    "license": "ISC",
+    "dependencies": {
+        "app-root-path": "^3.0.0",
+        "axios": "^0.19.2",
+        "discord.js": "^12.4.1",
+        "mysql": "^2.18.1",
+        "sequelize": "^6.3.5",
+        "sqlite3": "^5.0.0",
+        "winston": "^3.3.3"
+    }
 }
