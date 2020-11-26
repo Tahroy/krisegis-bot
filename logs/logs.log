@@ -22,3 +22,9 @@
 {"message":"Tahroy a supprimé 50 messages","level":"info"}
 {"timestamp":1593887356484,"Message":"$role add <@!202854559662473216> badi","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'name' of undefined"}
 {"timestamp":1593887399344,"Message":"$role add <@!202854559662473216> badi","Utilisateur":"Tahroy","level":"error","message":"Cannot read property '1' of undefined"}
+{"timestamp":1606422230627,"Message":"$play mha opening","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
+{"timestamp":1606422258264,"Message":"$play https://www.youtube.com/watch?v=-77UEct0cZM","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
+{"timestamp":1606422330488,"Message":"$play mha","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
+{"timestamp":1606422344375,"Message":"$play $play https://www.youtube.com/watch?v=-77UEct0cZM","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
+{"timestamp":1606422354210,"Message":"$play https://www.youtube.com/watch?v=-77UEct0cZM","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
+{"timestamp":1606422504802,"Message":"$skip test","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'player' of undefined"}

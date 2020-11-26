@@ -32,6 +32,15 @@ const {
 } = require('./config/config.json');
 const client = new Discord.Client();
 
+/* Configuration du player */
+const { Player } = require("discord-player");
+// Create a new Player (you don't need any API Key)
+const player = new Player(client);
+// To easily access the player
+client.player = player;
+// add the trackStart event so when a song will be played this message will be sent
+client.player.on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
+
 /* Configuration des commandes */
 const fs = require('fs');
 client.commands = new Discord.Collection();
@@ -97,4 +106,4 @@ client.on('message', message => {
     }
 });
 
-client.login(test_token);
+client.login(token);

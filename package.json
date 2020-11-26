@@ -9,9 +9,12 @@
     "author": "Tahroy",
     "license": "ISC",
     "dependencies": {
+        "@discordjs/opus": "^0.3.3",
         "app-root-path": "^3.0.0",
         "axios": "^0.19.2",
+        "discord-player": "^3.0.3",
         "discord.js": "^12.4.1",
+        "ffmpeg-static": "^4.2.7",
         "mysql": "^2.18.1",
         "sequelize": "^6.3.5",
         "sqlite3": "^5.0.0",
