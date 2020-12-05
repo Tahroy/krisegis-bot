@@ -1,8 +1,8 @@
 module.exports = {
     name: 'play',
-    description: '',
+    description: 'Joue une musique',
     args: 1,
-    usage: '',
+    usage: '<url>',
     execute(message, args) {
         message.client.player.play(message, args[0], message.member.user);
     },
