@@ -1,6 +1,7 @@
 const {
     split,
-    slice
+    slice,
+    indexOf
 } = require("ffmpeg-static");
 const {
     info
@@ -15,9 +16,22 @@ module.exports = {
     execute(message, args) {
         let reponse = '';
 
+        args[0] = args[0].toLowerCase();
         let infos = args[0].split('d');
         let nombre = infos[0];
         let faces = infos[1];
+
+        if (args[0].indexOf('d') === -1) {
+            return message.channel.send(`Il manque un « D » !`);
+        }
+
+        if (infos.length != 2) {
+            return message.channel.send(`Toi tu n'as rien compris.`);
+        }
+
+        if (parseInt(nombre) == 0 || parseInt(faces) == 0) {
+            return message.channel.send(`Toi tu n'as rien compris.`);
+        }
 
         let lesDes = [];
         let resultat = 0;
