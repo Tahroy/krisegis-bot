@@ -106,4 +106,4 @@ client.on('message', message => {
     }
 });
 
-client.login(test_token);
+client.login(token);
