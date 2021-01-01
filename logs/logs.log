@@ -28,3 +28,7 @@
 {"timestamp":1606422344375,"Message":"$play $play https://www.youtube.com/watch?v=-77UEct0cZM","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
 {"timestamp":1606422354210,"Message":"$play https://www.youtube.com/watch?v=-77UEct0cZM","Utilisateur":"Tahroy","level":"error","message":"Unhandled error. ('NotPlaying')"}
 {"timestamp":1606422504802,"Message":"$skip test","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'player' of undefined"}
+{"timestamp":1608584898865,"Message":"$r","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'split' of undefined"}
+{"timestamp":1608585037617,"Message":"$r","Utilisateur":"Tahroy","level":"error","message":"Cannot read property 'split' of undefined"}
+{"timestamp":1608585290879,"Message":"$r 7d6","Utilisateur":"Tahroy","level":"error","message":"face is not defined"}
+{"timestamp":1608587904280,"Message":"$r ada","Utilisateur":"Tahroy","level":"error","message":"infos[0].isInteger is not a function"}

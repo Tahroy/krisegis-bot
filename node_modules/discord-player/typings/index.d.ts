@@ -1,7 +1,7 @@
 declare module 'discord-player' {
     import { EventEmitter } from 'events';
     import { Client, Collection, Message, MessageCollector, Snowflake, User, VoiceChannel, VoiceConnection } from 'discord.js';
-    import { result as YtplPlaylist } from 'ytpl';
+    import { Playlist as YTSRPlaylist } from 'youtube-sr';
     import { Stream } from 'stream';
 
     export const version: string;
@@ -25,7 +25,7 @@ declare module 'discord-player' {
 
         public isPlaying(message: Message): boolean;
         public setFilters(message: Message, newFilters: Partial<Filters>): Promise<void>;
-        public play(message: Message, query: string | Track): Promise<void>;
+        public play(message: Message, query: string | Track, firstResult: boolean): Promise<void>;
         public pause(message: Message): void;
         public resume(message: Message): void;
         public stop(message: Message): void;
@@ -33,8 +33,10 @@ declare module 'discord-player' {
         public getQueue(message: Message): Queue;
         public clearQueue(message: Message): void;
         public skip(message: Message): void;
+        public back(message: Message): void;
         public nowPlaying(message: Message): Track;
         public setRepeatMode(message: Message): boolean;
+        public setLoopMode(message: Message, enabled: boolean): boolean
         public shuffle(message: Message): Queue;
         public remove(message: Message, trackOrPosition: Track|number): Track;
         public createProgressBar(message: Message, progressBarOptions: ProgressBarOptions): string;
@@ -45,9 +47,11 @@ declare module 'discord-player' {
     }
     interface PlayerOptions {
         leaveOnEnd: boolean;
+        leaveOnEndCooldown?: number;
         leaveOnStop: boolean;
         leaveOnEmpty: boolean;
         leaveOnEmptyCooldown?: number;
+        autoSelfDeaf: boolean;
     }
     type Filters = 'bassboost' | '8D' | 'vaporwave' | 'nightcore'| 'phaser' | 'tremolo' | 'vibrato' | 'reverse' | 'treble' | 'normalizer' | 'surrounding' | 'pulsator' | 'subboost' | 'karaoke' | 'flanger' | 'gate' | 'haas' | 'mcompand';
     type FiltersStatuses = {
@@ -65,7 +69,7 @@ declare module 'discord-player' {
         thumbnail: string;
         requestedBy: User;
     }
-    type Playlist = YtplPlaylist & CustomPlaylist;
+    type Playlist = YTSRPlaylist & CustomPlaylist;
     interface PlayerEvents {
         searchResults: [Message, string, Track[]];
         searchInvalidResponse: [Message, string, Track[], string, MessageCollector];
@@ -88,11 +92,13 @@ declare module 'discord-player' {
         public voiceConnection?: VoiceConnection;
         public stream: Stream;
         public tracks: Track[];
+        public previousTracks: Track[];
         public stopped: boolean;
         public lastSkipped: boolean;
         public volume: number;
         public paused: boolean;
         public repeatMode: boolean;
+        public loopMode: boolean;
         public filters: FiltersStatuses;
         public firstMessage: Message;
         private additionalStreamTime: number;

@@ -36,6 +36,11 @@ class Queue extends EventEmitter {
          */
         this.tracks = []
         /**
+         * The previous tracks in this queue.
+         * @type {Track[]}
+         */
+        this.previousTracks = []
+        /**
          * Whether the stream is currently stopped.
          * @type {boolean}
          */
@@ -60,6 +65,11 @@ class Queue extends EventEmitter {
          * @type {boolean}
          */
         this.repeatMode = false
+        /**
+         * Whether the loop mode is enabled.
+         * @type {boolean}
+         */
+        this.loopMode = false
         /**
          * Filters status
          * @type {Filters}
