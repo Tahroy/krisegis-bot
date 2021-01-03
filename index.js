@@ -38,8 +38,9 @@ const { Player } = require("discord-player");
 const player = new Player(client);
 // To easily access the player
 client.player = player;
-// add the trackStart event so when a song will be played this message will be sent
-client.player.on('trackStart', (message, track) => message.channel.send(`Now playing ${track.title}...`))
+
+const music = require('./src/utils/music.js');
+music.execute(client);
 
 /* Configuration des commandes */
 const fs = require('fs');

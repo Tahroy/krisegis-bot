@@ -4,6 +4,10 @@ module.exports = {
     args: 1,
     usage: '<url>',
     execute(message, args) {
-        message.client.player.play(message, args[0], message.member.user);
+        if (message.client.player.isPlaying(message)) {
+            message.client.player.resume(message);
+        }
+        message.client.player.play(message, args.join(' '), message.member.user);
+        return message.channel.send(`La musique a été ajoutée !`);
     },
 };
