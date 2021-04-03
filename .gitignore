@@ -1,1 +1,2 @@
-logs/logs.log
+/logs/
+/node_modules/
