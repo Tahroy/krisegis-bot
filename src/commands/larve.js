@@ -48,12 +48,6 @@ module.exports = {
         if (this.partiesEnAttente[channelID]) {
             if (this.partiesEnAttente[channelID]['max'] == this.partiesEnAttente[channelID]['participants'].length) {
                 let nbJoueurs = this.partiesEnAttente[channelID]['participants'].length;
-                let retour = `Joueurs actuels (${nbJoueurs}) : \n`
-                this.partiesEnAttente[channelID]['participants'].forEach(function (x) {
-                    retour += `- <@!${x}>\n`;
-                });
-                message.channel.send(retour);
-                message.channel.send('Goooooooooooooo !');
                 this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
 
                 this.partiesEnCours[channelID]['larves'] = {
@@ -71,6 +65,8 @@ module.exports = {
     defineLarves(channel) {
         var self = this;
         self.partiesEnCours[channel.id]['paris'] = [];
+
+        let retour = '';
         this.partiesEnCours[channel.id]['participants'].forEach(function (participant) {
             const random = Math.floor(Math.random() * 4);
             console.log('random :' + random);
@@ -92,12 +88,13 @@ module.exports = {
             console.log('larve :' + larve);
 
             let pari = {
-                'id': [participant],
-                'larve': [larve],
+                'id': participant,
+                'larve': larve,
             };
-            self.partiesEnCours[channel.id]['paris'].push({ pari });
-            channel.send('<@!' + participant + '> aura la ' + self.getEmoji(larve));
+            self.partiesEnCours[channel.id]['paris'].push(pari);
+            retour += '<@!' + participant + '> aura la ' + self.getEmoji(larve) + self.sautLigne;
         });
+        channel.send(retour);
     },
     async lancerPartie(channel) {
         var self = this;
@@ -130,8 +127,11 @@ module.exports = {
 
         let gagnants = [];
 
+        console.log(paris);
         for (let i = 0; i < paris.length; i++) {
             let pari = paris[i];
+            console.log(pari.larve);
+            console.log(result);
             if (pari.larve == result)
                 gagnants.push('<@!' + pari.id + '>');
         }
@@ -146,12 +146,15 @@ module.exports = {
     jeuFini(channel) {
         const larves = this.partiesEnCours[channel.id]['larves'];
 
+        let gagnant = false;
+        let max = 0;
         for (const [key, value] of Object.entries(larves)) {
-            if (value >= this.objectif)
-                return key;
+            if (value >= this.objectif && value > max)
+                gagnant = key;
+                max = value;
         }
 
-        return false;
+        return gagnant;
     },
     getPartie(channel) {
         let base = this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne;
@@ -191,5 +194,5 @@ module.exports = {
     larveO: 'larveO',
     larveV: 'larveV',
     sautLigne: '\n',
-    objectif: 10,
+    objectif: 15,
 };
