@@ -1,104 +1,80 @@
 module.exports = {
     name: 'larve',
     description: 'Jeu des larves',
-    usage: 'new <nb> | go | play',
+    usage: '',
     partiesEnAttente: [],
     partiesEnCours: [],
     client: null,
     execute(message, args) {
         const arg1 = args[0];
+        const arg2 = args[1] ? args[1] : null;
+        this.client = message.client;
+
+        let larve = '';
+        switch (arg1) {
+            case 'jaune':
+                larve = this.larveD;
+                break;
+            case 'orange':
+                larve = this.larveO;
+                break;
+            case 'bleue':
+                larve = this.larveB;
+                break;
+            case 'violette':
+                larve = this.larveVio;
+                break;
+            case 'verte':
+                larve = this.larveV;
+                break;
+            case 'go':
+                this.goGame(message, message.channel);
+                return;
+        }
+
+        this.ajoutOuCreation(message, larve);
+    },
+    ajoutOuCreation(message, larve) {
         const channel = message.channel;
         const channelID = channel.id;
         const authorID = message.author.id;
-        this.client = message.client;
 
-        switch (arg1) {
-            case 'play':
-                // Ajoute le joueur
-                if (this.partiesEnAttente[channelID]) {
-                    this.partiesEnAttente[channelID]['participants'].push(authorID);
-                    message.reply("Je t'ai ajouté à la liste des joueurs !");
-                }
-                break;
-            case 'new':
-                // Nouvelle partie
-                if (this.partiesEnAttente[channelID] || this.partiesEnCours[channelID])
-                    return message.reply('Une partie est déjà en cours !');
+        // Si une partie est en cours, on rejette
+        if (this.partiesEnCours[channelID])
+            return message.reply('Une partie est déjà en cours !');
 
-                const nbJoueurs = args[1] ? args[1] : 1;
-                this.partiesEnAttente[channelID] = {
-                    'max': parseInt(nbJoueurs),
-                    'participants': [
-                        authorID
-                    ]
-                };
-                if (nbJoueurs > 1) {
-                    message.channel.send("C'est parti pour une nouvelle course de larves ! Inscrivez-vous avec $larve play");
-                    message.channel.send(`${nbJoueurs} joueur(s) maximum.`)
-                }
-                break;
-            case 'go':
-                if (this.partiesEnAttente[channelID])
-                    this.partiesEnAttente[channelID]['max'] = this.partiesEnAttente[channelID]['participants'].length;
-                else
-                    message.reply('Aucune partie en cours.');
-                break;
+        // Si aucune partie, on la créé
+        if (!this.partiesEnAttente[channelID]) {
+            this.partiesEnAttente[channelID] = [];
+            this.partiesEnAttente[channel.id]['paris'] = [];
         }
 
-        if (this.partiesEnAttente[channelID]) {
-            if (this.partiesEnAttente[channelID]['max'] == this.partiesEnAttente[channelID]['participants'].length) {
-                let nbJoueurs = this.partiesEnAttente[channelID]['participants'].length;
-                this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
+        // Ajoute le joueur
 
-                this.partiesEnCours[channelID]['larves'] = {
-                    [this.larveB]: 0,
-                    [this.larveD]: 0,
-                    [this.larveO]: 0,
-                    [this.larveV]: 0,
-                };
-                this.partiesEnAttente[channelID] = null;
+        let pari = {
+            'id': message.author.id,
+            'larve': larve,
+        };
 
-                this.lancerPartie(channel);
-            }
-        }
+        this.partiesEnAttente[channel.id]['paris'].push(pari);
+        message.reply("Je t'ai ajouté à la liste des joueurs !");
     },
-    defineLarves(channel) {
+    async goGame(message, channel) {
         var self = this;
-        self.partiesEnCours[channel.id]['paris'] = [];
+        let channelID = channel.id;
 
-        let retour = '';
-        this.partiesEnCours[channel.id]['participants'].forEach(function (participant) {
-            const random = Math.floor(Math.random() * 4);
-            console.log('random :' + random);
-            let larve = null;
-            switch (random) {
-                case 0:
-                    larve = self.larveB;
-                    break;
-                case 1:
-                    larve = self.larveD;
-                    break;
-                case 2:
-                    larve = self.larveO;
-                    break;
-                case 3:
-                    larve = self.larveV
-                    break;
-            }
-            console.log('larve :' + larve);
+        if (!self.partiesEnAttente[channelID])
+            return message.reply('Aucune partie en attente. :/');
 
-            let pari = {
-                'id': participant,
-                'larve': larve,
-            };
-            self.partiesEnCours[channel.id]['paris'].push(pari);
-            retour += '<@!' + participant + '> aura la ' + self.getEmoji(larve) + self.sautLigne;
-        });
-        channel.send(retour);
-    },
-    async lancerPartie(channel) {
-        var self = this;
-        this.defineLarves(channel);
+        this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
+        this.partiesEnCours[channelID]['larves'] = {
+            [this.larveB]: 0,
+            [this.larveD]: 0,
+            [this.larveO]: 0,
+            [this.larveV]: 0,
+            [this.larveVio]: 0,
+        };
+        this.partiesEnAttente[channelID] = null;
 
         let partie = this.getPartie(channel);
         let msg = await channel.send(partie);
@@ -107,38 +83,36 @@ module.exports = {
         let result = null;
         var interval = setInterval(function () {
             i++;
-            self.partiesEnCours[channel.id]['larves'][self.larveB] += Math.floor(Math.random() * 3);
-            self.partiesEnCours[channel.id]['larves'][self.larveD] += Math.floor(Math.random() * 3);
-            self.partiesEnCours[channel.id]['larves'][self.larveO] += Math.floor(Math.random() * 3);
-            self.partiesEnCours[channel.id]['larves'][self.larveV] += Math.floor(Math.random() * 3);
-
+            self.updateLarves(channelID);
             msg.edit(self.getPartie(channel));
-
             if ((result = self.jeuFini(channel)) !== false) {
                 clearInterval(interval);
                 self.annoncerGagnant(channel, result);
-                self.partiesEnCours[channel.id] = null;
+                self.partiesEnCours[channelID] = null;
             }
         }, 1000);
     },
+    updateLarves(channelID) {
+        this.partiesEnCours[channelID]['larves'][this.larveB] += Math.floor(Math.random() * 3);
+        this.partiesEnCours[channelID]['larves'][this.larveD] += Math.floor(Math.random() * 3);
+        this.partiesEnCours[channelID]['larves'][this.larveO] += Math.floor(Math.random() * 3);
+        this.partiesEnCours[channelID]['larves'][this.larveV] += Math.floor(Math.random() * 3);
+        this.partiesEnCours[channelID]['larves'][this.larveVio] += Math.floor(Math.random() * 5) - 1;
+    },
     annoncerGagnant(channel, result) {
-        channel.send('Gagnant : **' + this.getEmoji(result) + '**');
         const paris = this.partiesEnCours[channel.id]['paris'];
+        channel.send('Gagnant : ' + this.getEmoji(result));
 
         let gagnants = [];
 
-        console.log(paris);
-        for (let i = 0; i < paris.length; i++) {
-            let pari = paris[i];
-            console.log(pari.larve);
-            console.log(result);
-            if (pari.larve == result)
-                gagnants.push('<@!' + pari.id + '>');
-        }
+        paris.forEach(function (joueur) {
+            if (joueur.larve == result)
+                gagnants.push('<@!' + joueur.id + '>');
+        });
 
-        if (gagnants.length == 1)
+        if (gagnants.length === 1)
             channel.send(gagnants.join(', ') + ' a gagné !');
-        else if (gagnants.length > 1)
+        else if (gagnants.length === 1)
             channel.send(gagnants.join(', ') + ' ont gagné !');
         else
             channel.send("Personne n'a gagné. :(");
@@ -151,7 +125,7 @@ module.exports = {
         for (const [key, value] of Object.entries(larves)) {
             if (value >= this.objectif && value > max)
                 gagnant = key;
-                max = value;
+            max = value;
         }
 
         return gagnant;
@@ -162,9 +136,10 @@ module.exports = {
         let larveD = this.getLarve(channel.id, this.larveD);
         let larveO = this.getLarve(channel.id, this.larveO);
         let larveV = this.getLarve(channel.id, this.larveV);
+        let larveVio = this.getLarve(channel.id, this.larveVio);
         let fin = this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne;
 
-        retour = base + larveB + larveD + larveO + larveV + fin;
+        retour = base + larveB + larveD + larveO + larveV + larveVio + fin;
         return retour;
     },
     getLarve(channelID, larve) {
@@ -183,6 +158,28 @@ module.exports = {
             let search = this.client.emojis.cache.find(emoji => emoji.name === myEmoji);
             if (search !== undefined)
                 myEmoji = '<:' + search.name + ':' + search.id + '>';
+            else {
+                switch (myEmoji) {
+                    case 'larveB':
+                        myEmoji = ':blue_circle:';
+                        break;
+                    case 'larveD':
+                        myEmoji = ':yellow_circle:';
+                        break;
+                    case 'larveV':
+                        myEmoji = ':green_circle:';
+                        break;
+                    case 'larveO':
+                        myEmoji = ':orange_circle:';
+                        break;
+                    case 'larveVio':
+                        myEmoji = ':purple_circle:';
+                        break;
+                    default:
+                        myEmoji = ':interrobang:';
+                        break;
+                }
+            }
         }
 
         return myEmoji;
@@ -193,6 +190,7 @@ module.exports = {
     larveD: 'larveD',
     larveO: 'larveO',
     larveV: 'larveV',
+    larveVio: 'larveVio',
     sautLigne: '\n',
     objectif: 15,
 };
