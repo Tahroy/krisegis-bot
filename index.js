@@ -1,28 +1,7 @@
-/* Configuration des logs */
-const appRoot = require('app-root-path');
-const {
-    createLogger,
-    format,
-    transports
-} = require('winston');
-const logger = createLogger({
-    level: 'info',
-    exitOnError: false,
-    format: format.json(),
-    transports: [
-        new transports.File({
-            filename: `${appRoot}/logs/logs.log`
-        }),
-    ],
-});
-module.exports = logger;
-
-/* Configuration de la base de données */
-const Sequelize = require('sequelize');
-
 /* Configuration du bot */
-
 const Discord = require('discord.js');
+const {Client, Intents, Permissions} = require('discord.js');
+
 const {
     prefix,
     token,
@@ -30,10 +9,9 @@ const {
     owner,
     test_token
 } = require('./config/config.json');
-const client = new Discord.Client();
-
+const client = new Discord.Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS]});
 /* Configuration du player */
-const { Player } = require("discord-player");
+const {Player} = require("discord-player");
 // Create a new Player (you don't need any API Key)
 const player = new Player(client);
 // To easily access the player
@@ -58,7 +36,7 @@ client.once('ready', () => {
     console.log(`Krisegis V${version} prêt !`);
 });
 
-client.on('message', message => {
+client.on('messageCreate', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
 
@@ -99,12 +77,7 @@ client.on('message', message => {
         command.execute(message, args);
     } catch (error) {
         console.log(error);
-        logger.error(error.message, {
-            'timestamp': Date.now(),
-            'Message': message.content,
-            'Utilisateur': message.author.username
-        });
     }
 });
 
-client.login(token);
+client.login(test_token);
