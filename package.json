@@ -1,34 +1,35 @@
 {
-    "name": "krisegis-bot",
-    "version": "1.0.0",
-    "description": "Bot pour Krisegis",
-    "main": "index.js",
-    "scripts": {
-        "lancement": "node index.js"
-    },
-    "author": "Tahroy",
-    "license": "ISC",
-    "dependencies": {
-        "@discordjs/opus": "*",
-        "@discordjs/voice": "^0.7.5",
-        "app-root-path": "*",
-        "axios": "*",
-        "core-util-is": "*",
-        "discord-player": "*",
-        "discord.js": "*",
-        "ffmpeg-static": "*",
-        "libsodium-wrappers": "^0.7.9",
-        "mysql": "*",
-        "node-gyp": "*",
-        "python": "*",
-        "rebuild": "*",
-        "sequelize": "*",
-        "sqlite3": "*",
-        "winston": "*",
-        "ytdl-core": "*"
-    },
-    "devDependencies": {
-        "@discordjs/rest": "^0.2.0-canary.0",
-        "discord-api-types": "^0.26.1"
-    }
+  "name": "krisegis-bot",
+  "version": "1.0.0",
+  "description": "Bot pour Krisegis",
+  "main": "index.js",
+  "scripts": {
+    "lancement": "node index.js"
+  },
+  "author": "Tahroy",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "*",
+    "@discordjs/opus": "*",
+    "@discordjs/voice": "*",
+    "app-root-path": "*",
+    "axios": "*",
+    "core-util-is": "*",
+    "discord-player": "*",
+    "discord.js": "*",
+    "ffmpeg-static": "*",
+    "libsodium-wrappers": "*",
+    "mysql": "*",
+    "node-gyp": "*",
+    "python": "*",
+    "rebuild": "*",
+    "sequelize": "*",
+    "sqlite3": "*",
+    "winston": "*",
+    "ytdl-core": "*",
+    "@discordjs/rest": "*",
+    "discord-api-types": "*"
+  },
+  "devDependencies": {
+  }
 }
