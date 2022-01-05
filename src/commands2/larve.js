@@ -1,39 +1,118 @@
+const {SlashCommandBuilder} = require('@discordjs/builders');
+
 module.exports = {
+    opts: {
+        admin: true
+    },
+    data: new SlashCommandBuilder()
+        .setName('larve')
+        .setDescription('Permet de jouer au jeu des larves')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('go')
+                .setDescription('Lance la partie'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('choix')
+                .setDescription('Permet de choisir une larve')
+                .addStringOption(option => option
+                    .setName('larve')
+                    .setDescription('La larve à choisir')
+                    .setRequired(true)
+                    .addChoice('Bleue', 'larveB')
+                    .addChoice('Jaune', 'larveD')
+                    .addChoice('Orange', 'larveO')
+                    .addChoice('Violette', 'larveVio')
+                    .addChoice('Verte', 'larveV')
+                )),
+    async execute(interaction) {
+        const subCommand = interaction.options.getSubcommand();
+        this.client = interaction.client;
+
+        switch (subCommand) {
+            case 'choix':
+                await this.addLarve(interaction);
+                break;
+            case 'go':
+                await this.goGame(interaction)
+        }
+    },
+
+
     name: 'larve',
     description: 'Jeu des larves',
     usage: '',
     partiesEnAttente: [],
     partiesEnCours: [],
     client: null,
-    execute(message, args) {
-        const arg1 = args[0];
-        const arg2 = args[1] ? args[1] : null;
-        this.client = message.client;
 
-        let larve = '';
-        switch (arg1) {
-            case 'jaune':
-                larve = this.larveD;
-                break;
-            case 'orange':
-                larve = this.larveO;
-                break;
-            case 'bleue':
-                larve = this.larveB;
-                break;
-            case 'violette':
-                larve = this.larveVio;
-                break;
-            case 'verte':
-                larve = this.larveV;
-                break;
-            case 'go':
-                this.goGame(message, message.channel);
-                return;
+    async addLarve(interaction) {
+        const channel = interaction.channel;
+        const channelID = channel.id;
+        const userID = interaction.member.user.id;
+        const larve = interaction.options.getString('larve');
+
+        /**
+         * Si une partie est en cours, on refuse
+         */
+        if (this.partiesEnCours[channelID]) {
+            return await interaction.reply('Une partie est déjà en cours !');
         }
 
-        this.ajoutOuCreation(message, larve);
+        /**
+         * Si aucune partie, on la créé
+         */
+        if (!this.partiesEnAttente[channelID]) {
+            this.partiesEnAttente[channelID] = [];
+            this.partiesEnAttente[channel.id]['paris'] = [];
+        }
+
+        // Ajoute le joueur
+
+        let pari = {
+            'id': userID,
+            'larve': larve,
+        };
+        this.partiesEnAttente[channel.id]['paris'].push(pari);
+        return interaction.reply("Je t'ai ajouté à la liste des joueurs !");
     },
+    async goGame(interaction) {
+        const self = this;
+        const channel = interaction.channel;
+        const channelID = channel.id;
+
+        if (!self.partiesEnAttente[channelID]) {
+            return interaction.reply('Aucune partie en attente. :/');
+        }
+
+        this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
+        this.partiesEnCours[channelID]['larves'] = {
+            [this.larveB]: 0,
+            [this.larveD]: 0,
+            [this.larveO]: 0,
+            [this.larveV]: 0,
+            [this.larveVio]: 0,
+        };
+        this.partiesEnAttente[channelID] = null;
+
+        let partie = this.getPartie(channel);
+        interaction.reply("C'est parti !");
+        let msg = await channel.send(partie);
+        let i = 0;
+
+        let result = null;
+        const interval = setInterval(function () {
+            i++;
+            self.updateLarves(channelID);
+            msg.edit(self.getPartie(channel));
+            if ((result = self.jeuFini(channel)) !== false) {
+                clearInterval(interval);
+                self.annoncerGagnant(channel, result);
+                self.partiesEnCours[channelID] = null;
+            }
+        }, 1000);
+    },
+
     ajoutOuCreation(message, larve) {
         const channel = message.channel;
         const channelID = channel.id;
@@ -59,39 +138,6 @@ module.exports = {
         this.partiesEnAttente[channel.id]['paris'].push(pari);
         message.reply("Je t'ai ajouté à la liste des joueurs !");
     },
-    async goGame(message, channel) {
-        var self = this;
-        let channelID = channel.id;
-
-        if (!self.partiesEnAttente[channelID])
-            return message.reply('Aucune partie en attente. :/');
-
-        this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
-        this.partiesEnCours[channelID]['larves'] = {
-            [this.larveB]: 0,
-            [this.larveD]: 0,
-            [this.larveO]: 0,
-            [this.larveV]: 0,
-            [this.larveVio]: 0,
-        };
-        this.partiesEnAttente[channelID] = null;
-
-        let partie = this.getPartie(channel);
-        let msg = await channel.send(partie);
-        let i = 0;
-
-        let result = null;
-        var interval = setInterval(function () {
-            i++;
-            self.updateLarves(channelID);
-            msg.edit(self.getPartie(channel));
-            if ((result = self.jeuFini(channel)) !== false) {
-                clearInterval(interval);
-                self.annoncerGagnant(channel, result);
-                self.partiesEnCours[channelID] = null;
-            }
-        }, 1000);
-    },
     updateLarves(channelID) {
         this.partiesEnCours[channelID]['larves'][this.larveB] += Math.floor(Math.random() * 3);
         this.partiesEnCours[channelID]['larves'][this.larveD] += Math.floor(Math.random() * 3);
@@ -106,7 +152,7 @@ module.exports = {
         let gagnants = [];
 
         paris.forEach(function (joueur) {
-            if (joueur.larve == result)
+            if (joueur.larve === result)
                 gagnants.push('<@!' + joueur.id + '>');
         });
 
@@ -139,8 +185,7 @@ module.exports = {
         let larveVio = this.getLarve(channel.id, this.larveVio);
         let fin = this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne;
 
-        retour = base + larveB + larveD + larveO + larveV + larveVio + fin;
-        return retour;
+        return base + larveB + larveD + larveO + larveV + larveVio + fin;
     },
     getLarve(channelID, larve) {
         const scoreLarve = this.partiesEnCours[channelID]['larves'][larve];
