@@ -67,13 +67,11 @@ module.exports = {
                 channel.send('Nouvelle map !');
                 return channel.send(this.getMap(channel));
             case 'play':
-                this.playGame(interaction);
+                await this.playGame(interaction);
                 break;
             default:
                 return channel.send(this.getMap(channel));
         }
-
-
     },
     tuiles: [],
     base: [
@@ -176,10 +174,6 @@ module.exports = {
     },
     getEmoji(colonne, client) {
         let myEmoji = this.emotes[colonne];
-
-        console.log(this.emotes);
-        console.log(colonne);
-        console.log(myEmoji);
         if (myEmoji.indexOf(':') === -1) {
             let search = client.emojis.cache.find(emoji => emoji.name === myEmoji);
             if (search !== undefined) {
