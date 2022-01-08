@@ -1,9 +1,7 @@
 const {SlashCommandBuilder} = require('@discordjs/builders');
 
 module.exports = {
-    opts: {
-        admin: true
-    },
+    opts: {},
     data: new SlashCommandBuilder()
         .setName('memory')
         .setDescription('Jeu du memory DOFUS')
