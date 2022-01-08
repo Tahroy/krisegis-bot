@@ -1,9 +1,7 @@
 const {SlashCommandBuilder} = require('@discordjs/builders');
 
 module.exports = {
-    opts: {
-        admin: true
-    },
+    opts: {},
     data: new SlashCommandBuilder()
         .setName('larve')
         .setDescription('Permet de jouer au jeu des larves')
