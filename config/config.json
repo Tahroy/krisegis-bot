@@ -1,9 +1,9 @@
 {
     "prefix": "$",
-    "token": "MzAyNTEwNDk5ODQ3NzMzMjQ4.XwoIlw.rhTmjd3LdQf9FWS6WFmsK7u6uuk",
+    "token": "Mjk2MjA1NTkzMDY3MjU3ODYw.WNok9A.v6Ogp2CNLZf2CjBeKpkj0jgfCmM",
     "owner": "178147970385051649",
     "admins": ["189062473888956416", "178147970385051649"],
-    "version": "0.8.1",
-    "client_id": "302510499847733248",
-    "guilds": ["729001939098009630"]
+    "version": "2.0",
+    "client_id": "296205593067257860",
+    "guilds": ["729001939098009630", "246982503972208640", "239380574605672448"]
 }

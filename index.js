@@ -16,7 +16,8 @@ const {Player} = require("discord-player");
 // Create a new Player (you don't need any API Key)
 const player = new Player(client, {
     ytdlOptions: {
-        filter: "audioonly"
+        filter: "audioonly",
+        quality:"highestaudio"
     }
 });
 
@@ -57,6 +58,9 @@ for (const command of client.commands) {
 }
 slashCommands = slashCommands.map(command => command.toJSON());
 
-rest.put(Routes.applicationGuildCommands(client_id, guilds[0]), {body: slashCommands})
-    .then(() => console.log('Successfully registered application commands.'))
-    .catch(console.error);
+for (const guild of guilds)
+{
+    rest.put(Routes.applicationGuildCommands(client_id, guild), {body: slashCommands})
+        .then(() => console.log('Successfully registered application commands.'))
+        .catch(console.error);
+}

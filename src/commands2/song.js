@@ -1,4 +1,6 @@
 const {SlashCommandBuilder} = require('@discordjs/builders');
+const {QueryType} = require("discord-player");
+const {MessageEmbed} = require("discord.js");
 
 
 module.exports = {
@@ -54,25 +56,17 @@ module.exports = {
 
         switch (interaction.options.getSubcommand()) {
             case "play":
-                await this.play(interaction, player);
-                return;
+                return this.play(interaction, player);
             case "current":
-                await interaction.reply(player.current);
-                return;
+                return this.current(interaction, player);
             case 'pause':
-                player.setPaused(true);
-                await interaction.reply('Musique en pause !');
-                return;
+                return this.pause(interaction, player);
             case 'resume':
-                player.setPaused(false);
-                await interaction.reply("Et c'est reparti !");
-                return;
+                return this.resume(interaction, player);
             case 'skip':
-                player.skipTo(1);
-                await interaction.reply("Tu n'aimes pas ? OK, je passe.");
-                return;
+                return this.skip(interaction, player);
             case 'volume':
-                await interaction.deferReply();
+                return this.volume(interaction, player);
         }
 
 
@@ -82,40 +76,112 @@ module.exports = {
 
         if (!interaction.member.voice.channelId) {
             return await interaction.reply({
-                content: "You are not in a voice channel!",
+                content: "Il vaut être dans un canal vocal...",
                 ephemeral: true
             });
         }
         if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) {
             return await interaction.reply({
-                content: "You are not in my voice channel!",
+                content: "Il vaut être dans un canal vocal...",
                 ephemeral: true
             });
         }
         const query = interaction.options.get("query").value;
+
+        if (!query) {
+            return interaction.reply(`Aucun résultat... ❌`);
+        }
+
+        const res = await player.search(query, {
+            requestedBy: interaction.member,
+            searchEngine: QueryType.AUTO
+        });
+
+        if (!res || !res.tracks.length) return interaction.reply(`Aucun résultat... ❌`);
+
         const queue = await player.createQueue(interaction.guild, {
             metadata: interaction.channel
         });
 
-        // verify vc connection
         try {
             if (!queue.connection) await queue.connect(interaction.member.voice.channel);
-        } catch (error) {
-            queue.destroy();
-            return await interaction.reply({content: "Could not join your voice channel!", ephemeral: true});
+        } catch {
+            await player.deleteQueue(interaction.guild.id);
+            return interaction.reply(`Je ne peux pas rejoindre ton canal vocal. :( ❌`);
         }
 
-        await interaction.deferReply();
-        const track = await player.search(query, {
-            requestedBy: interaction.user
-        }).then(x => x.tracks[0]);
+        await interaction.reply(`Chargement de ${res.playlist ? 'playlist' : 'musique'}... 🎧`);
 
-        if (!track) {
-            return await interaction.followUp({content: `❌ | Track **${query}** not found!`});
+        res.playlist ? queue.addTracks(res.tracks) : queue.addTrack(res.tracks[0]);
+
+        if (!queue.playing) await queue.play();
+    },
+    async skip(interaction, player) {
+        const queue = player.getQueue(interaction.guild.id);
+        if (!queue || !queue.playing) return interaction.reply(`Aucune musique en cours... ❌`);
+        const success = queue.skip();
+        return interaction.reply(success ? `La musique actuelle ${queue.current.title} a été skip ✅` : `Quelque chose n'a pas bien marché... Stop drink please. ❌`);
+    },
+    async current(interaction, player) {
+        const queue = player.getQueue(interaction.guild.id);
+
+        if (!queue || !queue.playing) return interaction.reply(`Aucune musique en cours... ❌`);
+
+        const track = queue.current;
+
+        const embed = new MessageEmbed();
+
+        embed.setColor('RED');
+        embed.setThumbnail(track.thumbnail);
+
+        const timestamp = queue.getPlayerTimestamp();
+        const trackDuration = timestamp.progress === 'Infinie' ? 'Infinie (live)' : track.duration;
+
+        //             Loop mode **${methods[queue.repeatMode]}**\n
+        embed.setDescription(`
+            Volume **${queue.volume}** %\n
+            Durée **${trackDuration}**\n
+            Ajoutée par ${track.requestedBy}`);
+        embed.setTimestamp();
+
+        return interaction.reply({embeds: [embed]});
+    },
+    async pause(interaction, player) {
+        const queue = player.getQueue(interaction.guild.id);
+
+        if (!queue) {
+            return interaction.reply(`Aucune musique en cours... ❌`);
         }
 
-        await queue.play(track);
+        const success = queue.setPaused(true);
 
-        return await interaction.followUp({content: `⏱️ | Loading track **${track.title}**!`});
+        return interaction.reply(success ? `La musique ${queue.current.title} a été mise en pause ✅` : `Non, je ne vais pas mettre en pause. ❌`);
+    },
+    async resume(interaction, player) {
+        const queue = player.getQueue(interaction.guild.id);
+
+        if (!queue) {
+            return interaction.reply(`Aucune musique en cours... ❌`);
+        }
+
+        const success = queue.setPaused(false);
+
+        return interaction.reply(success ? `La musique ${queue.current.title} a été relancée ✅` : `Non, je ne vais pas relancer. ❌`);
+    },
+    async volume(interaction, player)
+    {
+        const queue = player.getQueue(interaction.guild.id);
+
+        if (!queue || !queue.playing) {
+            return interaction.reply(`Aucune musique en cours... ❌`);
+        }
+
+        const vol = parseInt(interaction.options.getInteger('volume'));
+
+        if (vol < 0 || vol > 100) return interaction.reply(`Il faut un nombre entre 0 et 100... ❌`);
+
+        const success = queue.setVolume(vol);
+
+        return interaction.reply(success ? `Le volume a été modifié : **${vol}**/**100**% 🔊` : `Non. ❌`);
     }
 };
