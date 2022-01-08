@@ -1,31 +1,36 @@
 module.exports = {
 
     execute(client) {
-        client.player.on("error", (queue, error) => {
-            console.log(`[${queue.guild.name}] Error emitted from the queue: ${error.message}`);
-        });
-        client.player.on("connectionError", (queue, error) => {
-            console.log(`[${queue.guild.name}] Error emitted from the connection: ${error.message}`);
+        let player = client.player;
+
+        player.on('error', (queue, error) => {
+            console.log(error);
+            console.log(`Erreur, bloup : ${error.message}`);
         });
 
-        client.player.on("trackStart", (queue, track) => {
-            queue.metadata.send(`🎶 | Started playing: **${track.title}** in **${queue.connection.channel.name}**!`);
+        player.on('connectionError', (queue, error) => {
+            console.log(error);
+            console.log(`Erreur de connexion, bloup : ${error.message}`);
         });
 
-        client.player.on("trackAdd", (queue, track) => {
-            queue.metadata.send(`🎶 | Track **${track.title}** queued!`);
+        player.on('trackStart', (queue, track) => {
+            queue.metadata.send(`Lancement de ${track.title} dans **${queue.connection.channel.name}** 🎧`);
         });
 
-        client.player.on("botDisconnect", (queue) => {
-            queue.metadata.send("❌ | I was manually disconnected from the voice channel, clearing queue!");
+        player.on('trackAdd', (queue, track) => {
+            queue.metadata.send(`Musique ${track.title} ajoutée ! ✅`);
         });
 
-        client.player.on("channelEmpty", (queue) => {
-            queue.metadata.send("❌ | Nobody is in the voice channel, leaving...");
+        player.on('botDisconnect', (queue) => {
+            queue.metadata.send('On m\'a kick... :( ❌');
         });
 
-        client.player.on("queueEnd", (queue) => {
-            queue.metadata.send("✅ | Queue finished!");
+        player.on('channelEmpty', (queue) => {
+            queue.metadata.send('WESH Y\'A PERSONNE, J\`ME CASSE !... ❌');
+        });
+
+        player.on('queueEnd', (queue) => {
+            queue.metadata.send('Plus de musiques ? Bisou ! ✅');
         });
     }
 }
