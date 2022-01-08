@@ -14,12 +14,16 @@ const client = new Client({
 /* Configuration du player */
 const {Player} = require("discord-player");
 // Create a new Player (you don't need any API Key)
-const player = new Player(client);
+const player = new Player(client, {
+    ytdlOptions: {
+        filter: "audioonly"
+    }
+});
+
 // To easily access the player
 client.player = player;
 
 const music = require('./src/utils/music.js');
-const {SlashCommandBuilder} = require('@discordjs/builders');
 const {REST} = require('@discordjs/rest');
 const {Routes} = require('discord-api-types/v9');
 music.execute(client);
