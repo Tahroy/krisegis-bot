@@ -17,7 +17,8 @@ const {Player} = require("discord-player");
 const player = new Player(client, {
     ytdlOptions: {
         filter: "audioonly",
-        quality:"highestaudio"
+        quality:"highestaudio",
+        highWaterMark: 1024 * 1024 * 10
     }
 });
 
