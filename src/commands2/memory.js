@@ -193,8 +193,8 @@ module.exports = {
 
         let game = this.channels[interaction.channel.id];
 
-        const tuile1 = game.etat[line1][col1];
-        const tuile2 = game.etat[line2][col2];
+        const tuile1 = game.etat[line1 - 1][col1 - 1];
+        const tuile2 = game.etat[line2 - 1][col2 - 1];
 
         if (tuile1 === undefined || tuile2 === undefined) {
             interaction.channel.send(`Veuillez choisir des tuiles valides !`);
