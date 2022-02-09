@@ -182,10 +182,10 @@ module.exports = {
         return myEmoji;
     },
     playGame: async function (interaction) {
-        const line1 = interaction.options.getInteger('line1');
-        const line2 = interaction.options.getInteger('line2');
-        const col1 = interaction.options.getInteger('col1');
-        const col2 = interaction.options.getInteger('col2');
+        const line1 = interaction.options.getInteger('line1') -1;
+        const line2 = interaction.options.getInteger('line2') -1;
+        const col1 = interaction.options.getInteger('col1') -1;
+        const col2 = interaction.options.getInteger('col2') -1;
 
         if (line1 + " " + col1 === line2 + " " + col2) {
             return interaction.reply("Veuillez choisir deux tuiles différentes !");
@@ -193,8 +193,8 @@ module.exports = {
 
         let game = this.channels[interaction.channel.id];
 
-        const tuile1 = game.etat[line1 - 1][col1 - 1];
-        const tuile2 = game.etat[line2 - 1][col2 - 1];
+        const tuile1 = game.etat[line1][col1];
+        const tuile2 = game.etat[line2][col2];
 
         if (tuile1 === undefined || tuile2 === undefined) {
             interaction.channel.send(`Veuillez choisir des tuiles valides !`);
