@@ -37,6 +37,12 @@ module.exports = {
             year: year
         };
 
+        const champs = {
+            userId: membre.id,
+            server: interaction.guild.id,
+            author: message.author.id,
+        };
+
         console.log(anniversaire);
     },
 };
