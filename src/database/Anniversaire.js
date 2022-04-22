@@ -14,11 +14,11 @@ const Anniversaire = sequelize.define('anniversaire', {
         autoIncrement: true
     },
     userId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
     },
     date: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: false
     },
     server: {
