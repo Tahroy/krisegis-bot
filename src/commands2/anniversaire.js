@@ -71,12 +71,26 @@ module.exports = {
 
         let values = date.split('-');
 
-        const day = values[0];
-        const month = values[1];
+        const day = parseInt(values[0]);
+        const month = parseInt(values[1]);
+
+        if (day == 'NaN' || month == 'NaN') {
+            interaction.reply('Format de date invalide');
+            return;
+        }
+
+        if (day > 31 || day < 1 || month > 12 || month < 1) {
+            interaction.reply('Format de date invalide');
+            return;
+        }
+
+        const dateObject = new Date();
+        dateObject.setMonth(month);
+        dateObject.setDate(day);
 
         const champs = {
             userId: membre.id,
-            date: month + '-' + day,
+            date: '0000-' + values[1] + '-' + values[0],
             server: interaction.guild.id,
         };
 
@@ -122,8 +136,8 @@ module.exports = {
             const membre = interaction.guild.members.cache.get(anniv.get('userId'));
 
             const date = anniv.get('date').split('-');
-            const day = date[1];
-            const month = date[0];
+            const day = date[2];
+            const month = date[1];
 
             message += `${membre.user.username} : ${day}/${month}\n`;
         }
