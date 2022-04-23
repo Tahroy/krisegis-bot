@@ -11,7 +11,20 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('ajouter')
-                .setDescription('Ajoute un anniversaire'))
+                .setDescription('Ajoute un anniversaire')
+                .addUserOption(option =>
+                    option
+                        .setName('membre')
+                        .setDescription('Membre à ajouter')
+                        .setRequired(true)
+                )
+                .addStringOption(option =>
+                    option
+                        .setName('date')
+                        .setDescription('Format 23.04.2022')
+                        .setRequired(true)
+                )
+        )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('liste')
