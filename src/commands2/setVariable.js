@@ -24,6 +24,15 @@ module.exports = {
         const data = interaction.options.getString('data');
 
 
+        if (name === 'birthdayChannel') {
+            const channel = interaction.guild.channels.cache.get(data);
+
+            if (!channel) {
+                interaction.reply('ID invalide. Veuillez renseigner l\'ID du salon des anniversaires');
+                return;
+            }
+        }
+
         const search = await Variable.findOne({
             where: {
                 name: name,
