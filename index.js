@@ -1,5 +1,5 @@
 /* Configuration du bot */
-const {token, client_id, guilds} = require('./config/config_test.json');
+const {token, client_id, guilds} = require('./config/config.json');
 
 const {Client, Intents} = require('discord.js');
 
