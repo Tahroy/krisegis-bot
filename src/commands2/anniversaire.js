@@ -45,7 +45,7 @@ module.exports = {
         if (channelVariable)
         {
             const cible = ('<@!' + membre.id + '>');
-            const channel = interaction.guild.channels.cache.get(channelID.get('data'));
+            const channel = interaction.guild.channels.cache.get(channelVariable.get('data'));
 
             cron.schedule(`* * ${day} ${month} *`, () => {
                 channel.send(`Today's ${cible} birthday, congratulations!`);
