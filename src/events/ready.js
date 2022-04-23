@@ -7,8 +7,8 @@ module.exports = async function (client) {
     client.once('ready', async () => {
         console.log(`Krisegis V${version} prêt !`);
 
-        Variable.sync();
-        Anniversaire.sync();
+        await Variable.sync();
+        await Anniversaire.sync();
 
 
         const annivs = await Anniversaire.findAll();
