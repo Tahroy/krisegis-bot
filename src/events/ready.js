@@ -30,7 +30,7 @@ module.exports = async function (client) {
             const cible = ('<@!' + userID + '>');
 
 
-            let task = cron.schedule(`* * ${day} ${month} *`, () => {
+            let task = cron.schedule(`0 10 ${day} ${month} *`, () => {
                 channel.send(`Aujourd'hui c'est l'anniversaire de ${cible}, bravo !`);
             }, 'Europe/Paris');
 
