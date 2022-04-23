@@ -19,8 +19,8 @@ module.exports = async function (client) {
             const userID = data.get('userId');
 
             const dataDate = date.split('-');
-            const month = dataDate[1];
-            const day = dataDate[2];
+            const month = dataDate[0];
+            const day = dataDate[1];
 
             const channelVariable = await Variable.findOne({where: {server: serverID, name: 'birthdayChannel'}});
 
