@@ -21,7 +21,7 @@ module.exports = {
                 .addStringOption(option =>
                     option
                         .setName('date')
-                        .setDescription('Format 23.04.2022')
+                        .setDescription('Format 23.04')
                         .setRequired(true)
                 )
         )
@@ -73,11 +73,10 @@ module.exports = {
 
         const day = values[0];
         const month = values[1];
-        const year = values[2];
 
         const champs = {
             userId: membre.id,
-            date: year + '-' + month + '-' + day,
+            date: month + '-' + day,
             server: interaction.guild.id,
         };
 
@@ -123,11 +122,10 @@ module.exports = {
             const membre = interaction.guild.members.cache.get(anniv.get('userId'));
 
             const date = anniv.get('date').split('-');
-            const day = date[2];
-            const month = date[1];
-            const year = date[0];
+            const day = date[1];
+            const month = date[0];
 
-            message += `${membre.user.username} : ${day}/${month}/${year}\n`;
+            message += `${membre.user.username} : ${day}/${month}\n`;
         }
 
         interaction.reply(message);
