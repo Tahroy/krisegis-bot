@@ -24,6 +24,9 @@ module.exports = async function (client) {
 
             const channelVariable = await Variable.findOne({where: {server: serverID, name: 'birthdayChannel'}});
 
+            if (!channelVariable) {
+                return;
+            }
             const channelID = channelVariable.get('data');
 
             const channel = await client.channels.fetch(channelID)
