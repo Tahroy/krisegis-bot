@@ -34,6 +34,21 @@ module.exports = {
 
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
+        const serverID = interaction.guild.id;
+
+        const channelVariable = await Variable.findOne({where: {server: serverID, name: 'birthdayChannel'}});
+
+        if (!channelVariable) {
+            interaction.reply('Le channel anniversaire n\'existe pas. Utilisez la commande `setvariable`');
+            return;
+        }
+
+        const channel = interaction.guild.channels.cache.get(channelVariable.get('data'));
+
+        if (!channel) {
+            interaction.reply('Le channel anniversaire n\'existe pas. Utilisez la commande `setvariable`');
+            return;
+        }
 
         switch (subCommand) {
             case 'ajouter':
@@ -66,11 +81,27 @@ module.exports = {
             server: interaction.guild.id,
         };
 
+        const search = await Anniversaire.findOne({
+            where: {
+                userId: membre.id,
+                server: interaction.guild.id
+            }
+        });
+
+        if (search) {
+            await Anniversaire.destroy({
+                where: {
+                    userId: membre.id,
+                    server: interaction.guild.id
+                }
+            });
+        }
+
         await Anniversaire.create(champs);
         interaction.reply(`Anniversaire ajouté pour ${membre.username}`);
 
 
-        const channelVariable = Variable.findOne({where: {name: 'birthdayChannel', server: interaction.guild.id}});
+        const channelVariable = await Variable.findOne({where: {name: 'birthdayChannel', server: interaction.guild.id}});
 
         if (channelVariable) {
             const cible = ('<@!' + membre.id + '>');
