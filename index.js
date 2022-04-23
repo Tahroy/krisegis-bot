@@ -1,5 +1,5 @@
 /* Configuration du bot */
-const {token, client_id, guilds} = require('./config/config.json');
+const {token, client_id, guilds} = require('./config/config_test.json');
 
 const {Client, Intents} = require('discord.js');
 
@@ -35,8 +35,12 @@ client.commands = require('./src/utils/commandsAdd');
 /* Lancement du bot */
 
 require('./src/events/ready')(client);
-//require('./src/events/messageCreate')(client);
 require('./src/events/interactionCreate')(client);
+
+const Reaction = require('./src/database/Anniversaire');
+const Variable = require("./src/database/Variable");
+Reaction.sync();
+Variable.sync();
 
 client.login(token).then(r => function() {
 
