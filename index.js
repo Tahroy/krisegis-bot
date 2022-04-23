@@ -34,13 +34,13 @@ music.execute(client);
 client.commands = require('./src/utils/commandsAdd');
 /* Lancement du bot */
 
-require('./src/events/ready')(client);
-require('./src/events/interactionCreate')(client);
-
 const Reaction = require('./src/database/Anniversaire');
 const Variable = require("./src/database/Variable");
 Reaction.sync();
 Variable.sync();
+
+require('./src/events/ready')(client);
+require('./src/events/interactionCreate')(client);
 
 client.login(token).then(r => function() {
 
