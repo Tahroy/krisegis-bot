@@ -1,4 +1,7 @@
 const {SlashCommandBuilder} = require('@discordjs/builders');
+const Anniversaire = require("../database/Anniversaire");
+const cron = require("node-cron");
+const Variable = require("../database/Variable");
 
 module.exports = {
     opts: {},
@@ -7,12 +10,12 @@ module.exports = {
         .setDescription('Ajoute ou retire un anniversaire')
         .addUserOption(option =>
             option.setName('membre')
-                .setDescription('Membre concerné')
-                .setRequired(true))
+                  .setDescription('Membre concerné')
+                  .setRequired(true))
         .addStringOption(option =>
             option.setName('date')
-                .setDescription('Date de l\'anniversaire')
-                .setRequired(true)),
+                  .setDescription('Date de l\'anniversaire')
+                  .setRequired(true)),
 
     async execute(interaction) {
         const membre = interaction.options.getUser('membre');
@@ -27,22 +30,26 @@ module.exports = {
         const month = values[1];
         const year = values[2];
 
-        console.log(day, month, year);
-
-        const anniversaire = {
-            user: membre.id,
-            server: interaction.guild.id,
-            day: day,
-            month: month,
-            year: year
-        };
-
         const champs = {
             userId: membre.id,
+            date: year + '-' + month + '-' + day,
             server: interaction.guild.id,
-            author: message.author.id,
         };
 
-        console.log(anniversaire);
+        await Anniversaire.create(champs);
+        interaction.reply(`Anniversaire ajouté pour ${membre.username}`);
+
+
+        const channelVariable = Variable.findOne({where: {name: 'birthdayChannel', server: interaction.guild.id}});
+
+        if (channelVariable)
+        {
+            const cible = ('<@!' + membre.id + '>');
+            const channel = interaction.guild.channels.cache.get(channelID.get('data'));
+
+            cron.schedule(`* * ${day} ${month} *`, () => {
+                channel.send(`Today's ${cible} birthday, congratulations!`);
+            }, 'Europe/Paris');
+        }
     },
 };
