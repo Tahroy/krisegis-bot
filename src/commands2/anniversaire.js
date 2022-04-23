@@ -7,17 +7,34 @@ module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('anniversaire')
-        .setDescription('Ajoute ou retire un anniversaire')
-        .addUserOption(option =>
-            option.setName('membre')
-                  .setDescription('Membre concerné')
-                  .setRequired(true))
-        .addStringOption(option =>
-            option.setName('date')
-                  .setDescription('Date de l\'anniversaire')
-                  .setRequired(true)),
+        .setDescription('Gestion des anniversaires')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('ajouter')
+                .setDescription('Ajoute un anniversaire'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('liste')
+                .setDescription('liste les anniversaires')
+        )
+    ,
 
     async execute(interaction) {
+        const subCommand = interaction.options.getSubcommand();
+
+        switch (subCommand) {
+            case 'ajouter':
+                await this.addAnniv(interaction);
+                break;
+            case 'liste':
+                await this.getList(interaction);
+                break;
+            default:
+                interaction.channel.send("Commande inconnue");
+        }
+    },
+
+    async addAnniv(interaction) {
         const membre = interaction.options.getUser('membre');
         let date = interaction.options.getString('date');
 
@@ -42,8 +59,7 @@ module.exports = {
 
         const channelVariable = Variable.findOne({where: {name: 'birthdayChannel', server: interaction.guild.id}});
 
-        if (channelVariable)
-        {
+        if (channelVariable) {
             const cible = ('<@!' + membre.id + '>');
             const channel = interaction.guild.channels.cache.get(channelVariable.get('data'));
 
@@ -52,4 +68,22 @@ module.exports = {
             }, 'Europe/Paris');
         }
     },
+    async getList(interaction) {
+        const anniversaires = await Anniversaire.findAll({where: {server: interaction.guild.id}});
+
+        let message = '';
+
+        for (let anniv of anniversaires) {
+            const membre = interaction.guild.members.cache.get(anniv.get('userId'));
+
+            const date = anniv.get('date').split('-');
+            const day = date[2];
+            const month = date[1];
+            const year = date[0];
+
+            message += `${membre.user.username} : ${day}/${month}/${year}\n`;
+        }
+
+        interaction.reply(message);
+    }
 };
