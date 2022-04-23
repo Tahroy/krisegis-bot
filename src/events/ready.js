@@ -10,7 +10,6 @@ module.exports = async function (client) {
         Variable.sync();
         Anniversaire.sync();
 
-        return;
 
         const annivs = await Anniversaire.findAll();
 
