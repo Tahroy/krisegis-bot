@@ -76,9 +76,11 @@ module.exports = {
             const cible = ('<@!' + membre.id + '>');
             const channel = interaction.guild.channels.cache.get(channelVariable.get('data'));
 
-            cron.schedule(`* * ${day} ${month} *`, () => {
-                channel.send(`Today's ${cible} birthday, congratulations!`);
+            let task = cron.schedule(`0 10 ${day} ${month} *`, () => {
+                channel.send(`Aujourd'hui c'est l'anniversaire de ${cible}, bravo !`);
             }, 'Europe/Paris');
+
+            task.start();
         }
     },
     async getList(interaction) {
