@@ -74,18 +74,16 @@ module.exports = {
     },
     async play(interaction, player) {
 
-        if (!interaction.member.voice.channelId) {
+        const channelID = interaction?.member?.voice?.channel?.id;
+
+      //  return interaction.reply(JSON.stringify(interaction.member.voice.channel.id));
+        if (!channelID) {
             return await interaction.reply({
                 content: "Il vaut être dans un canal vocal...",
                 ephemeral: true
             });
         }
-        if (interaction.guild.me.voice.channelId && interaction.member.voice.channelId !== interaction.guild.me.voice.channelId) {
-            return await interaction.reply({
-                content: "Il vaut être dans un canal vocal...",
-                ephemeral: true
-            });
-        }
+
         const query = interaction.options.get("query").value;
 
         if (!query) {
