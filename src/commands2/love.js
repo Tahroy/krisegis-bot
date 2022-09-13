@@ -21,9 +21,9 @@ module.exports = {
                     score += parseInt(auteurID[i]);
                 }
 
-                if (auteurID[i] === victimeID[i - 1])
+                if (auteurID[i] === victimeID[0])
                 {
-                    score += parseInt(auteurID[i]);
+                    score += (parseInt(auteurID[i]) * 4);
                 }
             }
 
