@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require('@discordjs/builders');
+const {SlashCommandBuilder} = require("discord.js");
 
 module.exports = {
     opts: {},
@@ -17,11 +17,13 @@ module.exports = {
                     .setName('larve')
                     .setDescription('La larve à choisir')
                     .setRequired(true)
-                    .addChoice('Bleue', 'larveB')
-                    .addChoice('Jaune', 'larveD')
-                    .addChoice('Orange', 'larveO')
-                    .addChoice('Violette', 'larveVio')
-                    .addChoice('Verte', 'larveV')
+                    .addChoices(
+                        {name: 'Bleue', value: 'larveB'},
+                        {name: 'Dorée', value: 'larveD'},
+                        {name: 'Orange', value: 'LarveO'},
+                        {name: 'Violette', value: 'larveVio'},
+                        {name: 'Verte', value: 'larveV'}
+                    )
                 )),
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
