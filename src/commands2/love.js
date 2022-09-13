@@ -23,7 +23,9 @@ module.exports = {
 
                 if (auteurID[i] === victimeID[0])
                 {
-                    score += (parseInt(auteurID[i]) * 4);
+                    let plus = parseInt(auteurID[i]);
+                    plus *= 4;
+                    score += plus;
                 }
             }
 
