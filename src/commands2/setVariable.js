@@ -12,7 +12,7 @@ module.exports = {
             option.setName('name')
                   .setDescription('La variable nécessaire')
                   .setRequired(true)
-                  .addChoice('Salon des anniversaires', 'birthdayChannel')
+                .addChoices({value: 'birthdayChannel', name: 'Salon des anniversaires'})
         )
         .addStringOption(option =>
             option.setName('data')

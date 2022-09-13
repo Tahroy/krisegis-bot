@@ -13,45 +13,54 @@ module.exports = {
                     .setName("line1")
                     .setDescription("Ligne de la 1ère tuile")
                     .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6)
+                    .addChoices(
+                        {name: "1", value: 1},
+                        {name: "2", value: 2},
+                        {name: "3", value: 3},
+                        {name: "4", value: 4},
+                        {name: "5", value: 5},
+                        {name: "6", value: 6},
+                    )
                 )
                 .addIntegerOption(option => option
                     .setName("col1")
                     .setDescription("Colonne de la 1ère tuile")
                     .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6)
+                    .addChoices(
+                        {name: "1", value: 1},
+                        {name: "2", value: 2},
+                        {name: "3", value: 3},
+                        {name: "4", value: 4},
+                        {name: "5", value: 5},
+                        {name: "6", value: 6},
+                    )
                 )
                 .addIntegerOption(option => option
                     .setName("line2")
                     .setDescription("Ligne de la 2e tuile")
                     .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6)
+                    .addChoices(
+                        {name: "1", value: 1},
+                        {name: "2", value: 2},
+                        {name: "3", value: 3},
+                        {name: "4", value: 4},
+                        {name: "5", value: 5},
+                        {name: "6", value: 6},
+                    )
                 )
                 .addIntegerOption(option => option
                     .setName("col2")
                     .setDescription("Colonne de la 2e tuile")
                     .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6))),
+                    .addChoices(
+                        {name: "1", value: 1},
+                        {name: "2", value: 2},
+                        {name: "3", value: 3},
+                        {name: "4", value: 4},
+                        {name: "5", value: 5},
+                        {name: "6", value: 6},
+                    )
+                )),
     async execute(interaction) {
         const channel = interaction.channel;
 
