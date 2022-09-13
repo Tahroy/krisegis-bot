@@ -16,17 +16,19 @@ module.exports = {
 
             for (let i = 0; i < auteurID.length; ++i)
             {
+                let plus = parseInt(auteurID[i]);
+
                 if (auteurID[i] === victimeID[i])
                 {
-                    score += parseInt(auteurID[i]);
+                    plus = parseInt(auteurID[i]) * 3;
                 }
 
                 if (auteurID[i] === victimeID[0])
                 {
-                    let plus = parseInt(auteurID[i]);
-                    plus *= 4;
-                    score += plus;
+                    plus = parseInt(auteurID[i]) * 10;
                 }
+
+                score += plus;
             }
 
             return score;
