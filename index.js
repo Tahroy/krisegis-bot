@@ -1,16 +1,15 @@
 /* Configuration du bot */
-const {token, client_id, guilds} = require('./config/config.json');
+const {token, client_id, guilds} = require('./config/config_test.json');
 
-const {Client, Intents} = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 
-const client = new Client({
-    intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_VOICE_STATES,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MEMBERS
-    ]
-});
+const client = new Client({ intents: [
+    GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMembers
+    ], partials: [Partials.Channel] });
+
 /* Configuration du player */
 const {Player} = require("discord-player");
 // Create a new Player (you don't need any API Key)
