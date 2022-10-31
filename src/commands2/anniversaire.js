@@ -139,9 +139,12 @@ module.exports = {
             const day = date[2];
             const month = date[1];
 
-            message += `${membre.user.username} : ${day}/${month}\n`;
+            if (membre?.user)
+            {
+                message += `${membre?.user?.username} : ${day}/${month}\n`;
+            }
         }
 
-        interaction.reply(message);
+        interaction.reply('Liste des anniversaires : \n' + message);
     }
 };
