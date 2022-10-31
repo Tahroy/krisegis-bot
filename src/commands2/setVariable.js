@@ -1,5 +1,6 @@
 const {SlashCommandBuilder} = require("discord.js");
 const Variable = require("../database/Variable");
+const {PermissionFlagsBits} = require("discord-api-types/v8");
 
 module.exports = {
     opts: {
@@ -17,7 +18,9 @@ module.exports = {
         .addStringOption(option =>
             option.setName('data')
                   .setDescription('La donnée à sauvegarder')
-                  .setRequired(true)),
+                  .setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    ,
 
     async execute(interaction) {
         const name = interaction.options.getString('name');

@@ -1,4 +1,5 @@
-const {SlashCommandBuilder} = require("discord.js");
+const {SlashCommandBuilder, PermissionsBitField} = require("discord.js");
+const {PermissionFlagsBits} = require("discord-api-types/v8");
 module.exports = {
     opts: {
         admin:true
@@ -9,7 +10,9 @@ module.exports = {
         .addIntegerOption(option =>
             option.setName('nb')
                   .setDescription('Nombre de messages à supprimer')
-                  .setRequired(true)),
+                  .setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    ,
     async execute(interaction) {
 
         const nombre = interaction.options.getInteger('nb');
