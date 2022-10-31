@@ -1,54 +1,34 @@
-const {MessageEmbed, MessageAttachment} = require("discord.js");
+const {AttachmentBuilder, EmbedBuilder, Colors} = require("discord.js");
 const appRoot = require('app-root-path');
 const {version} = require(`${appRoot}/config/config.json`);
 
 module.exports = {
-    /*
-    const { MessageAttachment, MessageEmbed } = require('discord.js');
-// ...
-const file = new MessageAttachment('../assets/discordjs.png');
-const exampleEmbed = new MessageEmbed()
-	.setTitle('Some title')
-	.setImage('attachment://discordjs.png');
+	get(fields, options) {
 
-channel.send({ embeds: [exampleEmbed], files: [file] });
+		const builder = new EmbedBuilder()
+			.setColor(Colors.Yellow)
+			.setURL('https://krisegis.fr')
+			.setAuthor({name: 'Krisegis', iconURL: 'attachment://krisegis-point.png', url: 'https://krisegis.fr'})
+			.addFields(fields)
+			.setTimestamp(new Date())
+			.setFooter({text: `Krisegis ${version}`, iconURL: 'attachment://krisegis.png'});
 
-     */
-    get(fields, options) {
-        const embed = {
-            color: 'YELLOW',
-            url: 'https://krisegis.fr/',
-            author: { icon_url: 'attachment://krisegis-point.png'},
-            thumbnail: {},
-            fields: fields,
-            image: {},
-            timestamp: new Date(),
-            footer: {
-                text: `Krisegis V${version}`,
-                icon_url: 'attachment://krisegis.png',
-            },
-        };
+		if (options) {
+			if (options.title) {
+				builder.setTitle(options.title);
+			}
+			if (options.url) {
+				builder.setURL(options.url);
+			}
+			if (options.description) {
+				builder.setDescription(options.description);
+			}
+		}
 
-        if (options) {
-            if (options.author) {
-                embed.author.name = options.author;
-            }
-            if (options.title) {
-                embed.title = options.title;
-            }
-            if (options.url) {
-                embed.url = options.url;
-            }
-            if (options.description) {
-                embed.description = options.description;
-            }
-        }
+		const krisegisLogo = new AttachmentBuilder(`${appRoot}/assets/krisegis.png`);
+		const krisegisPoint = new AttachmentBuilder(`${appRoot}/assets/krisegis-point.png`);
+		const files = [krisegisLogo, krisegisPoint];
 
-
-        const krisegisLogo = new MessageAttachment(`${appRoot}/assets/krisegis.png`);
-        const krisegisPoint = new MessageAttachment(`${appRoot}/assets/krisegis-point.png`);
-        const files = [krisegisLogo, krisegisPoint];
-
-        return {embeds: [embed], files: files};
-    }
+		return {embeds: [builder], files: files};
+	}
 };
