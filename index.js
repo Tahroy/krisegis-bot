@@ -1,14 +1,14 @@
 /* Configuration du bot */
-const {token, client_id, guilds} = require('./config/config_test.json');
+const {token, client_id, guilds} = require('./config/config.json');
 
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildVoiceStates
-    ],
-    partials: [Partials.Channel]
-});
+
+const client = new Client({ intents: [
+    GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMembers
+    ], partials: [Partials.Channel] });
 
 /* Configuration du player */
 const {Player} = require("discord-player");
