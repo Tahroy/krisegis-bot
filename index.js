@@ -1,16 +1,15 @@
 /* Configuration du bot */
-const {token, client_id, guilds} = require('./config/config.json');
+const {token, client_id, guilds} = require('./config/config_test.json');
 
-const {Client, Intents} = require('discord.js');
-
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const client = new Client({
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_VOICE_STATES,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MEMBERS
-    ]
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates
+    ],
+    partials: [Partials.Channel]
 });
+
 /* Configuration du player */
 const {Player} = require("discord-player");
 // Create a new Player (you don't need any API Key)
@@ -33,13 +32,11 @@ music.execute(client);
 /* Configuration des commandes */
 client.commands = require('./src/utils/commandsAdd');
 /* Lancement du bot */
-
 require('./src/events/ready')(client);
 require('./src/events/interactionCreate')(client);
 
-client.login(token).then(r => function() {
+client.login(token).then(r => function() {});
 
-});
 
 const rest = new REST({version: '9'}).setToken(token);
 
@@ -58,9 +55,8 @@ for (const command of client.commands) {
 }
 slashCommands = slashCommands.map(command => command.toJSON());
 
-for (const guild of guilds)
-{
-    rest.put(Routes.applicationGuildCommands(client_id, guild), {body: slashCommands})
-        .then(() => console.log('Successfully registered application commands.'))
-        .catch(console.error);
-}
+
+rest.put(
+    Routes.applicationCommands(client_id),
+    { body: slashCommands },
+);

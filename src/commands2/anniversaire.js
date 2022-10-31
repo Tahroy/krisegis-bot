@@ -1,7 +1,7 @@
-const {SlashCommandBuilder} = require('@discordjs/builders');
 const Anniversaire = require("../database/Anniversaire");
 const cron = require("node-cron");
 const Variable = require("../database/Variable");
+const {SlashCommandBuilder} = require("discord.js");
 
 module.exports = {
     opts: {},
