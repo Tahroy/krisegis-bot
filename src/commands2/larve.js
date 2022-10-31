@@ -1,28 +1,24 @@
-const {SlashCommandBuilder} = require('@discordjs/builders');
+const {SlashCommandBuilder} = require("discord.js");
 
 module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('larve')
         .setDescription('Permet de jouer au jeu des larves')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('go')
-                .setDescription('Lance la partie'))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('choix')
-                .setDescription('Permet de choisir une larve')
-                .addStringOption(option => option
-                    .setName('larve')
-                    .setDescription('La larve à choisir')
-                    .setRequired(true)
-                    .addChoice('Bleue', 'larveB')
-                    .addChoice('Jaune', 'larveD')
-                    .addChoice('Orange', 'larveO')
-                    .addChoice('Violette', 'larveVio')
-                    .addChoice('Verte', 'larveV')
-                )),
+        .addSubcommand(subcommand => subcommand
+            .setName('go')
+            .setDescription('Lance la partie'))
+        .addSubcommand(subcommand => subcommand
+            .setName('choix')
+            .setDescription('Permet de choisir une larve')
+            .addStringOption(option => option
+                .setName('larve')
+                .setDescription('La larve à choisir')
+                .setRequired(true)
+                .addChoices({name: 'Bleue', value: 'larveB'}, {name: 'Dorée', value: 'larveD'}, {
+                    name: 'Orange',
+                    value: 'larveO'
+                }, {name: 'Violette', value: 'larveVio'}, {name: 'Verte', value: 'larveV'}))),
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client;
@@ -68,8 +64,7 @@ module.exports = {
         // Ajoute le joueur
 
         let pari = {
-            'id': userID,
-            'larve': larve,
+            'id': userID, 'larve': larve,
         };
         this.partiesEnAttente[channel.id]['paris'].push(pari);
         return interaction.reply("Je t'ai ajouté à la liste des joueurs !");
@@ -85,11 +80,7 @@ module.exports = {
 
         this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
         this.partiesEnCours[channelID]['larves'] = {
-            [this.larveB]: 0,
-            [this.larveD]: 0,
-            [this.larveO]: 0,
-            [this.larveV]: 0,
-            [this.larveVio]: 0,
+            [this.larveB]: 0, [this.larveD]: 0, [this.larveO]: 0, [this.larveV]: 0, [this.larveVio]: 0,
         };
         this.partiesEnAttente[channelID] = null;
 
@@ -117,8 +108,7 @@ module.exports = {
         const authorID = message.author.id;
 
         // Si une partie est en cours, on rejette
-        if (this.partiesEnCours[channelID])
-            return message.reply('Une partie est déjà en cours !');
+        if (this.partiesEnCours[channelID]) return message.reply('Une partie est déjà en cours !');
 
         // Si aucune partie, on la créé
         if (!this.partiesEnAttente[channelID]) {
@@ -129,8 +119,7 @@ module.exports = {
         // Ajoute le joueur
 
         let pari = {
-            'id': message.author.id,
-            'larve': larve,
+            'id': message.author.id, 'larve': larve,
         };
 
         this.partiesEnAttente[channel.id]['paris'].push(pari);
@@ -150,16 +139,10 @@ module.exports = {
         let gagnants = [];
 
         paris.forEach(function (joueur) {
-            if (joueur.larve === result)
-                gagnants.push('<@!' + joueur.id + '>');
+            if (joueur.larve === result) gagnants.push('<@!' + joueur.id + '>');
         });
 
-        if (gagnants.length === 1)
-            channel.send(gagnants.join(', ') + ' a gagné !');
-        else if (gagnants.length === 1)
-            channel.send(gagnants.join(', ') + ' ont gagné !');
-        else
-            channel.send("Personne n'a gagné. :(");
+        if (gagnants.length === 1) channel.send(gagnants.join(', ') + ' a gagné !'); else if (gagnants.length === 1) channel.send(gagnants.join(', ') + ' ont gagné !'); else channel.send("Personne n'a gagné. :(");
     },
     jeuFini(channel) {
         const larves = this.partiesEnCours[channel.id]['larves'];
@@ -167,8 +150,7 @@ module.exports = {
         let gagnant = false;
         let max = 0;
         for (const [key, value] of Object.entries(larves)) {
-            if (value >= this.objectif && value > max)
-                gagnant = key;
+            if (value >= this.objectif && value > max) gagnant = key;
             max = value;
         }
 
@@ -189,8 +171,7 @@ module.exports = {
         const scoreLarve = this.partiesEnCours[channelID]['larves'][larve];
         let retour = this.flag;
 
-        for (let i = 0; i < scoreLarve; i++)
-            retour += '-';
+        for (let i = 0; i < scoreLarve; i++) retour += '-';
 
         retour += this.getEmoji(larve) + this.sautLigne
         return retour;
@@ -199,9 +180,7 @@ module.exports = {
         let myEmoji = emoji;
         if (myEmoji.indexOf(':') === -1) {
             let search = this.client.emojis.cache.find(emoji => emoji.name === myEmoji);
-            if (search !== undefined)
-                myEmoji = '<:' + search.name + ':' + search.id + '>';
-            else {
+            if (search !== undefined) myEmoji = '<:' + search.name + ':' + search.id + '>'; else {
                 switch (myEmoji) {
                     case 'larveB':
                         myEmoji = ':blue_circle:';
