@@ -1,57 +1,42 @@
-const {SlashCommandBuilder} = require('@discordjs/builders');
+const {SlashCommandBuilder} = require("discord.js");
 
 module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('memory')
         .setDescription('Jeu du memory DOFUS')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('play')
-                .setDescription("Veuillez choisir : ligne 1, colonne 1, ligne 2, colonne 2")
-                .addIntegerOption(option => option
-                    .setName("line1")
-                    .setDescription("Ligne de la 1ère tuile")
-                    .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6)
-                )
-                .addIntegerOption(option => option
-                    .setName("col1")
-                    .setDescription("Colonne de la 1ère tuile")
-                    .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6)
-                )
-                .addIntegerOption(option => option
-                    .setName("line2")
-                    .setDescription("Ligne de la 2e tuile")
-                    .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6)
-                )
-                .addIntegerOption(option => option
-                    .setName("col2")
-                    .setDescription("Colonne de la 2e tuile")
-                    .setRequired(true)
-                    .addChoice("1", 1)
-                    .addChoice("2", 2)
-                    .addChoice("3", 3)
-                    .addChoice("4", 4)
-                    .addChoice("5", 5)
-                    .addChoice("6", 6))),
+        .addSubcommand(subcommand => subcommand
+            .setName('play')
+            .setDescription("Veuillez choisir : ligne 1, colonne 1, ligne 2, colonne 2")
+            .addIntegerOption(option => option
+                .setName("line1")
+                .setDescription("Ligne de la 1ère tuile")
+                .setRequired(true)
+                .addChoices({name: "1", value: 1}, {name: "2", value: 2}, {name: "3", value: 3}, {
+                    name: "4", value: 4
+                }, {name: "5", value: 5}, {name: "6", value: 6}))
+            .addIntegerOption(option => option
+                .setName("col1")
+                .setDescription("Colonne de la 1ère tuile")
+                .setRequired(true)
+                .addChoices({name: "1", value: 1}, {name: "2", value: 2}, {name: "3", value: 3}, {
+                    name: "4", value: 4
+                }, {name: "5", value: 5}, {name: "6", value: 6}))
+
+            .addIntegerOption(option => option
+                .setName("line2")
+                .setDescription("Ligne de la 2e tuile")
+                .setRequired(true)
+                .addChoices({name: "1", value: 1}, {name: "2", value: 2}, {name: "3", value: 3}, {
+                    name: "4", value: 4
+                }, {name: "5", value: 5}, {name: "6", value: 6}))
+            .addIntegerOption(option => option
+                .setName("col2")
+                .setDescription("Colonne de la 2e tuile")
+                .setRequired(true)
+                .addChoices({name: "1", value: 1}, {name: "2", value: 2}, {name: "3", value: 3}, {
+                    name: "4", value: 4
+                }, {name: "5", value: 5}, {name: "6", value: 6}))),
     async execute(interaction) {
         const channel = interaction.channel;
 
@@ -72,14 +57,7 @@ module.exports = {
         }
     },
     tuiles: [],
-    base: [
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-    ],
+    base: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],],
     emotes: {
         0: ':white_circle:',
         1: ':jack_o_lantern:',
@@ -102,35 +80,19 @@ module.exports = {
         18: 'arakne',
     },
     nombres: {
-        '0': ':zero:',
-        '1': ':one:',
-        '2': ':two:',
-        '3': ':three:',
-        '4': ':four:',
-        '5': ':five:',
-        '6': ':six:'
+        '0': ':zero:', '1': ':one:', '2': ':two:', '3': ':three:', '4': ':four:', '5': ':five:', '6': ':six:'
     },
     channels: {},
     initGame(channel) {
-        let tuiles = [
-            1, 2, 3, 4, 5, 6,
-            7, 8, 9, 10, 11, 12,
-            1, 2, 3, 4, 5, 6,
-            7, 8, 9, 10, 11, 12,
-            13, 14, 15, 16, 17, 18,
-            13, 14, 15, 16, 17, 18,
-        ];
+        let tuiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 13, 14, 15, 16, 17, 18,];
         tuiles = this.shuffleBis(tuiles);
         tuiles = this.splitArray(tuiles, 6);
         this.channels[channel.id] = {
-            etat: this.base,
-            tuiles: tuiles,
-            points: 0,
+            etat: this.base, tuiles: tuiles, points: 0,
         };
     },
     shuffleBis(array) {
-        var currentIndex = array.length,
-            temporaryValue, randomIndex;
+        var currentIndex = array.length, temporaryValue, randomIndex;
 
         // While there remain elements to shuffle...
         while (0 !== currentIndex) {
@@ -182,10 +144,10 @@ module.exports = {
         return myEmoji;
     },
     playGame: async function (interaction) {
-        const line1 = interaction.options.getInteger('line1') -1;
-        const line2 = interaction.options.getInteger('line2') -1;
-        const col1 = interaction.options.getInteger('col1') -1;
-        const col2 = interaction.options.getInteger('col2') -1;
+        const line1 = interaction.options.getInteger('line1') - 1;
+        const line2 = interaction.options.getInteger('line2') - 1;
+        const col1 = interaction.options.getInteger('col1') - 1;
+        const col2 = interaction.options.getInteger('col2') - 1;
 
         if (line1 + " " + col1 === line2 + " " + col2) {
             return interaction.reply("Veuillez choisir deux tuiles différentes !");

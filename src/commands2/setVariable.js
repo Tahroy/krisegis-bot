@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require('@discordjs/builders');
+const {SlashCommandBuilder} = require("discord.js");
 const Variable = require("../database/Variable");
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
             option.setName('name')
                   .setDescription('La variable nécessaire')
                   .setRequired(true)
-                  .addChoice('Salon des anniversaires', 'birthdayChannel')
+                  .addChoices({name:'Salon des anniversaires', value:'birthdayChannel'})
         )
         .addStringOption(option =>
             option.setName('data')
