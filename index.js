@@ -7,7 +7,8 @@ const client = new Client({ intents: [
     GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildEmojisAndStickers
     ], partials: [Partials.Channel] });
 
 /* Configuration du player */
@@ -48,13 +49,10 @@ for (const command of client.commands) {
     if (!commandData.description) {
         commandData.description = "- Sans description";
     }
-
-
     let slashCommand = commandData.data;
     slashCommands.push(slashCommand);
 }
 slashCommands = slashCommands.map(command => command.toJSON());
-
 
 rest.put(
     Routes.applicationCommands(client_id),
