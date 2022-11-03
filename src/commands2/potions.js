@@ -9,8 +9,9 @@ let parties = {};
 const ingredients = {
 	snake: "🐍",
 	herb: "🌿",
-	spider: "🕷️",
+	cookie: "🍪",
 	garlic: "🧄",
+	egg: "🥚",
 	mosquito: "🦟",
 	skull: "💀",
 	eye: "👁️",
@@ -28,15 +29,16 @@ module.exports = {
 
 		const channelID = interaction.channel.id;
 
+
 		if (parties[channelID]) {
 			if (!parties[channelID].ended) {
 
-				interaction.reply(parties[channelID].render());
-
-				parties[channelID].message = await interaction.fetchReply();
-				return interaction.channel.send({content: "Il y a déjà un jeu en cours !", ephemeral: true});
+				parties[channelID].title = "Partie annulée !";
+				parties[channelID].ended = true;
+				parties[channelID].message.edit(parties[channelID].render());
 			}
 		}
+
 		parties[channelID] = new MasterMindGame(channelID);
 
 		interaction.reply(parties[channelID].render());
@@ -80,6 +82,8 @@ class MasterMindGame {
 	 * @param {string}
 	 */
 	channel;
+
+	title = "Il faut trouver la recette !"
 
 	rows = [];
 
@@ -150,15 +154,21 @@ class MasterMindGame {
 	}
 
 	render() {
+		let object = {};
+
 		const data = embedData.get(this.getRows(), {
-			title: this.ended ? 'Jeu terminé !' : 'Il faut trouver la recette !',
+			title: this.title,
 		})
+
+		object.embeds = data.embeds;
+		object.files = data.files;
 
 		let rows = [];
 		rows.push(new ActionRowBuilder());
 
 		let rowNB = 0;
 		const self = this;
+
 		Object.entries(ingredients).forEach(function (data) {
 			const key = data[0];
 			const label = data[1];
@@ -191,8 +201,9 @@ class MasterMindGame {
 										 .setStyle(ButtonStyle.Success)
 										 .setDisabled(this.ended || this.rows[this.currentRow].length < NOMBRE)));
 
+		object.components = rows;
 
-		return {embeds: data.embeds, files: data.files, components: rows};
+		return object;
 	}
 
 	cancel() {
@@ -223,13 +234,12 @@ class MasterMindGame {
 
 		this.retours[this.currentRow] = retour;
 
-		console.log(retour);
-
 		this.rows.push([]);
 		this.currentRow++;
 
 		if (!fails) {
 			this.ended = true;
+			this.title = "La recette a été trouvée, bravo !";
 			return true;
 		}
 
