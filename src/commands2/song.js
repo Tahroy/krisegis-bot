@@ -102,13 +102,20 @@ module.exports = {
         });
 
         try {
-            if (!queue.connection) await queue.connect(interaction.member.voice.channel);
+            if (!queue.connection) {
+                await queue.connect(interaction.member.voice.channel);
+                queue.setVolume(50);
+            }
         } catch {
             await player.deleteQueue(interaction.guild.id);
             return interaction.reply(`Je ne peux pas rejoindre ton canal vocal. :( ❌`);
         }
 
-        await interaction.reply(`Chargement de ${res.playlist ? 'playlist' : 'musique'}... 🎧`);
+        try {
+            await interaction.reply(`Chargement de ${res.playlist ? 'playlist' : 'musique'}... 🎧`);
+        } catch (err) {
+            console.error();
+        }
 
         res.playlist ? queue.addTracks(res.tracks) : queue.addTrack(res.tracks[0]);
 
