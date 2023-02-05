@@ -12,7 +12,11 @@ module.exports = function (client) {
             return await command.execute(interaction);
         } catch (error) {
             console.error(error);
-            return await interaction.reply({content: `Erreur ${error.message}`, ephemeral: true});
+            try {
+                return await interaction.reply({content: `Erreur ${error.message}`, ephemeral: true});
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
     this.gererBouton = async function (interaction)
