@@ -4,3 +4,5 @@ package-lock.json
 /database.sqlite
 
 config.json
+
+/.idea
