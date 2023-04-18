@@ -98,7 +98,7 @@ module.exports = {
 
                 const embedData = require('../utils/embed');
 
-                const data = embedData.get(fields, {
+                const data = embedData.createEmbed(fields, {
                     url: 'https://krisegis.fr/type_fiche/membre/',
                     title: 'Liste des membres',
                     description: `Il existe actuellement ${membres.length} membres dans la Compagnie de Krisegis.`,

@@ -3,7 +3,7 @@ const appRoot = require('app-root-path');
 const {version} = require(`${appRoot}/config/config.json`);
 
 module.exports = {
-	get(fields, options) {
+	createEmbed(fields, options) {
 
 		const builder = new EmbedBuilder()
 			.setColor(Colors.Yellow)
