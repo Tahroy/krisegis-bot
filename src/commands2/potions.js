@@ -156,7 +156,7 @@ class MasterMindGame {
 	render() {
 		let object = {};
 
-		const data = embedData.get(this.getRows(), {
+		const data = embedData.createEmbed(this.getRows(), {
 			title: this.title,
 		})
 
