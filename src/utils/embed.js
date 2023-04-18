@@ -7,7 +7,7 @@ module.exports = {
 
 		const builder = new EmbedBuilder()
 			.setColor(Colors.Yellow)
-			.setURL('https://krisegis.fr')
+			//.setURL('https://krisegis.fr')
 			.setAuthor({name: 'Krisegis', iconURL: 'attachment://krisegis-point.png', url: 'https://krisegis.fr'})
 			.addFields(fields)
 			.setTimestamp(new Date())

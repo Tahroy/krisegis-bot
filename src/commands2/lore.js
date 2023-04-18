@@ -2,7 +2,6 @@ const {SlashCommandBuilder} = require("discord.js");
 const {api_lore} = require('../../config/config.json');
 const axios = require("axios");
 const {JSDOM} = require("jsdom");
-const embedData = require("../utils/embed");
 const {PermissionFlagsBits} = require("discord-api-types/v8");
 
 module.exports = {
@@ -59,7 +58,7 @@ module.exports = {
                 let itemsEmbed = embedData.get([], {
                     title: `**${data.items.length} objets :**`,
                     description: lines.join('\n'),
-                    author: "Recherche : " + interaction.options.getString('search'),
+                    author: "Recherche : " + interaction.options.getString('search')
                 })
 
                 interaction.channel.send({embeds: itemsEmbed.embeds, files: data.files});
@@ -108,7 +107,6 @@ module.exports = {
                 })
 
                 interaction.channel.send({embeds: articlesEmbed.embeds, files: data.files});
-                lines = [];
 
                 interaction.reply("Voici ce que j'ai !");
             });
