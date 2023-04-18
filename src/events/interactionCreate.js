@@ -6,14 +6,13 @@ module.exports = function (client) {
 
         const command = client.commands.get(commandName);
         try {
-            if (command?.opts?.admin && interaction.member.user.id !== owner) {
+            if (command?.opts?.admin && interaction.user.id !== owner) {
                 return await interaction.reply("Vous ne pouvez pas utiliser cette commande !");
             }
             return await command.execute(interaction);
         } catch (error) {
-            console.error(error);
             try {
-                return await interaction.reply({content: `Erreur ${error.message}`, ephemeral: true});
+                return await interaction.reply({content: `Erreur, contactez un admin`, ephemeral: true});
             } catch (error) {
                 console.error(error);
             }
@@ -38,13 +37,25 @@ module.exports = function (client) {
             return await interaction.reply({content: `Erreur ${error.message}`, ephemeral: true});
         }
     }
+    this.autocomplete = async function (interaction) {
+        const {commandName} = interaction;
+
+        const command = client.commands.get(commandName);
+        try {
+            return await command.autocomplete(interaction);
+        } catch (error) {
+            console.error(error);
+        }
+    }
     client.on('interactionCreate', async interaction => {
         if (interaction.isCommand()) {
             await this.gererCommande(interaction);
         }
-        else if (interaction.isButton())
-        {
+        else if (interaction.isButton()) {
             await this.gererBouton(interaction);
+        }
+        else if (interaction.isAutocomplete()) {
+            await this.autocomplete(interaction);
         }
     });
 };
