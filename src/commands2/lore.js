@@ -5,6 +5,8 @@ const {PermissionFlagsBits} = require("discord-api-types/v8");
 const {escapeHTML, substringContent } = require("../utils/Utils");
 const embedData = require('../utils/embed')
 
+const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
+
 module.exports = {
     opts: {
         admin: true
@@ -30,6 +32,17 @@ module.exports = {
         await this.sendResults(interaction, data.npcs, "PNJ");
         await this.sendResults(interaction, data.documents, "document");
         await this.sendResults(interaction, data.articles, "article", false);
+
+        const wikiResponse = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
+
+        const WikiData = wikiResponse.data.query.search;
+
+        let pages = [];
+        for (let i = 0; i < WikiData.length; i++) {
+            const item = WikiData[i];
+            pages.push({name: item.title, content: [WIKI_RP + `wiki/?curid=${item.pageid}`]});
+        }
+        await this.sendResults(interaction, pages, "page", false);
     },
 
     async sendResults (interaction, items = [], name = "", truncate = true) {
