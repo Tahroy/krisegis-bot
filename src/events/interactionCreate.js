@@ -11,6 +11,7 @@ module.exports = function (client) {
             }
             return await command.execute(interaction);
         } catch (error) {
+            console.error(error);
             try {
                 return await interaction.reply({content: `Erreur, contactez un admin`, ephemeral: true});
             } catch (error) {
