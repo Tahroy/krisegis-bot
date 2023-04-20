@@ -36,7 +36,7 @@ module.exports = {
 
             const object = {
                 name: title,
-                content: [text],
+                content: [WIKI_RP + `wiki/?curid=${data.pageid}`, text],
                 id: id,
             };
 
