@@ -11,7 +11,7 @@ module.exports = {
         .addStringOption(option =>
             option
                 .setName('query')
-                .setDescription("Recherche un nom de PNJ>")
+                .setDescription("Recherche un nom de PNJ")
                 .setRequired(true)
                 .setAutocomplete(true)
         ),
