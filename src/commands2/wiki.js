@@ -30,33 +30,12 @@ module.exports = {
 
             const data = response.data.query.search;
 
-            let lines = [];
+            let pages = [];
             for (let i = 0; i < data.length; i++) {
                 const item = data[i];
-                const name = escapeHTML(item.title);
-                const content = escapeHTML(item.snippet);
-                const url = WIKI_RP + `wiki/?curid=${item.pageid}`;
-
-                lines.push(`**${name}** : ${url}`);
-
-                if (i === 9) {
-                    lines.push(`*Certains résultats ont été masqués, précisez la requête*`);
-                    break;
-                }
-            }
-            let name = "page";
-
-            if (lines.length > 1) {
-                name += "s";
+                pages.push({name: item.title, content: WIKI_RP + `wiki/?curid=${item.pageid}`});
             }
 
-            let itemsEmbed = embedData.createEmbed([], {
-                title: `- **${data.length} ${name} :**`,
-                description: lines.join('\n'),
-                author: "Recherche : " + interaction.options.getString('search')
-            })
-
-            await interaction.channel.send({ embeds: itemsEmbed.embeds, files: itemsEmbed.files });
         } catch (error) {
 
             await interaction.channel.send("Erreur lors de la récupération");
