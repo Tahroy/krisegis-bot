@@ -5,31 +5,63 @@ const {PermissionFlagsBits} = require("discord-api-types/v8");
 const {escapeHTML, substringContent } = require("../utils/Utils");
 const embedData = require('../utils/embed')
 
+const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
+
 module.exports = {
     opts: {
         admin: true
     }, data: new SlashCommandBuilder()
-        .setName('lore')
-        .setDescription('Cherche des objets, articles ou dialogues de PNJ')
+        .setName('wiki')
+        .setDescription('Cherche des données sur le wiki')
         .addStringOption(option => option.setName('search')
-                                         .setDescription(
-                                             'recherche sur les objets, documents, articles ou dialogues de PNJ')
-                                         .setRequired(true))
+            .setDescription(
+                'Mots clefs')
+            .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction)
     {
 
         const search = interaction.options.getString('search');
-        const response = await axios.get(api_lore + '?content=' + search);
-
-
-        const data = response.data.data;
 
         await interaction.reply("Voici ce que j'ai !");
-        await this.sendResults(interaction, data.items, 'objet');
-        await this.sendResults(interaction, data.npcs, "PNJ");
-        await this.sendResults(interaction, data.documents, "document");
-        await this.sendResults(interaction, data.articles, "article", false);
+        // https://dofus-rp.fandom.com/fr/api.php?action=query&list=search&srsearch=shariva&format=json
+        try {
+            const response = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
+
+            const data = response.data.query.search;
+
+            let lines = [];
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+                const name = escapeHTML(item.title);
+                const content = escapeHTML(item.snippet);
+                const url = WIKI_RP + `wiki/?curid=${item.pageid}`;
+
+                lines.push(`**${name}** : ${url}`);
+
+                if (i === 9) {
+                    lines.push(`*Certains résultats ont été masqués, précisez la requête*`);
+                    break;
+                }
+            }
+            let name = "page";
+
+            if (lines.length > 1) {
+                name += "s";
+            }
+
+            let itemsEmbed = embedData.createEmbed([], {
+                title: `- **${data.length} ${name} :**`,
+                description: lines.join('\n'),
+                author: "Recherche : " + interaction.options.getString('search')
+            })
+
+            await interaction.channel.send({ embeds: itemsEmbed.embeds, files: itemsEmbed.files });
+        } catch (error) {
+
+            await interaction.channel.send("Erreur lors de la récupération");
+        }
+
     },
 
     async sendResults (interaction, items = [], name = "", truncate = true) {
