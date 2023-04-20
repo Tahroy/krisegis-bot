@@ -21,7 +21,7 @@ module.exports = {
     async execute(interaction)
     {
 
-        const search = interaction.options.getString('search');
+        const search = encodeURI(interaction.options.getString('search'));
         const response = await axios.get(api_lore + '?content=' + search);
 
 
@@ -33,16 +33,21 @@ module.exports = {
         await this.sendResults(interaction, data.documents, "document");
         await this.sendResults(interaction, data.articles, "article", false);
 
-        const wikiResponse = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
+        try {
+            const wikiResponse = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
 
-        const WikiData = wikiResponse.data.query.search;
+            const WikiData = wikiResponse.data.query.search;
 
-        let pages = [];
-        for (let i = 0; i < WikiData.length; i++) {
-            const item = WikiData[i];
-            pages.push({name: item.title, content: [WIKI_RP + `wiki/?curid=${item.pageid}`]});
+            let pages = [];
+            for (let i = 0; i < WikiData.length; i++) {
+                const item = WikiData[i];
+                pages.push({name: item.title, content: [WIKI_RP + `wiki/?curid=${item.pageid}`]});
+            }
+            await this.sendResults(interaction, pages, "page", false);
+        } catch (error) {
+            console.error(error);
+            await interaction.channel.send("Erreur lors de la récupération des données WIKI");
         }
-        await this.sendResults(interaction, pages, "page", false);
     },
 
     async sendResults (interaction, items = [], name = "", truncate = true) {
