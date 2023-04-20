@@ -1,9 +1,7 @@
 const {SlashCommandBuilder} = require("discord.js");
-const {api_lore} = require('../../config/config.json');
 const axios = require("axios");
 const {PermissionFlagsBits} = require("discord-api-types/v8");
-const {escapeHTML, substringContent } = require("../utils/Utils");
-const embedData = require('../utils/embed')
+const {escapeHTML, sendLore} = require("../utils/Utils");
 
 const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
 
@@ -12,68 +10,64 @@ module.exports = {
         admin: true
     }, data: new SlashCommandBuilder()
         .setName('wiki')
-        .setDescription('Cherche des données sur le wiki')
-        .addStringOption(option => option.setName('search')
-            .setDescription(
-                'Mots clefs')
-            .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDescription('Rechercher une page Wiki')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .addStringOption(option =>
+            option
+                .setName('search')
+                .setDescription("Recherche une page")
+                .setRequired(true)
+                .setAutocomplete(true)
+        ),
     async execute(interaction)
     {
 
         const search = interaction.options.getString('search');
 
-        await interaction.reply("Voici ce que j'ai !");
         // https://dofus-rp.fandom.com/fr/api.php?action=query&list=search&srsearch=shariva&format=json
         try {
-            const response = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
+            const response = await axios.get(WIKI_RP + `api.php?action=parse&pageid=${search}&format=json`);
 
-            const data = response.data.query.search;
+            const data = response.data.parse;
 
-            let pages = [];
-            for (let i = 0; i < data.length; i++) {
-                const item = data[i];
-                pages.push({name: item.title, content: WIKI_RP + `wiki/?curid=${item.pageid}`});
-            }
+            const title = data.title;
+            const id = data.pageid;
+            const text = escapeHTML(data.text['*']);
+
+            const object = {
+                name: title,
+                content: [text],
+                id: id,
+            };
+
+            await sendLore(object, search, interaction);
 
         } catch (error) {
-
+            console.error(error);
             await interaction.channel.send("Erreur lors de la récupération");
         }
 
     },
+    async autocomplete (interaction) {
+        const search = interaction.options.getFocused()
 
-    async sendResults (interaction, items = [], name = "", truncate = true) {
-        let lines = [];
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            const name = escapeHTML(item.name);
-
-            let content = '';
-            if (truncate) {
-                content = substringContent(escapeHTML(item.content[0]));
-            } else {
-                content = escapeHTML(item.content[0]);
-            }
-
-            lines.push(`- **${name}** : ${content}`)
-
-            if (i === 20) {
-                lines.push(`*Certains résultats ont été masqués, précisez la requête*`);
-                i = items.length;
-            }
+        if (!search || search.length < 3) {
+            await interaction.respond([])
+            return
         }
 
-        if (lines.length > 1) {
-            name += "s";
-        }
+        // Appel à l'API externe pour récupérer les objets correspondants à la recherche
+        const wikiResponse = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
 
-        let itemsEmbed = embedData.createEmbed([], {
-            title: `**${items.length} ${name} :**`,
-            description: lines.join('\n'),
-            author: "Recherche : " + interaction.options.getString('search')
-        })
+        // Traitement des résultats de l'API
+        const items = wikiResponse.data.query.search;
 
-        await interaction.channel.send({ embeds: itemsEmbed.embeds, files: itemsEmbed.files });
+        // Construction de la réponse avec les résultats sous forme d'autocomplétions
+        const choices = items.map(item => ({
+            name: item.title + ` (${item.pageid})`,
+            value: '' + item.pageid
+        })).slice(0, 25)
+
+        await interaction.respond(choices)
     }
 };

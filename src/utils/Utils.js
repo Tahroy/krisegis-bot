@@ -1,10 +1,10 @@
-const { JSDOM } = require('jsdom')
+const {JSDOM} = require('jsdom')
 const axios = require('axios')
-const { api_lore } = require('../../config/config.json')
-const { createEmbed } = require('./embed')
+const {api_lore} = require('../../config/config.json')
+const {createEmbed} = require('./embed')
 
 module.exports = {
-    escapeHTML (str) {
+    escapeHTML(str) {
         const dom = new JSDOM(str)
         const doc = dom.window.document
         // Extraire le texte brut en accédant à la propriété textContent de l'élément body
@@ -16,7 +16,7 @@ module.exports = {
         return str
     },
 
-    substringContent (str) {
+    substringContent(str) {
         if (str.length > 50) {
             str = str.substring(0, 50) + '...'
         }
@@ -24,48 +24,37 @@ module.exports = {
         return str
     },
 
-    async executeLore (interaction, endPoint = '') {
-        function decouperTexte(texte) {
-            const longueurMax = 4000; // Nombre maximum de caractères par partie
+    decouperTexte(texte) {
+        const longueurMax = 4000; // Nombre maximum de caractères par partie
 
-            if (texte.length < 4000) {
-                return [texte];
+        if (texte.length < 4000) {
+            return [texte];
+        }
+        const phrases = texte.split('.'); // Séparer le texte en phrases
+        let partieCourante = ''; // Partie courante en cours de construction
+        const parties = []; // Tableau pour stocker les parties découpées
+
+        phrases.forEach((phrase, index) => {
+            if (partieCourante.length + phrase.length + 1 <= longueurMax) {
+                // Ajouter la phrase à la partie courante si cela ne dépasse pas la longueur maximale
+                partieCourante += (partieCourante ? ' ' : '') + phrase + '.';
+            } else {
+                // Ajouter la partie courante au tableau de parties
+                parties.push(partieCourante);
+                // Réinitialiser la partie courante avec la phrase actuelle
+                partieCourante = phrase + '.';
             }
-            const phrases = texte.split('.'); // Séparer le texte en phrases
-            let partieCourante = ''; // Partie courante en cours de construction
-            const parties = []; // Tableau pour stocker les parties découpées
 
-            phrases.forEach((phrase, index) => {
-                if (partieCourante.length + phrase.length + 1 <= longueurMax) {
-                    // Ajouter la phrase à la partie courante si cela ne dépasse pas la longueur maximale
-                    partieCourante += (partieCourante ? ' ' : '') + phrase + '.';
-                } else {
-                    // Ajouter la partie courante au tableau de parties
-                    parties.push(partieCourante);
-                    // Réinitialiser la partie courante avec la phrase actuelle
-                    partieCourante = phrase + '.';
-                }
+            // Ajouter la dernière partie courante au tableau de parties
+            if (index === phrases.length - 1 && partieCourante) {
+                parties.push(partieCourante);
+            }
+        });
 
-                // Ajouter la dernière partie courante au tableau de parties
-                if (index === phrases.length - 1 && partieCourante) {
-                    parties.push(partieCourante);
-                }
-            });
+        return parties;
+    },
 
-            return parties;
-        }
-
-        const search = interaction.options.getString('query')
-
-        const response = await axios.get(api_lore + '/' + endPoint + '?id=' + search)
-
-        const items = response.data.data
-
-        if (!items.length) {
-            return interaction.reply('Aucun résultat trouvé')
-        }
-
-        const item = items[0]
+    async sendLore(item, search, interaction)  {
 
         let decoupeContent = [];
 
@@ -78,6 +67,7 @@ module.exports = {
             const plainText = doc.body.textContent || ''
             // Retirer les espaces en début et en fin de chaîne
             content = plainText.trim()
+            const {decouperTexte} = require("./Utils.js");
             decoupeContent = decoupeContent.concat(decouperTexte(content));
         }
 
@@ -93,12 +83,26 @@ module.exports = {
                 description: decoupeContent[i],
                 author: 'ID : ' + search
             })
-            await interaction.channel.send({ embeds: embed.embeds, files: embed.files })
+            await interaction.channel.send({embeds: embed.embeds, files: embed.files})
         }
 
         return interaction.reply(`Voilà ce que j'ai trouvé !`)
     },
-    async autocompleteLore (interaction, endPoint = '') {
+    async executeLore(interaction, endPoint = '') {
+        const search = interaction.options.getString('query')
+
+        const response = await axios.get(api_lore + '/' + endPoint + '?id=' + search)
+
+        const items = response.data.data
+
+        if (!items.length) {
+            return interaction.reply('Aucun résultat trouvé')
+        }
+
+        const item = items[0]
+        await this.sendLore(item, search, interaction);
+    },
+    async autocompleteLore(interaction, endPoint = '') {
         const search = interaction.options.getFocused()
 
         if (!search || search.length < 3) {
