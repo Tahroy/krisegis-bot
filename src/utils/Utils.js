@@ -37,7 +37,7 @@ module.exports = {
         phrases.forEach((phrase, index) => {
             if (partieCourante.length + phrase.length + 1 <= longueurMax) {
                 // Ajouter la phrase à la partie courante si cela ne dépasse pas la longueur maximale
-                partieCourante += (partieCourante ? ' ' : '') + phrase + '.';
+                partieCourante += (partieCourante ? '' : '') + phrase + '.';
             } else {
                 // Ajouter la partie courante au tableau de parties
                 parties.push(partieCourante);
