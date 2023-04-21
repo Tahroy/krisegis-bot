@@ -91,6 +91,8 @@ module.exports = {
     async executeLore(interaction, endPoint = '') {
         const search = interaction.options.getString('query')
 
+        console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`);
+
         if (parseInt(search) != search) {
             interaction.reply("Recherche incorrecte", {ephemeral: true});
             return;
