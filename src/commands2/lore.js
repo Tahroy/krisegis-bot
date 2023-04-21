@@ -8,9 +8,8 @@ const embedData = require('../utils/embed')
 const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
 
 module.exports = {
-    opts: {
-        admin: true
-    }, data: new SlashCommandBuilder()
+    opts: {},
+    data: new SlashCommandBuilder()
         .setName('lore')
         .setDescription('Cherche des objets, articles ou dialogues de PNJ')
         .addStringOption(option => option.setName('search')

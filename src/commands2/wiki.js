@@ -6,12 +6,10 @@ const {escapeHTML, sendLore} = require("../utils/Utils");
 const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
 
 module.exports = {
-    opts: {
-        admin: true
-    }, data: new SlashCommandBuilder()
+    opts: {},
+    data: new SlashCommandBuilder()
         .setName('wiki')
         .setDescription('Rechercher une page Wiki')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption(option =>
             option
                 .setName('search')
