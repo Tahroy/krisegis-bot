@@ -25,6 +25,7 @@ module.exports = {
         console.log(`Recherche de ${search} par ${interaction.user.username}`);
 
         const response = await axios.get(api_lore + '?content=' + search);
+        console.log(api_lore + '?content=' + search);
 
         const data = response.data.data
 
