@@ -25,7 +25,7 @@ module.exports = {
         const response = await axios.get(api_lore + '?content=' + search);
 
 
-        const data = response.data.data;
+        const data = response.data.data
 
         await interaction.reply("Voici ce que j'ai !");
         await this.sendResults(interaction, data.items, 'objet');
@@ -50,11 +50,11 @@ module.exports = {
         }
     },
 
-    async sendResults (interaction, items = [], name = "", truncate = true) {
-        let lines = [];
+    async sendResults (interaction, items = [], name = '', truncate = true) {
+        let lines = []
         for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            const name = escapeHTML(item.name);
+            const item = items[i]
+            const name = escapeHTML(item.name)
 
             let content = '';
             if (truncate) {

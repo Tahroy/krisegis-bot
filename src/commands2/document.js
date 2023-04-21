@@ -7,7 +7,6 @@ module.exports = {
     }, data: new SlashCommandBuilder()
         .setName('document')
         .setDescription('Rechercher un document')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption(option =>
             option
                 .setName('query')
