@@ -2,9 +2,8 @@ const { SlashCommandBuilder } = require('discord.js')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
 const { autocompleteLore, executeLore } = require('../utils/Utils')
 module.exports = {
-    opts: {
-        admin: true
-    }, data: new SlashCommandBuilder()
+    opts: {},
+    data: new SlashCommandBuilder()
         .setName('article')
         .setDescription('Rechercher un article')
         .addStringOption(option =>
