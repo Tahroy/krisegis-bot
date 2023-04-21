@@ -5,9 +5,8 @@ module.exports = {
     opts: {
         admin: true
     }, data: new SlashCommandBuilder()
-        .setName('npc')
+        .setName('pnj')
         .setDescription('Rechercher un PNJ')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption(option =>
             option
                 .setName('query')
