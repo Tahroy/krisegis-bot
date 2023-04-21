@@ -71,6 +71,8 @@ module.exports = {
             decoupeContent = decoupeContent.concat(decouperTexte(content));
         }
 
+        interaction.reply(`Voilà ce que j'ai trouvé !`);
+
         for (let i = 0; i < decoupeContent.length; i++) {
             let title = item.name + ` (${item.id})`
             if (decoupeContent.length > 1) {
@@ -85,11 +87,15 @@ module.exports = {
             })
             await interaction.channel.send({embeds: embed.embeds, files: embed.files})
         }
-
-        return interaction.reply(`Voilà ce que j'ai trouvé !`)
     },
     async executeLore(interaction, endPoint = '') {
         const search = interaction.options.getString('query')
+
+        if (parseInt(search) != search) {
+            interaction.reply("Recherche incorrecte", {ephemeral: true});
+            return;
+
+        }
 
         const response = await axios.get(api_lore + '/' + endPoint + '?id=' + search)
 
@@ -100,7 +106,8 @@ module.exports = {
         }
 
         const item = items[0]
-        await this.sendLore(item, search, interaction);
+        const {sendLore} = require("./Utils.js");
+        await sendLore(item, search, interaction);
     },
     async autocompleteLore(interaction, endPoint = '') {
         const search = interaction.options.getFocused()
