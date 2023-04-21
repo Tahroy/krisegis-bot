@@ -24,7 +24,6 @@ module.exports = {
         const search = encodeURI(interaction.options.getString('search'));
         const response = await axios.get(api_lore + '?content=' + search);
 
-
         const data = response.data.data
 
         await interaction.reply("Voici ce que j'ai !");
