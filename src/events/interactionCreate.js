@@ -11,13 +11,7 @@ module.exports = function (client) {
             }
             return await command.execute(interaction);
         } catch (error) {
-            console.error('error');
-            try {
-                console.log(interaction);
-                return await interaction.reply({content: `Erreur, contactez un admin`, ephemeral: true});
-            } catch (error) {
-                console.error('error');
-            }
+            console.log(error);
         }
     }
     this.gererBouton = async function (interaction)
