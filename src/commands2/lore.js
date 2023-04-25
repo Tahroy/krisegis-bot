@@ -22,14 +22,14 @@ module.exports = {
 
         const search = encodeURI(interaction.options.getString('search'));
 
-        console.log(`Recherche de ${search} par ${interaction.user.username}`);
+        await interaction.reply("Voici ce que j'ai !");
 
-        const response = await axios.get(api_lore + '?content=' + search);
-        console.log(api_lore + '?content=' + search);
+        console.log(`Recherche de ${search} par ${interaction.user.username}`);
+        const response = await axios.get(api_lore + '?content=' + `"${search}"`);
+
+        console.log(api_lore + '?content=' + `"${search}"`);
 
         const data = response.data.data
-
-        await interaction.reply("Voici ce que j'ai !");
         await this.sendResults(interaction, data.items, 'objet');
         await this.sendResults(interaction, data.npcs, "PNJ");
         await this.sendResults(interaction, data.documents, "document");
