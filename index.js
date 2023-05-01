@@ -11,24 +11,8 @@ const client = new Client({ intents: [
         GatewayIntentBits.GuildEmojisAndStickers
     ], partials: [Partials.Channel] });
 
-/* Configuration du player */
-const {Player} = require("discord-player");
-// Create a new Player (you don't need any API Key)
-const player = new Player(client, {
-    ytdlOptions: {
-        filter: "audioonly",
-        quality:"highestaudio",
-        highWaterMark: 1024 * 1024 * 10
-    }
-});
-
-// To easily access the player
-client.player = player;
-
-const music = require('./src/utils/music.js');
 const {REST} = require('@discordjs/rest');
 const {Routes} = require('discord-api-types/v9');
-music.execute(client);
 
 /* Configuration des commandes */
 client.commands = require('./src/utils/commandsAdd');
@@ -39,7 +23,7 @@ require('./src/events/interactionCreate')(client);
 client.login(token).then(r => function() {});
 
 
-const rest = new REST({version: '9'}).setToken(token);
+const rest = new REST({ version: '10' }).setToken(token);
 
 let slashCommands = [];
 
