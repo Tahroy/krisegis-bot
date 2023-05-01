@@ -15,8 +15,7 @@ module.exports = {
         .addStringOption(option => option.setName('search')
                                          .setDescription(
                                              'recherche sur les objets, documents, articles ou dialogues de PNJ')
-                                         .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+                                         .setRequired(true)),
     async execute(interaction)
     {
 
