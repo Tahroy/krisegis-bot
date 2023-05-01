@@ -17,7 +17,7 @@ const {Routes} = require('discord-api-types/v9');
 /* Configuration des commandes */
 client.commands = require('./src/utils/commandsAdd');
 /* Lancement du bot */
-require('./src/events/ready')(client);
+//require('./src/events/ready')(client);
 require('./src/events/interactionCreate')(client);
 
 client.login(token).then(r => function() {});
