@@ -1,11 +1,11 @@
-const {SlashCommandBuilder} = require("discord.js");
-const {api_lore} = require('../../config/config.json');
-const axios = require("axios");
-const {PermissionFlagsBits} = require("discord-api-types/v8");
-const {escapeHTML, substringContent } = require("../utils/Utils");
+const { SlashCommandBuilder } = require('discord.js')
+const { api_lore } = require('../../config/config.json')
+const axios = require('axios')
+const { PermissionFlagsBits } = require('discord-api-types/v8')
+const { escapeHTML, substringContent } = require('../utils/Utils')
 const embedData = require('../utils/embed')
 
-const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
+const WIKI_RP = 'https://dofus-rp.fandom.com/fr/'
 
 module.exports = {
     opts: {},
@@ -13,41 +13,40 @@ module.exports = {
         .setName('lore')
         .setDescription('Cherche des objets, articles ou dialogues de PNJ')
         .addStringOption(option => option.setName('search')
-                                         .setDescription(
-                                             'recherche sur les objets, documents, articles ou dialogues de PNJ')
-                                         .setRequired(true)),
-    async execute(interaction)
-    {
+            .setDescription(
+                'recherche sur les objets, documents, articles ou dialogues de PNJ')
+            .setRequired(true)),
+    async execute (interaction) {
 
-        const search = encodeURI(interaction.options.getString('search'));
+        const search = encodeURI(interaction.options.getString('search'))
 
-        await interaction.reply("Voici ce que j'ai !");
+        await interaction.reply('Voici ce que j\'ai !')
 
-        await console.log(`Recherche de ${search} par ${interaction.user.username}`);
-        const response = await axios.get(api_lore + '?content=' + `"${search}"`);
+        await console.log(`Recherche de ${search} par ${interaction.user.username}`)
+        const response = await axios.get(api_lore + '?content=' + `"${search}"`)
 
-        console.log(api_lore + '?content=' + `"${search}"`);
+        console.log(api_lore + '?content=' + `"${search}"`)
 
         const data = response.data.data
-        await this.sendResults(interaction, data.items, 'objet');
-        await this.sendResults(interaction, data.npcs, "PNJ");
-        await this.sendResults(interaction, data.documents, "document");
-        await this.sendResults(interaction, data.articles, "article", false);
+        await this.sendResults(interaction, data.items, 'objet')
+        await this.sendResults(interaction, data.npcs, 'PNJ')
+        await this.sendResults(interaction, data.documents, 'document')
+        await this.sendResults(interaction, data.articles, 'article', false)
 
         try {
-            const wikiResponse = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`);
+            const wikiResponse = await axios.get(WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`)
 
-            const WikiData = wikiResponse.data.query.search;
+            const WikiData = wikiResponse.data.query.search
 
-            let pages = [];
+            let pages = []
             for (let i = 0; i < WikiData.length; i++) {
-                const item = WikiData[i];
-                pages.push({name: item.title, content: [WIKI_RP + `wiki/?curid=${item.pageid}`]});
+                const item = WikiData[i]
+                pages.push({ name: item.title, content: [WIKI_RP + `wiki/?curid=${item.pageid}`] })
             }
-            await this.sendResults(interaction, pages, "page", false);
+            await this.sendResults(interaction, pages, 'page', false)
         } catch (error) {
-            console.error(error);
-            await interaction.channel.send("Erreur lors de la récupération des données WIKI");
+            console.error(error)
+            await interaction.channel.send('Erreur lors de la récupération des données WIKI')
         }
     },
 
@@ -57,31 +56,31 @@ module.exports = {
             const item = items[i]
             const name = escapeHTML(item.name)
 
-            let content = '';
+            let content = ''
             if (truncate) {
-                content = substringContent(escapeHTML(item.content[0]));
+                content = substringContent(escapeHTML(item.content[0]))
             } else {
-                content = escapeHTML(item.content[0]);
+                content = escapeHTML(item.content[0])
             }
 
             lines.push(`- **${name}** : ${content}`)
 
             if (i === 20) {
-                lines.push(`*Certains résultats ont été masqués, précisez la requête*`);
-                i = items.length;
+                lines.push(`*Certains résultats ont été masqués, précisez la requête*`)
+                i = items.length
             }
         }
 
         if (lines.length > 1) {
-            name += "s";
+            name += 's'
         }
 
         let itemsEmbed = embedData.createEmbed([], {
             title: `**${items.length} ${name} :**`,
             description: lines.join('\n'),
-            author: "Recherche : " + interaction.options.getString('search')
+            author: 'Recherche : ' + interaction.options.getString('search')
         })
 
-        await interaction.channel.send({ embeds: itemsEmbed.embeds, files: itemsEmbed.files });
+        await interaction.channel.send({ embeds: itemsEmbed.embeds, files: itemsEmbed.files })
     }
-};
+}
