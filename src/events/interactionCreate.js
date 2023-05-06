@@ -28,12 +28,10 @@ module.exports = function (client) {
                 return await interaction.reply("Vous ne pouvez pas utiliser cette commande !");
             }
             await command.executeButton(interaction, buttonName);
-            return
         } catch (error) {
             console.error(error);
-            await interaction.channel.send({content: `Erreur ${error.message}`, ephemeral: true});
+            await interaction.channel.send({content: `Une erreur a eu lieu, contactez Tahroy !`, ephemeral: true});
             interaction.deferUpdate();
-            return;
         }
     }
     this.autocomplete = async function (interaction) {
