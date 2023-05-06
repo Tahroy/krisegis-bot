@@ -27,10 +27,13 @@ module.exports = function (client) {
             if (command?.opts?.admin && interaction.member.user.id !== owner) {
                 return await interaction.reply("Vous ne pouvez pas utiliser cette commande !");
             }
-            return await command.executeButton(interaction, buttonName);
+            await command.executeButton(interaction, buttonName);
+            return
         } catch (error) {
             console.error(error);
-            return await interaction.reply({content: `Erreur ${error.message}`, ephemeral: true});
+            await interaction.channel.send({content: `Erreur ${error.message}`, ephemeral: true});
+            interaction.deferUpdate();
+            return;
         }
     }
     this.autocomplete = async function (interaction) {

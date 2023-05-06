@@ -120,7 +120,9 @@ module.exports = {
         }
 
         // Appel à l'API externe pour récupérer les objets correspondants à la recherche
-        const response = await axios.get(api_lore + '/' + endPoint + '?name=' + search)
+        const request = api_lore + '/' + endPoint + '?name=' + search + "&limit=25";
+        console.log(request);
+        const response = await axios.get(request)
 
         // Traitement des résultats de l'API
         const items = response.data.data
