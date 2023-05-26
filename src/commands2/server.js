@@ -163,10 +163,10 @@ module.exports = {
             attributes: ['game'],
             group: ['game'],
         })
-            .then((games) => {
-                games.forEach((game) => {
-                    this.sendServers(interaction, game)
-                })
+            .then(async (games) => {
+                for (const game of games) {
+                    await this.sendServers(interaction, game)
+                }
             })
             .catch((error) => {
                 console.error('Erreur lors de la récupération des jeux :', error)
@@ -185,10 +185,12 @@ module.exports = {
         await this.send(servers, interaction, nomJeuPrincipal)
     },
     async send (servers, interaction, name) {
-        const rowAjouter = new ActionRowBuilder()
-        const rowRetirer = new ActionRowBuilder()
+        let rowAjouter = new ActionRowBuilder()
+        let rowRetirer = new ActionRowBuilder()
 
+        let count = 0;
         for (const server of servers) {
+            count++;
 
             const serverName = await interaction.guild.roles.cache.find(role => role.id === server.id).name
 
@@ -203,8 +205,18 @@ module.exports = {
                 .setLabel(serverName)
                 .setEmoji('⛔')
                 .setStyle(ButtonStyle.Danger))
+
+            if (count === 5) {
+                await interaction.channel.send({ content: `Serveurs ${name}:`, components: [rowAjouter, rowRetirer] })
+                count = 0;
+                rowAjouter = new ActionRowBuilder();
+                rowRetirer = new ActionRowBuilder();
+            }
         }
 
-        await interaction.channel.send({ content: `Serveurs ${name}:`, components: [rowAjouter, rowRetirer] })
+        if (count > 0) {
+            const titre = count === servers.length ? `Serveurs ${name}` : '';
+            await interaction.channel.send({ content: titre, components: [rowAjouter, rowRetirer] })
+        }
     },
 }
