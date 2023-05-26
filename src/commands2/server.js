@@ -36,7 +36,7 @@ module.exports = {
                 .setName('list')
                 .setDescription('Liste des serveurs')
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .setDMPermission(false)
     ,
     async execute (interaction) {
