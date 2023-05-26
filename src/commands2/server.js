@@ -25,7 +25,7 @@ module.exports = {
                         .setName('game')
                         .setDescription('Le jeu du serveur')
                 )
-                .addRoleOption(
+                .addStringOption(
                     option => option
                         .setName('tag')
                         .setDescription('Tag du serveur')
