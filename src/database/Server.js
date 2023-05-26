@@ -21,6 +21,10 @@ const Role = sequelize.define('server', {
     guild: {
         type: Sequelize.STRING,
         allowNull: false,
+    },
+    tag: {
+        type: Sequelize.STRING,
+        allowNull: false,
     }
 });
 
