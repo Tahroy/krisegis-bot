@@ -10,7 +10,7 @@ module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('membres')
-        .setDescription('Donne la liste des membres de la guilde'),
+        .setDescription('Donne la liste des membres de la Compagnie de Krisegis'),
     async execute(interaction) {
 
         function string_to_slug(str) {
