@@ -9,6 +9,9 @@ module.exports = function (client) {
             if (command?.opts?.admin && interaction.user.id !== owner) {
                 return await interaction.reply("Vous ne pouvez pas utiliser cette commande !");
             }
+            if (!command) {
+                return await interaction.reply("Cette commande n'existe pas !");
+            }
             return await command.execute(interaction);
         } catch (error) {
             console.log(error);
