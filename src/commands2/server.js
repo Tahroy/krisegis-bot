@@ -35,6 +35,12 @@ module.exports = {
             subcommand => subcommand
                 .setName('remove')
                 .setDescription('Retirer un serveur')
+                .addRoleOption(
+                    option => option
+                        .setName('server')
+                        .setDescription('Le serveur à ajouter')
+                        .setRequired(true)
+                )
         )
         .addSubcommand(
             subcommand => subcommand
