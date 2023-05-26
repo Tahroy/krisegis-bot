@@ -25,6 +25,11 @@ module.exports = {
                         .setName('game')
                         .setDescription('Le jeu du serveur')
                 )
+                .addRoleOption(
+                    option => option
+                        .setName('tag')
+                        .setDescription('Tag du serveur')
+                )
         )
         .addSubcommand(
             subcommand => subcommand
@@ -118,11 +123,13 @@ module.exports = {
     async addServer (interaction) {
         const server = interaction.options.getRole('server')
         const game = interaction.options.getRole('game')
+        const tag = interaction.options.getString('tag');
 
         await Server.create({
             id: server.id,
             game: game.id ?? '',
-            guild: interaction.guild.id
+            guild: interaction.guild.id,
+            tag: tag
         })
 
         interaction.reply({
