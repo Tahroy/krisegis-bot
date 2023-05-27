@@ -1,10 +1,11 @@
-const {JSDOM} = require('jsdom')
+const { JSDOM } = require('jsdom')
 const axios = require('axios')
-const {api_lore} = require('../../config/config.json')
-const {createEmbed} = require('./embed')
+const { api_lore } = require('../../config/config.json')
+const { createEmbed } = require('./embed')
+const Variable = require('../database/Variable')
 
 module.exports = {
-    escapeHTML(str) {
+    escapeHTML (str) {
         const dom = new JSDOM(str)
         const doc = dom.window.document
         // Extraire le texte brut en accédant à la propriété textContent de l'élément body
@@ -16,7 +17,7 @@ module.exports = {
         return str
     },
 
-    substringContent(str) {
+    substringContent (str) {
         if (str.length > 50) {
             str = str.substring(0, 50) + '...'
         }
@@ -24,39 +25,68 @@ module.exports = {
         return str
     },
 
-    decouperTexte(texte) {
-        const longueurMax = 4000; // Nombre maximum de caractères par partie
+    decouperTexte (texte) {
+        const longueurMax = 4000 // Nombre maximum de caractères par partie
 
         if (texte.length < 4000) {
-            return [texte];
+            return [texte]
         }
-        const phrases = texte.split('.'); // Séparer le texte en phrases
-        let partieCourante = ''; // Partie courante en cours de construction
-        const parties = []; // Tableau pour stocker les parties découpées
+        const phrases = texte.split('.') // Séparer le texte en phrases
+        let partieCourante = '' // Partie courante en cours de construction
+        const parties = [] // Tableau pour stocker les parties découpées
 
         phrases.forEach((phrase, index) => {
             if (partieCourante.length + phrase.length + 1 <= longueurMax) {
                 // Ajouter la phrase à la partie courante si cela ne dépasse pas la longueur maximale
-                partieCourante += (partieCourante ? '' : '') + phrase + '.';
+                partieCourante += (partieCourante ? '' : '') + phrase + '.'
             } else {
                 // Ajouter la partie courante au tableau de parties
-                parties.push(partieCourante);
+                parties.push(partieCourante)
                 // Réinitialiser la partie courante avec la phrase actuelle
-                partieCourante = phrase + '.';
+                partieCourante = phrase + '.'
             }
 
             // Ajouter la dernière partie courante au tableau de parties
             if (index === phrases.length - 1 && partieCourante) {
-                parties.push(partieCourante);
+                parties.push(partieCourante)
             }
-        });
+        })
 
-        return parties;
+        return parties
     },
 
-    async sendLore(item, search, interaction)  {
+    debugMessage (guild, message) {
+        const dateHeure = new Date().toLocaleString()
+        const debugMessage = '[' + dateHeure + '] ' + message
 
-        let decoupeContent = [];
+        console.log(debugMessage)
+
+        if (!guild.id) {
+            console.log('guild non trouvé')
+            return
+        }
+
+        Variable.findOne({
+            where: {
+                name: 'debugChannel',
+                server: guild.id
+            }
+        }).then((debugChannel) => {
+            if (!debugChannel) {
+                console.log('debugChannel non trouvé')
+                return
+            }
+
+            guild.channels.cache.get(debugChannel.data).send({ content: debugMessage });
+
+        }).catch((err) => {
+            console.log(err)
+        })
+    },
+
+    async sendLore (item, search, interaction) {
+
+        let decoupeContent = []
 
         for (let i = 0; i < item.content.length; i++) {
             let content = item.content[i]
@@ -67,16 +97,16 @@ module.exports = {
             const plainText = doc.body.textContent || ''
             // Retirer les espaces en début et en fin de chaîne
             content = plainText.trim()
-            const {decouperTexte} = require("./Utils.js");
-            decoupeContent = decoupeContent.concat(decouperTexte(content));
+            const { decouperTexte } = require('./Utils.js')
+            decoupeContent = decoupeContent.concat(decouperTexte(content))
         }
 
-        interaction.reply(`Voilà ce que j'ai trouvé !`);
+        interaction.reply(`Voilà ce que j'ai trouvé !`)
 
         for (let i = 0; i < decoupeContent.length; i++) {
             let title = item.name + ` (${item.id})`
             if (decoupeContent.length > 1) {
-                let num = i + 1;
+                let num = i + 1
                 title += ` ${num}/${decoupeContent.length}`
             }
 
@@ -85,17 +115,17 @@ module.exports = {
                 description: decoupeContent[i],
                 author: 'ID : ' + search
             })
-            await interaction.channel.send({embeds: embed.embeds, files: embed.files})
+            await interaction.channel.send({ embeds: embed.embeds, files: embed.files })
         }
     },
-    async executeLore(interaction, endPoint = '') {
+    async executeLore (interaction, endPoint = '') {
         const search = interaction.options.getString('query')
 
-        console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`);
+        console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`)
 
         if (parseInt(search) != search) {
-            interaction.reply("Recherche incorrecte", {ephemeral: true});
-            return;
+            interaction.reply('Recherche incorrecte', { ephemeral: true })
+            return
 
         }
 
@@ -108,10 +138,10 @@ module.exports = {
         }
 
         const item = items[0]
-        const {sendLore} = require("./Utils.js");
-        await sendLore(item, search, interaction);
+        const { sendLore } = require('./Utils.js')
+        await sendLore(item, search, interaction)
     },
-    async autocompleteLore(interaction, endPoint = '') {
+    async autocompleteLore (interaction, endPoint = '') {
         const search = interaction.options.getFocused()
 
         if (!search || search.length < 3) {
@@ -120,8 +150,8 @@ module.exports = {
         }
 
         // Appel à l'API externe pour récupérer les objets correspondants à la recherche
-        const request = api_lore + '/' + endPoint + '?name=' + search + "&limit=25";
-        console.log(request);
+        const request = api_lore + '/' + endPoint + '?name=' + search + '&limit=25'
+        console.log(request)
         const response = await axios.get(request)
 
         // Traitement des résultats de l'API

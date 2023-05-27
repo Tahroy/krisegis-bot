@@ -1,61 +1,70 @@
-const {owner} = require('../../config/config.json');
+const { owner } = require('../../config/config.json')
+const Variable = require('../database/Variable')
+const { debugMessage } = require('../utils/Utils')
 
 module.exports = function (client) {
     this.gererCommande = async function (interaction) {
-        const {commandName} = interaction;
+        const { commandName } = interaction
 
-        const command = client.commands.get(commandName);
+        const command = client.commands.get(commandName)
         try {
             if (command?.opts?.admin && interaction.user.id !== owner) {
-                return await interaction.reply("Vous ne pouvez pas utiliser cette commande !");
+                return await interaction.reply('Vous ne pouvez pas utiliser cette commande !')
             }
             if (!command) {
-                return await interaction.reply("Cette commande n'existe pas !");
+                return await interaction.reply('Cette commande n\'existe pas !')
             }
-            return await command.execute(interaction);
+            await command.execute(interaction)
+
+            const userName = interaction.member.nickname || interaction.member.user.username;
+            const commandName = command.data.name;
+
+            const log = "``" + userName + "`` a utilisé la commande ``" + commandName + "``";
+
+            debugMessage(interaction.guild, log);
+
         } catch (error) {
-            console.log(error);
+            console.log(error)
         }
     }
-    this.gererBouton = async function (interaction)
-    {
-        const customID = interaction.customId;
-        const explode  = customID.split('-');
+    this.gererBouton = async function (interaction) {
+        const customID = interaction.customId
+        const explode = customID.split('-')
 
-        const commandName = explode[0];
-        const buttonName  = explode[1];
-        const command = client.commands.get(commandName);
+        const commandName = explode[0]
+        const buttonName = explode[1]
+        const command = client.commands.get(commandName)
 
         try {
             if (command?.opts?.admin && interaction.member.user.id !== owner) {
-                return await interaction.reply("Vous ne pouvez pas utiliser cette commande !");
+                return await interaction.reply('Vous ne pouvez pas utiliser cette commande !')
             }
-            await command.executeButton(interaction, buttonName);
+            await command.executeButton(interaction, buttonName)
         } catch (error) {
-            console.error(error);
-            await interaction.channel.send({content: `Une erreur a eu lieu, contactez Tahroy !`, ephemeral: true});
-            interaction.deferUpdate();
+            console.error(error)
+            if (interaction) {
+                await interaction.channel.send({ content: `Une erreur a eu lieu, contactez Tahroy !`, ephemeral: true })
+            }
+//            interaction.deferUpdate()
         }
     }
     this.autocomplete = async function (interaction) {
-        const {commandName} = interaction;
+        const { commandName } = interaction
 
-        const command = client.commands.get(commandName);
+        const command = client.commands.get(commandName)
         try {
-            return await command.autocomplete(interaction);
+            return await command.autocomplete(interaction)
         } catch (error) {
-            console.error(error);
+            console.error(error)
         }
     }
     client.on('interactionCreate', async interaction => {
         if (interaction.isCommand()) {
-            await this.gererCommande(interaction);
+            await this.gererCommande(interaction)
+        } else if (interaction.isButton()) {
+            await this.gererBouton(interaction)
+        } else if (interaction.isAutocomplete()) {
+            await this.autocomplete(interaction)
         }
-        else if (interaction.isButton()) {
-            await this.gererBouton(interaction);
-        }
-        else if (interaction.isAutocomplete()) {
-            await this.autocomplete(interaction);
-        }
-    });
-};
+    })
+}
