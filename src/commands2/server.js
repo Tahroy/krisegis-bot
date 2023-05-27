@@ -1,9 +1,9 @@
-const {
-    MessageActionRow, SlashCommandBuilder, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder
 } = require('discord.js')
 const Server = require('../database/Server')
 const { ButtonStyle } = require('discord-api-types/v10')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
+const { debugMessage } = require('../utils/Utils')
 
 module.exports = {
     opts: {},
@@ -115,6 +115,11 @@ module.exports = {
         await this.checkJeuxPrincipaux(member)
         await this.checkTags(member)
 
+        const userName = member.nickname || member.user.username;
+        const roleName = role.name;
+
+        debugMessage(interaction.guild, userName + " " + action + " server " + roleName);
+
         console.log(interaction.user.username + ` ${action} ${role.name}`);
         return;
         return await interaction.deferUpdate()
@@ -133,7 +138,7 @@ module.exports = {
                 //console.log(`Check de ${roleGame.name}`)
                 //console.log('Jeu ID :', roleGame.id)
                 // On récupère tous les serveurs de ce jeu
-                const servers = Server.findAll({
+                Server.findAll({
                     where: { game: roleGame.id }
                 }).then((servers) => {
                     if (!servers.length) {
@@ -145,7 +150,7 @@ module.exports = {
 
                         const hasRole = member.roles.cache.find(role => role.id === server.id)
                         if (hasRole) {
-                           // console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
+                           //console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
                             member.roles.add(roleGame)
                             return
                         }
