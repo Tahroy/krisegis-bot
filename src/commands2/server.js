@@ -118,7 +118,7 @@ module.exports = {
         const userName = member.nickname || member.user.username;
         const roleName = role.name;
 
-        debugMessage(interaction.guild, userName + " " + action + " server " + roleName);
+        debugMessage(interaction.guild, "``" + userName + "`` " + action + " server ``" + roleName + "``");
 
         console.log(interaction.user.username + ` ${action} ${role.name}`);
         return;
