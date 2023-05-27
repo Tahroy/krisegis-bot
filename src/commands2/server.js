@@ -216,7 +216,7 @@ module.exports = {
         }
 
         if (count > 0) {
-            const titre = count === servers.length ? `Serveurs ${name}` : ''
+            const titre = count === servers.length ? `Serveurs ${name} : ` : ''
             await interaction.channel.send({ content: titre, components: [rowAjouter, rowRetirer] })
         }
     },
