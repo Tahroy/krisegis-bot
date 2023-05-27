@@ -85,6 +85,7 @@ module.exports = {
         await this.checkJeuxPrincipaux(member)
         await this.checkTags(member)
 
+        console.log(interaction.user.username + ` ${action} ${role.name}`);
         return await interaction.deferUpdate()
         interaction.reply(interaction.user.username + ` ${action} ${role.name}`)
     },
@@ -98,28 +99,28 @@ module.exports = {
                 // Le rôle du jeu (Dofus, Wakfu...)
                 const roleGame = member.guild.roles.cache.find(role => role.id === game.game)
 
-                console.log(`Check de ${roleGame.name}`)
-                console.log('Jeu ID :', roleGame.id)
+                //console.log(`Check de ${roleGame.name}`)
+                //console.log('Jeu ID :', roleGame.id)
                 // On récupère tous les serveurs de ce jeu
                 const servers = Server.findAll({
                     where: { game: roleGame.id }
                 }).then((servers) => {
                     if (!servers.length) {
-                        console.log(`Aucun serveur trouvé pour le jeu ${roleGame.name}`)
+                        //console.log(`Aucun serveur trouvé pour le jeu ${roleGame.name}`)
                     }
 
                     for (const server of servers) {
-                        console.log(`Check de ${server.id}`)
+                        //console.log(`Check de ${server.id}`)
 
                         const hasRole = member.roles.cache.find(role => role.id === server.id)
                         if (hasRole) {
-                            console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
+                           // console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
                             member.roles.add(roleGame)
                             return
                         }
                     }
 
-                    console.log('Aucun serveur trouvé, on lui retire le jeu')
+                    //console.log('Aucun serveur trouvé, on lui retire le jeu')
                     member.roles.remove(roleGame)
                 })
             }
@@ -216,7 +217,7 @@ module.exports = {
         }
 
         if (count > 0) {
-            const titre = count === servers.length ? `Serveurs ${name} : ` : ''
+            const titre = count === servers.length ? `Serveurs ${name} :    ` : ''
             await interaction.channel.send({ content: titre, components: [rowAjouter, rowRetirer] })
         }
     },
