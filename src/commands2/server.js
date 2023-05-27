@@ -77,15 +77,46 @@ module.exports = {
         const role = interaction.guild.roles.cache.find(role => role.id === roleID)
 
         if (action === 'add') {
-            await member.roles.add(role)
+
+            // On vérifie qu'il n'a pas déjà le rôle
+            if (member.roles.cache.find(role => role.id === roleID)) {
+                await interaction.reply({
+                    content: `Vous avez déjà le rôle ${role.name}`,
+                    ephemeral: true
+                })
+                return;
+            }
+
+            await member.roles.add(role);
+
+            await interaction.reply({
+                content: `Le serveur ${role.name} a été ajouté`,
+                ephemeral: true
+            })
+
         } else if (action === 'remove') {
+
+            // On vérifie qu'il a le rôle
+            if (!member.roles.cache.find(role => role.id === roleID)) {
+                await interaction.reply({
+                    content: `Vous n'avez pas le rôle ${role.name}, impossible de vous le retirer.`,
+                    ephemeral: true
+                })
+                return;
+            }
             await member.roles.remove(role)
+
+            await interaction.reply({
+                content: `Le serveur ${role.name} a été retiré`,
+                ephemeral: true
+            })
         }
 
         await this.checkJeuxPrincipaux(member)
         await this.checkTags(member)
 
         console.log(interaction.user.username + ` ${action} ${role.name}`);
+        return;
         return await interaction.deferUpdate()
         interaction.reply(interaction.user.username + ` ${action} ${role.name}`)
     },
