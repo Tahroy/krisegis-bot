@@ -245,10 +245,15 @@ module.exports = {
 
                 console.log(`Tag : ${tag} | Nickname : ${nickName}`);
 
-                if (tag) {
-                    await member.setNickname(`[${tag}] ${nickName}`)
-                } else {
-                    await member.setNickname(nickName)
+                try {
+                    if (tag) {
+                        await member.setNickname(`[${tag}] ${nickName}`)
+                    } else {
+                        await member.setNickname(nickName)
+                    }
+                } catch (error) {
+                    console.log(`Impossible de changer le nickname de ${nickName}`)
+                    console.error(error)
                 }
             }
         )
