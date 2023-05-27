@@ -16,5 +16,7 @@ client.commands = require('./src/utils/commandsAdd');
 /* Lancement du bot */
 require('./src/events/ready')(client);
 require('./src/events/interactionCreate')(client);
+require('./src/events/guildMemberAdd')(client);
+require('./src/events/guildMemberRemove')(client);
 
 client.login(token).then(r => function() {});
