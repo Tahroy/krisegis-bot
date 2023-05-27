@@ -13,13 +13,17 @@ module.exports = {
             option.setName('name')
                   .setDescription('La variable nécessaire')
                   .setRequired(true)
-                  .addChoices({name:'Salon des anniversaires', value:'birthdayChannel'})
+                  .addChoices(
+                      {name:'Salon des anniversaires', value:'birthdayChannel'},
+                      {name: 'Salon debug', value: 'debugChannel'}
+                  )
         )
         .addStringOption(option =>
             option.setName('data')
                   .setDescription('La donnée à sauvegarder')
                   .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false)
     ,
 
     async execute(interaction) {
