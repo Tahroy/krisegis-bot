@@ -15,7 +15,9 @@ module.exports = {
                   .setRequired(true)
                   .addChoices(
                       {name:'Salon des anniversaires', value:'birthdayChannel'},
-                      {name: 'Salon debug', value: 'debugChannel'}
+                      {name: 'Salon debug', value: 'debugChannel'},
+                      {name: 'Salon évènements', value: 'eventsChannel'},
+                      {name: 'Rôle alerte RP', value: 'alerteRP'}
                   )
         )
         .addStringOption(option =>
