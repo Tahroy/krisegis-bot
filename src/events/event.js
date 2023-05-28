@@ -56,7 +56,10 @@ module.exports = function (client) {
         const dateDebutFR = moment(dateDebut).format('LLLL') // Formater la date en format français
         const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
 
-        const message = `Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !\nPlus de détails dans la liste des évènements. N'hésitez pas à vous inscrire. :shariva:`
+        const message = `
+Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
+\nPlus de détails dans la liste des évènements en haut à gauche de Discord. N'hésitez pas à vous inscrire ! :Shariva:
+`
         await eventChannel.send(message, {
             allowedMentions: {
                 roles: [eventRole.id]
