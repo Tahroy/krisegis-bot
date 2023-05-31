@@ -17,7 +17,10 @@ module.exports = {
                       {name:'Salon des anniversaires', value:'birthdayChannel'},
                       {name: 'Salon debug', value: 'debugChannel'},
                       {name: 'Salon évènements', value: 'eventsChannel'},
-                      {name: 'Rôle alerte RP', value: 'alerteRP'}
+                      {name: 'Rôle alerte RP générale', value: 'alerte_rp_generale'},
+                      {name: 'Rôle alerte RP serveur', value: 'alerte_rp_serveur'},
+                      {name: 'Rôle alerte évènements générale', value: 'alerte_event_generale'},
+                      {name: 'Rôle alerte évènements serveur', value: 'alerte_event_serveur'},
                   )
         )
         .addStringOption(option =>
@@ -37,7 +40,7 @@ module.exports = {
             const channel = interaction.guild.channels.cache.get(data);
 
             if (!channel) {
-                interaction.reply('ID invalide. Veuillez renseigner l\'ID du salon des anniversaires');
+                interaction.reply('ID invalide. Veuillez renseigner l\'ID du salon des anniversaires', {ephemeral: true});
                 return;
             }
         }
@@ -65,6 +68,6 @@ module.exports = {
         };
 
         await Variable.create(champs);
-        interaction.reply(`La variable a bien été enregistrée pour ce serveur.`);
+        interaction.reply(`La variable a bien été enregistrée pour ce serveur.`, {ephemeral: true});
     },
 };
