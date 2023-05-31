@@ -8,6 +8,12 @@ module.exports = function (client) {
 
         const command = client.commands.get(commandName)
         try {
+            const userName = interaction.user.tag;
+            const commandName = command.data.name;
+
+            const log = "``" + userName + "`` a utilisé la commande ``" + commandName + "``";
+            debugMessage(interaction.guild, log);
+
             if (command?.opts?.admin && interaction.user.id !== owner) {
                 return await interaction.reply('Vous ne pouvez pas utiliser cette commande !')
             }
@@ -15,13 +21,6 @@ module.exports = function (client) {
                 return await interaction.reply('Cette commande n\'existe pas !')
             }
             await command.execute(interaction)
-
-            const userName = interaction.member.nickname || interaction.member.user.username;
-            const commandName = command.data.name;
-
-            const log = "``" + userName + "`` a utilisé la commande ``" + commandName + "``";
-
-            debugMessage(interaction.guild, log);
 
         } catch (error) {
             console.log(error)
@@ -43,6 +42,7 @@ module.exports = function (client) {
         } catch (error) {
             console.error(error)
             if (interaction) {
+                console.error(`Erreur de ${interaction.user.tag} avec la commande ${commandName} et bouton ${buttonName}`)
                 await interaction.channel.send({ content: `Une erreur a eu lieu, contactez Tahroy !`, ephemeral: true })
             }
 //            interaction.deferUpdate()
