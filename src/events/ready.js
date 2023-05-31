@@ -55,6 +55,9 @@ module.exports = async function (client) {
             for (const event of scheduledEvents) {
 
                 const guild = client.guilds.cache.get(event.guild);
+                if (!guild.scheduledEvents) {
+                    continue;
+                }
                 const guildEvent = guild.scheduledEvents.cache.get(event.id);
 
                 if (!guildEvent) {
