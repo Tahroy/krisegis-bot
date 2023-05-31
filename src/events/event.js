@@ -27,48 +27,84 @@ module.exports = function (client) {
      * Annonce publique
      * @returns {Promise<void>}
      */
-    async function annoncerEvent (guildScheduledEvent, event) {
+    async function annoncerEventGeneral (guildScheduledEvent, event) {
         const name = guildScheduledEvent.name
-        const creatorID = guildScheduledEvent.creatorId
-        const description = guildScheduledEvent.description
         const dateDebut = guildScheduledEvent.scheduledStartTimestamp
         const dateFin = guildScheduledEvent.scheduledEndTimestamp
-        const location = guildScheduledEvent.entityMetadata.location
-        const image = guildScheduledEvent.image
         const guild = guildScheduledEvent.guild
 
+        const role = client.guilds.cache.get(guild.id).roles.cache.find(role => role.id === event.server)
+
+        // On annonce sur le canal général
         const eventsChannelID = await Variable.findOne({
             where: { name: 'eventsChannel', server: guild.id }
         })
-        const roleAlerteRPID    = await Variable.findOne({
-            where: { name: 'alerteRP', server: guild.id }
+        const roleAlerteEventGeneraleID = await Variable.findOne({
+            where: { name: 'alerte_event_generale', server: guild.id }
         })
-        if (!eventsChannelID || !roleAlerteRPID) {
+
+        if (!eventsChannelID || !roleAlerteEventGeneraleID) {
             return
         }
 
-        const eventChannel = client.channels.cache.get(eventsChannelID.data)
-        const eventRole    = guildScheduledEvent.guild.roles.cache.get(roleAlerteRPID.data)
+        const eventChannelGeneral = client.channels.cache.get(eventsChannelID.data)
+        const eventRoleGeneral = guildScheduledEvent.guild.roles.cache.get(roleAlerteEventGeneraleID.data)
 
-        const role = client.guilds.cache.get(guild.id).roles.cache.find(role => role.id === event.server)
         moment.locale('fr') // Définir la locale sur français
 
         const dateDebutFR = moment(dateDebut).format('LLLL') // Formater la date en format français
         const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
 
         const message = `
-Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
+Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
 \nPlus de détails dans la liste des évènements en haut à gauche de Discord. N'hésitez pas à vous inscrire ! :Shariva:
 `
-        await eventChannel.send(message, {
+        await eventChannelGeneral.send(message, {
             allowedMentions: {
-                roles: [eventRole.id]
+                roles: [eventRoleGeneral.id]
+            }
+        })
+
+    }
+
+    async function annoncerEventServeur (guildScheduledEvent, event) {
+        const name = guildScheduledEvent.name
+        const dateDebut = guildScheduledEvent.scheduledStartTimestamp
+        const dateFin = guildScheduledEvent.scheduledEndTimestamp
+        const guild = guildScheduledEvent.guild
+
+        const role = client.guilds.cache.get(guild.id).roles.cache.find(role => role.id === event.server)
+
+        const roleAlerteEventServeurID = await Variable.findOne({
+            where: { name: 'alerte_event_serveur', server: guild.id }
+        })
+
+        const channelServeur = client.channels.cache.find(channel => channel.name === role.name.toLowerCase().replaceAll(' ', '-'))
+
+        if (!roleAlerteEventServeurID || !channelServeur) {
+            console.log("Il manque le rôle ou le channel serveur");
+            return
+        }
+        const eventRoleServeur = guildScheduledEvent.guild.roles.cache.get(roleAlerteEventServeurID.data)
+
+        moment.locale('fr') // Définir la locale sur français
+
+        const dateDebutFR = moment(dateDebut).format('LLLL') // Formater la date en format français
+        const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
+
+        const message = `
+Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
+\nPlus de détails dans la liste des évènements en haut à gauche de Discord. N'hésitez pas à vous inscrire ! :Shariva:
+`
+        await channelServeur.send(message, {
+            allowedMentions: {
+                roles: [eventRoleServeur.id]
             }
         })
     }
 
     async function ajouterEvent (guildScheduledEvent) {
-        console.log('Ajouter event');
+        console.log('Ajouter event')
         const servers = await getServers(guildScheduledEvent.guild)
 
         const location = guildScheduledEvent.entityMetadata.location
@@ -114,25 +150,35 @@ Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le
             const event = await ajouterEvent(guildScheduledEvent)
 
             if (event) {
-                await annoncerEvent(guildScheduledEvent, event)
+                await annoncerEventGeneral(guildScheduledEvent, event)
+                await annoncerEventServeur(guildScheduledEvent, event)
             }
         }
     }
 
+    /**
+     * Évènement créé
+     */
     client.on('guildScheduledEventCreate', async (guildScheduledEvent) => {
         await updateEvent(guildScheduledEvent)
     })
 
+    /**
+     * Évènement mis à jour
+     */
     client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => {
         await updateEvent(newGuildScheduledEvent)
     })
 
+    /**
+     * Évènement supprimé
+     */
     client.on('guildScheduledEventDelete', async (guildScheduledEvent) => {
         await Event.destroy({
             where: {
                 id: guildScheduledEvent.id
             }
-        });
+        })
 
         await Participant.destroy({
             where: {
@@ -141,16 +187,22 @@ Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le
         })
     })
 
+    /**
+     * Un utilisateur rejoint un évènement
+     */
     client.on('guildScheduledEventUserAdd', async (guildScheduledEvent, user) => {
         await updateEvent(guildScheduledEvent)
 
-        addParticipant(guildScheduledEvent, user);
+        addParticipant(guildScheduledEvent, user)
     })
 
+    /**
+     * Un utilisateur quitte un évènement
+     */
     client.on('guildScheduledEventUserRemove', async (guildScheduledEvent, user) => {
         await updateEvent(guildScheduledEvent)
 
-        removeParticipant(guildScheduledEvent, user);
+        removeParticipant(guildScheduledEvent, user)
     })
 
     /**
@@ -159,8 +211,8 @@ Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le
      * @param user
      */
     function removeParticipant (guildScheduledEvent, user) {
-        const eventID = guildScheduledEvent.id;
-        const userID  = user.id;
+        const eventID = guildScheduledEvent.id
+        const userID = user.id
 
         Participant.findOne({
             where: { id: userID, event: eventID }
@@ -177,8 +229,8 @@ Hey ${eventRole} ! Un évènement **${name}** est prévu sur **${role.name}** le
      * @param user
      */
     function addParticipant (guildScheduledEvent, user) {
-        const eventID = guildScheduledEvent.id;
-        const userID  = user.id;
+        const eventID = guildScheduledEvent.id
+        const userID = user.id
 
         Participant.findOne({
             where: { id: userID, event: eventID }
