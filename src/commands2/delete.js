@@ -24,9 +24,9 @@ module.exports = {
 
         try {
             await channel.bulkDelete(nombre);
-            return await interaction.reply(`${nombre} messages supprimés !`);
+            return await interaction.reply(`${nombre} messages supprimés !`, {ephemeral: true});
         } catch (error) {
-            return await interaction.reply(`Erreur : ${error.message}`);
+            return await interaction.reply(`Erreur : ${error.message}`, {ephemeral: true});
         }
     },
 };
