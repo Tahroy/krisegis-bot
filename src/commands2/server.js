@@ -1,4 +1,5 @@
-const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder
+const {
+    SlashCommandBuilder, ActionRowBuilder, ButtonBuilder
 } = require('discord.js')
 const Server = require('../database/Server')
 const { ButtonStyle } = require('discord-api-types/v10')
@@ -47,6 +48,11 @@ module.exports = {
                 .setName('list')
                 .setDescription('Liste des serveurs')
         )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('rp')
+                .setDescription('Affiche les boutons pour le RP')
+        )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .setDMPermission(false)
     ,
@@ -62,6 +68,9 @@ module.exports = {
                 break
             case 'list':
                 await this.listServers(interaction)
+                break
+            case 'rp':
+                await this.listRP(interaction)
                 break
             default:
                 await interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
@@ -84,10 +93,10 @@ module.exports = {
                     content: `Vous avez déjà le rôle ${role.name}`,
                     ephemeral: true
                 })
-                return;
+                return
             }
 
-            await member.roles.add(role);
+            await member.roles.add(role)
 
             await interaction.reply({
                 content: `Le serveur ${role.name} a été ajouté`,
@@ -102,7 +111,7 @@ module.exports = {
                     content: `Vous n'avez pas le rôle ${role.name}, impossible de vous le retirer.`,
                     ephemeral: true
                 })
-                return;
+                return
             }
             await member.roles.remove(role)
 
@@ -115,16 +124,18 @@ module.exports = {
         await this.checkJeuxPrincipaux(member)
         await this.checkTags(member)
 
-        const userName = member.nickname || member.user.username;
-        const roleName = role.name;
+        const userName = member.nickname || member.user.username
+        const roleName = role.name
 
-        debugMessage(interaction.guild, "``" + userName + "`` " + action + " server ``" + roleName + "``");
+        debugMessage(interaction.guild, '``' + userName + '`` ' + action + ' server ``' + roleName + '``')
 
-        console.log(interaction.user.username + ` ${action} ${role.name}`);
-        return;
+        console.log(interaction.user.username + ` ${action} ${role.name}`)
+        return
         return await interaction.deferUpdate()
         interaction.reply(interaction.user.username + ` ${action} ${role.name}`)
     },
+
+    // Vérification des rôles de l'utilisateur
     checkJeuxPrincipaux (member) {
         Server.findAll({
             attributes: ['game'],
@@ -150,7 +161,7 @@ module.exports = {
 
                         const hasRole = member.roles.cache.find(role => role.id === server.id)
                         if (hasRole) {
-                           //console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
+                            //console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
                             member.roles.add(roleGame)
                             return
                         }
@@ -274,12 +285,12 @@ module.exports = {
                     }
                 }
 
-                let nickName = member.nickname || member.user.username;
+                let nickName = member.nickname || member.user.username
                 if (nickName.includes('[') && nickName.includes(']')) {
                     [, nickName] = nickName.split('] ', 2)
                 }
 
-                console.log(`Tag : ${tag} | Nickname : ${nickName}`);
+                console.log(`Tag : ${tag} | Nickname : ${nickName}`)
 
                 try {
                     if (tag) {
@@ -293,6 +304,45 @@ module.exports = {
                 }
             }
         )
+
+    },
+
+    // Role Play
+    async listRP (interaction) {
+
+        let rowAjouter = new ActionRowBuilder()
+        let rowRetirer = new ActionRowBuilder()
+
+        rowAjouter.addComponents(
+            new ButtonBuilder()
+                .setCustomId('server-add_event_all')
+                .setEmoji('✅')
+                .setLabel('Annonces générales')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('server-add_event_server')
+                .setEmoji('✅')
+                .setLabel('Uniquement ses serveurs')
+                .setStyle(ButtonStyle.Primary));
+
+        rowRetirer.addComponents(
+            new ButtonBuilder()
+                .setCustomId('server-remove_event_all')
+                .setEmoji('⛔')
+                .setLabel('Annonces générales')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('server-remove_event_server')
+                .setEmoji('⛔')
+                .setLabel('Uniquement ses serveurs')
+                .setStyle(ButtonStyle.Primary)
+        )
+
+        await interaction.channel.send({ content: '**S\'inscrire aux évènements**', components: [rowAjouter, rowRetirer] })
+
+        rowAjouter = new ActionRowBuilder()
+        rowRetirer = new ActionRowBuilder()
+
 
     }
 }
