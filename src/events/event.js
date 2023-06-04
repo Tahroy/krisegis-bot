@@ -67,6 +67,12 @@ Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${role.nam
 
     }
 
+    /**
+     * Annonce uniquement sur un serveur
+     * @param guildScheduledEvent
+     * @param event
+     * @returns {Promise<void>}
+     */
     async function annoncerEventServeur (guildScheduledEvent, event) {
         const name = guildScheduledEvent.name
         const dateDebut = guildScheduledEvent.scheduledStartTimestamp
@@ -74,12 +80,14 @@ Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${role.nam
         const guild = guildScheduledEvent.guild
 
         const role = client.guilds.cache.get(guild.id).roles.cache.find(role => role.id === event.server)
-
+        const server = await Server.findOne({
+            where: { id: event.server }
+        });
         const roleAlerteEventServeurID = await Variable.findOne({
             where: { name: 'alerte_event_serveur', server: guild.id }
         })
 
-        const channelServeur = client.channels.cache.find(channel => channel.name === role.name.toLowerCase().replaceAll(' ', '-'))
+        const channelServeur = client.channels.cache.find(channel => channel.id === server.channel);
 
         if (!roleAlerteEventServeurID || !channelServeur) {
             console.log("Il manque le rôle ou le channel serveur");

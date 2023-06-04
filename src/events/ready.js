@@ -1,10 +1,10 @@
-const { version } = require('./../../config/config.json')
+const { version } = require('../../config/config_bot.json')
 const Variable = require('../database/Variable')
 const Server = require('../database/Server')
 const Event = require('../database/Event')
 const Participant = require('../database/Participant')
 const { REST } = require('@discordjs/rest')
-const { token, client_id } = require('../../config/config.json')
+const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
 const moment = require('moment/moment')
 

@@ -1,6 +1,6 @@
 const { JSDOM } = require('jsdom')
 const axios = require('axios')
-const { api_lore } = require('../../config/config.json')
+const { api_lore } = require('../../config/config_bot.json')
 const { createEmbed } = require('./embed')
 const Variable = require('../database/Variable')
 
