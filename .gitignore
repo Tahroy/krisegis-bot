@@ -3,6 +3,7 @@
 package-lock.json
 /database.sqlite
 
+/config
 config.json
 
 /.idea
