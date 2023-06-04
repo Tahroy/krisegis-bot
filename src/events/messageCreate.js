@@ -1,4 +1,4 @@
-const {prefix, owner} = require('./../../config/config.json');
+const {prefix, owner} = require('../../config/config_bot.json');
 module.exports = function (client) {
     client.on('messageCreate', message => {
         if (!message.content.startsWith(prefix) || message.author.bot) return;

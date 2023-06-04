@@ -25,6 +25,14 @@ const Role = sequelize.define('server', {
     tag: {
         type: Sequelize.STRING,
         allowNull: false,
+    },
+    channel: {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
+    name: {
+        type: Sequelize.STRING,
+        allowNull: true,
     }
 });
 

@@ -1,6 +1,6 @@
 const {AttachmentBuilder, EmbedBuilder, Colors} = require("discord.js");
 const appRoot = require('app-root-path');
-const {version} = require(`${appRoot}/config/config.json`);
+const {version} = require(`${appRoot}/config/config_bot.json`);
 
 module.exports = {
 	createEmbed(fields, options) {
