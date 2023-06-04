@@ -42,8 +42,6 @@ module.exports = {
         }).then(async servers => {
             for (const server of servers) {
                 const role = await guild.roles.cache.find(role => role.id === server.id)
-                console.log(server)
-                console.log(role)
                 if (role.name && role.name.includes(serverString)) {
                     retour.push({
                         name: role.name,
@@ -82,7 +80,7 @@ module.exports = {
         }
 
         const message = interaction.options.getString('message');
-        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur ${serveur} ! ${message}`)
+        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** ! ${message}`)
     },
     async sendServeur (interaction) {
         const guild = interaction.guild
@@ -95,8 +93,9 @@ module.exports = {
             return;
         }
 
-        const channelName = serveur.toLowerCase().replaceAll(' ', '_');
-        const channel = guild.channels.cache.find(channel => channel.name === channelName);
+        const roleServer = await guild.roles.cache.find(role => role.name === serveur);
+        const server = await Server.findOne({ where: { id: roleServer.id } });
+        const channel = guild.channels.cache.find(channel => channel.id === server.channel);
 
         if (!channel) {
             debugMessage(interaction.guild, `Pas de rôle channel serveur pour ${channelName}`);

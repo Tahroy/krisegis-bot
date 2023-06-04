@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js')
-const { api_lore } = require('../../config/config.json')
+const { api_lore } = require('../../config/config_bot.json')
 const axios = require('axios')
 const { PermissionFlagsBits, ButtonStyle } = require('discord-api-types/v8')
 const { escapeHTML, substringContent } = require('../utils/Utils')

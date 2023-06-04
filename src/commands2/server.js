@@ -5,6 +5,7 @@ const Server = require('../database/Server')
 const { ButtonStyle } = require('discord-api-types/v10')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
 const { debugMessage } = require('../utils/Utils')
+const Variable = require('../database/Variable')
 
 module.exports = {
     opts: {},
@@ -21,15 +22,29 @@ module.exports = {
                         .setDescription('Le serveur à ajouter')
                         .setRequired(true)
                 )
-                .addRoleOption(
-                    option => option
-                        .setName('game')
-                        .setDescription('Le jeu du serveur')
-                )
                 .addStringOption(
                     option => option
                         .setName('tag')
                         .setDescription('Tag du serveur')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('name')
+                        .setDescription('Nom du serveur')
+                        .setRequired(true)
+                )
+                .addChannelOption(
+                    option => option
+                        .setName('channel')
+                        .setDescription('Le channel du serveur')
+                        .setRequired(true)
+                )
+                .addRoleOption(
+                    option => option
+                        .setName('game')
+                        .setDescription('Le jeu du serveur')
+                        .setRequired(true)
                 )
         )
         .addSubcommand(
@@ -53,6 +68,11 @@ module.exports = {
                 .setName('rp')
                 .setDescription('Affiche les boutons pour le RP')
         )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('debug')
+                .setDescription('Affiche la configuration actuelle')
+        )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .setDMPermission(false)
     ,
@@ -72,11 +92,71 @@ module.exports = {
             case 'rp':
                 await this.listRP(interaction)
                 break
+            case 'debug':
+                await this.debugAdmin(interaction)
+                break
             default:
                 await interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
         }
     },
     async executeButton (interaction, buttonName) {
+        const args = buttonName.split('_')
+
+        const action = args[0]
+        const roleID = args[1]
+
+        if (roleID === 'rp' || roleID === 'event') {
+            await this.addRemoveRP(interaction, buttonName)
+            return
+        }
+
+        await this.addRemoveServer(interaction, buttonName)
+
+        // return await interaction.deferUpdate()
+        // interaction.reply(interaction.user.username + ` ${action} ${role.name}`)
+    },
+
+    // Vérification des rôles de l'utilisateur
+    checkJeuxPrincipaux (member) {
+        Server.findAll({
+            attributes: ['game'],
+            group: ['game'],
+        }).then((games) => {
+            for (const game of games) {
+
+                // Le rôle du jeu (Dofus, Wakfu...)
+                const roleGame = member.guild.roles.cache.find(role => role.id === game.game)
+
+                //console.log(`Check de ${roleGame.name}`)
+                //console.log('Jeu ID :', roleGame.id)
+                // On récupère tous les serveurs de ce jeu
+                Server.findAll({
+                    where: { game: roleGame.id }
+                }).then((servers) => {
+                    if (!servers.length) {
+                        //console.log(`Aucun serveur trouvé pour le jeu ${roleGame.name}`)
+                    }
+
+                    for (const server of servers) {
+                        //console.log(`Check de ${server.id}`)
+
+                        const hasRole = member.roles.cache.find(role => role.id === server.id)
+                        if (hasRole) {
+                            //console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
+                            member.roles.add(roleGame)
+                            return
+                        }
+                    }
+
+                    //console.log('Aucun serveur trouvé, on lui retire le jeu')
+                    member.roles.remove(roleGame)
+                })
+            }
+        })
+    },
+
+    // Ajout / Retrait
+    async addRemoveServer (interaction, buttonName) {
         const args = buttonName.split('_')
 
         const action = args[0]
@@ -130,61 +210,22 @@ module.exports = {
         debugMessage(interaction.guild, '``' + userName + '`` ' + action + ' server ``' + roleName + '``')
 
         console.log(interaction.user.username + ` ${action} ${role.name}`)
-        return
-        return await interaction.deferUpdate()
-        interaction.reply(interaction.user.username + ` ${action} ${role.name}`)
+
     },
-
-    // Vérification des rôles de l'utilisateur
-    checkJeuxPrincipaux (member) {
-        Server.findAll({
-            attributes: ['game'],
-            group: ['game'],
-        }).then((games) => {
-            for (const game of games) {
-
-                // Le rôle du jeu (Dofus, Wakfu...)
-                const roleGame = member.guild.roles.cache.find(role => role.id === game.game)
-
-                //console.log(`Check de ${roleGame.name}`)
-                //console.log('Jeu ID :', roleGame.id)
-                // On récupère tous les serveurs de ce jeu
-                Server.findAll({
-                    where: { game: roleGame.id }
-                }).then((servers) => {
-                    if (!servers.length) {
-                        //console.log(`Aucun serveur trouvé pour le jeu ${roleGame.name}`)
-                    }
-
-                    for (const server of servers) {
-                        //console.log(`Check de ${server.id}`)
-
-                        const hasRole = member.roles.cache.find(role => role.id === server.id)
-                        if (hasRole) {
-                            //console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
-                            member.roles.add(roleGame)
-                            return
-                        }
-                    }
-
-                    //console.log('Aucun serveur trouvé, on lui retire le jeu')
-                    member.roles.remove(roleGame)
-                })
-            }
-        })
-    },
-
-    // Ajout / Retrait
     async addServer (interaction) {
         const server = interaction.options.getRole('server')
         const game = interaction.options.getRole('game')
         const tag = interaction.options.getString('tag')
+        const name = interaction.options.getString('name')
+        const channel = interaction.options.getChannel('channel').id
 
         await Server.create({
             id: server.id,
             game: game.id ?? '',
             guild: interaction.guild.id,
-            tag: tag
+            tag: tag,
+            name: name,
+            channel: channel
         })
 
         interaction.reply({
@@ -300,10 +341,36 @@ module.exports = {
                     }
                 } catch (error) {
                     console.log(`Impossible de changer le nickname de ${nickName}`)
-                    console.error(error)
+                    // console.error(error)
                 }
             }
         )
+
+    },
+
+    // Debug admin
+    async debugAdmin (interaction) {
+        await Server.findAll({
+            where: { guild: interaction.guild.id }
+        }).then(async (servers) => {
+            await interaction.reply({ content: 'Voici la liste', ephemeral: true })
+            for (const server of servers) {
+                const game = await interaction.guild.roles.cache.find(role => role.id === server.game)
+                const role = await interaction.guild.roles.cache.find(role => role.id === server.id)
+                const channel = await interaction.guild.channels.cache.find(channel => channel.id === server.channel)
+                let line = `
+* BDD name : ${server?.name ?? 'absent'}
+* BDD ID : ${server?.id}
+* BDD tag : ${server?.tag}
+                    
+* Discord rôle : ${role.name}
+* Discord game : ${game.name}
+* Discord channel : ${channel?.name ?? 'absent'}`
+
+                await interaction.channel.send({ content: line})
+                await interaction.channel.send({ content: "-----------"})
+            }
+        })
 
     },
 
@@ -317,32 +384,120 @@ module.exports = {
             new ButtonBuilder()
                 .setCustomId('server-add_event_all')
                 .setEmoji('✅')
-                .setLabel('Annonces générales')
-                .setStyle(ButtonStyle.Primary),
+                .setLabel('Tous les évènements')
+                .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
                 .setCustomId('server-add_event_server')
                 .setEmoji('✅')
                 .setLabel('Uniquement ses serveurs')
-                .setStyle(ButtonStyle.Primary));
+                .setStyle(ButtonStyle.Success))
 
         rowRetirer.addComponents(
             new ButtonBuilder()
                 .setCustomId('server-remove_event_all')
                 .setEmoji('⛔')
-                .setLabel('Annonces générales')
-                .setStyle(ButtonStyle.Primary),
+                .setLabel('Tous les serveurs')
+                .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId('server-remove_event_server')
                 .setEmoji('⛔')
                 .setLabel('Uniquement ses serveurs')
-                .setStyle(ButtonStyle.Primary)
+                .setStyle(ButtonStyle.Danger)
         )
 
-        await interaction.channel.send({ content: '**S\'inscrire aux évènements**', components: [rowAjouter, rowRetirer] })
+        await interaction.channel.send({
+            content: '**S\'inscrire aux évènements**',
+            components: [rowAjouter, rowRetirer]
+        })
 
+        // Rôle Play
         rowAjouter = new ActionRowBuilder()
         rowRetirer = new ActionRowBuilder()
 
+        rowAjouter.addComponents(
+            new ButtonBuilder()
+                .setCustomId('server-add_rp_all')
+                .setEmoji('✅')
+                .setLabel('Toutes les alertes RP')
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId('server-add_rp_server')
+                .setEmoji('✅')
+                .setLabel('Uniquement ses serveurs')
+                .setStyle(ButtonStyle.Success))
 
+        rowRetirer.addComponents(
+            new ButtonBuilder()
+                .setCustomId('server-remove_rp_all')
+                .setEmoji('⛔')
+                .setLabel('Toutes les alertes RP')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId('server-remove_rp_server')
+                .setEmoji('⛔')
+                .setLabel('Uniquement ses serveurs')
+                .setStyle(ButtonStyle.Danger)
+        )
+
+        await interaction.channel.send({
+            content: '**S\'inscrire aux alertes RP**',
+            components: [rowAjouter, rowRetirer]
+        })
+
+        await interaction.reply({ 'content': 'Voilà !', 'ephemeral': true })
+    },
+    async addRemoveRP (interaction, buttonName) {
+        const args = buttonName.split('_')
+
+        const action = args[0]
+        const eventRP = args[1]
+        const allServer = args[2]
+
+        let roleKey = null
+        let message = ''
+
+        if (eventRP === 'rp') {
+            if (allServer === 'all') {
+                roleKey = 'alerte_rp_generale'
+                message = 'Rôle Alerte RP générale'
+            } else {
+                roleKey = 'alerte_rp_serveur'
+                message = 'Rôle Alerte RP serveur'
+            }
+        } else {
+            if (allServer === 'all') {
+                roleKey = 'alerte_event_generale'
+                message = 'Rôle Alerte évènement général'
+            } else {
+                roleKey = 'alerte_event_serveur'
+                message = 'Rôle Alerte évènement serveur'
+            }
+        }
+
+        let roleID = await Variable.findOne({ where: { name: roleKey } })
+        roleID = roleID.data ?? null
+
+        if (!roleID) {
+            debugMessage(interaction.guild, `Aucune configuration role RP/event trouvée pour ${roleKey}`)
+            await interaction.reply({ content: 'Aucun rôle RP/event trouvé ! Contactez un admin', ephemeral: true })
+            return
+        }
+
+        const role = await interaction.guild.roles.cache.get(roleID)
+
+        if (!role) {
+            debugMessage(interaction.guild, 'Aucun rôle trouvé !')
+            await interaction.reply({ content: 'Aucun rôle trouvé ! Contactez un admin', ephemeral: true })
+            return
+        }
+        if (action === 'add') {
+            message += ' ajouté !'
+            await interaction.guild.members.cache.get(interaction.user.id).roles.add(role)
+        } else {
+            message += ' retiré !'
+            await interaction.guild.members.cache.get(interaction.user.id).roles.remove(role)
+        }
+
+        await interaction.reply({ content: message, ephemeral: true })
     }
 }

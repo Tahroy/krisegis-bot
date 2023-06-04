@@ -1,4 +1,4 @@
-const { owner } = require('../../config/config.json')
+const { owner } = require('../../config/config_bot.json')
 const Variable = require('../database/Variable')
 const { debugMessage } = require('../utils/Utils')
 
