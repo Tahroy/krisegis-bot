@@ -492,12 +492,13 @@ module.exports = {
         }
         if (action === 'add') {
             message += ' ajouté !'
-            await interaction.guild.members.cache.get(interaction.user.id).roles.add(role)
+            await interaction.member.roles.add(role)
         } else {
             message += ' retiré !'
-            await interaction.guild.members.cache.get(interaction.user.id).roles.remove(role)
+            await interaction.member.roles.remove(role)
         }
 
+        debugMessage(interaction.guild, "Rôle ``" + role.name + "`` " + action + " pour ``" + interaction.user.tag + "``");
         await interaction.reply({ content: message, ephemeral: true })
     }
 }
