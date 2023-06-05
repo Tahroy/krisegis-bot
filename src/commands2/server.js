@@ -178,11 +178,14 @@ module.exports = {
 
             await member.roles.add(role)
 
-            await interaction.reply({
-                content: `Le serveur ${role.name} a été ajouté`,
-                ephemeral: true
-            })
-
+            try {
+                await interaction.reply({
+                    content: `Le serveur ${role.name} a été ajouté`,
+                    ephemeral: true
+                })
+            } catch (error) {
+                console.error(error)
+            }
         } else if (action === 'remove') {
 
             // On vérifie qu'il a le rôle
@@ -195,10 +198,16 @@ module.exports = {
             }
             await member.roles.remove(role)
 
-            await interaction.reply({
-                content: `Le serveur ${role.name} a été retiré`,
-                ephemeral: true
-            })
+            try {
+                await interaction.reply({
+                    content: `Le serveur ${role.name} a été retiré`,
+                    ephemeral: true
+                })
+            } catch (error) {
+                console.error(error)
+            }
+        } else {
+            await interaction.deferReply();
         }
 
         await this.checkJeuxPrincipaux(member)
@@ -367,8 +376,8 @@ module.exports = {
 * Discord game : ${game.name}
 * Discord channel : ${channel?.name ?? 'absent'}`
 
-                await interaction.channel.send({ content: line})
-                await interaction.channel.send({ content: "-----------"})
+                await interaction.channel.send({ content: line })
+                await interaction.channel.send({ content: '-----------' })
             }
         })
 
@@ -498,7 +507,7 @@ module.exports = {
             await interaction.member.roles.remove(role)
         }
 
-        debugMessage(interaction.guild, "Rôle ``" + role.name + "`` " + action + " pour ``" + interaction.user.tag + "``");
+        debugMessage(interaction.guild, 'Rôle ``' + role.name + '`` ' + action + ' pour ``' + interaction.user.tag + '``')
         await interaction.reply({ content: message, ephemeral: true })
     }
 }
