@@ -17,6 +17,7 @@ module.exports = {
                       {name:'Salon des anniversaires', value:'birthdayChannel'},
                       {name: 'Salon debug', value: 'debugChannel'},
                       {name: 'Salon évènements', value: 'eventsChannel'},
+                      {name: 'Salon du RP', value: 'rp_channel'},
                       {name: 'Rôle alerte RP générale', value: 'alerte_rp_generale'},
                       {name: 'Rôle alerte RP serveur', value: 'alerte_rp_serveur'},
                       {name: 'Rôle alerte évènements générale', value: 'alerte_event_generale'},
