@@ -306,7 +306,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger))
 
             if (count === 5) {
-                await interaction.channel.send({ content: `Serveurs ${name} :`, components: [rowAjouter, rowRetirer] })
+                await interaction.channel.send({ content: `**Serveurs ${name} :**`, components: [rowAjouter, rowRetirer] })
                 count = 0
                 rowAjouter = new ActionRowBuilder()
                 rowRetirer = new ActionRowBuilder()
@@ -314,7 +314,7 @@ module.exports = {
         }
 
         if (count > 0) {
-            const titre = count === servers.length ? `Serveurs ${name} :    ` : ''
+            const titre = count === servers.length ? `**Serveurs ${name} :**` : ''
             await interaction.channel.send({ content: titre, components: [rowAjouter, rowRetirer] })
         }
     },
