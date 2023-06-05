@@ -80,7 +80,7 @@ module.exports = {
         }
 
         const message = interaction.options.getString('message');
-        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** ! ${message}`)
+        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** ! ${message}\n`)
     },
     async sendServeur (interaction) {
         const guild = interaction.guild
@@ -111,6 +111,6 @@ module.exports = {
 
         const message = interaction.options.getString('message');
 
-        channel.send(`Hey ${roleRP}, il y a du RP en cours sur ${serveur} ! ${message}`)
+        channel.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** !\n ${message}`)
     }
 }
