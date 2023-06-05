@@ -163,12 +163,12 @@ module.exports = {
         const roleID = args[1]
 
         const member = interaction.member
-        const role = interaction.guild.roles.cache.find(role => role.id === roleID)
+        const role = await interaction.guild.roles.cache.find(role => role.id === roleID)
 
         if (action === 'add') {
 
             // On vérifie qu'il n'a pas déjà le rôle
-            if (member.roles.cache.find(role => role.id === roleID)) {
+            if (await member.roles.cache.find(role => role.id === roleID)) {
                 await interaction.reply({
                     content: `Vous avez déjà le rôle ${role.name}`,
                     ephemeral: true
@@ -189,7 +189,7 @@ module.exports = {
         } else if (action === 'remove') {
 
             // On vérifie qu'il a le rôle
-            if (!member.roles.cache.find(role => role.id === roleID)) {
+            if (await (!member.roles.cache.find(role => role.id === roleID))) {
                 await interaction.reply({
                     content: `Vous n'avez pas le rôle ${role.name}, impossible de vous le retirer.`,
                     ephemeral: true
