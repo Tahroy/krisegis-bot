@@ -417,7 +417,7 @@ module.exports = {
         )
 
         await interaction.channel.send({
-            content: '**S\'inscrire aux évènements**',
+            content: '**S\'inscrire à l\'alerte évènements**',
             components: [rowAjouter, rowRetirer]
         })
 
@@ -451,7 +451,7 @@ module.exports = {
         )
 
         await interaction.channel.send({
-            content: '**S\'inscrire aux alertes RP**',
+            content: '**S\'inscrire à l\'alertes RP**',
             components: [rowAjouter, rowRetirer]
         })
 
