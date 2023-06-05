@@ -64,7 +64,7 @@ module.exports = {
             return;
         }
 
-        const channelID = await Variable.findOne({ where: { name: 'eventsChannel', server: guild.id } });
+        const channelID = await Variable.findOne({ where: { name: 'rp_channel', server: guild.id } });
 
         if (!channelID) {
             debugMessage(interaction.guild, "Pas de rôle channel général");
