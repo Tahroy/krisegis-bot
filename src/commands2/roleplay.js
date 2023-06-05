@@ -80,7 +80,7 @@ module.exports = {
         }
 
         const message = interaction.options.getString('message');
-        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** ! ${message}\n`)
+        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** !\n ${message}`)
     },
     async sendServeur (interaction) {
         const guild = interaction.guild
