@@ -61,7 +61,7 @@ module.exports = {
 
         console.log(debugMessage)
 
-        if (!guild.id) {
+        if (!guild) {
             console.log('guild non trouvé')
             return
         }

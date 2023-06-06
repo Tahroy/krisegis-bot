@@ -12,6 +12,8 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('server')
         .setDescription('Choisir son serveur.')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+        .setDMPermission(false)
         .addSubcommand(
             subcommand => subcommand
                 .setName('add')
@@ -73,8 +75,7 @@ module.exports = {
                 .setName('debug')
                 .setDescription('Affiche la configuration actuelle')
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-        .setDMPermission(false)
+
     ,
     async execute (interaction) {
         const subCommand = interaction.options.getSubcommand()
