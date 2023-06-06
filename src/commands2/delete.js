@@ -12,6 +12,7 @@ module.exports = {
                   .setDescription('Nombre de messages à supprimer')
                   .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false)
     ,
     async execute(interaction) {
 

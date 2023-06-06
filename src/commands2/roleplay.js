@@ -7,6 +7,7 @@ module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('roleplay')
+        .setDMPermission(false)
         .setDescription('Annoncer du RP en jeu')
         .addStringOption(option => option
             .setName('serveur')
@@ -18,8 +19,7 @@ module.exports = {
             .setName('message')
             .setDescription('Message à passer')
             .setRequired(true)
-        )
-    ,
+        ),
     async execute (interaction) {
         await this.sendGeneral(interaction);
         await this.sendServeur(interaction);

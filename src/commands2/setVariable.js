@@ -9,6 +9,8 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('setvariable')
         .setDescription('Met en place une variable')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false)
         .addStringOption(option =>
             option.setName('name')
                   .setDescription('La variable nécessaire')
@@ -28,8 +30,6 @@ module.exports = {
             option.setName('data')
                   .setDescription('La donnée à sauvegarder')
                   .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-        .setDMPermission(false)
     ,
 
     async execute(interaction) {
