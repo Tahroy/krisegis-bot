@@ -119,11 +119,19 @@ module.exports = {
         }
     },
     async executeLore (interaction, endPoint = '') {
-        const search = interaction.options.getString('query')
+        let search = interaction.options.getString('query')
 
         console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`)
 
-        if (parseInt(search) != search) {
+        const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',];
+
+        for (let i = 0; i < removeChars.length; i++) {
+            search = search.replaceAll(removeChars[i], '');
+        }
+
+        search = encodeURIComponent(search);
+
+        if (parseInt(search) !== search) {
             interaction.reply('Recherche incorrecte', { ephemeral: true })
             return
 
