@@ -510,6 +510,10 @@ module.exports = {
         }
 
         debugMessage(interaction.guild, 'Rôle ``' + role.name + '`` ' + action + ' pour ``' + interaction.user.tag + '``')
-        await interaction.reply({ content: message, ephemeral: true })
+        try {
+            await interaction.reply({ content: message, ephemeral: true })
+        } catch (error) {
+            console.error(error)
+        }
     }
 }
