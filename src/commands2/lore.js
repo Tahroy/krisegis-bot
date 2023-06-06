@@ -18,9 +18,7 @@ const NOMS = {
 };
 
 module.exports = {
-    opts: {
-        admin:true
-    },
+    opts: {},
     data: new SlashCommandBuilder()
         .setName('lore')
         .setDescription('Cherche des objets, articles ou dialogues de PNJ')
@@ -32,6 +30,8 @@ module.exports = {
     async execute (interaction) {
 
         const search = encodeURI(interaction.options.getString('search'))
+
+        console.log(search)
 
         await interaction.reply('Voici ce que j\'ai !')
 
@@ -55,7 +55,7 @@ module.exports = {
 
             const wikiResponse = await axios.get(callWiki);
 
-            const WikiData = wikiResponse.data.query.search
+            const WikiData = wikiResponse.data.query?.search ?? [];
 
             let pages = []
             for (let i = 0; i < WikiData.length; i++) {
@@ -82,6 +82,15 @@ module.exports = {
 
     async getData (route, search, offset = 0) {
         const LIMIT = 20;
+
+        const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',];
+
+        for (let i = 0; i < removeChars.length; i++) {
+            search = search.replaceAll(removeChars[i], '');
+        }
+
+        search = encodeURIComponent(search);
+
         const call = `${api_lore}/${route}?content="${search}"&$limit=${LIMIT}&$offset=${offset}`
         console.log(call)
         const response = await axios.get(call)
