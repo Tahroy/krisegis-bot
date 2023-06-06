@@ -18,7 +18,9 @@ const NOMS = {
 };
 
 module.exports = {
-    opts: {},
+    opts: {
+        admin:true
+    },
     data: new SlashCommandBuilder()
         .setName('lore')
         .setDescription('Cherche des objets, articles ou dialogues de PNJ')

@@ -6,7 +6,9 @@ const {escapeHTML, sendLore} = require("../utils/Utils");
 const WIKI_RP = "https://dofus-rp.fandom.com/fr/";
 
 module.exports = {
-    opts: {},
+    opts: {
+        admin:true
+    },
     data: new SlashCommandBuilder()
         .setName('wiki')
         .setDescription('Rechercher une page Wiki')

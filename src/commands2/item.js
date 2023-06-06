@@ -2,7 +2,9 @@ const { SlashCommandBuilder } = require('discord.js')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
 const { autocompleteLore, executeLore } = require('../utils/Utils')
 module.exports = {
-    opts: {},
+    opts: {
+        admin:true
+    },
     data: new SlashCommandBuilder()
         .setName('item')
         .setDescription('Rechercher un objet')
