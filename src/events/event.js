@@ -56,7 +56,7 @@ module.exports = function (client) {
         const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
 
         const message = `
-Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
+Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${guildScheduledEvent.entityMetadata.location}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
 \nPlus de détails dans la liste des évènements en haut à gauche de Discord. N'hésitez pas à vous inscrire ! :Shariva:
 `
         await eventChannelGeneral.send(message, {
@@ -80,6 +80,7 @@ Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${role.nam
         const guild = guildScheduledEvent.guild
 
         const role = client.guilds.cache.get(guild.id).roles.cache.find(role => role.id === event.server)
+
         const server = await Server.findOne({
             where: { id: event.server }
         });
@@ -101,7 +102,7 @@ Hey ${eventRoleGeneral} ! Un évènement **${name}** est prévu sur **${role.nam
         const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
 
         const message = `
-Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${role.name}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
+Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${guildScheduledEvent.entityMetadata.location}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
 \nPlus de détails dans la liste des évènements en haut à gauche de Discord. N'hésitez pas à vous inscrire ! :Shariva:
 `
         await channelServeur.send(message, {
