@@ -101,7 +101,7 @@ module.exports = {
             decoupeContent = decoupeContent.concat(decouperTexte(content))
         }
 
-        interaction.reply(`Voilà ce que j'ai trouvé !`)
+        await interaction.reply(`Voilà ce que j'ai trouvé !`)
 
         for (let i = 0; i < decoupeContent.length; i++) {
             let title = item.name + ` (${item.id})`
@@ -123,6 +123,7 @@ module.exports = {
 
         console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`)
 
+        console.log(search);
         const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',];
 
         for (let i = 0; i < removeChars.length; i++) {
@@ -131,10 +132,9 @@ module.exports = {
 
         search = encodeURIComponent(search);
 
-        if (parseInt(search) !== search) {
+        if (parseInt(search) === 0) {
             interaction.reply('Recherche incorrecte', { ephemeral: true })
             return
-
         }
 
         const response = await axios.get(api_lore + '/' + endPoint + '?id=' + search)
