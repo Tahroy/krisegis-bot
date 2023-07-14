@@ -4,7 +4,7 @@ const {
 const Server = require('../database/Server')
 const { ButtonStyle } = require('discord-api-types/v10')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
-const { debugMessage } = require('../utils/Utils')
+const { debugMessage, checkTags } = require('../utils/Utils')
 const Variable = require('../database/Variable')
 
 module.exports = {
@@ -214,7 +214,7 @@ module.exports = {
         }
 
         await this.checkJeuxPrincipaux(member)
-        await this.checkTags(member)
+        await checkTags(member);
 
         const userName = member.nickname || member.user.username
         const roleName = role.name
@@ -320,44 +320,6 @@ module.exports = {
             const titre = count === servers.length ? `**Serveurs ${name} :**` : ''
             await interaction.channel.send({ content: titre, components: [rowAjouter, rowRetirer] })
         }
-    },
-    async checkTags (member) {
-        Server.findAll({
-            where: { guild: member.guild.id }
-        }).then(async (servers) => {
-                var tag = ''
-                for (const server of servers) {
-                    const hasRole = await member.roles.cache.find(role => role.id === server.id)
-
-                    if (hasRole) {
-                        if (tag !== '') {
-                            tag = 'Multi'
-                            break
-                        }
-                        tag = server.tag
-                    }
-                }
-
-                let nickName = member.nickname || member.user.username
-                if (nickName.includes('[') && nickName.includes(']')) {
-                    [, nickName] = nickName.split('] ', 2)
-                }
-
-                console.log(`Tag : ${tag} | Nickname : ${nickName}`)
-
-                try {
-                    if (tag) {
-                        await member.setNickname(`[${tag}] ${nickName}`)
-                    } else {
-                        await member.setNickname(nickName)
-                    }
-                } catch (error) {
-                    console.log(`Impossible de changer le nickname de ${nickName}`)
-                    // console.error(error)
-                }
-            }
-        )
-
     },
 
     // Debug admin
