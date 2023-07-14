@@ -3,6 +3,7 @@ const axios = require('axios')
 const { api_lore } = require('../../config/config_bot.json')
 const { createEmbed } = require('./embed')
 const Variable = require('../database/Variable')
+const Server = require('../database/Server')
 
 module.exports = {
     escapeHTML (str) {
@@ -172,5 +173,44 @@ module.exports = {
         })).slice(0, 25)
 
         await interaction.respond(choices)
-    }
+    },
+
+    async checkTags (member) {
+        Server.findAll({
+            where: { guild: member.guild.id }
+        }).then(async (servers) => {
+                var tag = ''
+                for (const server of servers) {
+                    const hasRole = await member.roles.cache.find(role => role.id === server.id)
+
+                    if (hasRole) {
+                        if (tag !== '') {
+                            tag = 'Multi'
+                            break
+                        }
+                        tag = server.tag
+                    }
+                }
+
+                let nickName = member.nickname || member.user.username
+                if (nickName.includes('[') && nickName.includes(']')) {
+                    [, nickName] = nickName.split('] ', 2)
+                }
+
+                console.log(`Tag : ${tag} | Nickname : ${nickName}`)
+
+                try {
+                    if (tag) {
+                        await member.setNickname(`[${tag}] ${nickName}`)
+                    } else {
+                        await member.setNickname(nickName)
+                    }
+                } catch (error) {
+                    console.log(`Impossible de changer le nickname de ${nickName}`)
+                }
+            }
+        )
+
+    },
+
 }

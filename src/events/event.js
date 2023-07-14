@@ -116,7 +116,7 @@ Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${guildSch
         console.log('Ajouter event')
         const servers = await getServers(guildScheduledEvent.guild)
 
-        const location = guildScheduledEvent.entityMetadata.location
+        const location = guildScheduledEvent.entityMetadata.location.toLowerCase();
         for (const server of servers) {
             const name = server.role.name.toLowerCase()
             if (location.toLowerCase().includes(name)) {
@@ -169,6 +169,7 @@ Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${guildSch
      * Évènement créé
      */
     client.on('guildScheduledEventCreate', async (guildScheduledEvent) => {
+        console.log(guildScheduledEvent.name + ' creé');
         await updateEvent(guildScheduledEvent)
     })
 
@@ -176,6 +177,7 @@ Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${guildSch
      * Évènement mis à jour
      */
     client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => {
+        console.log(oldGuildScheduledEvent.name + ' mis à jour');
         await updateEvent(newGuildScheduledEvent)
     })
 
@@ -183,6 +185,7 @@ Hey ${eventRoleServeur} ! Un évènement **${name}** est prévu sur **${guildSch
      * Évènement supprimé
      */
     client.on('guildScheduledEventDelete', async (guildScheduledEvent) => {
+        console.log(guildScheduledEvent.name + ' supprimé');
         await Event.destroy({
             where: {
                 id: guildScheduledEvent.id

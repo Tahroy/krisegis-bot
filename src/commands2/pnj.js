@@ -12,7 +12,10 @@ module.exports = {
                 .setDescription("Recherche un nom de PNJ")
                 .setRequired(true)
                 .setAutocomplete(true)
-        ),
+        )
+        .setDMPermission(true)
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    ,
     async execute (interaction) {
         return executeLore(interaction, 'npc');
     },
