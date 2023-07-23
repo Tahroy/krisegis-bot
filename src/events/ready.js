@@ -65,6 +65,7 @@ module.exports = async function (client) {
                 }
 
                 const eventStartTime = guildEvent.scheduledStartTimestamp;
+                const link = guildEvent.url;
                 const reminderTime = eventStartTime - eventReminderTime
                 if (now >= reminderTime && now < eventStartTime) {
 
@@ -80,7 +81,10 @@ module.exports = async function (client) {
                             moment.locale('fr') // Définir la locale sur français
                             const dateDebutFR = moment(guildEvent.scheduledStartTimestamp).format('HH:mm');
 
-                            await user.send(`**__Rappel__** : L'événement **${guildEvent.name}** commence dans une heure sur **${server.name}** (**${dateDebutFR}**) !`)
+                            await user.send(`
+**__Rappel__** : L'événement **${guildEvent.name}** commence dans une heure sur **${server.name}** (**${dateDebutFR}**) !
+${link}
+`)
                             console.log(`Message de rappel envoyé à ${user.tag} pour l'événement ${guildEvent.name} !`);
                         } catch (error) {
                             console.error(`Erreur lors de l'envoi du message de rappel à l'utilisateur ${participantId}:`, error)
