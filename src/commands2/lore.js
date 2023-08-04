@@ -28,10 +28,7 @@ module.exports = {
             .setRequired(true)),
     interactions: [],
     async execute (interaction) {
-
-        const search = encodeURI(interaction.options.getString('search'))
-
-        console.log(search)
+        const search = interaction.options.getString('search');
 
         await interaction.reply('Voici ce que j\'ai !')
 
