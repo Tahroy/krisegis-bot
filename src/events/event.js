@@ -145,6 +145,8 @@ ${link}`
     async function updateEvent (guildScheduledEvent) {
         let isNew = true
         const guild = guildScheduledEvent.guild
+        console.log('update event');
+        console.log(guildScheduledEvent);
 
         if (!guildScheduledEvent.name || !guildScheduledEvent.scheduledStartTimestamp || !guildScheduledEvent.scheduledEndTimestamp) {
             return;
@@ -158,6 +160,8 @@ ${link}`
                 isNew = false
             }
         })
+
+        console.log('search')
 
         // Il n'y est pas, donc on l'ajoute en BDD
         // Si la création réussit, on l'annonce dans le canal
