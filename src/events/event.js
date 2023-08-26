@@ -146,6 +146,10 @@ ${link}`
         let isNew = true
         const guild = guildScheduledEvent.guild
 
+        if (!guildScheduledEvent.name || !guildScheduledEvent.scheduledStartTimestamp || !guildScheduledEvent.scheduledEndTimestamp) {
+            return;
+        }
+
         // On cherche l'évènement en BDD
         await Event.findOne({
             where: { guild: guild.id, id: guildScheduledEvent.id }
@@ -158,8 +162,10 @@ ${link}`
         // Il n'y est pas, donc on l'ajoute en BDD
         // Si la création réussit, on l'annonce dans le canal
         if (isNew) {
-            const event = await ajouterEvent(guildScheduledEvent)
+            console.log("Nouvel évènement");
+            console.log(guildScheduledEvent);
 
+            const event = await ajouterEvent(guildScheduledEvent)
             if (event) {
                 await annoncerEventGeneral(guildScheduledEvent, event)
                 await annoncerEventServeur(guildScheduledEvent, event)
@@ -172,7 +178,7 @@ ${link}`
      */
     client.on('guildScheduledEventCreate', async (guildScheduledEvent) => {
         console.log(guildScheduledEvent.name + ' creé')
-        await updateEvent(guildScheduledEvent)
+//        await updateEvent(guildScheduledEvent)
     })
 
     /**
@@ -180,7 +186,7 @@ ${link}`
      */
     client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => {
         console.log(oldGuildScheduledEvent.name + ' mis à jour')
-        await updateEvent(newGuildScheduledEvent)
+  //      await updateEvent(newGuildScheduledEvent)
     })
 
     /**
@@ -206,6 +212,7 @@ ${link}`
      */
     client.on('guildScheduledEventUserAdd', async (guildScheduledEvent, user) => {
         console.log(guildScheduledEvent.url)
+        console.log("User ajouté");
         await updateEvent(guildScheduledEvent)
 
         addParticipant(guildScheduledEvent, user)
@@ -217,7 +224,7 @@ ${link}`
     client.on('guildScheduledEventUserRemove', async (guildScheduledEvent, user) => {
         await updateEvent(guildScheduledEvent)
 
-        removeParticipant(guildScheduledEvent, user)
+        await removeParticipant(guildScheduledEvent, user)
     })
 
     /**
