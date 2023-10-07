@@ -15,8 +15,7 @@ const client = new Client({
         GatewayIntentBits.DirectMessages
     ], partials: [
         Partials.Channel,
-        Partials.User,
-        Partials.GuildScheduledEvent,
+        Partials.User
     ]
 })
 
