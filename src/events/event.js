@@ -145,8 +145,7 @@ ${link}`
     async function updateEvent (guildScheduledEvent) {
         let isNew = true
         const guild = guildScheduledEvent.guild
-        console.log('update event');
-        console.log(guildScheduledEvent);
+        guild.scheduledEvents.cache.clear();
 
         if (!guildScheduledEvent.name || !guildScheduledEvent.scheduledStartTimestamp || !guildScheduledEvent.scheduledEndTimestamp) {
             return;
