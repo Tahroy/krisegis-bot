@@ -128,7 +128,9 @@ module.exports = {
             const availableQuestions = [...questions]
             for (let i = 0; i < 5; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
-                currentChannelData.questions.push(availableQuestions.splice(randomIndex, 1)[0])
+                let question = availableQuestions.splice(randomIndex, 1)[0];
+                question.participations = new Map()
+                currentChannelData.questions.push(question)
             }
 
             console.log(currentChannelData);
@@ -159,18 +161,25 @@ module.exports = {
             return interaction.reply({ 'content': 'Aucune question en cours !', 'ephemeral': true })
         }
 
+        if (currentQuestion.participations.has(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous avez répondu !', 'ephemeral': true })
+        }
+
+        currentQuestion.participations.set(interaction.user.id, selectedAnswer)
+
+
+        // Incrémentez le score du participant
+        const authorId = interaction.user.id
+        if (!currentChannelScores.has(authorId)) {
+            currentChannelScores.set(authorId, 0)
+        }
+
         // Vérifiez si la réponse est correcte
         if (currentQuestion.correctAnswer === selectedAnswer) {
-            // Incrémentez le score du participant
-            const authorId = interaction.user.id
-            if (!currentChannelScores.has(authorId)) {
-                currentChannelScores.set(authorId, 0)
-            }
             currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
         }
 
         // Passez à la question suivante
-        console.log(interaction.user);
         console.log(`${interaction.user.username} a répondu ${selectedAnswer}`)
         await interaction.reply({ 'content': `Tu as répondu ! « ${selectedAnswer} »`, 'ephemeral': true })
     },
@@ -211,23 +220,20 @@ function sendQuestion (interaction) {
 
     // Définissez un délai de 30 secondes pour répondre à la question
     setTimeout(async () => {
-        await interaction.followUp(`Le temps est écoulé ! La réponse était ${currentQuestion.correctAnswer}`)
+        await interaction.followUp(`Le temps est écoulé ! La réponse était « ${currentQuestion.correctAnswer} »`)
         // Passez à la question suivante
         currentChannelData.currentQuestionIndex++
-        console.log(currentChannelData.currentQuestionIndex);
-        console.log(currentChannelData.questions.length);
         if (currentChannelData.currentQuestionIndex < currentChannelData.questions.length) {
-            console.log('On passe à la suivante !')
             sendQuestion(interaction)
         } else {
-            console.log('fin !')
             // Le quizz est terminé, annoncez le score
             const currentChannelData = channelScores.get(interaction.channelId)
             const currentChannelScores = currentChannelData.scores ?? new Map()
             let scoreMessage = `Quizz terminé ! Scores :\n`
             currentChannelScores.forEach((score, userId) => {
                 const user = interaction.guild.members.cache.get(userId)
-                scoreMessage += `${user ? user.displayName : 'Utilisateur inconnu'} : ${score} point(s)\n`
+                const plurial = score > 1 ? 's' : ''
+                scoreMessage += `${user ? user.displayName : 'Utilisateur inconnu'} : ${score} point${plurial}\n`
             })
             channelScores.delete(interaction.channelId)
             await interaction.followUp(scoreMessage)
