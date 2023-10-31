@@ -27,18 +27,19 @@ const questions = [
         correctAnswer: 'Enutrof'
     },
     {
-        question: 'Quel dragon a pondu le Dofus Ébène',
+        question: 'Quel dragon a pondu le Dofus Ébène ?',
         answers: ['Grougalorasalar', 'Gargoylone', 'Grougaloragran', 'Ouronigride'],
         correctAnswer: 'Grougalorasalar'
     },
     {
-        question: 'Quel continent est le principal ?',
+        question: 'Quel est le continent principal du Monde des Douze ?',
         answers: ['Amakna', 'Frigost', 'Otomaï', 'Astrub'],
         correctAnswer: 'Amakna'
     },
     {
         question: 'Quel Favori possède une toge rouge vive ?',
         answers: ['Malma', 'Malvadar', 'Morre', 'Mirah'],
+        correctAnswer: 'Malvadar'
     },
     {
         question: 'Quel Dieu a découvert le futur Monde des Dix ?',
@@ -61,9 +62,44 @@ const questions = [
         correctAnswer: 'Hein ?'
     },
     {
-        question: "Qui est le dragon de l'eau ?",
+        question: 'Qui est le dragon de l\'eau ?',
         answers: ['Bolgrot', 'Khelebragon', 'Ignemikal', 'Aguabrial'],
         correctAnswer: 'Aguabrial'
+    },
+    {
+        question: "Qui est le Méryde du fer ?",
+        answers: ['Macugny', 'Patawaii', 'Kuri', 'Sili'],
+        correctAnswer: 'Sili'
+    },
+    {
+        question: "Où demeure Belladone ?",
+        answers: ['Ereboria', 'Albuera', 'Plan Astral', 'Ephedrya'],
+        correctAnswer: 'Ephedrya'
+    },
+    {
+        question: "Qui est le chef des Kitsounes tué par Daïgoro ?",
+        answers: ['Red', 'Kazuo', 'Pichon', 'Pandalia'],
+        correctAnswer: 'Red'
+    },
+    {
+        question: "Qui est Méthée ?",
+        answers: ['Une sorcière', 'Une fermière', 'Une aventurière', 'Une divinité'],
+        correctAnswer: 'Une sorcière'
+    },
+    {
+        question: "Qui est le maître de Bavdur ?",
+        answers: ['Guerre', 'Misère', 'Servitude', 'Corruption'],
+        correctAnswer: 'Servitude'
+    },
+    {
+        question: "Quel clan de Nimbos n'existe pas ?",
+        answers: ['Boutefeu', 'Ventrepierre', 'Clochecuivre', 'Blanchebière'],
+        correctAnswer: 'Clochecuivre'
+    },
+    {
+        question: "Quel est le nom du Saigneur de Jade ?",
+        answers: ['Crocdjade', 'Crodur', 'Crolaklakos', 'Crocahualpa'],
+        correctAnswer: 'Crocahualpa'
     }
     // Ajoutez d'autres questions de la même manière
 ]
@@ -95,13 +131,13 @@ module.exports = {
                 currentChannelData.questions.push(availableQuestions.splice(randomIndex, 1)[0])
             }
 
+            console.log(currentChannelData);
             channelScores.set(interaction.channelId, currentChannelData)
         }
 
-        console.log(channelScores.get(interaction.channelId))
-
         // Commencez le quizz en envoyant la première question
         sendQuestion(interaction)
+        interaction.reply({ 'content': 'Le quizz a commencé !', 'ephemeral': true })
     },
 
     async executeButton (interaction, buttonName) {
@@ -109,18 +145,18 @@ module.exports = {
         const currentChannelData = channelScores.get(interaction.channelId)
 
         if (!currentChannelData) {
-            return interaction.reply('Aucun jeu en cours !', { 'ephemeral': true })
+            return interaction.reply({ 'content': 'Aucun jeu en cours !', 'ephemeral': true })
         }
 
         const currentQuestion = currentChannelData.questions[currentChannelData.currentQuestionIndex]
         const currentChannelScores = currentChannelData.scores
 
         if (!currentChannelScores) {
-            return interaction.reply('Aucun jeu en cours !', { 'ephemeral': true })
+            return interaction.reply({ 'content': 'Aucun jeu en cours !', 'ephemeral': true })
         }
 
         if (!currentQuestion) {
-            return interaction.reply('Aucune question en cours !', { 'ephemeral': true })
+            return interaction.reply({ 'content': 'Aucune question en cours !', 'ephemeral': true })
         }
 
         // Vérifiez si la réponse est correcte
@@ -134,24 +170,9 @@ module.exports = {
         }
 
         // Passez à la question suivante
-        currentChannelData.currentQuestionIndex++
-
-        // Si le quizz n'est pas terminé, envoyez la question suivante
-        if (currentChannelData.currentQuestionIndex < currentChannelData.questions.length) {
-            sendQuestion(interaction)
-        } else {
-            // Le quizz est terminé, annoncez le score
-            let scoreMessage = `Quizz terminé ! Scores :\n`
-            currentChannelScores.forEach((score, userId) => {
-                const user = interaction.guild.members.cache.get(userId)
-                scoreMessage += `${user ? user.displayName : 'Utilisateur inconnu'} : ${score} point(s)\n`
-            })
-            channelScores.delete(interaction.channelId)
-            await interaction.deferReply()
-            await interaction.followUp(scoreMessage)
-            //await interaction.channel.send(scoreMessage);
-            currentChannelScores.clear()
-        }
+        console.log(interaction.user);
+        console.log(`${interaction.user.username} a répondu ${selectedAnswer}`)
+        await interaction.reply({ 'content': `Tu as répondu ! « ${selectedAnswer} »`, 'ephemeral': true })
     },
 }
 
@@ -159,15 +180,16 @@ function sendQuestion (interaction) {
     const currentChannelData = channelScores.get(interaction.channelId)
 
     if (!currentChannelData) {
-        return interaction.reply('Aucun jeu en cours !', { 'ephemeral': true })
+        return interaction.reply({ 'content': 'Aucun jeu en cours !', 'ephemeral': true })
     }
 
     const currentQuestion = currentChannelData.questions[currentChannelData.currentQuestionIndex]
 
     if (!currentQuestion) {
-        return interaction.reply('Plus de questions disponibles !', { 'ephemeral': true })
+        return interaction.reply({ 'content': 'Plus de questions disponibles !', 'ephemeral': true })
     }
 
+    console.log(currentQuestion);
     // Créez les boutons de réponse
     const buttons = currentQuestion.answers.map((answer) => {
         return new ButtonBuilder()
@@ -180,19 +202,25 @@ function sendQuestion (interaction) {
     const row = new ActionRowBuilder().addComponents(buttons)
 
     // Envoyez la question avec les boutons
-    interaction.reply({
+    interaction.channel.send({
         content: currentQuestion.question,
         components: [row],
     })
 
+    console.log(`Question envoyée ${currentQuestion.question}`)
+
     // Définissez un délai de 30 secondes pour répondre à la question
-    setTimeout(() => {
-        interaction.followUp('Le temps est écoulé !')
+    setTimeout(async () => {
+        await interaction.followUp(`Le temps est écoulé ! La réponse était ${currentQuestion.correctAnswer}`)
         // Passez à la question suivante
         currentChannelData.currentQuestionIndex++
+        console.log(currentChannelData.currentQuestionIndex);
+        console.log(currentChannelData.questions.length);
         if (currentChannelData.currentQuestionIndex < currentChannelData.questions.length) {
+            console.log('On passe à la suivante !')
             sendQuestion(interaction)
         } else {
+            console.log('fin !')
             // Le quizz est terminé, annoncez le score
             const currentChannelData = channelScores.get(interaction.channelId)
             const currentChannelScores = currentChannelData.scores ?? new Map()
@@ -202,7 +230,7 @@ function sendQuestion (interaction) {
                 scoreMessage += `${user ? user.displayName : 'Utilisateur inconnu'} : ${score} point(s)\n`
             })
             channelScores.delete(interaction.channelId)
-            interaction.followUp(scoreMessage)
+            await interaction.followUp(scoreMessage)
         }
-    }, 30000)
+    }, 10000)
 }
