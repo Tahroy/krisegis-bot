@@ -179,7 +179,7 @@ module.exports = {
 
         // Passez à la question suivante
         console.log(`${interaction.user.username} a répondu ${selectedAnswer}`)
-        await interaction.reply({ 'content': `Tu as répondu ! « ${selectedAnswer} »`, 'ephemeral': true })
+        await interaction.reply({ 'content': `Tu as répondu « ${selectedAnswer} »`, 'ephemeral': true })
     },
 }
 
@@ -218,7 +218,7 @@ function sendQuestion (interaction) {
 
     // Définissez un délai de 30 secondes pour répondre à la question
     setTimeout(async () => {
-        await interaction.followUp(`Le temps est écoulé ! La réponse était « ${currentQuestion.correctAnswer} »`)
+        await interaction.channel.send(`Le temps est écoulé ! La réponse était « **${currentQuestion.correctAnswer}** »`)
         // Passez à la question suivante
         currentChannelData.currentQuestionIndex++
         if (currentChannelData.currentQuestionIndex < currentChannelData.questions.length) {
@@ -234,7 +234,7 @@ function sendQuestion (interaction) {
                 scoreMessage += `${user ? user.displayName : 'Utilisateur inconnu'} : ${score} point${plurial}\n`
             })
             channelScores.delete(interaction.channelId)
-            await interaction.followUp(scoreMessage)
+            await interaction.channel.send(scoreMessage)
         }
     }, 10000)
 }
