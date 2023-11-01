@@ -108,9 +108,7 @@ const questions = [
 const channelScores = new Map()
 
 module.exports = {
-    opts: {
-        admin: true
-    },
+    opts: {},
     data: new SlashCommandBuilder()
         .setName('quizz')
         .setDescription('Lance un quizz !'),
