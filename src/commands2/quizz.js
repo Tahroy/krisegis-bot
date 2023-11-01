@@ -1,18 +1,47 @@
-const {SlashCommandBuilder} = require("discord.js");
+const { SlashCommandBuilder } = require('discord.js')
 const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
+const Question = require('../database/Question')
+const { PermissionFlagsBits } = require('discord-api-types/v8')
 
 /*
-    Qui est le gardien du Dofus Primordial Émeraude ?
-    Quel dieu est associé à la classe des Enutrofs ?
-    Quel personnage légendaire a créé le Dofus Ébène ?
-    Quel continent est le principal lieu d'action de Dofus ?
-    Quelle est l'histoire derrière le Dofus Ocre ?
-    Quel dieu est responsable de la création du Monde des Douze ?
-    Qui sont les trois dragons primordiaux dans l'univers de Dofus ?
-    Quel est le nom du roi qui règne sur la cité de Bonta ?
-    Quel objet est nécessaire pour devenir un Dofusé ?
-    Qui est le principal antagoniste de la saga Wakfu, liée à l'univers de Dofus ?
+Qui a jeté la malédiction de l'éternel hiver sur Frigost ?
+Le Comte Harebourg
+Jiva
+Djaul
+Nileza
+
+Qui a offert le Dofus des Glace à la Clepsydre pour réduire la saison hivernale sur l'île de Frigost ?
+Le Comte Harebourg
+Jiva
+Djaul
+Nileza
+
+Quel boss doit être vaincu pour valider la quête « Antiroyaliste »
+Le Royalmouth
+Le Mansot Royal
+Ben le Ripate
+l’Obsidiantre
+
+
+Quel est le boss de la famille des Mystifiés ?
+Le Tengu Givrefoux
+Le Korriandre
+Le Kolosso
+Le Glourséleste
+(pareil, cette question peut être décliné avec Givrefoux, Bléros et Gloursons)
+
+L’un des boss de Frigost a pour ancien nom « Piautre », lequel ?
+Le Tengu Givrefoux
+Le Korriandre
+Le Kolosso
+Le Glourséleste
+
+Quel boss prétend que si sa queue vient à toucher le sol, l’île de frigost sera engloutie, cinq fois ?
+Le Tengu Givrefoux
+Le Korriandre
+Le Kolosso
+Le Glourséleste
  */
 // Définissez vos questions et réponses dans un tableau
 const questions = [
@@ -52,11 +81,6 @@ const questions = [
         correctAnswer: 'Beldarion'
     },
     {
-        question: 'Qui dirige réellement Bonta ?',
-        answers: ['Allister', 'Beldarion', 'Amayiro', 'Danathor'],
-        correctAnswer: 'Danathor'
-    },
-    {
         question: 'Quel objet est nécessaire pour devenir un Dofusé ?',
         answers: ['Dofus Émeraude', 'Hein ?', 'Dofus Ocre', 'Dofusteuse'],
         correctAnswer: 'Hein ?'
@@ -67,37 +91,37 @@ const questions = [
         correctAnswer: 'Aguabrial'
     },
     {
-        question: "Qui est le Méryde du fer ?",
+        question: 'Qui est le Méryde du fer ?',
         answers: ['Macugny', 'Patawaii', 'Kuri', 'Sili'],
         correctAnswer: 'Sili'
     },
     {
-        question: "Où demeure Belladone ?",
+        question: 'Où demeure Belladone ?',
         answers: ['Ereboria', 'Albuera', 'Plan Astral', 'Ephedrya'],
         correctAnswer: 'Ephedrya'
     },
     {
-        question: "Qui est le chef des Kitsounes tué par Daïgoro ?",
+        question: 'Qui est le chef des Kitsounes tué par Daïgoro ?',
         answers: ['Red', 'Kazuo', 'Pichon', 'Pandalia'],
         correctAnswer: 'Red'
     },
     {
-        question: "Qui est Méthée ?",
+        question: 'Qui est Méthée ?',
         answers: ['Une sorcière', 'Une fermière', 'Une aventurière', 'Une divinité'],
         correctAnswer: 'Une sorcière'
     },
     {
-        question: "Qui est le maître de Bavdur ?",
+        question: 'Qui est le maître de Bavdur ?',
         answers: ['Guerre', 'Misère', 'Servitude', 'Corruption'],
         correctAnswer: 'Servitude'
     },
     {
-        question: "Quel clan de Nimbos n'existe pas ?",
+        question: 'Quel clan de Nimbos n\'existe pas ?',
         answers: ['Boutefeu', 'Ventrepierre', 'Clochecuivre', 'Blanchebière'],
         correctAnswer: 'Clochecuivre'
     },
     {
-        question: "Quel est le nom du Saigneur de Jade ?",
+        question: 'Quel est le nom du Saigneur de Jade ?',
         answers: ['Crocdjade', 'Crodur', 'Crolaklakos', 'Crocahualpa'],
         correctAnswer: 'Crocahualpa'
     }
@@ -111,9 +135,42 @@ module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('quizz')
-        .setDescription('Lance un quizz !'),
+        .setDescription('Lance un quizz !')
+        .addSubcommand(subcommmand => subcommmand
+            .setName('start')
+            .setDescription('Lance le quizz')
+        )
+
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('add')
+                .setDescription('Ajouter une question')
+                .addStringOption(
+                    option => option
+                        .setName('question')
+                        .setDescription('Question à poser')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('answers')
+                        .setDescription('Réponses séparées par des virgules')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('correct_answer')
+                        .setDescription('La bonne réponse')
+                        .setRequired(true)
+                )
+        ),
 
     async execute (interaction) {
+        if (interaction.options.getSubcommand() === 'add') {
+            this.addQuestion(interaction)
+            return
+        }
+
         // Créez un canal de scores pour le canal actuel
         if (!channelScores.has(interaction.channelId)) {
             const currentChannelData = {
@@ -123,15 +180,16 @@ module.exports = {
             }
 
             // Ajout de 10 questions aléatoires (sans répétition) dans le canal
-            const availableQuestions = [...questions]
-            for (let i = 0; i < 5; i++) {
+            const availableQuestions = await getRandomQuestions();
+            console.log(availableQuestions);
+            for (let i = 0; i < 3; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
-                let question = availableQuestions.splice(randomIndex, 1)[0];
+                let question = availableQuestions.splice(randomIndex, 1)[0]
                 question.participations = new Map()
                 currentChannelData.questions.push(question)
             }
 
-            console.log(currentChannelData);
+            console.log(currentChannelData)
             channelScores.set(interaction.channelId, currentChannelData)
         }
 
@@ -165,7 +223,6 @@ module.exports = {
 
         currentQuestion.participations.set(interaction.user.id, selectedAnswer)
 
-
         // Incrémentez le score du participant
         const authorId = interaction.user.id
         if (!currentChannelScores.has(authorId)) {
@@ -181,6 +238,44 @@ module.exports = {
         console.log(`${interaction.user.username} a répondu ${selectedAnswer}`)
         await interaction.reply({ 'content': `Tu as répondu « ${selectedAnswer} »`, 'ephemeral': true })
     },
+    addQuestion (interaction) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
+            return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
+        }
+        const question = interaction.options.getString('question')
+        const answers = interaction.options.getString('answers')
+        const correctAnswer = interaction.options.getString('correct_answer')
+
+        const answersArray = answers.split(',')
+
+        if (!answersArray.includes(correctAnswer)) {
+            return interaction.reply({ 'content': 'La bonne reponse est incorrecte !', 'ephemeral': true })
+        }
+
+        if (answersArray.length < 4) {
+            return interaction.reply({ 'content': 'Il faut au moins 4 reponses !', 'ephemeral': true })
+        }
+
+        Question.create({
+            question: question,
+            answers: answersArray,
+            correctAnswer: correctAnswer,
+        })
+            .then((question) => {
+                console.log(`Question créée : ${question.question}`);
+                return interaction.reply({
+                    'content': 'Question ajoutée !',
+                    'ephemeral': true
+                })
+            })
+            .catch((error) => {
+                console.error('Erreur lors de la création de la question :', error);
+                return interaction.reply({
+                    'content': 'Erreur lors de la création de la question !',
+                    'ephemeral': true
+                })
+            });
+    }
 }
 
 function sendQuestion (interaction) {
@@ -196,7 +291,7 @@ function sendQuestion (interaction) {
         return interaction.reply({ 'content': 'Plus de questions disponibles !', 'ephemeral': true })
     }
 
-    console.log(currentQuestion);
+    console.log(currentQuestion)
     // Créez les boutons de réponse
     const buttons = currentQuestion.answers.map((answer) => {
         return new ButtonBuilder()
@@ -236,5 +331,22 @@ function sendQuestion (interaction) {
             channelScores.delete(interaction.channelId)
             await interaction.channel.send(scoreMessage)
         }
-    }, 10000)
+    }, 15000)
+}
+
+async function getRandomQuestions() {
+    try {
+        const questions = await Question.findAll();
+
+        if (questions.length === 0) {
+            console.log('Aucune question trouvée.');
+            return [];
+        }
+
+        // Mélangez les questions de manière aléatoire
+        return questions.sort(() => 0.5 - Math.random());
+    } catch (error) {
+        console.error('Erreur lors de la récupération des questions aléatoires :', error);
+        return [];
+    }
 }

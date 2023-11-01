@@ -3,6 +3,7 @@ const Variable = require('../database/Variable')
 const Server = require('../database/Server')
 const Event = require('../database/Event')
 const Participant = require('../database/Participant')
+const Question = require('../database/Question')
 const { REST } = require('@discordjs/rest')
 const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
@@ -19,6 +20,7 @@ module.exports = async function (client) {
         await Server.sync()
         await Event.sync()
         await Participant.sync()
+        await Question.sync()
 
         const rest = new REST({ version: '10' }).setToken(token);
 
