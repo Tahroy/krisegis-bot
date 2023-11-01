@@ -4,130 +4,6 @@ const { ButtonStyle } = require('discord-api-types/v10')
 const Question = require('../database/Question')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
 
-/*
-Qui a jeté la malédiction de l'éternel hiver sur Frigost ?
-Le Comte Harebourg
-Jiva
-Djaul
-Nileza
-
-Qui a offert le Dofus des Glace à la Clepsydre pour réduire la saison hivernale sur l'île de Frigost ?
-Le Comte Harebourg
-Jiva
-Djaul
-Nileza
-
-Quel boss doit être vaincu pour valider la quête « Antiroyaliste »
-Le Royalmouth
-Le Mansot Royal
-Ben le Ripate
-l’Obsidiantre
-
-
-Quel est le boss de la famille des Mystifiés ?
-Le Tengu Givrefoux
-Le Korriandre
-Le Kolosso
-Le Glourséleste
-(pareil, cette question peut être décliné avec Givrefoux, Bléros et Gloursons)
-
-L’un des boss de Frigost a pour ancien nom « Piautre », lequel ?
-Le Tengu Givrefoux
-Le Korriandre
-Le Kolosso
-Le Glourséleste
-
-Quel boss prétend que si sa queue vient à toucher le sol, l’île de frigost sera engloutie, cinq fois ?
-Le Tengu Givrefoux
-Le Korriandre
-Le Kolosso
-Le Glourséleste
- */
-// Définissez vos questions et réponses dans un tableau
-const questions = [
-    {
-        question: 'Qui est le gardien du Dofus Primordial Émeraude ?',
-        answers: ['Chêne Mou', 'Bubulle', 'Aerafal', 'Dark Vlad'],
-        correctAnswer: 'Dark Vlad'
-    },
-    {
-        question: 'Quel dieu est associé à la classe des Enutrofs ?',
-        answers: ['Enutopia', 'Wahn', 'Enutrof', 'Ruel'],
-        correctAnswer: 'Enutrof'
-    },
-    {
-        question: 'Quel dragon a pondu le Dofus Ébène ?',
-        answers: ['Grougalorasalar', 'Gargoylone', 'Grougaloragran', 'Ouronigride'],
-        correctAnswer: 'Grougalorasalar'
-    },
-    {
-        question: 'Quel est le continent principal du Monde des Douze ?',
-        answers: ['Amakna', 'Frigost', 'Otomaï', 'Astrub'],
-        correctAnswer: 'Amakna'
-    },
-    {
-        question: 'Quel Favori possède une toge rouge vive ?',
-        answers: ['Malma', 'Malvadar', 'Morre', 'Mirah'],
-        correctAnswer: 'Malvadar'
-    },
-    {
-        question: 'Quel Dieu a découvert le futur Monde des Dix ?',
-        answers: ['Eliatrope', 'Rushu', 'Osamodas', 'Xélor'],
-        correctAnswer: 'Osamodas'
-    },
-    {
-        question: 'Quel est le nom du roi qui règne sur la cité de Bonta ?',
-        answers: ['Allister', 'Beldarion', 'Amayiro', 'Danathor'],
-        correctAnswer: 'Beldarion'
-    },
-    {
-        question: 'Quel objet est nécessaire pour devenir un Dofusé ?',
-        answers: ['Dofus Émeraude', 'Hein ?', 'Dofus Ocre', 'Dofusteuse'],
-        correctAnswer: 'Hein ?'
-    },
-    {
-        question: 'Qui est le dragon de l\'eau ?',
-        answers: ['Bolgrot', 'Khelebragon', 'Ignemikal', 'Aguabrial'],
-        correctAnswer: 'Aguabrial'
-    },
-    {
-        question: 'Qui est le Méryde du fer ?',
-        answers: ['Macugny', 'Patawaii', 'Kuri', 'Sili'],
-        correctAnswer: 'Sili'
-    },
-    {
-        question: 'Où demeure Belladone ?',
-        answers: ['Ereboria', 'Albuera', 'Plan Astral', 'Ephedrya'],
-        correctAnswer: 'Ephedrya'
-    },
-    {
-        question: 'Qui est le chef des Kitsounes tué par Daïgoro ?',
-        answers: ['Red', 'Kazuo', 'Pichon', 'Pandalia'],
-        correctAnswer: 'Red'
-    },
-    {
-        question: 'Qui est Méthée ?',
-        answers: ['Une sorcière', 'Une fermière', 'Une aventurière', 'Une divinité'],
-        correctAnswer: 'Une sorcière'
-    },
-    {
-        question: 'Qui est le maître de Bavdur ?',
-        answers: ['Guerre', 'Misère', 'Servitude', 'Corruption'],
-        correctAnswer: 'Servitude'
-    },
-    {
-        question: 'Quel clan de Nimbos n\'existe pas ?',
-        answers: ['Boutefeu', 'Ventrepierre', 'Clochecuivre', 'Blanchebière'],
-        correctAnswer: 'Clochecuivre'
-    },
-    {
-        question: 'Quel est le nom du Saigneur de Jade ?',
-        answers: ['Crocdjade', 'Crodur', 'Crolaklakos', 'Crocahualpa'],
-        correctAnswer: 'Crocahualpa'
-    }
-    // Ajoutez d'autres questions de la même manière
-]
-
 // Utilisez un objet pour stocker les scores des participants par canal
 const channelScores = new Map()
 
@@ -182,7 +58,7 @@ module.exports = {
             // Ajout de 10 questions aléatoires (sans répétition) dans le canal
             const availableQuestions = await getRandomQuestions();
             console.log(availableQuestions);
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
                 let question = availableQuestions.splice(randomIndex, 1)[0]
                 question.participations = new Map()
