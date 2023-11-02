@@ -1,11 +1,20 @@
-const { SlashCommandBuilder } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const Question = require('../database/Question')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
+const Server = require('../database/Server')
+const { createEmbed } = require('../utils/embed')
 
 // Utilisez un objet pour stocker les scores des participants par canal
 const channelScores = new Map()
+
+const adminsIds = [
+    328239065918996481, // Astreius
+    178147970385051649, // Tahroy
+    266673171409666053, // Alba
+    376674327405264908, // Soute
+];
 
 module.exports = {
     opts: {},
@@ -39,39 +48,53 @@ module.exports = {
                         .setDescription('La bonne réponse')
                         .setRequired(true)
                 )
+        )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('edit')
+                .setDescription('editer une question')
+                .addStringOption(
+                    option => option
+                        .setName('question')
+                        .setDescription('Question à éditer')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('answers')
+                        .setDescription('Réponses séparées par des virgules')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('correct_answer')
+                        .setDescription('La bonne réponse')
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('list')
+                .setDescription('Liste des questions')
         ),
 
     async execute (interaction) {
-        if (interaction.options.getSubcommand() === 'add') {
-            this.addQuestion(interaction)
-            return
+        switch (interaction.options.getSubcommand()) {
+            case 'start':
+                await this.startQuizz(interaction)
+                return
+            case 'add':
+                this.addQuestion(interaction)
+                return
+            case 'edit':
+                await this.editQuestion(interaction)
+                return
+            case 'list':
+                await this.listQuestions(interaction)
+                return
+            default:
+                await interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
         }
-
-        // Créez un canal de scores pour le canal actuel
-        if (!channelScores.has(interaction.channelId)) {
-            const currentChannelData = {
-                scores: new Map(),
-                currentQuestionIndex: 0,
-                questions: [],
-            }
-
-            // Ajout de 10 questions aléatoires (sans répétition) dans le canal
-            const availableQuestions = await getRandomQuestions();
-            console.log(availableQuestions);
-            for (let i = 0; i < 5; i++) {
-                const randomIndex = Math.floor(Math.random() * availableQuestions.length)
-                let question = availableQuestions.splice(randomIndex, 1)[0]
-                question.participations = new Map()
-                currentChannelData.questions.push(question)
-            }
-
-            console.log(currentChannelData)
-            channelScores.set(interaction.channelId, currentChannelData)
-        }
-
-        // Commencez le quizz en envoyant la première question
-        sendQuestion(interaction)
-        interaction.reply({ 'content': 'Le quizz a commencé !', 'ephemeral': true })
     },
 
     async executeButton (interaction, buttonName) {
@@ -114,10 +137,40 @@ module.exports = {
         console.log(`${interaction.user.username} a répondu ${selectedAnswer}`)
         await interaction.reply({ 'content': `Tu as répondu « ${selectedAnswer} »`, 'ephemeral': true })
     },
+    async startQuizz (interaction) {
+
+        // Créez un canal de scores pour le canal actuel
+        if (!channelScores.has(interaction.channelId)) {
+            const currentChannelData = {
+                scores: new Map(),
+                currentQuestionIndex: 0,
+                questions: [],
+            }
+
+            // Ajout de 10 questions aléatoires (sans répétition) dans le canal
+            const availableQuestions = await getRandomQuestions()
+            console.log(availableQuestions)
+            for (let i = 0; i < 5; i++) {
+                const randomIndex = Math.floor(Math.random() * availableQuestions.length)
+                let question = availableQuestions.splice(randomIndex, 1)[0]
+                question.participations = new Map()
+                currentChannelData.questions.push(question)
+            }
+
+            console.log(currentChannelData)
+            channelScores.set(interaction.channelId, currentChannelData)
+        }
+
+        // Commencez le quizz en envoyant la première question
+        sendQuestion(interaction)
+        interaction.reply({ 'content': 'Le quizz a commencé !', 'ephemeral': true })
+    },
     addQuestion (interaction) {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
+        // Si ce n'est pas un admin, on retourne une erreur
+        if (!adminsIds.includes(interaction.user.id)) {
             return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
         }
+
         const question = interaction.options.getString('question')
         const answers = interaction.options.getString('answers')
         const correctAnswer = interaction.options.getString('correct_answer')
@@ -138,19 +191,96 @@ module.exports = {
             correctAnswer: correctAnswer,
         })
             .then((question) => {
-                console.log(`Question créée : ${question.question}`);
+                console.log(`Question créée : ${question.question}`)
                 return interaction.reply({
                     'content': 'Question ajoutée !',
                     'ephemeral': true
                 })
             })
             .catch((error) => {
-                console.error('Erreur lors de la création de la question :', error);
+                console.error('Erreur lors de la création de la question :', error)
                 return interaction.reply({
                     'content': 'Erreur lors de la création de la question !',
                     'ephemeral': true
                 })
-            });
+            })
+    },
+    async editQuestion (interaction) {
+        // Si ce n'est pas un admin, on retourne une erreur
+        if (!adminsIds.includes(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
+        }
+
+        const questionString = interaction.options.getString('question')
+        const answers = interaction.options.getString('answers')
+        const correctAnswer = interaction.options.getString('correct_answer')
+
+        const answersArray = answers.split(',')
+
+        const searchQuestion = await Question.findOne({
+            where: { question: questionString }
+        })
+
+        if (!searchQuestion) {
+            return interaction.reply({ 'content': 'La question n\'existe pas !', 'ephemeral': true })
+        }
+
+        if (!answersArray.includes(correctAnswer)) {
+            return interaction.reply({ 'content': 'La bonne reponse est incorrecte !', 'ephemeral': true })
+        }
+
+        if (answersArray.length < 4) {
+            return interaction.reply({ 'content': 'Il faut au moins 4 reponses !', 'ephemeral': true })
+        }
+
+        Question.update({
+            question: questionString,
+            answers: answersArray,
+            correctAnswer: correctAnswer,
+        })
+            .then((question) => {
+                console.log(`Question créée : ${question.question}`)
+                return interaction.reply({
+                    'content': 'Question ajoutée !',
+                    'ephemeral': true
+                })
+            })
+            .catch((error) => {
+                console.error('Erreur lors de la création de la question :', error)
+                return interaction.reply({
+                    'content': 'Erreur lors de la création de la question !',
+                    'ephemeral': true
+                })
+            })
+    },
+    async listQuestions (interaction) {
+        // Si ce n'est pas un admin, on retourne une erreur
+        if (!adminsIds.includes(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
+        }
+
+        await interaction.reply('Chargement...');
+        const questions = await Question.findAll()
+
+        let fields = [];
+
+        for (let i = 0; i < questions.length; i++) {
+            fields.push({
+                name: questions[i].question,
+                value: questions[i].answers.join(', ')
+            })
+            if ((i !== 0 && i % 10 === 0) || i === questions.length - 1) {
+                const embed = createEmbed(fields, {
+                    title: `Questions du Quizz`,
+                    description: "",
+                    author: ""
+                })
+                await interaction.channel.send({ embeds: embed.embeds, files: embed.files })
+                fields = [];
+            }
+        }
+
+        await interaction.deleteReply();
     }
 }
 
@@ -210,19 +340,19 @@ function sendQuestion (interaction) {
     }, 15000)
 }
 
-async function getRandomQuestions() {
+async function getRandomQuestions () {
     try {
-        const questions = await Question.findAll();
+        const questions = await Question.findAll()
 
         if (questions.length === 0) {
-            console.log('Aucune question trouvée.');
-            return [];
+            console.log('Aucune question trouvée.')
+            return []
         }
 
         // Mélangez les questions de manière aléatoire
-        return questions.sort(() => 0.5 - Math.random());
+        return questions.sort(() => 0.5 - Math.random())
     } catch (error) {
-        console.error('Erreur lors de la récupération des questions aléatoires :', error);
-        return [];
+        console.error('Erreur lors de la récupération des questions aléatoires :', error)
+        return []
     }
 }
