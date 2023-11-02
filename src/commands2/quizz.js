@@ -10,10 +10,10 @@ const { createEmbed } = require('../utils/embed')
 const channelScores = new Map()
 
 const adminsIds = [
-    328239065918996481, // Astreius
-    178147970385051649, // Tahroy
-    266673171409666053, // Alba
-    376674327405264908, // Soute
+    "328239065918996481", // Astreius
+    "178147970385051649", // Tahroy
+    "266673171409666053", // Alba
+    "376674327405264908", // Soute
 ];
 
 module.exports = {
