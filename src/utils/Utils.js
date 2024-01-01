@@ -72,13 +72,14 @@ module.exports = {
                 name: 'debugChannel',
                 server: guild.id
             }
-        }).then((debugChannel) => {
+        }).then(async (debugChannel) => {
             if (!debugChannel) {
                 console.log('debugChannel non trouvé')
                 return
             }
 
-            guild.channels.cache.get(debugChannel.data).send({ content: debugMessage });
+            const debugChannelObj = await guild.channels.cache.get(debugChannel.data);
+            debugChannelObj.send({ content: debugMessage });
 
         }).catch((err) => {
             console.log(err)
