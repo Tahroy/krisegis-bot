@@ -64,7 +64,14 @@ module.exports = {
 
         const channelData = usersByChannel[interaction.channel.id]
 
-        if (buttonType === 'hit' && uniqueID === channelData.randomID) {
+        if (uniqueID === channelData.randomID) {
+
+            if (buttonType !== 'hit') {
+                return interaction.reply({
+                    content: `Mais, tu viens de lui faire un ${buttonType} ?`,
+                    ephemeral: true
+                })
+            }
             // On vide le randomID
             channelData.randomID = 0
 
@@ -89,11 +96,17 @@ module.exports = {
 
         // Si le randomID est à 0, le wabbit a déjà été attrapé
         if (channelData.randomID === 0) {
-            return interaction.reply('Ce wabbit a déjà été attrapé !', { ephemeral: true })
+            return interaction.reply({
+                content: 'Ce wabbit a déjà été attrapé !',
+                ephemeral: true
+            })
         }
 
         // Sinon simplement trop tard !
-        return interaction.reply('Trop tard !', { ephemeral: true })
+        return interaction.reply({
+            content: 'Trop tard !',
+            ephemeral: true
+        })
     },
 
     async generateWabbit (channel) {
@@ -112,16 +125,37 @@ module.exports = {
 
         usersByChannel[channel.id].randomID = randomID
 
+        /*
+         * Ajouter :
+         * - Patawaii : - 4 points
+         * - Krisegis : - 1 point
+         * - Crâ bot  : + 2 points
+         *
+         * Ajouter image
+         */
+
         let buttonHit = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`wabbit-hit_${randomID}`)
                 .setEmoji('⛔')
                 .setLabel('TAPER')
                 .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`wabbit-bisou_${randomID}`)
+                .setEmoji('⛔')
+                .setLabel('BISOUS')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`wabbit-câlin_${randomID}`)
+                .setEmoji('⛔')
+                .setLabel('Câlin')
+                .setStyle(ButtonStyle.Danger),
         )
 
+        buttonHit.components.sort(() => Math.random() - 0.5)
+
         const message = await channel.send({
-            content: 'Un wabbit est arrivé !',
+            content: `Un wabbit est arrivé ! (${randomID})`,
             components: [buttonHit],
             files: [imagePath], // Attache le fichier (l'image) au message
         })
