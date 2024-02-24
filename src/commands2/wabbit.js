@@ -68,7 +68,7 @@ module.exports = {
 
             if (buttonType !== 'hit') {
                 return interaction.reply({
-                    content: `Mais, tu viens de lui faire un ${buttonType} ?`,
+                    content: `Mais, tu viens de lui faire un ${buttonType} là ?`,
                     ephemeral: true
                 })
             }
@@ -143,12 +143,12 @@ module.exports = {
             new ButtonBuilder()
                 .setCustomId(`wabbit-bisou_${randomID}`)
                 .setEmoji('⛔')
-                .setLabel('BISOUS')
+                .setLabel('BISOU')
                 .setStyle(ButtonStyle.Danger),
             new ButtonBuilder()
                 .setCustomId(`wabbit-câlin_${randomID}`)
                 .setEmoji('⛔')
-                .setLabel('Câlin')
+                .setLabel('CÂLIN')
                 .setStyle(ButtonStyle.Danger),
         )
 
