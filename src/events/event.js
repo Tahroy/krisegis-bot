@@ -115,7 +115,6 @@ ${link}`
     }
 
     async function ajouterEvent (guildScheduledEvent) {
-        console.log('Ajouter event')
         const servers = await getServers(guildScheduledEvent.guild)
 
         const location = guildScheduledEvent.entityMetadata.location.toLowerCase()
@@ -135,6 +134,11 @@ ${link}`
     }
 
     /**
+     * Liste avec ID event en clef et timestamp en valeur
+     */
+    let derniersEvenements = [];
+
+    /**
      * Lorsqu'un évènement est modifié, on regarde si on l'a déjà sur Krisegis
      * - Si oui, on ne fait rien
      * - Sinon, on l'ajoute à la liste en BDD et on prévient le serveur
@@ -146,15 +150,22 @@ ${link}`
         let isNew = true
         const guild = guildScheduledEvent.guild
 
-        console.log(guildScheduledEvent);
+        console.log(derniersEvenements)
+        // On vérifie qu'il n'est pas déjà dans derniersEvenements ou il y a plus de 5s
+        if (derniersEvenements[guildScheduledEvent.id]) {
+            if (moment().diff(derniersEvenements[guildScheduledEvent.id], 'seconds') < 5) {
+                console.log('on ignore');
+                return;
+            }
+        }
         guild.scheduledEvents.cache.clear();
         const event = guild.scheduledEvents.cache.get(guildScheduledEvent.id);
-        console.log('event');
-        console.log(event);
 
         if (!guildScheduledEvent.name || !guildScheduledEvent.scheduledStartTimestamp || !guildScheduledEvent.scheduledEndTimestamp) {
             return;
         }
+
+        derniersEvenements[guildScheduledEvent.id] = moment();
 
         // On cherche l'évènement en BDD
         await Event.findOne({
@@ -170,8 +181,8 @@ ${link}`
         // Il n'y est pas, donc on l'ajoute en BDD
         // Si la création réussit, on l'annonce dans le canal
         if (isNew) {
-            console.log("Nouvel évènement");
-            console.log(guildScheduledEvent);
+            console.log('Nouvel évènement')
+            console.log(guildScheduledEvent)
 
             const event = await ajouterEvent(guildScheduledEvent)
             if (event) {
@@ -186,7 +197,7 @@ ${link}`
      */
     client.on('guildScheduledEventCreate', async (guildScheduledEvent) => {
         console.log(guildScheduledEvent.name + ' creé')
-//        await updateEvent(guildScheduledEvent)
+        await updateEvent(guildScheduledEvent)
     })
 
     /**
@@ -230,6 +241,7 @@ ${link}`
      * Un utilisateur quitte un évènement
      */
     client.on('guildScheduledEventUserRemove', async (guildScheduledEvent, user) => {
+        console.log("User retiré");
         await updateEvent(guildScheduledEvent)
 
         await removeParticipant(guildScheduledEvent, user)
