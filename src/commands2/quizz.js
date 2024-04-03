@@ -25,7 +25,6 @@ module.exports = {
             .setName('start')
             .setDescription('Lance le quizz')
         )
-
         .addSubcommand(
             subcommand => subcommand
                 .setName('add')
@@ -38,14 +37,14 @@ module.exports = {
                 )
                 .addStringOption(
                     option => option
-                        .setName('answers')
-                        .setDescription('Réponses séparées par des virgules')
+                        .setName('correct_answer')
+                        .setDescription('La bonne réponse')
                         .setRequired(true)
                 )
                 .addStringOption(
                     option => option
-                        .setName('correct_answer')
-                        .setDescription('La bonne réponse')
+                        .setName('answers')
+                        .setDescription('Autres réponses séparées par des virgules')
                         .setRequired(true)
                 )
         )
@@ -149,15 +148,15 @@ module.exports = {
 
             // Ajout de 10 questions aléatoires (sans répétition) dans le canal
             const availableQuestions = await getRandomQuestions()
-            console.log(availableQuestions)
-            for (let i = 0; i < 5; i++) {
+            //console.log(availableQuestions)
+            for (let i = 0; i < 2; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
                 let question = availableQuestions.splice(randomIndex, 1)[0]
                 question.participations = new Map()
                 currentChannelData.questions.push(question)
             }
 
-            console.log(currentChannelData)
+            //console.log(currentChannelData)
             channelScores.set(interaction.channelId, currentChannelData)
         }
 
@@ -175,10 +174,14 @@ module.exports = {
         const answers = interaction.options.getString('answers')
         const correctAnswer = interaction.options.getString('correct_answer')
 
+        // On met un trim et un unique sur l'array
         const answersArray = answers.split(',')
+            .map(answer => answer.trim())
+            .filter((answer, index, self) => self.indexOf(answer) === index)
+
 
         if (!answersArray.includes(correctAnswer)) {
-            return interaction.reply({ 'content': 'La bonne reponse est incorrecte !', 'ephemeral': true })
+//            return interaction.reply({ 'content': 'La bonne reponse est incorrecte !', 'ephemeral': true })
         }
 
         if (answersArray.length < 4) {
@@ -225,8 +228,8 @@ module.exports = {
             return interaction.reply({ 'content': 'La question n\'existe pas !', 'ephemeral': true })
         }
 
-        if (!answersArray.includes(correctAnswer)) {
-            return interaction.reply({ 'content': 'La bonne reponse est incorrecte !', 'ephemeral': true })
+        if (answersArray.includes(correctAnswer)) {
+            return interaction.reply({ 'content': 'La bonne reponse ne doit pas être dans les mauvaises !', 'ephemeral': true })
         }
 
         if (answersArray.length < 4) {
@@ -297,9 +300,18 @@ function sendQuestion (interaction) {
         return interaction.reply({ 'content': 'Plus de questions disponibles !', 'ephemeral': true })
     }
 
-    console.log(currentQuestion)
+    // Mélanger les réponses de manière aléatoire
+    const shuffledAnswers = shuffleArray(currentQuestion.answers);
+
+    // Sélectionner uniquement les trois premières réponses mélangées
+    const selectedAnswers = shuffledAnswers.slice(0, 3);
+
+    selectedAnswers.push(currentQuestion.correctAnswer);
+    console.log('avant', selectedAnswers)
+    const finalAnswers = shuffleArray(selectedAnswers);
+    console.log('apres', finalAnswers)
     // Créez les boutons de réponse
-    const buttons = currentQuestion.answers.map((answer) => {
+    const buttons = finalAnswers.map((answer) => {
         return new ButtonBuilder()
             .setCustomId(`quizz-${answer}`)
             .setLabel(answer)
@@ -315,7 +327,7 @@ function sendQuestion (interaction) {
         components: [row],
     })
 
-    console.log(`Question envoyée ${currentQuestion.question}`)
+//    console.log(`Question envoyée ${currentQuestion.question}`)
 
     // Définissez un délai de 30 secondes pour répondre à la question
     setTimeout(async () => {
@@ -338,6 +350,15 @@ function sendQuestion (interaction) {
             await interaction.channel.send(scoreMessage)
         }
     }, 15000)
+}
+
+// Fonction de mélange (shuffle) basée sur l'algorithme de Fisher-Yates
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 async function getRandomQuestions () {
