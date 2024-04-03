@@ -179,9 +179,10 @@ module.exports = {
             .map(answer => answer.trim())
             .filter((answer, index, self) => self.indexOf(answer) === index)
 
+        console.log(answersArray);
 
-        if (!answersArray.includes(correctAnswer)) {
-//            return interaction.reply({ 'content': 'La bonne reponse est incorrecte !', 'ephemeral': true })
+        if (answersArray.includes(correctAnswer)) {
+            return interaction.reply({ 'content': 'La bonne reponse ne doit pas être dans les mauvaises !', 'ephemeral': true })
         }
 
         if (answersArray.length < 4) {
@@ -218,7 +219,10 @@ module.exports = {
         const answers = interaction.options.getString('answers')
         const correctAnswer = interaction.options.getString('correct_answer')
 
+        // On met un trim et un unique sur l'array
         const answersArray = answers.split(',')
+            .map(answer => answer.trim())
+            .filter((answer, index, self) => self.indexOf(answer) === index)
 
         const searchQuestion = await Question.findOne({
             where: { question: questionString }
