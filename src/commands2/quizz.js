@@ -149,7 +149,7 @@ module.exports = {
             // Ajout de 10 questions aléatoires (sans répétition) dans le canal
             const availableQuestions = await getRandomQuestions()
             //console.log(availableQuestions)
-            for (let i = 0; i < 2; i++) {
+            for (let i = 0; i < 5; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
                 let question = availableQuestions.splice(randomIndex, 1)[0]
                 question.participations = new Map()
