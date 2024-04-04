@@ -4,6 +4,7 @@ const Server = require('../database/Server')
 const Event = require('../database/Event')
 const Participant = require('../database/Participant')
 const Question = require('../database/Question')
+const WelcomeMessage = require('../database/WelcomeMessage')
 const { REST } = require('@discordjs/rest')
 const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
@@ -21,8 +22,9 @@ module.exports = async function (client) {
         await Event.sync()
         await Participant.sync()
         await Question.sync()
+        await WelcomeMessage.sync()
 
-        const rest = new REST({ version: '10' }).setToken(token);
+        const rest = new REST({ version: '10' }).setToken(token)
 
         let slashCommands = []
 
@@ -56,38 +58,38 @@ module.exports = async function (client) {
             const now = Date.now()
             for (const event of scheduledEvents) {
 
-                const guild = client.guilds.cache.get(event.guild);
+                const guild = client.guilds.cache.get(event.guild)
                 if (!guild.scheduledEvents) {
-                    continue;
+                    continue
                 }
-                const guildEvent = guild.scheduledEvents.cache.get(event.id);
+                const guildEvent = guild.scheduledEvents.cache.get(event.id)
 
                 if (!guildEvent) {
-                    continue;
+                    continue
                 }
 
-                const eventStartTime = guildEvent.scheduledStartTimestamp;
-                const link = guildEvent.url;
+                const eventStartTime = guildEvent.scheduledStartTimestamp
+                const link = guildEvent.url
                 const reminderTime = eventStartTime - eventReminderTime
                 if (now >= reminderTime && now < eventStartTime) {
 
-                    console.log(`${guildEvent.name} commence !`);
+                    console.log(`${guildEvent.name} commence !`)
                     // Le rappel doit être envoyé
                     const participants = await getParticipantsFromDatabase(event)
 
                     for (const participant of participants) {
-                        const participantId = participant.id;
+                        const participantId = participant.id
                         try {
-                            const server = guild.roles.cache.get(event.server);
+                            const server = guild.roles.cache.get(event.server)
                             const user = await client.users.fetch(participantId)
                             moment.locale('fr') // Définir la locale sur français
-                            const dateDebutFR = moment(guildEvent.scheduledStartTimestamp).format('HH:mm');
+                            const dateDebutFR = moment(guildEvent.scheduledStartTimestamp).format('HH:mm')
 
                             await user.send(`
 **__Rappel__** : L'événement **${guildEvent.name}** commence dans une heure sur **${server.name}** (**${dateDebutFR}**) !
 ${link}
 `)
-                            console.log(`Message de rappel envoyé à ${user.tag} pour l'événement ${guildEvent.name} !`);
+                            console.log(`Message de rappel envoyé à ${user.tag} pour l'événement ${guildEvent.name} !`)
                         } catch (error) {
                             console.error(`Erreur lors de l'envoi du message de rappel à l'utilisateur ${participantId}:`, error)
                         }
@@ -95,7 +97,7 @@ ${link}
 
                     event.update({
                         recalled: true
-                    });
+                    })
                 }
             }
         }, eventReminderCheckInterval)
@@ -105,7 +107,7 @@ ${link}
     async function getScheduledEventsFromDatabase () {
         return await Event.findAll({
             where: { recalled: false }
-        });
+        })
     }
 
     // Fonction pour récupérer les participants d'un événement depuis votre système de stockage (table)
@@ -115,6 +117,6 @@ ${link}
             where: {
                 event: event.id
             }
-        });
+        })
     }
 }
