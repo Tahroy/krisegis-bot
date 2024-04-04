@@ -6,6 +6,7 @@ const { ButtonStyle } = require('discord-api-types/v10')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
 const { debugMessage, checkTags } = require('../utils/Utils')
 const Variable = require('../database/Variable')
+const WelcomeMessage = require('../database/WelcomeMessage')
 
 module.exports = {
     opts: {},
@@ -164,10 +165,14 @@ module.exports = {
         const roleID = args[1]
 
         const member = interaction.member
+
+        // Roles actuels du membre
+        const roles = member.roles.cache.map(role => role.name)
         const role = await interaction.guild.roles.cache.find(role => role.id === roleID)
 
-        const hasRole = await member.roles.cache.find(role => role.id === roleID);
+        const hasRole = await member.roles.cache.find(role => role.id === roleID)
 
+        const self = this
         if (action === 'add') {
 
             // On vérifie qu'il n'a pas déjà le rôle
@@ -210,11 +215,35 @@ module.exports = {
                 console.error(error)
             }
         } else {
-            await interaction.deferReply();
+            await interaction.deferReply()
         }
 
         await this.checkJeuxPrincipaux(member)
-        await checkTags(member);
+        await checkTags(member)
+
+        if (roles.length === 1 && action === 'add') {
+            Variable.findOne({
+                where: {
+                    name: 'welcomeChannel',
+                    server: interaction.guild.id
+                }
+            }).then(async (welcomeChannel) => {
+                if (!welcomeChannel) {
+                    console.log('welcomeChannel non trouvé')
+                    return
+                }
+
+                const message = await self.getRandomWelcomeMessage(interaction.member)
+
+                if (message) {
+                    const welcomeChannelObj = await interaction.guild.channels.cache.get(welcomeChannel.data)
+                    welcomeChannelObj.send({ content: message })
+                }
+
+            }).catch((err) => {
+                console.log(err)
+            })
+        }
 
         const userName = member.nickname || member.user.username
         const roleName = role.name
@@ -309,7 +338,10 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger))
 
             if (count === 5) {
-                await interaction.channel.send({ content: `**Serveurs ${name} :**`, components: [rowAjouter, rowRetirer] })
+                await interaction.channel.send({
+                    content: `**Serveurs ${name} :**`,
+                    components: [rowAjouter, rowRetirer]
+                })
                 count = 0
                 rowAjouter = new ActionRowBuilder()
                 rowRetirer = new ActionRowBuilder()
@@ -478,5 +510,14 @@ module.exports = {
         } catch (error) {
             console.error(error)
         }
+    },
+
+    // get message welcome
+    async getRandomWelcomeMessage (member) {
+        // Get variable from WelcomeMessage table
+        const messages = await WelcomeMessage.findAll({})
+        const randomIndex = Math.floor(Math.random() * messages.length)
+        let message = messages[randomIndex].get('message')
+        return message.replace('[nom]', `<@${member.id}>`)
     }
 }
