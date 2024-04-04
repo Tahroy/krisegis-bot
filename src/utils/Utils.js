@@ -5,6 +5,18 @@ const { createEmbed } = require('./embed')
 const Variable = require('../database/Variable')
 const Server = require('../database/Server')
 
+function htmlToMarkdown (texteHTML) {
+    // Remplacer les balises de paragraphe par des sauts de ligne
+    texteHTML = texteHTML.replace(/<p>/g, '\n');
+    texteHTML = texteHTML.replace(/<\/p>/g, '');
+
+    // Remplacer les sauts de ligne forcés par des sauts de ligne
+   // texteHTML = texteHTML.replace(/<br\s*[/]?>/gi, "\n");
+
+    return texteHTML;
+
+}
+
 module.exports = {
     escapeHTML (str) {
         const dom = new JSDOM(str)
@@ -27,6 +39,21 @@ module.exports = {
     },
 
     decouperTexte (texte) {
+        function decouperDocument (texte) {
+            // Diviser le texte à chaque occurrence de <pagefeed />
+            let parts = texte.split('<pagefeed />')
+
+            // Retirer les occurrences vides
+            parts = parts.filter(function(part) {
+                return part.trim() !== "";
+            });
+
+            return parts;
+        }
+
+        if (texte.includes('<pagefeed />')) {
+           // return decouperDocument(texte);
+        }
         const longueurMax = 4000 // Nombre maximum de caractères par partie
 
         if (texte.length < 4000) {
@@ -93,7 +120,8 @@ module.exports = {
         for (let i = 0; i < item.content.length; i++) {
             let content = item.content[i]
 
-            const dom = new JSDOM(content)
+            const markdown = htmlToMarkdown(content);
+            const dom = new JSDOM(markdown)
             const doc = dom.window.document
             // Extraire le texte brut en accédant à la propriété textContent de l'élément body
             const plainText = doc.body.textContent || ''

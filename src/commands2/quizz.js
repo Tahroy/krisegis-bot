@@ -60,14 +60,14 @@ module.exports = {
                 )
                 .addStringOption(
                     option => option
-                        .setName('answers')
-                        .setDescription('Réponses séparées par des virgules')
+                        .setName('correct_answer')
+                        .setDescription('La bonne réponse')
                         .setRequired(true)
                 )
                 .addStringOption(
                     option => option
-                        .setName('correct_answer')
-                        .setDescription('La bonne réponse')
+                        .setName('answers')
+                        .setDescription('Réponses séparées par des virgules')
                         .setRequired(true)
                 )
         )
