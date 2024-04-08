@@ -518,6 +518,6 @@ module.exports = {
         const messages = await WelcomeMessage.findAll({})
         const randomIndex = Math.floor(Math.random() * messages.length)
         let message = messages[randomIndex].get('message')
-        return message.replace('[nom]', `<@${member.id}>`)
+        return message.replaceAll('[nom]', `<@${member.id}>`)
     }
 }
