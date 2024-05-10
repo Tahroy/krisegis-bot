@@ -295,6 +295,7 @@ module.exports = {
         Server.findAll({
             attributes: ['game'],
             group: ['game'],
+            where: { guild: interaction.guild.id }
         })
             .then(async (games) => {
                 for (const game of games) {
