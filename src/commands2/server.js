@@ -309,7 +309,11 @@ module.exports = {
     },
     async sendServers (interaction, game) {
         const jeuPrincipal = interaction.guild.roles.cache.find(role => role.id === game.game)
-        const nomJeuPrincipal = jeuPrincipal.name || ''
+        const nomJeuPrincipal = jeuPrincipal.name ?? ''
+
+        if (!nomJeuPrincipal) {
+            console.error(game)
+        }
 
         const servers = await Server.findAll({
             where: { game: game.game },
