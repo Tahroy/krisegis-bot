@@ -24,6 +24,8 @@ module.exports = async function (client) {
         await Question.sync()
         await WelcomeMessage.sync()
 
+        console.log('BDD Synchro !');
+
         const rest = new REST({ version: '10' }).setToken(token)
 
         let slashCommands = []

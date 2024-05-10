@@ -126,7 +126,10 @@ ${link}`
                     guild: guildScheduledEvent.guild.id,
                     server: server.id,
                     date: guildScheduledEvent.scheduledStartTimestamp,
-                    recalled: false
+                    recalled: false,
+                    name: guildScheduledEvent.name,
+                    description: guildScheduledEvent.description,
+                    serverName: name
                 })
             }
         }
@@ -174,8 +177,6 @@ ${link}`
                 isNew = false
             }
         })
-
-        console.log('search')
 
         // Il n'y est pas, donc on l'ajoute en BDD
         // Si la création réussit, on l'annonce dans le canal
