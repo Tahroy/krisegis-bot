@@ -204,7 +204,7 @@ module.exports = {
         await interaction.respond(choices)
     },
 
-    async checkTags (member) {
+    checkTags (member) {
         Server.findAll({
             where: { guild: member.guild.id }
         }).then(async (servers) => {
