@@ -308,7 +308,12 @@ module.exports = {
         await interaction.reply({ content: 'Voici la liste', ephemeral: true })
     },
     async sendServers (interaction, game) {
+        console.log('----- game ----')
+        console.log(game);
         const jeuPrincipal = interaction.guild.roles.cache.find(role => role.id === game.game)
+        console.log('----- jeuPrincipal ----')
+        console.log(jeuPrincipal);
+
         const nomJeuPrincipal = jeuPrincipal.name ?? ''
 
         if (!nomJeuPrincipal) {
