@@ -1,6 +1,6 @@
-const {SlashCommandBuilder} = require("discord.js");
-const WelcomeMessage = require("../database/WelcomeMessage");
-const {PermissionFlagsBits} = require("discord-api-types/v8");
+const { SlashCommandBuilder } = require('discord.js')
+const WelcomeMessage = require('../database/WelcomeMessage')
+const { PermissionFlagsBits } = require('discord-api-types/v8')
 
 module.exports = {
     opts: {
@@ -8,24 +8,34 @@ module.exports = {
     },
     data: new SlashCommandBuilder()
         .setName('welcomemessage')
-        .setDescription("Ajoute un message d'accueil")
+        .setDescription('Ajoute un message d\'accueil')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false)
         .addStringOption(option =>
             option.setName('message')
-                .setDescription("Le message d'accueil")
+                .setDescription('Le message d\'accueil')
                 .setRequired(true)
         )
     ,
 
-    async execute(interaction) {
-        const message = interaction.options.getString('message');
+    async execute (interaction) {
+        const message = interaction.options.getString('message')
 
+        if (!message.includes('[nom]')) {
+            interaction.reply({
+                content: 'Le message d\'accueil doit contenir \'[nom]\'',
+                ephemeral: true
+            })
+        }
         const champs = {
-            message: message
-        };
+            message: message,
+            guild: interaction.guild.id
+        }
 
-        await WelcomeMessage.create(champs);
-        interaction.reply(`Message ajouté !`, {ephemeral: true});
+        await WelcomeMessage.create(champs)
+        interaction.reply({
+            content: 'Le message d\'accueil a été ajouté',
+            ephemeral: true
+        })
     },
-};
+}

@@ -14,6 +14,11 @@ const WelcomeMessage = sequelize.define('WelcomeMessage', {
     message: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    guild: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "185464480346537984"
     }
 })
 

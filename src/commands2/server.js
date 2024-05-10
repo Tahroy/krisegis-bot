@@ -526,8 +526,9 @@ module.exports = {
 
     // get message welcome
     async getRandomWelcomeMessage (member) {
+        const guild = member.guild;
         // Get variable from WelcomeMessage table
-        const messages = await WelcomeMessage.findAll({})
+        const messages = await WelcomeMessage.findAll({where: { guild: guild.id }})
         const randomIndex = Math.floor(Math.random() * messages.length)
         let message = messages[randomIndex].get('message')
         return message.replaceAll('[nom]', `<@${member.id}>`)
