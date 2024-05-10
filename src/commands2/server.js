@@ -81,25 +81,17 @@ module.exports = {
     async execute (interaction) {
         const subCommand = interaction.options.getSubcommand()
 
-        switch (subCommand) {
-            case 'add':
-                await this.addServer(interaction)
-                break
-            case 'remove':
-                await this.removeServer(interaction)
-                break
-            case 'list':
-                await this.listServers(interaction)
-                break
-            case 'rp':
-                await this.listRP(interaction)
-                break
-            case 'debug':
-                await this.debugAdmin(interaction)
-                break
-            default:
-                await interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
+        const commands = {
+            add: () => this.addServer(interaction),
+            remove: () => this.removeServer(interaction),
+            list: () => this.listServers(interaction),
+            rp: () => this.listRP(interaction),
+            debug: () => this.debugAdmin(interaction),
+            default: () => interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
         }
+
+        const command = commands[subCommand] || commands.default
+        await command()
     },
     async executeButton (interaction, buttonName) {
         const args = buttonName.split('_')
@@ -119,41 +111,72 @@ module.exports = {
     },
 
     // Vérification des rôles de l'utilisateur
-    checkJeuxPrincipaux (member) {
-        Server.findAll({
-            attributes: ['game'],
-            group: ['game'],
-        }).then((games) => {
-            for (const game of games) {
+    async checkJeuxPrincipaux (member) {
 
-                // Le rôle du jeu (Dofus, Wakfu...)
-                const roleGame = member.guild.roles.cache.find(role => role.id === game.game)
+        const guild = member.guild;
 
-                //console.log(`Check de ${roleGame.name}`)
-                //console.log('Jeu ID :', roleGame.id)
-                // On récupère tous les serveurs de ce jeu
-                Server.findAll({
-                    where: { game: roleGame.id }
-                }).then((servers) => {
-                    if (!servers.length) {
-                        //console.log(`Aucun serveur trouvé pour le jeu ${roleGame.name}`)
-                    }
+        const allServers = await Server.findAll({where: {guild: member.guild.id}});
+        const allGames = await Server.findAll({ attributes: ['game'], group: ['game'], where: {guild: member.guild.id}});
 
-                    for (const server of servers) {
-                        //console.log(`Check de ${server.id}`)
+        // On récupère les rôles du membre
+        const roles = member.roles.cache.map(role => role.id)
 
-                        const hasRole = member.roles.cache.find(role => role.id === server.id)
-                        if (hasRole) {
-                            //console.log('Le membre a un serveur correspondant. On lui ajoute le jeu')
-                            member.roles.add(roleGame)
-                            return
-                        }
-                    }
+        // On note chaque serveur identifié et chaque jeu identifié
+        const servers = [];
+        const games = [];
 
-                    //console.log('Aucun serveur trouvé, on lui retire le jeu')
-                    member.roles.remove(roleGame)
-                })
+        // On regarde pour chaque serveur dans un premier temps
+        allServers.forEach((server) => {
+            const serverId = server.get('id');
+            if (roles.includes(serverId)) {
+                games.push(server.get('game'));
             }
+        })
+
+        // On boucle sur tous les jeux. Ceux qui ne sont pas dans game sont retirés, ceux dans dans game sontn ajoutés
+        allGames.forEach((game) => {
+            const gameID = game.get('game');
+            const role = guild.roles.cache.get(gameID);
+            if (!role) {
+                return;
+            }
+            if (games.includes(gameID)) {
+                console.log("Ajout du jeu " + role.name + " au membre " + member.user.username);
+                member.roles.add(role);
+            }
+            else {
+                console.log("Retrait du jeu " + role.name + " au membre " + member.user.username);
+                member.roles.remove(role);
+            }
+        })
+    },
+    sendWelcomeMessage (roles, action, interaction, self) {
+        if (action !== 'add') {
+            return
+        }
+        if (roles.length !== 1) {
+            return
+        }
+        Variable.findOne({
+            where: {
+                name: 'welcomeChannel',
+                server: interaction.guild.id
+            }
+        }).then(async (welcomeChannel) => {
+            if (!welcomeChannel) {
+                console.log('welcomeChannel non trouvé')
+                return
+            }
+
+            const message = await self.getRandomWelcomeMessage(interaction.member)
+
+            if (message) {
+                const welcomeChannelObj = await interaction.guild.channels.cache.get(welcomeChannel.data)
+                welcomeChannelObj.send({ content: message })
+            }
+
+        }).catch((err) => {
+            console.log(err)
         })
     },
 
@@ -218,38 +241,17 @@ module.exports = {
             await interaction.deferReply()
         }
 
+        // On ajoute le jeu
         await this.checkJeuxPrincipaux(member)
-        await checkTags(member)
-
-        if (roles.length === 1 && action === 'add') {
-            Variable.findOne({
-                where: {
-                    name: 'welcomeChannel',
-                    server: interaction.guild.id
-                }
-            }).then(async (welcomeChannel) => {
-                if (!welcomeChannel) {
-                    console.log('welcomeChannel non trouvé')
-                    return
-                }
-
-                const message = await self.getRandomWelcomeMessage(interaction.member)
-
-                if (message) {
-                    const welcomeChannelObj = await interaction.guild.channels.cache.get(welcomeChannel.data)
-                    welcomeChannelObj.send({ content: message })
-                }
-
-            }).catch((err) => {
-                console.log(err)
-            })
-        }
+        // On ajoute le tag
+        checkTags(member)
+        // On ajoute le message d'accueil
+        this.sendWelcomeMessage(roles, action, interaction, self)
 
         const userName = member.nickname || member.user.username
         const roleName = role.name
 
         debugMessage(interaction.guild, '``' + userName + '`` ' + action + ' server ``' + roleName + '``')
-
         console.log(interaction.user.username + ` ${action} ${role.name}`)
 
     },
