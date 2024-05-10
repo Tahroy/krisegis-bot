@@ -30,6 +30,18 @@ const Event = sequelize.define('event', {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false
+    },
+    name: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
+    serverName: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
+    description: {
+        type: Sequelize.STRING,
+        allowNull: true
     }
 })
 
