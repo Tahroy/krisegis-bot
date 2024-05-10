@@ -150,7 +150,7 @@ ${link}`
         let isNew = true
         const guild = guildScheduledEvent.guild
 
-        console.log(derniersEvenements)
+        console.log('update');
         // On vérifie qu'il n'est pas déjà dans derniersEvenements ou il y a plus de 5s
         if (derniersEvenements[guildScheduledEvent.id]) {
             if (moment().diff(derniersEvenements[guildScheduledEvent.id], 'seconds') < 5) {
@@ -204,8 +204,9 @@ ${link}`
      * Évènement mis à jour
      */
     client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => {
-        console.log(oldGuildScheduledEvent.name + ' mis à jour')
-  //      await updateEvent(newGuildScheduledEvent)
+        console.log(oldGuildScheduledEvent, newGuildScheduledEvent);
+        // console.log(oldGuildScheduledEvent.name + ' mis à jour')
+        await updateEvent(newGuildScheduledEvent)
     })
 
     /**
@@ -232,7 +233,7 @@ ${link}`
     client.on('guildScheduledEventUserAdd', async (guildScheduledEvent, user) => {
         console.log(guildScheduledEvent.url)
         console.log("User ajouté");
-        await updateEvent(guildScheduledEvent)
+      //  await updateEvent(guildScheduledEvent)
 
         addParticipant(guildScheduledEvent, user)
     })
@@ -242,7 +243,7 @@ ${link}`
      */
     client.on('guildScheduledEventUserRemove', async (guildScheduledEvent, user) => {
         console.log("User retiré");
-        await updateEvent(guildScheduledEvent)
+    //    await updateEvent(guildScheduledEvent)
 
         await removeParticipant(guildScheduledEvent, user)
     })
