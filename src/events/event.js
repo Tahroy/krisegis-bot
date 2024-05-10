@@ -150,7 +150,6 @@ ${link}`
         let isNew = true
         const guild = guildScheduledEvent.guild
 
-        console.log('update');
         // On vérifie qu'il n'est pas déjà dans derniersEvenements ou il y a plus de 5s
         if (derniersEvenements[guildScheduledEvent.id]) {
             if (moment().diff(derniersEvenements[guildScheduledEvent.id], 'seconds') < 5) {
