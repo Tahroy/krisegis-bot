@@ -380,7 +380,7 @@ module.exports = {
 * BDD name : ${server?.name ?? 'absent'}
 * BDD ID : ${server?.id}
 * BDD tag : ${server?.tag}
-                    
+* BDD game : ${server?.game}                    
 * Discord rôle : ${role.name}
 * Discord game : ${game.name}
 * Discord channel : ${channel?.name ?? 'absent'}`
