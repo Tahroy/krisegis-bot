@@ -31,12 +31,16 @@ module.exports = {
             nbWabbits: 0,
             nbCatched: 0,
             randomID: 0,
+            image: '',
             maxWabbits: interaction.options.getInteger('nombre')
         }
 
+        const MIN_TIME = 2500
+        const MAX_TIME = 3000
+
         // Génération de wabbits à intervalles aléatoires
         const generateWabbits = () => {
-            const randomDelay = Math.floor(Math.random() * 5000) + 5500 // Délai entre 2 et 10 secondes
+            const randomDelay = Math.floor(Math.random() * MIN_TIME) + MAX_TIME // Délai entre 2 et 10 secondes
             setTimeout(() => {
                 if (usersByChannel[channelId].nbWabbits < usersByChannel[channelId].maxWabbits) {
                     console.log('On attend ' + (randomDelay) / 1000 + ' secondes')
@@ -66,15 +70,6 @@ module.exports = {
 
         if (uniqueID === channelData.randomID) {
 
-            if (buttonType !== 'hit') {
-                return interaction.reply({
-                    content: `Mais, tu viens de lui faire un ${buttonType} là ?`,
-                    ephemeral: true
-                })
-            }
-            // On vide le randomID
-            channelData.randomID = 0
-
             // On récupère les scores du channel
             // Si l'utilisateur n'y est pas (id), on l'ajoute
             // On ajoute ensuite 1 point.
@@ -85,6 +80,20 @@ module.exports = {
                 }
             }
 
+            // Si c'est Malma, on perd un point.
+            if (channelData.image === 'malma') {
+                channelData.users[user.id].score--
+                return interaction.reply(`${userName} s'est approché de Malma ! Il perd un point, ça pique...`)
+            }
+            if (buttonType !== 'hit') {
+                return interaction.reply({
+                    content: `Mais, tu viens de lui faire un ${buttonType} là ?`,
+                    ephemeral: true
+                })
+            }
+
+            // On vide le randomID
+            channelData.randomID = 0
             channelData.users[user.id].score++
             channelData.nbCatched++
 
@@ -118,12 +127,16 @@ module.exports = {
         // Choisir aléatoirement un fichier parmi la liste
         const randomFileName = wabbitFiles[Math.floor(Math.random() * wabbitFiles.length)]
 
+        // Je ne veux pas l'extension
+        const fileName = randomFileName.split('.')[0]
+
         // Construire le chemin complet du fichier
         const imagePath = path.join(wabbitFolder, randomFileName)
 
         const randomID = Math.floor(Math.random() * 1000)
 
         usersByChannel[channel.id].randomID = randomID
+        usersByChannel[channel.id].image = fileName
 
         /*
          * Ajouter :
@@ -179,6 +192,6 @@ module.exports = {
         }
 
         delete usersByChannel[channel.id]
-        return channel.send(ladderMessage)
+        return channel.send("**Classement**\n" + ladderMessage)
     },
 }
