@@ -81,14 +81,14 @@ module.exports = {
             case 'new':
                 this.initGame(channel)
                 channel.send('Nouvelle map !')
-                return channel.reply(this.getMap(channel))
+                return interaction.reply(this.getMap(channel))
             case 'play':
                 await this.playGame(interaction)
                 break
             case 'get':
-                return channel.reply(this.getMap(channel))
+                return interaction.reply(this.getMap(channel))
             default:
-                return channel.reply(this.getMap(channel))
+                return interaction.reply(this.getMap(channel))
         }
     },
     tuiles: [],
