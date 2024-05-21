@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("discord.js");
+const { SlashCommandBuilder } = require('discord.js')
 
 module.exports = {
     opts: {},
@@ -8,76 +8,87 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('play')
-                .setDescription("Veuillez choisir : ligne 1, colonne 1, ligne 2, colonne 2")
+                .setDescription('Veuillez choisir : ligne 1, colonne 1, ligne 2, colonne 2')
                 .addIntegerOption(option => option
-                    .setName("line1")
-                    .setDescription("Ligne de la 1ère tuile")
+                    .setName('line1')
+                    .setDescription('Ligne de la 1ère tuile')
                     .setRequired(true)
                     .addChoices(
-                        {name: "1", value: 1},
-                        {name: "2", value: 2},
-                        {name: "3", value: 3},
-                        {name: "4", value: 4},
-                        {name: "5", value: 5},
-                        {name: "6", value: 6},
+                        { name: '1', value: 1 },
+                        { name: '2', value: 2 },
+                        { name: '3', value: 3 },
+                        { name: '4', value: 4 },
+                        { name: '5', value: 5 },
+                        { name: '6', value: 6 },
                     )
                 )
                 .addIntegerOption(option => option
-                    .setName("col1")
-                    .setDescription("Colonne de la 1ère tuile")
+                    .setName('col1')
+                    .setDescription('Colonne de la 1ère tuile')
                     .setRequired(true)
                     .addChoices(
-                        {name: "1", value: 1},
-                        {name: "2", value: 2},
-                        {name: "3", value: 3},
-                        {name: "4", value: 4},
-                        {name: "5", value: 5},
-                        {name: "6", value: 6},
+                        { name: '1', value: 1 },
+                        { name: '2', value: 2 },
+                        { name: '3', value: 3 },
+                        { name: '4', value: 4 },
+                        { name: '5', value: 5 },
+                        { name: '6', value: 6 },
                     )
                 )
                 .addIntegerOption(option => option
-                    .setName("line2")
-                    .setDescription("Ligne de la 2e tuile")
+                    .setName('line2')
+                    .setDescription('Ligne de la 2e tuile')
                     .setRequired(true)
                     .addChoices(
-                        {name: "1", value: 1},
-                        {name: "2", value: 2},
-                        {name: "3", value: 3},
-                        {name: "4", value: 4},
-                        {name: "5", value: 5},
-                        {name: "6", value: 6},
+                        { name: '1', value: 1 },
+                        { name: '2', value: 2 },
+                        { name: '3', value: 3 },
+                        { name: '4', value: 4 },
+                        { name: '5', value: 5 },
+                        { name: '6', value: 6 },
                     )
                 )
                 .addIntegerOption(option => option
-                    .setName("col2")
-                    .setDescription("Colonne de la 2e tuile")
+                    .setName('col2')
+                    .setDescription('Colonne de la 2e tuile')
                     .setRequired(true)
                     .addChoices(
-                        {name: "1", value: 1},
-                        {name: "2", value: 2},
-                        {name: "3", value: 3},
-                        {name: "4", value: 4},
-                        {name: "5", value: 5},
-                        {name: "6", value: 6},
+                        { name: '1', value: 1 },
+                        { name: '2', value: 2 },
+                        { name: '3', value: 3 },
+                        { name: '4', value: 4 },
+                        { name: '5', value: 5 },
+                        { name: '6', value: 6 },
                     )
-                )),
-    async execute(interaction) {
-        const channel = interaction.channel;
+                ))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('get')
+                .setDescription('Récupérer la carte actuelle'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('new')
+                .setDescription('Nouvelle carte'))
+    ,
+    async execute (interaction) {
+        const channel = interaction.channel
 
         if (!this.channels[channel.id]) {
-            this.initGame(channel);
+            this.initGame(channel)
         }
 
         switch (interaction.options.getSubcommand()) {
             case 'new':
-                this.initGame(channel);
-                channel.send('Nouvelle map !');
-                return channel.send(this.getMap(channel));
+                this.initGame(channel)
+                channel.send('Nouvelle map !')
+                return channel.send(this.getMap(channel))
             case 'play':
-                await this.playGame(interaction);
-                break;
+                await this.playGame(interaction)
+                break
+            case 'get':
+                return channel.send(this.getMap(channel))
             default:
-                return channel.send(this.getMap(channel));
+                return channel.send(this.getMap(channel))
         }
     },
     tuiles: [],
@@ -120,7 +131,7 @@ module.exports = {
         '6': ':six:'
     },
     channels: {},
-    initGame(channel) {
+    initGame (channel) {
         let tuiles = [
             1, 2, 3, 4, 5, 6,
             7, 8, 9, 10, 11, 12,
@@ -128,119 +139,119 @@ module.exports = {
             7, 8, 9, 10, 11, 12,
             13, 14, 15, 16, 17, 18,
             13, 14, 15, 16, 17, 18,
-        ];
-        tuiles = this.shuffleBis(tuiles);
-        tuiles = this.splitArray(tuiles, 6);
+        ]
+        tuiles = this.shuffleBis(tuiles)
+        tuiles = this.splitArray(tuiles, 6)
         this.channels[channel.id] = {
             etat: this.base,
             tuiles: tuiles,
             points: 0,
-        };
+        }
     },
-    shuffleBis(array) {
+    shuffleBis (array) {
         var currentIndex = array.length,
-            temporaryValue, randomIndex;
+            temporaryValue, randomIndex
 
         // While there remain elements to shuffle...
         while (0 !== currentIndex) {
 
             // Pick a remaining element...
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
+            randomIndex = Math.floor(Math.random() * currentIndex)
+            currentIndex -= 1
 
             // And swap it with the current element.
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = temporaryValue;
+            temporaryValue = array[currentIndex]
+            array[currentIndex] = array[randomIndex]
+            array[randomIndex] = temporaryValue
         }
 
-        return array;
+        return array
     },
-    splitArray(array, part) {
-        let tmp = [];
+    splitArray (array, part) {
+        let tmp = []
         for (let i = 0; i < array.length; i += part) {
-            tmp.push(array.slice(i, i + part));
+            tmp.push(array.slice(i, i + part))
         }
-        return tmp;
+        return tmp
     },
-    getMap(channel) {
-        const id = channel.id;
-        let map = ':zero: :one: :two: :three: :four: :five: :six:\n';
-        let ligneActuelle = 0;
-        let etat = this.channels[id].etat;
+    getMap (channel) {
+        const id = channel.id
+        let map = ':zero: :one: :two: :three: :four: :five: :six:\n'
+        let ligneActuelle = 0
+        let etat = this.channels[id].etat
         for (const ligne of etat) {
-            ligneActuelle++;
-            map += this.nombres[ligneActuelle];
+            ligneActuelle++
+            map += this.nombres[ligneActuelle]
             for (const colonne of ligne) {
-                map += ' ' + this.getEmoji(colonne, channel.client);
+                map += ' ' + this.getEmoji(colonne, channel.client)
             }
-            map += '\n';
+            map += '\n'
         }
 
-        return map;
+        return map
     },
-    getEmoji(colonne, client) {
-        let myEmoji = this.emotes[colonne];
+    getEmoji (colonne, client) {
+        let myEmoji = this.emotes[colonne]
         if (myEmoji.indexOf(':') === -1) {
-            let search = client.emojis.cache.find(emoji => emoji.name === myEmoji);
+            let search = client.emojis.cache.find(emoji => emoji.name === myEmoji)
             if (search !== undefined) {
-                myEmoji = '<:' + search.name + ':' + search.id + '>';
+                myEmoji = '<:' + search.name + ':' + search.id + '>'
             }
         }
 
-        return myEmoji;
+        return myEmoji
     },
     playGame: async function (interaction) {
-        const line1 = interaction.options.getInteger('line1') - 1;
-        const line2 = interaction.options.getInteger('line2') - 1;
-        const col1 = interaction.options.getInteger('col1') - 1;
-        const col2 = interaction.options.getInteger('col2') - 1;
+        const line1 = interaction.options.getInteger('line1') - 1
+        const line2 = interaction.options.getInteger('line2') - 1
+        const col1 = interaction.options.getInteger('col1') - 1
+        const col2 = interaction.options.getInteger('col2') - 1
 
-        if (line1 + " " + col1 === line2 + " " + col2) {
-            return interaction.reply("Veuillez choisir deux tuiles différentes !");
+        if (line1 + ' ' + col1 === line2 + ' ' + col2) {
+            return interaction.reply('Veuillez choisir deux tuiles différentes !')
         }
 
-        let game = this.channels[interaction.channel.id];
+        let game = this.channels[interaction.channel.id]
 
-        const tuile1 = game.etat[line1][col1];
-        const tuile2 = game.etat[line2][col2];
+        const tuile1 = game.etat[line1][col1]
+        const tuile2 = game.etat[line2][col2]
 
         if (tuile1 === undefined || tuile2 === undefined) {
-            interaction.channel.send(`Veuillez choisir des tuiles valides !`);
+            interaction.channel.send(`Veuillez choisir des tuiles valides !`)
         }
 
         if (tuile1 !== 0 || tuile2 !== 0) {
-            return interaction.channel.send(`L'un des indices a déjà été trouvé !`);
+            return interaction.channel.send(`L'un des indices a déjà été trouvé !`)
         }
 
-        const choix1Val = game.tuiles[line1][col1];
-        const choix2Val = game.tuiles[line2][col2];
+        const choix1Val = game.tuiles[line1][col1]
+        const choix2Val = game.tuiles[line2][col2]
 
-        game.etat[line1][col1] = choix1Val;
-        game.etat[line2][col2] = choix2Val;
+        game.etat[line1][col1] = choix1Val
+        game.etat[line2][col2] = choix2Val
 
         if (choix1Val === choix2Val) {
-            interaction.channel.send(this.getMap(interaction.channel));
-            game.points++;
+            interaction.channel.send(this.getMap(interaction.channel))
+            game.points++
 
             if (game.points === 18) {
-                this.initGame(interaction.channel);
-                return interaction.reply('Vous avez réussi, bravo !');
+                this.initGame(interaction.channel)
+                return interaction.reply('Vous avez réussi, bravo !')
             }
 
-            return interaction.reply('Tu as trouvé une piste !');
+            return interaction.reply('Tu as trouvé une piste !')
         } else {
-            const map = this.getMap(interaction.channel);
+            const map = this.getMap(interaction.channel)
 
-            let msg = await interaction.channel.send(map);
+            let msg = await interaction.channel.send(map)
             setTimeout(() => {
                 msg.delete()
-            }, 5000);
+            }, 5000)
 
-            game.etat[line1][col1] = 0;
-            game.etat[line2][col2] = 0;
+            game.etat[line1][col1] = 0
+            game.etat[line2][col2] = 0
 
-            return interaction.reply('Mais non, tu es mauvais !');
+            return interaction.reply('Mais non, tu es mauvais !')
         }
     }
-};
+}
