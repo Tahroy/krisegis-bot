@@ -81,14 +81,14 @@ module.exports = {
             case 'new':
                 this.initGame(channel)
                 channel.send('Nouvelle map !')
-                return channel.send(this.getMap(channel))
+                return channel.reply(this.getMap(channel))
             case 'play':
                 await this.playGame(interaction)
                 break
             case 'get':
-                return channel.send(this.getMap(channel))
+                return channel.reply(this.getMap(channel))
             default:
-                return channel.send(this.getMap(channel))
+                return channel.reply(this.getMap(channel))
         }
     },
     tuiles: [],
@@ -111,15 +111,15 @@ module.exports = {
         7: ':drop_of_blood:',
         8: ':skull:',
         9: ':dagger:',
-        10: 'malmajeste',
-        11: 'sad',
-        12: 'oeuf_pourri',
-        13: 'shigekax',
+        10: 'Mercenaire',
+        11: ':champableu',
+        12: 'chacha_surpris',
+        13: 'mouette',
         14: 'slip',
-        15: 'arakne_morte',
-        16: 'sukette',
-        17: 'bonbon_halouine',
-        18: 'arakne',
+        15: 'shivaton',
+        16: 'Shariva',
+        17: 'sharivaton',
+        18: 'biere',
     },
     nombres: {
         '0': ':zero:',
