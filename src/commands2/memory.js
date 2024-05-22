@@ -10,6 +10,19 @@ module.exports = {
                 .setName('play')
                 .setDescription('Veuillez choisir : ligne 1, colonne 1, ligne 2, colonne 2')
                 .addIntegerOption(option => option
+                    .setName('col1')
+                    .setDescription('Colonne de la 1ère tuile')
+                    .setRequired(true)
+                    .addChoices(
+                        { name: '1', value: 1 },
+                        { name: '2', value: 2 },
+                        { name: '3', value: 3 },
+                        { name: '4', value: 4 },
+                        { name: '5', value: 5 },
+                        { name: '6', value: 6 },
+                    )
+                )
+                .addIntegerOption(option => option
                     .setName('line1')
                     .setDescription('Ligne de la 1ère tuile')
                     .setRequired(true)
@@ -23,8 +36,8 @@ module.exports = {
                     )
                 )
                 .addIntegerOption(option => option
-                    .setName('col1')
-                    .setDescription('Colonne de la 1ère tuile')
+                    .setName('col2')
+                    .setDescription('Colonne de la 2e tuile')
                     .setRequired(true)
                     .addChoices(
                         { name: '1', value: 1 },
@@ -48,19 +61,7 @@ module.exports = {
                         { name: '6', value: 6 },
                     )
                 )
-                .addIntegerOption(option => option
-                    .setName('col2')
-                    .setDescription('Colonne de la 2e tuile')
-                    .setRequired(true)
-                    .addChoices(
-                        { name: '1', value: 1 },
-                        { name: '2', value: 2 },
-                        { name: '3', value: 3 },
-                        { name: '4', value: 4 },
-                        { name: '5', value: 5 },
-                        { name: '6', value: 6 },
-                    )
-                ))
+        )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('get')
