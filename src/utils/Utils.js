@@ -4,16 +4,18 @@ const { api_lore } = require('../../config/config_bot.json')
 const { createEmbed } = require('./embed')
 const Variable = require('../database/Variable')
 const Server = require('../database/Server')
+const { Op } = require('sequelize')
+const LoreElement = require('../database/LoreElement')
 
 function htmlToMarkdown (texteHTML) {
     // Remplacer les balises de paragraphe par des sauts de ligne
-    texteHTML = texteHTML.replace(/<p>/g, '\n');
-    texteHTML = texteHTML.replace(/<\/p>/g, '');
+    texteHTML = texteHTML.replace(/<p>/g, '\n')
+    texteHTML = texteHTML.replace(/<\/p>/g, '')
 
     // Remplacer les sauts de ligne forcés par des sauts de ligne
-   // texteHTML = texteHTML.replace(/<br\s*[/]?>/gi, "\n");
+    // texteHTML = texteHTML.replace(/<br\s*[/]?>/gi, "\n");
 
-    return texteHTML;
+    return texteHTML
 
 }
 
@@ -44,15 +46,15 @@ module.exports = {
             let parts = texte.split('<pagefeed />')
 
             // Retirer les occurrences vides
-            parts = parts.filter(function(part) {
-                return part.trim() !== "";
-            });
+            parts = parts.filter(function (part) {
+                return part.trim() !== ''
+            })
 
-            return parts;
+            return parts
         }
 
         if (texte.includes('<pagefeed />')) {
-           // return decouperDocument(texte);
+            // return decouperDocument(texte);
         }
         const longueurMax = 4000 // Nombre maximum de caractères par partie
 
@@ -105,8 +107,8 @@ module.exports = {
                 return
             }
 
-            const debugChannelObj = await guild.channels.cache.get(debugChannel.data);
-            debugChannelObj.send({ content: debugMessage });
+            const debugChannelObj = await guild.channels.cache.get(debugChannel.data)
+            debugChannelObj.send({ content: debugMessage })
 
         }).catch((err) => {
             console.log(err)
@@ -117,19 +119,17 @@ module.exports = {
 
         let decoupeContent = []
 
-        for (let i = 0; i < item.content.length; i++) {
-            let content = item.content[i]
+        let content = item.content
 
-            const markdown = htmlToMarkdown(content);
-            const dom = new JSDOM(markdown)
-            const doc = dom.window.document
-            // Extraire le texte brut en accédant à la propriété textContent de l'élément body
-            const plainText = doc.body.textContent || ''
-            // Retirer les espaces en début et en fin de chaîne
-            content = plainText.trim()
-            const { decouperTexte } = require('./Utils.js')
-            decoupeContent = decoupeContent.concat(decouperTexte(content))
-        }
+        const markdown = htmlToMarkdown(content)
+        const dom = new JSDOM(markdown)
+        const doc = dom.window.document
+        // Extraire le texte brut en accédant à la propriété textContent de l'élément body
+        const plainText = doc.body.textContent || ''
+        // Retirer les espaces en début et en fin de chaîne
+        content = plainText.trim()
+        const { decouperTexte } = require('./Utils.js')
+        decoupeContent = decoupeContent.concat(decouperTexte(content))
 
         await interaction.reply(`Voilà ce que j'ai trouvé !`)
 
@@ -153,31 +153,22 @@ module.exports = {
 
         console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`)
 
-        console.log(search);
-        const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',];
+        const item = await LoreElement.findOne({
+            where: {
+                id: search,
+                type: endPoint
+            }
+        })
 
-        for (let i = 0; i < removeChars.length; i++) {
-            search = search.replaceAll(removeChars[i], '');
+        const object = {
+            'name': item.get('name'),
+            'content': item.get('content'),
+            'id': item.get('id')
         }
 
-        search = encodeURIComponent(search);
-
-        if (parseInt(search) === 0) {
-            interaction.reply('Recherche incorrecte', { ephemeral: true })
-            return
-        }
-
-        const response = await axios.get(api_lore + '/' + endPoint + '?id=' + search)
-
-        const items = response.data.data
-
-        if (!items.length) {
-            return interaction.reply('Aucun résultat trouvé')
-        }
-
-        const item = items[0]
         const { sendLore } = require('./Utils.js')
-        await sendLore(item, search, interaction)
+        await sendLore(object, search, interaction)
+
     },
     async autocompleteLore (interaction, endPoint = '') {
         const search = interaction.options.getFocused()
@@ -187,13 +178,18 @@ module.exports = {
             return
         }
 
-        // Appel à l'API externe pour récupérer les objets correspondants à la recherche
-        const request = api_lore + '/' + endPoint + '?name=' + search + '&limit=25'
-        console.log(request)
-        const response = await axios.get(request)
+        console.log(`Recherche de ${search} (${endPoint}) par ${interaction.user.username}`)
 
-        // Traitement des résultats de l'API
-        const items = response.data.data
+        let items = await LoreElement.findAll({
+            where: {
+                type: endPoint,
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` } },
+                 //   { content: { [Op.like]: `%${search}%` } }
+                ]
+            },
+            limit: 25
+        })
 
         // Construction de la réponse avec les résultats sous forme d'autocomplétions
         const choices = items.map(item => ({
