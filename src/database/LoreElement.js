@@ -15,7 +15,7 @@ const Sequelize = require('sequelize')
  * @property {String} options.storage - The path to the SQLite database file. Only applicable for SQLite databases.
  */
 const sequelize = new Sequelize('database', 'username', 'password', {
-    host   : 'localhost',
+    host: 'localhost',
     dialect: 'sqlite',
     logging: false,
     // SQLite only
@@ -26,23 +26,23 @@ const sequelize = new Sequelize('database', 'username', 'password', {
  *
  */
 const LoreElement = sequelize.define('loreelement', {
-    id   : {
-        type         : Sequelize.INTEGER,
-        allowNull    : false,
-        primaryKey   : true,
-        autoIncrement: true
+    id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true
     },
-    nom  : {
-        type     : Sequelize.STRING,
+    name: {
+        type: Sequelize.STRING,
         allowNull: false
     },
-    type : {
-        type     : Sequelize.ENUM,
-        values   : ['npc', 'item', 'document', 'article'],
-        allowNull: false
+    type: {
+        type: Sequelize.ENUM,
+        values: ['npc', 'item', 'document', 'article'],
+        allowNull: false,
+        primaryKey: true
     },
-    texte: {
-        type     : Sequelize.TEXT,
+    content: {
+        type: Sequelize.TEXT,
         allowNull: true
     }
 })
