@@ -5,6 +5,7 @@ const Event = require('../database/Event')
 const Participant = require('../database/Participant')
 const Question = require('../database/Question')
 const WelcomeMessage = require('../database/WelcomeMessage')
+const LoreElement = require('../database/LoreElement')
 const { REST } = require('@discordjs/rest')
 const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
@@ -23,6 +24,7 @@ module.exports = async function (client) {
         await Participant.sync()
         await Question.sync()
         await WelcomeMessage.sync()
+        await LoreElement.sync()
 
         console.log('BDD Synchro !');
 
