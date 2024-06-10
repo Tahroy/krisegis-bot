@@ -1,6 +1,7 @@
 const { owner } = require('../../config/config_bot.json')
 const Variable = require('../database/Variable')
 const { debugMessage } = require('../utils/Utils')
+const {CommandInteraction} = require("discord.js");
 
 module.exports = function (client) {
     this.gererCommande = async function (interaction) {
@@ -15,7 +16,8 @@ module.exports = function (client) {
             debugMessage(interaction.guild, log);
 
             if (command?.opts?.admin && interaction.user.id !== owner) {
-                return await interaction.reply('Vous ne pouvez pas utiliser cette commande !')
+                interaction.reply('Vous ne pouvez pas utiliser cette commande !')
+                return;
             }
             if (!command) {
                 return await interaction.reply('Cette commande n\'existe pas !')
