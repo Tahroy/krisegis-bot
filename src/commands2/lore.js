@@ -4,18 +4,20 @@ const axios = require('axios')
 const { PermissionFlagsBits, ButtonStyle } = require('discord-api-types/v8')
 const { escapeHTML, substringContent } = require('../utils/Utils')
 const embedData = require('../utils/embed')
+const { Sequelize, Op } = require('sequelize')
+const LoreElement = require('../database/LoreElement')
 
 const WIKI_RP = 'https://dofus-rp.fandom.com/fr/'
 
-let interactionsCache = [];
+let interactionsCache = []
 
 const NOMS = {
     item: 'Objets',
     npc: 'PNJ',
     document: 'Documents',
     article: 'Articles',
-    page: "Pages WIKI"
-};
+    page: 'Pages WIKI'
+}
 
 module.exports = {
     opts: {},
@@ -28,7 +30,7 @@ module.exports = {
             .setRequired(true)),
     interactions: [],
     async execute (interaction) {
-        const search = interaction.options.getString('search');
+        const search = interaction.options.getString('search')
 
         await interaction.reply('Voici ce que j\'ai !')
 
@@ -38,8 +40,8 @@ module.exports = {
             { type: 'item', truncate: true },
             { type: 'npc', truncate: true },
             { type: 'document', truncate: true },
-            { type: 'article', truncate: false }
-        ];
+            { type: 'article', truncate: true }
+        ]
 
         for (const item of tab) {
             const data = await this.getData(item.type, search)
@@ -48,11 +50,11 @@ module.exports = {
         }
 
         try {
-            const callWiki = WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`;
+            const callWiki = WIKI_RP + `api.php?action=query&list=search&srsearch=${search}&format=json`
 
-            const wikiResponse = await axios.get(callWiki);
+            const wikiResponse = await axios.get(callWiki)
 
-            const WikiData = wikiResponse.data.query?.search ?? [];
+            const WikiData = wikiResponse.data.query?.search ?? []
 
             let pages = []
             for (let i = 0; i < WikiData.length; i++) {
@@ -68,25 +70,68 @@ module.exports = {
                 'limit': 10,
                 'offset': 0,
                 'total': pages.length,
-            };
+            }
 
-            await this.sendResults(interaction, data, 'page', false)
+            await this.sendResults(interaction, data, 'page', true)
         } catch (error) {
             console.error(error)
             await interaction.channel.send('Erreur lors de la récupération des données WIKI')
         }
     },
+    /*
+
+                [Sequelize.Op.or]: [
+                    { nom: { [Sequelize.Op.like]: `%${search}%` } },
+                    { texte: { [Sequelize.Op.like]: `%${search}%` } }
+                ]
+     */
 
     async getData (route, search, offset = 0) {
-        const LIMIT = 20;
+        const data = await LoreElement.findAll({
+            where: {
+                type: route,
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { content: { [Op.like]: `%${search}%` } }
+                ]
+            },
+            limit: 20,
+            offset: offset // Add offset for pagination
+        });
 
-        const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',];
+        const dataFormatted = data.map(item => {
+            return {
+                name: item.get('name'),
+                content: item.get('content')
+            }
+        })
 
-        for (let i = 0; i < removeChars.length; i++) {
-            search = search.replaceAll(removeChars[i], '');
+        const count = await LoreElement.count({
+            where: {
+                type: route,
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { content: { [Op.like]: `%${search}%` } }
+                ]
+            }
+        });
+
+        return {
+            'data': dataFormatted,
+            'limit': 20,
+            'offset': offset,
+            'total': count
         }
 
-        search = encodeURIComponent(search);
+        const LIMIT = 20
+
+        const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',]
+
+        for (let i = 0; i < removeChars.length; i++) {
+            search = search.replaceAll(removeChars[i], '')
+        }
+
+        search = encodeURIComponent(search)
 
         const call = `${api_lore}/${route}?content="${search}"&$limit=${LIMIT}&$offset=${offset}`
         console.log(call)
@@ -100,11 +145,12 @@ module.exports = {
         const offset = parseInt(data.offset)
         const total = parseInt(data.total)
 
+        console.log(data);
         const nombrePages = Math.ceil(total / limit) ? Math.ceil(total / limit) : 1
         const pageActuelle = Math.ceil(offset / limit) + 1
 
         let lines = []
-        let categorie = NOMS[type];
+        let categorie = NOMS[type]
 
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
@@ -112,9 +158,9 @@ module.exports = {
 
             let content = ''
             if (truncate) {
-                content = substringContent(escapeHTML(item.content[0]))
+                content = substringContent(escapeHTML(item.content))
             } else {
-                content = escapeHTML(item.content[0])
+                content = escapeHTML(item.content)
             }
 
             lines.push(`- **${name}** : ${content}`)
@@ -151,27 +197,27 @@ module.exports = {
     },
 
     async executeButton (interaction, buttonName) {
-        const interactionCache = interactionsCache[interaction.message.id];
-        const message = interaction.message;
+        const interactionCache = interactionsCache[interaction.message.id]
+        const message = interaction.message
 
+        console.log()
         if (!interactionCache) {
             interaction.channel.send('Erreur lors de la récupération des données de la requête.')
         }
 
-        let offset = parseInt(interactionCache.offset);
+        let offset = parseInt(interactionCache.offset)
 
         if (buttonName === 'last') {
-            offset -= interactionCache.limit;
-        }
-        else if (buttonName === 'next') {
-            offset += interactionCache.limit;
+            offset -= interactionCache.limit
+        } else if (buttonName === 'next') {
+            offset += interactionCache.limit
         }
 
-        const data = await this.getData(interactionCache.type, interactionCache.search, offset);
-        await this.editResults(interactionCache.message, data, interactionCache.type, interactionCache.type !== 'article');
-        this.saveInteraction(message, data, interactionCache.type, interactionCache.search);
+        const data = await this.getData(interactionCache.type, interactionCache.search, offset)
+        await this.editResults(interactionCache.message, data, interactionCache.type, interactionCache.type !== 'article')
+        this.saveInteraction(message, data, interactionCache.type, interactionCache.search)
 
-        return await interaction.deferUpdate();
+        return await interaction.deferUpdate()
     },
     saveInteraction (message, data, name = '', search = '') {
         const type = name
@@ -195,7 +241,7 @@ module.exports = {
     },
 
     async editResults (message, data, type, truncate) {
-        const retour = await this.getResult(data, type, truncate);
-        return await message.edit(retour);
+        const retour = await this.getResult(data, type, truncate)
+        return await message.edit(retour)
     }
 }
