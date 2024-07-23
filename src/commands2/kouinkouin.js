@@ -64,7 +64,7 @@ module.exports = {
 
                 const userName = interaction.member.nickname ?? interaction.member.user.globalName
                 interaction.followUp({
-                    content: `Le kouinkouin de ${userName} de apparaît !`,
+                    content: `Le kouinkouin de ${userName} apparaît !`,
                     components: [row]
                 })
 
