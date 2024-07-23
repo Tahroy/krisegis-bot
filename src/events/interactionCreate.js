@@ -30,7 +30,7 @@ module.exports = function (client) {
     }
     this.gererBouton = async function (interaction) {
         const customID = interaction.customId
-        const explode = customID.split('-')
+        const explode = customID.split('-', 2)
 
         const commandName = explode[0]
         const buttonName = explode[1]
