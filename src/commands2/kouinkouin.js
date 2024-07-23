@@ -33,6 +33,7 @@ module.exports = {
 
     // Fonction d'exécution quand la commande est déclenchée
     async execute (interaction) {
+        console.log(interaction.member)
         // On définit le serveur et l'utilisateur à partir de l'interaction
         const serverID = interaction.guild.id
         const userID = interaction.member.user.id
@@ -45,7 +46,7 @@ module.exports = {
 
         // Sinon on lance une nouvelle partie
         games[key] = true
-        await interaction.reply('Une partie est en cours...')
+        await interaction.reply('La partie débute !')
 
         let timer = Math.floor(Math.random() * (10 - 3 + 1)) + 3
 
@@ -62,8 +63,9 @@ module.exports = {
                             .setCustomId('kouinkouin-catch_' + userID)
                     )
 
+                const userName = interaction.member.nickname ?? interaction.member.user.globalName
                 interaction.followUp({
-                    content: 'kouinkouin apparaît !',
+                    content: `Le kouinkouin de ${userName} de apparaît !`,
                     components: [row]
                 })
 
@@ -95,7 +97,10 @@ module.exports = {
             } else {
                 // Sinon on continue de décrémenter le timer
                 timer--
-                interaction.followUp('...')
+                interaction.followUp({
+                    content: '...',
+                    ephemeral: true
+                })
             }
         }, 1000)
     },
@@ -121,13 +126,17 @@ module.exports = {
         // Si l'action est de 'catchkouinkouin', on marque la partie comme gagnée
         if (action === 'catch') {
             if (!games[key]) {
-                return interaction.reply('Aucune partie n\'est en cours !')
+                return interaction.reply({
+                    content: 'Aucune partie en cours pour vous !',
+                    ephemeral: true
+                })
             }
 
             if (games[interaction.guild.id + '-' + interaction.member.user.id] === true) {
                 const key = interaction.guild.id + '-' + interaction.member.user.id
                 games[key] = 'won'
-                interaction.reply('Le kouinkouin a été capturé !')
+                const userName = interaction.member.nickname ?? interaction.member.user.globalName
+                interaction.reply(`Le kouinkouin de ${userName} a été capturé !`)
             }
             else {
                 interaction.reply('Raté !')
