@@ -33,7 +33,6 @@ module.exports = {
 
     // Fonction d'exécution quand la commande est déclenchée
     async execute (interaction) {
-        console.log(interaction.member)
         // On définit le serveur et l'utilisateur à partir de l'interaction
         const serverID = interaction.guild.id
         const userID = interaction.member.user.id
