@@ -90,7 +90,7 @@ module.exports = {
 
                     delete games[key]
 
-                }, 1500)
+                }, 1200)
 
             } else {
                 // Sinon on continue de décrémenter le timer
@@ -110,7 +110,10 @@ module.exports = {
         // On vérifie que la personne qui clique est bien celle qui a lancé la partie
 
         if (userID !== interactionUserID) {
-            return interaction.reply('Ce n\'est pas votre kouinkouin !')
+            return interaction.reply({
+                content: 'Ceci n\'est pas votre kouinkouin !',
+                ephemeral: true
+            })
         }
 
         const key = interaction.guild.id + '-' + interaction.member.user.id
