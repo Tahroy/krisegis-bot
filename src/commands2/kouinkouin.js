@@ -4,6 +4,7 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discor
 const { ButtonStyle } = require('discord-api-types/v8')
 const { readdirSync } = require('node:fs')
 const { join, extname } = require('node:path')
+const { addPlayerItem } = require('../utils/Utils')
 
 // Nous déclarons un tableau vide 'games'.
 let games = []
@@ -18,12 +19,12 @@ let games = []
  * Un message contenant "..." est envoyé.
  * Ce message est répété chaque seconde.
  *
- * À la fin du timer, une image de kouinkouin est envoyée avec un bouton "Tirer!".
- * Le joueur a 2 secondes pour cliquer dessus, sinon il perd!
- * Nous supprimons ensuite l'image du kouinkouin et envoyons un message "Bravo!" ou "Perdu!".
+ * À la fin du timer, un bouton apparaît avec écrit "Tirer !"
+ * Le joueur a 1.2 secondes pour cliquer dessus, sinon il perd !
+ * Selon le résultat, on envoie "Bravo !" ou "Perdu !"
  *
- * NOTE : L'implémentation suivante n'inclut pas l'image du kouinkouin, car elle doit être servie depuis un certain emplacement.
- * Veuillez remplacer 'imageName' par le chemin réel de l'image.
+ * Lorsque quelqu'un clique sur "Tirer !" à temps, il est celui qui capture le kouinkouin.
+ * Il gagne donc le kouinkouin dans son inventaire
  */
 module.exports = {
     // Définition de la commande slash avec son nom et sa description
@@ -44,7 +45,16 @@ module.exports = {
         }
 
         // Sinon on lance une nouvelle partie
-        games[key] = true
+
+        // On prend un kouinkouin dans la liste
+        const images = readdirSync(join('assets', 'kouinkouins'))
+            .filter(file => ['.jpg', '.png'].includes(extname(file)))
+        const randomImg = images[Math.floor(Math.random() * images.length)]
+        const imgPath = join('assets', 'kouinkouins', randomImg)
+
+        // On stocke l'ID du kouinkouin dans le jeu
+        games[key] = parseInt(randomImg.split('_')[1].replace('.png', ''))
+
         await interaction.reply('La partie débute !')
 
         let timer = Math.floor(Math.random() * (10 - 3 + 1)) + 3
@@ -69,11 +79,6 @@ module.exports = {
                 })
 
                 setTimeout(function () {
-                    const images = readdirSync(join('assets', 'kouinkouins'))
-                        .filter(file => ['.jpg', '.png'].includes(extname(file)))
-                    const randomImg = images[Math.floor(Math.random() * images.length)]
-                    const imgPath = join('assets', 'kouinkouins', randomImg)
-
                     // Après 2 secondes, on annonce le résultat de la partie
                     if (games[key] === 'won') {
                         interaction.followUp({
@@ -107,19 +112,18 @@ module.exports = {
     // Fonction exécutée lors du clic sur le bouton
     async executeButton (interaction, buttonName) {
         const action = buttonName.split('_')[0]
-        const userID = parseInt(buttonName.split('_')[1])
-
-        const interactionUserID = parseInt(interaction.member.user.id)
+        const userID = buttonName.split('_')[1]
 
         // On vérifie que la personne qui clique est bien celle qui a lancé la partie
 
+        /*
         if (userID !== interactionUserID) {
             return interaction.reply({
                 content: 'Ceci n\'est pas votre kouinkouin !',
                 ephemeral: true
             })
         }
-
+        */
         const key = interaction.guild.id + '-' + interaction.member.user.id
 
         // Si l'action est de 'catchkouinkouin', on marque la partie comme gagnée
@@ -131,11 +135,34 @@ module.exports = {
                 })
             }
 
-            if (games[interaction.guild.id + '-' + interaction.member.user.id] === true) {
+            if (Number.isInteger(games[interaction.guild.id + '-' + interaction.member.user.id])) {
                 const key = interaction.guild.id + '-' + interaction.member.user.id
+                const kouinkouinID = games[key]
                 games[key] = 'won'
-                const userName = interaction.member.nickname ?? interaction.member.user.globalName
-                interaction.reply(`Le kouinkouin de ${userName} a été capturé !`)
+
+                // Celui qui attrape le kouinkouin
+                const catcher = interaction.member
+                const catcherName = catcher.nickname ?? catcher.user.globalName
+
+                // Celui qui a lancé la ligne
+
+                if (userID === catcher.user.id) {
+                    interaction.reply(`${catcherName} a attrapé son kouinkouin !`)
+                }
+                else {
+                    interaction.reply(`${catcherName} a volé le kouinkouin !`)
+                }
+
+                const KOUINKOUINS = {
+                    1: "Gros kouinkouin",
+                    2: "Kouinkouin rétro",
+                    3: "Kouinkouin de bain de Nagate",
+                    4: "Faux kouinkouin",
+                    5: "Kouinkouin fantôme",
+                    6: "Kouinkouin noir",
+                    7: "Kouinkouin"
+                }
+                await addPlayerItem(catcher.user, KOUINKOUINS[kouinkouinID])
             }
             else {
                 interaction.reply('Raté !')

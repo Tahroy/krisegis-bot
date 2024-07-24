@@ -5,8 +5,8 @@ const {version} = require(`${appRoot}/config/config_bot.json`);
 module.exports = {
 	createEmbed(fields, options) {
 
-		console.log("On fait un embed");
-		console.log(fields);
+//		console.log("On fait un embed");
+//		console.log(fields);
 		const builder = new EmbedBuilder()
 			.setColor(Colors.Yellow)
 			//.setURL('https://krisegis.fr')
