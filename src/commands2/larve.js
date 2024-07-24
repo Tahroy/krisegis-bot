@@ -96,6 +96,7 @@ class Game {
                 content: "La partie est déjà en cours !",
                 ephemeral: true
             })
+            return;
         }
         const userId = interaction.user.id
         const userName = interaction.member.nickname ?? interaction.member.user.globalName
