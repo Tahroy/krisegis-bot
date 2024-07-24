@@ -1,4 +1,13 @@
 const {SlashCommandBuilder} = require("discord.js");
+const { addPlayerItem } = require('../utils/Utils')
+
+const larvesLabels = {
+    'larveB': 'Larve bleue',
+    'larveD': 'Larve dorée',
+    'larveO': 'Larve orange',
+    'larveV': 'Larve verte',
+    'larveVio': 'Larve violette',
+}
 
 module.exports = {
     opts: {},
@@ -15,10 +24,10 @@ module.exports = {
                 .setName('larve')
                 .setDescription('La larve à choisir')
                 .setRequired(true)
-                .addChoices({name: 'Bleue', value: 'larveB'}, {name: 'Dorée', value: 'larveD'}, {
-                    name: 'Orange',
+                .addChoices({name: larvesLabels['larveB'], value: 'larveB'}, {name: larvesLabels['larveD'], value: 'larveD'}, {
+                    name: larvesLabels['larveO'],
                     value: 'larveO'
-                }, {name: 'Violette', value: 'larveVio'}, {name: 'Verte', value: 'larveV'}))),
+                }, {name: larvesLabels['larveVio'], value: 'larveVio'}, {name: larvesLabels['larveV'], value: 'larveV'}))),
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client;
@@ -139,10 +148,22 @@ module.exports = {
         let gagnants = [];
 
         paris.forEach(function (joueur) {
-            if (joueur.larve === result) gagnants.push('<@!' + joueur.id + '>');
+            if (joueur.larve === result) {
+                gagnants.push('<@!' + joueur.id + '>');
+
+                addPlayerItem({'id': joueur.id }, larvesLabels[result]);
+            }
         });
 
-        if (gagnants.length === 1) channel.send(gagnants.join(', ') + ' a gagné !'); else if (gagnants.length === 1) channel.send(gagnants.join(', ') + ' ont gagné !'); else channel.send("Personne n'a gagné. :(");
+        if (gagnants.length === 1) {
+            channel.send(gagnants.join(', ') + ' a gagné !')
+        } else if (gagnants.length === 1) {
+            channel.send(gagnants.join(', ') + ' ont gagné !')
+        }
+        else {
+            channel.send("Personne n'a gagné. :(");
+        }
+
     },
     jeuFini(channel) {
         const larves = this.partiesEnCours[channel.id]['larves'];
