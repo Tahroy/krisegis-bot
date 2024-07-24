@@ -6,6 +6,7 @@ const Variable = require('../database/Variable')
 const Server = require('../database/Server')
 const { Op } = require('sequelize')
 const LoreElement = require('../database/LoreElement')
+const PlayerItem = require('../database/PlayerItem')
 
 function htmlToMarkdown (texteHTML) {
     // Remplacer les balises de paragraphe par des sauts de ligne
@@ -237,5 +238,25 @@ module.exports = {
         )
 
     },
+
+    async addPlayerItem (user, name) {
+        let playerItem = await PlayerItem.findOne({
+            where: {
+                name: name,
+                user_id: user.id
+            }
+        })
+
+        if (playerItem) {
+            playerItem.quantity += 1
+            await playerItem.save()
+        } else {
+            playerItem = await PlayerItem.create({
+                name: name,
+                user_id: user.id,
+                quantity: 1
+            })
+        }
+    }
 
 }
