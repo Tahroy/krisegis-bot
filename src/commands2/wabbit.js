@@ -3,6 +3,35 @@ const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v8')
 const fs = require('fs')
 const path = require('path')
+const { addPlayerItem } = require('../utils/Utils')
+
+
+const WABBITS_NAMES = {
+    1: 'Wabbit',
+    2: 'Black Wabbit',
+    3: 'Tiwabbit',
+    4: 'Tiwabbit Kiafin',
+    5: 'Wabbit GM',
+    6: 'Wabbit Vampire',
+    7: 'Wabbit Fluo',
+    8: 'Wabbit Garou',
+    9: 'Black Wabbit Squelette',
+    10: 'Tchô Wabbit',
+    11: 'Esclave Wabbit',
+    12: 'Black Tiwabbit',
+    13: 'Tiwabbit',
+    14: 'Wo Wabbit',
+    15: 'Grand Pa Wabbit',
+    16: 'Gawde Wabbit',
+    17: 'Wa Wabbit',
+    18: 'Black tiwabbitus',
+    19: 'Gawdien Wabbit',
+    20: 'Peluche Wabbit',
+    21: 'Blanc Pa Wabbit',
+    22: 'Black Wo Wabbit',
+    23: 'Wabbit en wetawd',
+    24: 'Wabbit Céphale'
+}
 
 let usersByChannel = {}
 
@@ -100,7 +129,11 @@ module.exports = {
             const userScore = channelData.users[user.id].score
             const plural = userScore > 1 ? 's' : ''
 
-            return interaction.reply(`${userName} a eu le point ! Il a maintenant ${userScore} point${plural}`)
+            const wabbitName = WABBITS_NAMES[channelData.image]
+
+            addPlayerItem(user, wabbitName)
+
+            return interaction.reply(`${userName} a capturé un ${wabbitName} ! Il a maintenant ${userScore} point${plural}`)
         }
 
         // Si le randomID est à 0, le wabbit a déjà été attrapé
@@ -167,8 +200,10 @@ module.exports = {
 
         buttonHit.components.sort(() => Math.random() - 0.5)
 
+        const wabbitName = WABBITS_NAMES[fileName]
+
         const message = await channel.send({
-            content: `Un wabbit est arrivé ! (${randomID})`,
+            content: `Un ${wabbitName} est arrivé ! (${randomID})`,
             components: [buttonHit],
             files: [imagePath], // Attache le fichier (l'image) au message
         })
