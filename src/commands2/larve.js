@@ -13,25 +13,25 @@ const larvesLabels = {
 const LARVES = {
     'larve_bleue': {
         'name': 'Larve bleue',
-        'id' : '1265795127620665375'
+        'id' : '1265760235977441365'
     }, 'larve_doree': {
         'name': 'Larve dorée',
-        'id' : '1265795115822354523'
+        'id' : '1265760228947922986'
     }, 'larve_orange': {
         'name': 'Larve orange',
-        'id' : '1265795085245616128'
+        'id' : '1265760504731668520'
     }, 'larve_verte': {
         'name': 'Larve verte',
-        'id': '1265795098990612664'
+        'id': '1265760497907794010'
     }, 'larve_violette': {
         'name': 'Larve violette',
-        'id': '1265795208776388639'
+        'id': '1265760402965397599'
     }, 'larve_rose': {
         'name': 'Larve rose',
-        'id': '1265795071152881775'
+        'id': '1265753280534020226'
     }, 'larve_grise': {
         'name': 'Larve grise',
-        'id': '1265795058649661532'
+        'id': '1265760658063102058'
     },
 }
 
