@@ -1,10 +1,13 @@
-const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require("discord.js");
-const {ButtonStyle} = require("discord-api-types/v8");
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, ModalBuilder } = require("discord.js");
+const {ButtonStyle, TextInputStyle } = require("discord-api-types/v8");
 const embedData = require("../utils/embed");
+const { addPlayerItem } = require('../utils/Utils')
+const Potion = require('../database/Potion')
 
 const NOMBRE = 5;
 
 let parties = {};
+let savedPotions = {};
 
 const ingredients = {
 	snake: "🐍",
@@ -25,7 +28,8 @@ const ingredients = {
 module.exports = {
 	opts: {}, data: new SlashCommandBuilder()
 		.setName('potions')
-		.setDescription('Lance le jeu des potions'), async execute(interaction) {
+		.setDescription('Lance le jeu des potions'),
+	async execute(interaction) {
 
 		const channelID = interaction.channel.id;
 
@@ -45,7 +49,8 @@ module.exports = {
 
 		parties[channelID].message = await interaction.fetchReply()
 
-	}, async executeButton(interaction, buttonName) {
+	},
+	async executeButton(interaction, buttonName) {
 		const channelID = interaction.channel.id;
 
 		if (parties[channelID]) {
@@ -62,7 +67,7 @@ module.exports = {
 				partie.message.edit(parties[channelID].render());
 
 				if (submitResult) {
-					interaction.channel.send("Bravo ! Vous avez gagné ! :tada: :tada: :tada:");
+					return await partie.validatePotion(interaction)
 				}
 				return interaction.deferUpdate();
 			}
@@ -74,6 +79,28 @@ module.exports = {
 			}
 			return interaction.reply({content: "Veuillez valider l'étape !", ephemeral: true});
 		}
+	},
+	async gererModal(interaction, modalName) {
+
+		const modalNameExploded = modalName.split('_');
+		const userId = modalNameExploded[1];
+
+		const ingredients = savedPotions[userId];
+
+		const name = interaction.fields.getTextInputValue('name');
+
+		const potion = await Potion.create({
+			name: name,
+			user_id: userId,
+			ingredient_1: ingredients[0],
+			ingredient_2: ingredients[1],
+			ingredient_3: ingredients[2],
+			ingredient_4: ingredients[3],
+			ingredient_5: ingredients[4]
+		})
+
+		await interaction.reply({content: `Vous avez créé la potion **${potion.name}** ! :tada: :tada: :tada:`})
+		addPlayerItem(interaction.user, `Potion : ${potion.name}`);
 	}
 };
 
@@ -244,5 +271,56 @@ class MasterMindGame {
 		}
 
 		return false;
+	}
+	async validatePotion (interaction) {
+		const objectif = this.objectif
+
+		// On cherche dans la table Potion une potion qui correspond aux ingrédients
+		const potion = await Potion.findOne({
+			where: {
+				ingredient_1: objectif[0],
+				ingredient_2: objectif[1],
+				ingredient_3: objectif[2],
+				ingredient_4: objectif[3],
+				ingredient_5: objectif[4],
+			}
+		})
+
+		if (potion) {
+			// Si la potion existe, on dit qu'il a trouvé celle-ci
+			await interaction.reply({content: `Vous avez gagnez la potion **${potion.name}** ! :tada: :tada: :tada:`})
+			addPlayerItem(interaction.user, `Potion : ${potion.name}`);
+		}
+		else {
+			savedPotions[interaction.user.id] = this.objectif;
+
+			// Create the modal
+			const modal = new ModalBuilder()
+				.setCustomId(`potions-name_${interaction.member.user.id}`)
+				.setTitle('Nommer votre potion');
+
+			// Add components to modal
+			// Create the text input components
+			const favoriteColorInput = new TextInputBuilder()
+				.setCustomId('name')
+				// The label is the prompt the user sees for this input
+				.setLabel("Quel nom voulez-vous lui attribuer ?")
+				// Short means only a single line of text
+				.setStyle(TextInputStyle.Short)
+				.setMinLength(3)
+				.setRequired(true)
+			;
+
+			// An action row only holds one text input,
+			// so you need one action row per text input.
+			const firstActionRow = new ActionRowBuilder().addComponents(favoriteColorInput);
+
+			// Add inputs to the modal
+			modal.addComponents(firstActionRow);
+
+			// Show the modal to the user
+			//await interaction.reply({content: `Vous avez gagné ! Nommez votre potion pour l'obtenir`})
+			await interaction.showModal(modal);
+		}
 	}
 }
