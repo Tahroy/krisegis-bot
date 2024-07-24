@@ -64,7 +64,7 @@ module.exports = {
     async executeButton (interaction, buttonName) {
         const game = partiesEnCours[interaction.channel.id]
 
-        if (!game) {
+        if (!game || game.status === 'ended') {
             interaction.reply({
                 content: 'Aucune partie en cours',
                 ephemeral: true
@@ -90,6 +90,12 @@ class Game {
     sautLigne = '\n'
 
     async addNewLarve (interaction, buttonName) {
+        if (this.status !== 'waiting') {
+            interaction.reply({
+                content: "La partie est déjà en cours !",
+                ephemeral: true
+            })
+        }
         const userId = interaction.user.id
         const userName = interaction.member.nickname ?? interaction.member.user.globalName
 
