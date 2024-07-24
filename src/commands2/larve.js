@@ -69,10 +69,11 @@ module.exports = {
                 content: 'Aucune partie en cours',
                 ephemeral: true
             })
+            return;
         }
 
         if (buttonName === 'go') {
-            game.launchGame(interaction)
+            await game.launchGame(interaction)
         } else {
             await game.addNewLarve(interaction, buttonName)
         }
