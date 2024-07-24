@@ -1,5 +1,6 @@
-const {SlashCommandBuilder} = require("discord.js");
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 const { addPlayerItem } = require('../utils/Utils')
+const { ButtonStyle } = require('discord-api-types/v8')
 
 const larvesLabels = {
     'larveB': 'Larve bleue',
@@ -9,231 +10,271 @@ const larvesLabels = {
     'larveVio': 'Larve violette',
 }
 
+const LARVES = {
+    'larve_bleue': {
+        'name': 'Larve bleue',
+        'id' : '1265795127620665375'
+    }, 'larve_doree': {
+        'name': 'Larve dorée',
+        'id' : '1265795115822354523'
+    }, 'larve_orange': {
+        'name': 'Larve orange',
+        'id' : '1265795085245616128'
+    }, 'larve_verte': {
+        'name': 'Larve verte',
+        'id': '1265795098990612664'
+    }, 'larve_violette': {
+        'name': 'Larve violette',
+        'id': '1265795208776388639'
+    }, 'larve_rose': {
+        'name': 'Larve rose',
+        'id': '1265795071152881775'
+    }, 'larve_grise': {
+        'name': 'Larve grise',
+        'id': '1265795058649661532'
+    },
+}
+
+let partiesEnCours = []
+
 module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('larve')
-        .setDescription('Permet de jouer au jeu des larves')
-        .addSubcommand(subcommand => subcommand
-            .setName('go')
-            .setDescription('Lance la partie'))
-        .addSubcommand(subcommand => subcommand
-            .setName('choix')
-            .setDescription('Permet de choisir une larve')
-            .addStringOption(option => option
-                .setName('larve')
-                .setDescription('La larve à choisir')
-                .setRequired(true)
-                .addChoices({name: larvesLabels['larveB'], value: 'larveB'}, {name: larvesLabels['larveD'], value: 'larveD'}, {
-                    name: larvesLabels['larveO'],
-                    value: 'larveO'
-                }, {name: larvesLabels['larveVio'], value: 'larveVio'}, {name: larvesLabels['larveV'], value: 'larveV'}))),
-    async execute(interaction) {
-        const subCommand = interaction.options.getSubcommand();
-        this.client = interaction.client;
+        .setDescription('Permet de jouer au jeu des larves'),
+    async execute (interaction) {
+        // const subCommand = interaction.options.getSubcommand();
+        this.client = interaction.client
 
-        switch (subCommand) {
-            case 'choix':
-                await this.addLarve(interaction);
-                break;
-            case 'go':
-                await this.goGame(interaction)
-        }
+        await this.displayLarvesButtons(interaction)
     },
 
+    async displayLarvesButtons (interaction) {
+        const channelId = interaction.channel.id
 
-    name: 'larve',
-    description: 'Jeu des larves',
-    usage: '',
-    partiesEnAttente: [],
-    partiesEnCours: [],
-    client: null,
-
-    async addLarve(interaction) {
-        const channel = interaction.channel;
-        const channelID = channel.id;
-        const userID = interaction.member.user.id;
-        const larve = interaction.options.getString('larve');
-
-        /**
-         * Si une partie est en cours, on refuse
-         */
-        if (this.partiesEnCours[channelID]) {
-            return await interaction.reply('Une partie est déjà en cours !');
+        if (partiesEnCours[channelId]) {
+            await interaction.reply('Une partie est déjà en cours !')
+            return
         }
 
-        /**
-         * Si aucune partie, on la créé
-         */
-        if (!this.partiesEnAttente[channelID]) {
-            this.partiesEnAttente[channelID] = [];
-            this.partiesEnAttente[channel.id]['paris'] = [];
-        }
+        partiesEnCours[channelId] = new Game()
 
-        // Ajoute le joueur
-
-        let pari = {
-            'id': userID, 'larve': larve,
-        };
-        this.partiesEnAttente[channel.id]['paris'].push(pari);
-        return interaction.reply("Je t'ai ajouté à la liste des joueurs !");
+        partiesEnCours[channelId].message = await interaction.reply(partiesEnCours[channelId].getReplyButtons(interaction))
     },
-    async goGame(interaction) {
-        const self = this;
-        const channel = interaction.channel;
-        const channelID = channel.id;
+    async executeButton (interaction, buttonName) {
+        const game = partiesEnCours[interaction.channel.id]
 
-        if (!self.partiesEnAttente[channelID]) {
-            return interaction.reply('Aucune partie en attente. :/');
+        if (!game) {
+            interaction.reply({
+                content: 'Aucune partie en cours',
+                ephemeral: true
+            })
         }
 
-        this.partiesEnCours[channelID] = this.partiesEnAttente[channelID];
-        this.partiesEnCours[channelID]['larves'] = {
-            [this.larveB]: 0, [this.larveD]: 0, [this.larveO]: 0, [this.larveV]: 0, [this.larveVio]: 0,
-        };
-        this.partiesEnAttente[channelID] = null;
+        if (buttonName === 'go') {
+            game.launchGame(interaction)
+        } else {
+            await game.addNewLarve(interaction, buttonName)
+        }
 
-        let partie = this.getPartie(channel);
-        interaction.reply("C'est parti !");
-        let msg = await channel.send(partie);
-        let i = 0;
+    },
+}
 
-        let result = null;
-        const interval = setInterval(function () {
-            i++;
-            self.updateLarves(channelID);
-            msg.edit(self.getPartie(channel));
-            if ((result = self.jeuFini(channel)) !== false) {
-                clearInterval(interval);
-                self.annoncerGagnant(channel, result);
-                self.partiesEnCours[channelID] = null;
+class Game {
+    status = 'waiting'
+    message = null
+    larves = {}
+    plateau = {}
+    winner = null
+    flag = ':checkered_flag:'
+    sautLigne = '\n'
+
+    async addNewLarve (interaction, buttonName) {
+        const userId = interaction.user.id
+        const userName = interaction.member.nickname ?? interaction.member.user.globalName
+
+        // On vérifie que la larve n'est pas déjà prise
+        const larvesEnCours = this.larves
+
+        if (larvesEnCours[buttonName]) {
+            await interaction.reply({
+                content: 'Cette larve a déjà été choisie !', ephemeral: true
+            })
+            return
+        }
+
+        if (Object.values(larvesEnCours).includes(userId)) {
+            await interaction.reply({
+                content: 'Vous avez déjà choisi une larve !', ephemeral: true
+            })
+            return
+        }
+
+        larvesEnCours[buttonName] = userId
+
+        const larveName = LARVES[buttonName].name
+
+        interaction.reply({
+            content: `${userName} a pris la ${larveName}`, ephemeral: false
+        })
+
+        this.message.edit(this.getReplyButtons(interaction))
+    }
+    async launchGame (interaction) {
+        // On vérifie qu'elle est bien en attente
+        if (this.status !== 'waiting') {
+            return interaction.reply({
+                content: 'La partie est déjà lancée !', ephemeral: true
+            })
+        }
+
+        this.status = 'started'
+        this.plateau = {}
+        for (const [key, value] of Object.entries(LARVES)) {
+            this.plateau[key] = 0
+        }
+
+        const plateauMessage = await interaction.channel.send(this.getPlateau())
+        interaction.reply({
+            content: "C'est parti !",
+            ephemeral: true
+        })
+        let game = this
+        const interval = setInterval(async function () {
+            game.updateLarves()
+            await plateauMessage.edit(game.getPlateau())
+            game.checkWinner()
+
+            if (game.status === 'ended') {
+                await game.annoncerGagnant(interaction)
+                await clearInterval(interval)
             }
-        }, 1000);
-    },
+        }, 1000)
+    }
 
-    ajoutOuCreation(message, larve) {
-        const channel = message.channel;
-        const channelID = channel.id;
-        const authorID = message.author.id;
+    /**
+     * Iterates over the plateau object to determine the winner based on the maximum value.
+     *
+     */
+    checkWinner () {
+        let winner = null;
+        let max = 14
+        for (const [key, value] of Object.entries(this.plateau)) {
+            if (value >= max) {
+                winner = key
+                max = value
+                this.status = 'ended'
+                this.winner = winner
+            }
+        }
+    }
 
-        // Si une partie est en cours, on rejette
-        if (this.partiesEnCours[channelID]) return message.reply('Une partie est déjà en cours !');
-
-        // Si aucune partie, on la créé
-        if (!this.partiesEnAttente[channelID]) {
-            this.partiesEnAttente[channelID] = [];
-            this.partiesEnAttente[channel.id]['paris'] = [];
+    annoncerGagnant (interaction) {
+        if (!this.winner) {
+            console.error("Aucun gagnant !")
+            return
         }
 
-        // Ajoute le joueur
+        const channel = interaction.channel
 
-        let pari = {
-            'id': message.author.id, 'larve': larve,
-        };
+        const playerId = this.larves[this.winner]
+        const larveLabel = LARVES[this.winner]
 
-        this.partiesEnAttente[channel.id]['paris'].push(pari);
-        message.reply("Je t'ai ajouté à la liste des joueurs !");
-    },
-    updateLarves(channelID) {
-        this.partiesEnCours[channelID]['larves'][this.larveB] += Math.floor(Math.random() * 3);
-        this.partiesEnCours[channelID]['larves'][this.larveD] += Math.floor(Math.random() * 3);
-        this.partiesEnCours[channelID]['larves'][this.larveO] += Math.floor(Math.random() * 3);
-        this.partiesEnCours[channelID]['larves'][this.larveV] += Math.floor(Math.random() * 3);
-        this.partiesEnCours[channelID]['larves'][this.larveVio] += Math.floor(Math.random() * 5) - 1;
-    },
-    annoncerGagnant(channel, result) {
-        const paris = this.partiesEnCours[channel.id]['paris'];
-        channel.send('Gagnant : ' + this.getEmoji(result));
-
-        let gagnants = [];
-
-        paris.forEach(function (joueur) {
-            if (joueur.larve === result) {
-                gagnants.push('<@!' + joueur.id + '>');
-
-                addPlayerItem({'id': joueur.id }, larvesLabels[result]);
-            }
-        });
-
-        if (gagnants.length === 1) {
-            channel.send(gagnants.join(', ') + ' a gagné !')
-        } else if (gagnants.length === 1) {
-            channel.send(gagnants.join(', ') + ' ont gagné !')
+        if (!playerId) {
+            channel.send({content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
         }
         else {
-            channel.send("Personne n'a gagné. :(");
+            channel.send({content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>`})
+            addPlayerItem({id: playerId}, larveLabel.name)
         }
 
-    },
-    jeuFini(channel) {
-        const larves = this.partiesEnCours[channel.id]['larves'];
+        partiesEnCours[channel.id] = null
+    }
 
-        let gagnant = false;
-        let max = 0;
-        for (const [key, value] of Object.entries(larves)) {
-            if (value >= this.objectif && value > max) gagnant = key;
-            max = value;
+    getPlateau () {
+        const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
+        const larves =  [];
+        for (const [key, value] of Object.entries(this.plateau)) {
+            larves.push(this.getLarve(key))
         }
 
-        return gagnant;
-    },
-    getPartie(channel) {
-        let base = this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne;
-        let larveB = this.getLarve(channel.id, this.larveB);
-        let larveD = this.getLarve(channel.id, this.larveD);
-        let larveO = this.getLarve(channel.id, this.larveO);
-        let larveV = this.getLarve(channel.id, this.larveV);
-        let larveVio = this.getLarve(channel.id, this.larveVio);
-        let fin = this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne;
+        const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
 
-        return base + larveB + larveD + larveO + larveV + larveVio + fin;
-    },
-    getLarve(channelID, larve) {
-        const scoreLarve = this.partiesEnCours[channelID]['larves'][larve];
-        let retour = this.flag;
+        return base + larves.join(this.sautLigne) + end
+    }
 
-        for (let i = 0; i < scoreLarve; i++) retour += '-';
+    updateLarves() {
+        for (const [key, value] of Object.entries(this.plateau)) {
+            switch(key) {
+                case 'larve_violette':
+                    this.plateau[key] += Math.floor(Math.random() * 5) - 1
+                    break
+                case 'larve_rose':
+                    this.plateau[key] += Math.floor(Math.random()) + 1
+                    break
+                default:
+                    this.plateau[key] += Math.floor(Math.random() * 3)
+            }
+        }
+    }
+    /**
+     * Permet de générer le message avec les boutons des larves
+     *
+     * @param interaction
+     * @returns {{components: *[], content: string}}
+     */
+    getReplyButtons (interaction) {
+        const larves = this.larves
 
-        retour += this.getEmoji(larve) + this.sautLigne
-        return retour;
-    },
-    getEmoji(emoji) {
-        let myEmoji = emoji;
-        if (myEmoji.indexOf(':') === -1) {
-            let search = this.client.emojis.cache.find(emoji => emoji.name === myEmoji);
-            if (search !== undefined) myEmoji = '<:' + search.name + ':' + search.id + '>'; else {
-                switch (myEmoji) {
-                    case 'larveB':
-                        myEmoji = ':blue_circle:';
-                        break;
-                    case 'larveD':
-                        myEmoji = ':yellow_circle:';
-                        break;
-                    case 'larveV':
-                        myEmoji = ':green_circle:';
-                        break;
-                    case 'larveO':
-                        myEmoji = ':orange_circle:';
-                        break;
-                    case 'larveVio':
-                        myEmoji = ':purple_circle:';
-                        break;
-                    default:
-                        myEmoji = ':interrobang:';
-                        break;
-                }
+        // On va créer un bouton par larve
+        let buttons = []
+        let row1 = new ActionRowBuilder()
+        let row2 = new ActionRowBuilder()
+
+        let count = 0
+        for (const [key, value] of Object.entries(LARVES)) {
+            count++
+            if (count <= 5) {
+                row1.addComponents(new ButtonBuilder()
+                    .setCustomId(`larve-${key}`)
+                    .setLabel(value.name)
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji(`<:${key}:${LARVES[key].id}>`)
+                    .setDisabled(!!larves[key]))
+            } else {
+                row2.addComponents(new ButtonBuilder()
+                    .setCustomId(`larve-${key}`)
+                    .setLabel(value.name)
+                    .setStyle(ButtonStyle.Primary)
+                    .setEmoji(`<:${key}:${LARVES[key].id}>`)
+                    .setDisabled(!!larves[key]))
             }
         }
 
-        return myEmoji;
-    },
+        row2.addComponents(new ButtonBuilder()
+            .setCustomId(`larve-go`)
+            .setLabel('Lancer la course')
+            .setStyle(ButtonStyle.Success)
+            .setEmoji('➡️')
+            .setDisabled(this.status !== 'waiting'))
 
-    flag: ':checkered_flag:',
-    larveB: 'larveB',
-    larveD: 'larveD',
-    larveO: 'larveO',
-    larveV: 'larveV',
-    larveVio: 'larveVio',
-    sautLigne: '\n',
-    objectif: 15,
-};
+        buttons.push(row1, row2)
+
+        return {
+            content: 'Veuillez choisir une larve ou lancer la course', components: buttons
+        }
+    }
+
+    getLarve (key) {
+        let retour = this.flag;
+
+        const larve = this.plateau[key]
+        for (let i = 0; i < larve; i++) {
+            retour += '-'
+        }
+
+        const id = LARVES[key].id
+
+        return retour + `<:${key}:${id}>`
+    }
+}
