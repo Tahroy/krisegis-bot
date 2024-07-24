@@ -60,6 +60,21 @@ module.exports = function (client) {
             console.error(error)
         }
     }
+    this.gererModal = async function (interaction) {
+        const customId = interaction.customId
+
+        const customIdExploded = customId.split('-', 2)
+
+        const commandName = customIdExploded[0]
+        const modalName = customIdExploded[1]
+
+        const command = client.commands.get(commandName)
+        try {
+            return await command.gererModal(interaction, modalName)
+        } catch (error) {
+            console.error(error)
+        }
+    }
     client.on('interactionCreate', async interaction => {
         if (interaction.isCommand()) {
             await this.gererCommande(interaction)
@@ -67,6 +82,8 @@ module.exports = function (client) {
             await this.gererBouton(interaction)
         } else if (interaction.isAutocomplete()) {
             await this.autocomplete(interaction)
+        } else if (interaction.isModalSubmit()) {
+            await this.gererModal(interaction)
         }
     })
 }
