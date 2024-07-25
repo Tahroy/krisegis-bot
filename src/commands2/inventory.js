@@ -10,7 +10,7 @@ module.exports = {
     async execute (interaction) {
         const user = interaction.user
         const member = interaction.member
-        const memberName = member.nickname ?? member.user.globalName
+        const memberName = member.nickname ?? user.globalName
 
         const playerItems = await PlayerItem.findAll({
             where: {
