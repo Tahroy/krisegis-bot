@@ -30,7 +30,9 @@ module.exports = {
     // Définition de la commande slash avec son nom et sa description
     data: new SlashCommandBuilder()
         .setName('kouinkouin')
-        .setDescription('Permet de pêcher un kouinkouin'),
+        .setDescription('Permet de pêcher un kouinkouin')
+        .setDMPermission(false)
+    ,
 
     // Fonction d'exécution quand la commande est déclenchée
     async execute (interaction) {
