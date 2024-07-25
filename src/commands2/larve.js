@@ -41,7 +41,9 @@ module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
         .setName('larve')
-        .setDescription('Permet de jouer au jeu des larves'),
+        .setDescription('Permet de jouer au jeu des larves')
+        .setDMPermission(false)
+    ,
     async execute (interaction) {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client

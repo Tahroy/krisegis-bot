@@ -28,7 +28,9 @@ const ingredients = {
 module.exports = {
 	opts: {}, data: new SlashCommandBuilder()
 		.setName('potions')
-		.setDescription('Lance le jeu des potions'),
+		.setDescription('Lance le jeu des potions')
+		.setDMPermission(false)
+	,
 	async execute(interaction) {
 
 		const channelID = interaction.channel.id;
