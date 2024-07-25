@@ -9,7 +9,7 @@ const Variable = require('../database/Variable')
 const WelcomeMessage = require('../database/WelcomeMessage')
 
 module.exports = {
-    opts: {},
+    opts: {admin:true},
     data: new SlashCommandBuilder()
         .setName('server')
         .setDescription('Choisir son serveur.')
