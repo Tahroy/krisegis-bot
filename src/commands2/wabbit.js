@@ -47,6 +47,7 @@ module.exports = {
                 .setMinValue(1)
                 .setMaxValue(15)
         )
+        .setDMPermission(false)
     ,
     async execute (interaction) {
         const channelId = interaction.channel.id
