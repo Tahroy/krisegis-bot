@@ -40,10 +40,10 @@ module.exports = {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
-        await this.displayLarvesButtons(interaction)
+//        await this.displayLarvesButtons(interaction)
         /* TEST */
 
-        /*
+
         interaction.reply({ content: 'Termine !', ephemeral: true })
 
         for (let i = 0; i < 10000; i++) {
@@ -66,7 +66,7 @@ module.exports = {
             }
         }
 
-         */
+
 
     },
 
@@ -207,9 +207,9 @@ class Game {
         const larveLabel = LARVES[this.winner]
 
         if (!playerId) {
-            channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
+           // channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
         } else {
-            channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
+           // channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
             addPlayerItem({ id: playerId }, larveLabel.name)
         }
 
@@ -250,19 +250,19 @@ class Game {
                 case 'larve_violette':
                     value = value * 2
                     if (Math.random() < 0.5) {
-                        bonus -= 1
+                        bonus -= 1.5
                     } else {
-                        bonus += 2.5
+                        bonus += 2.90
                     }
                     break
                 case 'larve_rose':
                     value = value * 2
-                    bonus += 1.2
+                    bonus += 1.1
                     break
                 case 'larve_grise':
                     value = value * 2
                     if (Math.random() < 0.1) {
-                        bonus += 6.5
+                        bonus += 7.1
                     }
                     break
                 default:
