@@ -215,16 +215,30 @@ class Game {
 
     updateLarves() {
         for (const [key, value] of Object.entries(this.plateau)) {
+            const randomValue = Math.floor(Math.random())
+            let value = randomValue;
             switch(key) {
                 case 'larve_violette':
-                    this.plateau[key] += Math.floor(Math.random() * 4.5) - 1
+                    if (Math.random() < 0.5) {
+                        value -= 1;
+                    }
+                    else {
+                        value += 2
+                    }
                     break
                 case 'larve_rose':
-                    this.plateau[key] += Math.floor(Math.random()) + 1
+                    value = value + 1
                     break
+                case 'larve_grise':
+                    if (Math.random() < 0.1) {
+                        value += 5
+                    }
+                    break;
                 default:
-                    this.plateau[key] += Math.floor(Math.random() * 3)
+                    value = value * 3
             }
+
+            this.plateau[key] += value
         }
     }
     /**
