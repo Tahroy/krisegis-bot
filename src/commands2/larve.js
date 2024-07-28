@@ -184,7 +184,7 @@ class Game {
      */
     checkWinner () {
         let winner = null
-        let max = 20
+        let max = 30
         for (const [key, value] of Object.entries(this.plateau)) {
             if (value >= max) {
                 winner = key
