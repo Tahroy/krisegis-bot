@@ -50,7 +50,7 @@ module.exports = {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
-//        await this.displayLarvesButtons(interaction)
+        await this.displayLarvesButtons(interaction)
         /* TEST */
 
         /*
