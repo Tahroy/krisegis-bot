@@ -217,7 +217,7 @@ class Game {
         for (const [key, value] of Object.entries(this.plateau)) {
             switch(key) {
                 case 'larve_violette':
-                    this.plateau[key] += Math.floor(Math.random() * 4) - 1
+                    this.plateau[key] += Math.floor(Math.random() * 4.5) - 1
                     break
                 case 'larve_rose':
                     this.plateau[key] += Math.floor(Math.random()) + 1
