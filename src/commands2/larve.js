@@ -208,9 +208,9 @@ class Game {
         const larveLabel = LARVES[this.winner]
 
         if (!playerId) {
-           // channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
+           channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
         } else {
-           // channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
+           channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
             addPlayerItem({ id: playerId }, larveLabel.name)
         }
 
