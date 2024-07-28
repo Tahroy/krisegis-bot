@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 const { addPlayerItem } = require('../utils/Utils')
 const { ButtonStyle } = require('discord-api-types/v8')
+const Larve = require('../database/Larve')
+const PlayerItem = require('../database/PlayerItem')
 
 const larvesLabels = {
     'larveB': 'Larve bleue',
@@ -48,7 +50,34 @@ module.exports = {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
-        await this.displayLarvesButtons(interaction)
+//        await this.displayLarvesButtons(interaction)
+        /* TEST */
+
+        /*
+        interaction.reply({ content: 'Termine !', ephemeral: true })
+
+        for (let i = 0; i < 10000; i++) {
+
+            partiesEnCours[i] = new Game()
+            const game = partiesEnCours[i]
+            for (const [key, value] of Object.entries(LARVES)) {
+                game.plateau[key] = 0
+            }
+            while (true) {
+                game.updateLarves()
+                game.checkWinner()
+
+                console.log('Un tour !')
+
+                if (game.status === 'ended') {
+                    await game.annoncerGagnant(interaction)
+                    break;
+                }
+            }
+        }
+
+         */
+
     },
 
     async displayLarvesButtons (interaction) {
@@ -179,7 +208,7 @@ class Game {
         }
     }
 
-    annoncerGagnant (interaction) {
+    async annoncerGagnant (interaction) {
         if (!this.winner) {
             console.error("Aucun gagnant !")
             return
@@ -196,6 +225,21 @@ class Game {
         else {
             channel.send({content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>`})
             addPlayerItem({id: playerId}, larveLabel.name)
+        }
+
+        // On enregistre dans la table larve laquelle a gagné
+        let larve = await Larve.findOne({
+            where: { name: this.winner }
+        })
+
+        if (larve) {
+            larve.nb += 1
+            await larve.save()
+        } else {
+            await Larve.create({
+                name: this.winner,
+                nb: 1
+            })
         }
 
         partiesEnCours[channel.id] = null
@@ -215,29 +259,33 @@ class Game {
 
     updateLarves() {
         for (const [key, value] of Object.entries(this.plateau)) {
-            const randomValue = Math.floor(Math.random())
-            let value = randomValue;
+            let value =  Math.random() * 2
+            let bonus = 0
             switch(key) {
                 case 'larve_violette':
+                    value = value * 2
                     if (Math.random() < 0.5) {
-                        value -= 1;
+                        bonus -= 1;
                     }
                     else {
-                        value += 2
+                        bonus += 2.5
                     }
                     break
                 case 'larve_rose':
-                    value = value + 1
+                    value = value * 2
+                    bonus += 1.2
                     break
                 case 'larve_grise':
+                    value = value * 2
                     if (Math.random() < 0.1) {
-                        value += 5
+                        bonus += 6.5
                     }
                     break;
                 default:
                     value = value * 3
             }
 
+            value = Math.floor(bonus + value)
             this.plateau[key] += value
         }
     }
