@@ -231,13 +231,13 @@ class Game {
     }
 
     getPlateau () {
-        const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
+        const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
         const larves = []
         for (const [key, value] of Object.entries(this.plateau)) {
             larves.push(this.getLarve(key))
         }
 
-        const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
+        const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
 
         return base + larves.join(this.sautLigne) + end
     }
