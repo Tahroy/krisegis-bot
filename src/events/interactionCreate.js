@@ -32,9 +32,14 @@ module.exports = function (client) {
         const customID = interaction.customId
         const explode = customID.split('-', 2)
 
+        const userName = interaction.user.tag;
+
         const commandName = explode[0]
         const buttonName = explode[1]
         const command = client.commands.get(commandName)
+
+        const log = `${userName} a utilisé le bouton ${buttonName} dans la commande ${commandName}`;
+        console.log(log);
 
         try {
             if (command?.opts?.admin && interaction.member.user.id !== owner) {
