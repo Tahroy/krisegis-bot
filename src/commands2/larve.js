@@ -14,39 +14,29 @@ const larvesLabels = {
 
 const LARVES = {
     'larve_bleue': {
-        'name': 'Larve bleue',
-        'id' : '1265760235977441365'
+        'name': 'Larve bleue', 'id': '1265760235977441365'
     }, 'larve_doree': {
-        'name': 'Larve dorée',
-        'id' : '1265760228947922986'
+        'name': 'Larve dorée', 'id': '1265760228947922986'
     }, 'larve_orange': {
-        'name': 'Larve orange',
-        'id' : '1265760504731668520'
+        'name': 'Larve orange', 'id': '1265760504731668520'
     }, 'larve_verte': {
-        'name': 'Larve verte',
-        'id': '1265760497907794010'
+        'name': 'Larve verte', 'id': '1265760497907794010'
     }, 'larve_violette': {
-        'name': 'Larve violette',
-        'id': '1265760402965397599'
+        'name': 'Larve violette', 'id': '1265760402965397599'
     }, 'larve_rose': {
-        'name': 'Larve rose',
-        'id': '1265753280534020226'
+        'name': 'Larve rose', 'id': '1265753280534020226'
     }, 'larve_grise': {
-        'name': 'Larve grise',
-        'id': '1265760658063102058'
+        'name': 'Larve grise', 'id': '1265760658063102058'
     },
 }
 
 let partiesEnCours = []
 
 module.exports = {
-    opts: {},
-    data: new SlashCommandBuilder()
+    opts: {}, data: new SlashCommandBuilder()
         .setName('larve')
         .setDescription('Permet de jouer au jeu des larves')
-        .setDMPermission(false)
-    ,
-    async execute (interaction) {
+        .setDMPermission(false), async execute (interaction) {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
@@ -91,16 +81,14 @@ module.exports = {
         partiesEnCours[channelId] = new Game()
 
         partiesEnCours[channelId].message = await interaction.reply(partiesEnCours[channelId].getReplyButtons(interaction))
-    },
-    async executeButton (interaction, buttonName) {
+    }, async executeButton (interaction, buttonName) {
         const game = partiesEnCours[interaction.channel.id]
 
         if (!game || game.status === 'ended') {
             interaction.reply({
-                content: 'Aucune partie en cours',
-                ephemeral: true
+                content: 'Aucune partie en cours', ephemeral: true
             })
-            return;
+            return
         }
 
         if (buttonName === 'go') {
@@ -124,10 +112,9 @@ class Game {
     async addNewLarve (interaction, buttonName) {
         if (this.status !== 'waiting') {
             interaction.reply({
-                content: "La partie est déjà en cours !",
-                ephemeral: true
+                content: 'La partie est déjà en cours !', ephemeral: true
             })
-            return;
+            return
         }
         const userId = interaction.user.id
         const userName = interaction.member.nickname ?? interaction.member.user.globalName
@@ -159,6 +146,7 @@ class Game {
 
         this.message.edit(this.getReplyButtons(interaction))
     }
+
     async launchGame (interaction) {
         // On vérifie qu'elle est bien en attente
         if (this.status !== 'waiting') {
@@ -175,8 +163,7 @@ class Game {
 
         const plateauMessage = await interaction.channel.send(this.getPlateau())
         interaction.reply({
-            content: "C'est parti !",
-            ephemeral: true
+            content: 'C\'est parti !', ephemeral: true
         })
         let game = this
         const interval = setInterval(async function () {
@@ -196,8 +183,8 @@ class Game {
      *
      */
     checkWinner () {
-        let winner = null;
-        let max = 14
+        let winner = null
+        let max = 20
         for (const [key, value] of Object.entries(this.plateau)) {
             if (value >= max) {
                 winner = key
@@ -210,7 +197,7 @@ class Game {
 
     async annoncerGagnant (interaction) {
         if (!this.winner) {
-            console.error("Aucun gagnant !")
+            console.error('Aucun gagnant !')
             return
         }
 
@@ -220,11 +207,10 @@ class Game {
         const larveLabel = LARVES[this.winner]
 
         if (!playerId) {
-            channel.send({content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
-        }
-        else {
-            channel.send({content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>`})
-            addPlayerItem({id: playerId}, larveLabel.name)
+            channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
+        } else {
+            channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
+            addPlayerItem({ id: playerId }, larveLabel.name)
         }
 
         // On enregistre dans la table larve laquelle a gagné
@@ -237,8 +223,7 @@ class Game {
             await larve.save()
         } else {
             await Larve.create({
-                name: this.winner,
-                nb: 1
+                name: this.winner, nb: 1
             })
         }
 
@@ -246,28 +231,27 @@ class Game {
     }
 
     getPlateau () {
-        const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
-        const larves =  [];
+        const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
+        const larves = []
         for (const [key, value] of Object.entries(this.plateau)) {
             larves.push(this.getLarve(key))
         }
 
-        const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
+        const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
 
         return base + larves.join(this.sautLigne) + end
     }
 
-    updateLarves() {
+    updateLarves () {
         for (const [key, value] of Object.entries(this.plateau)) {
-            let value =  Math.random() * 2
+            let value = Math.random() * 2
             let bonus = 0
-            switch(key) {
+            switch (key) {
                 case 'larve_violette':
                     value = value * 2
                     if (Math.random() < 0.5) {
-                        bonus -= 1;
-                    }
-                    else {
+                        bonus -= 1
+                    } else {
                         bonus += 2.5
                     }
                     break
@@ -280,7 +264,7 @@ class Game {
                     if (Math.random() < 0.1) {
                         bonus += 6.5
                     }
-                    break;
+                    break
                 default:
                     value = value * 3
             }
@@ -289,6 +273,7 @@ class Game {
             this.plateau[key] += value
         }
     }
+
     /**
      * Permet de générer le message avec les boutons des larves
      *
@@ -338,7 +323,7 @@ class Game {
     }
 
     getLarve (key) {
-        let retour = this.flag;
+        let retour = this.flag
 
         const larve = this.plateau[key]
         for (let i = 0; i < larve; i++) {
