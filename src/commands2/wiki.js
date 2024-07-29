@@ -21,6 +21,10 @@ module.exports = {
     {
 
         const search = interaction.options.getString('search');
+        if (!parseInt(search)) {
+            await interaction.channel.send("Page introuvable. Veuillez utiliser l'autocomplétion");
+            return;
+        }
 
         // https://dofus-rp.fandom.com/fr/api.php?action=query&list=search&srsearch=shariva&format=json
         try {
