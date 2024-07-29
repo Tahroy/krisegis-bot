@@ -57,6 +57,11 @@ module.exports = async function (client) {
             console.error,
         )
 
+        client.guilds.cache.forEach(guild => {
+            console.log(`- ${guild.name} (ID: ${guild.id})`)
+        })
+
+
         checkEventReminders()
 
     })
