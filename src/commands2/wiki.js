@@ -28,6 +28,10 @@ module.exports = {
 
             const data = response.data.parse;
 
+            if (!data.title) {
+                await interaction.channel.send("Page introuvable");
+                return;
+            }
             const title = data.title;
             const id = data.pageid;
             const text = escapeHTML(data.text['*']);

@@ -120,7 +120,13 @@ module.exports = {
 
         let decoupeContent = []
 
-        let content = item.content
+        let content = ''
+        if (typeof item.content === 'string') {
+            content = item.content
+        }
+        else if (item.content instanceof Array) {
+            content = item.content.join("\n")
+        }
 
         const markdown = htmlToMarkdown(content)
         const dom = new JSDOM(markdown)
