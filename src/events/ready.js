@@ -56,18 +56,18 @@ module.exports = async function (client) {
         ).then(() => console.log('Successfully registered application commands.')).catch(
             console.error,
         )
-
-        for (const guild of client.guilds.cache) {
+        for (const guild of client.guilds.cache.values()) {
             console.log(`- ${guild.name} (ID: ${guild.id})`)
 
-            if (guild.id != '185464480346537984') {
-                // Liste des membres du serveur
-                await guild.members.fetch() // Récupère les membres du serveur
-                console.log(`  Membres de ${guild.name}:`)
-                guild.members.cache.forEach(member => {
-                    console.log(`  - ${member.user.tag} (ID: ${member.id})`)
-                })
+            if (guild.id === 185464480346537984) {
+                continue
             }
+            // Liste des membres du serveur
+            await guild.members.fetch() // Récupère les membres du serveur
+            console.log(`  Membres de ${guild.name}:`)
+            guild.members.cache.forEach(member => {
+                console.log(`  - ${member.user.tag} (ID: ${member.id})`)
+            })
         }
 
 
