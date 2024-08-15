@@ -46,7 +46,9 @@ module.exports = {
         for (const item of tab) {
             const data = await this.getData(item.type, search)
             const send = await this.sendResults(interaction, data, item.type, item.truncate)
-            this.saveInteraction(send, data, item.type, search);
+            if (send) {
+                this.saveInteraction(send, data, item.type, search);
+            }
         }
 
         try {
@@ -145,12 +147,18 @@ module.exports = {
         const offset = parseInt(data.offset)
         const total = parseInt(data.total)
 
-        console.log(data);
+        let categorie = NOMS[type]
+
+        if (!items.length) {
+            return {
+                content: `**${categorie}** : Aucun résultat`,
+            }
+        }
+
         const nombrePages = Math.ceil(total / limit) ? Math.ceil(total / limit) : 1
         const pageActuelle = Math.ceil(offset / limit) + 1
 
         let lines = []
-        let categorie = NOMS[type]
 
         for (let i = 0; i < items.length; i++) {
             const item = items[i]
@@ -173,26 +181,32 @@ module.exports = {
             description: lines.join('\n'),
         })
 
-        const precedent = new ButtonBuilder()
-            .setCustomId(`lore-last`)
-            .setLabel('Précedent')
-            .setStyle(ButtonStyle.Success)
-            .setDisabled(offset === 0)
+        let components = [];
 
-        const suivant = new ButtonBuilder()
-            .setCustomId(`lore-next`)
-            .setLabel('Suivant')
-            .setStyle(ButtonStyle.Success)
-            .setDisabled(offset + limit >= total)
+        if (nombrePages > 1) {
+            const row = new ActionRowBuilder();
 
-        const row = new ActionRowBuilder()
-        row.addComponents(precedent)
-        row.addComponents(suivant)
+            const precedent = new ButtonBuilder()
+                .setCustomId(`lore-last`)
+                .setLabel('Précedent')
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(offset === 0)
+            const suivant = new ButtonBuilder()
+                .setCustomId(`lore-next`)
+                .setLabel('Suivant')
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(offset + limit >= total)
+
+            row.addComponents(precedent)
+            row.addComponents(suivant)
+
+            components = [row]
+        }
 
         return {
             embeds: itemsEmbed.embeds,
             files: itemsEmbed.files,
-            components: [row],
+            components: components,
         }
     },
 
@@ -237,7 +251,10 @@ module.exports = {
 
     async sendResults (interaction, data, type = '', truncate = true) {
         const retour = await this.getResult(data, type, truncate)
-        return await interaction.channel.send(retour)
+        if (retour) {
+            return await interaction.channel.send(retour)
+        }
+        return null;
     },
 
     async editResults (message, data, type, truncate) {
