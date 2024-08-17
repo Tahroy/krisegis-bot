@@ -21,8 +21,8 @@ const LARVES = {
         'name': 'Larve orange', 'id': '1265760504731668520'
     }, 'larve_verte': {
         'name': 'Larve verte', 'id': '1265760497907794010'
-    }, 'larve_violette': {
-        'name': 'Larve violette', 'id': '1265760402965397599'
+    }, 'britannya': {
+        'name': 'Larve violette', 'id': '1274427328612663377'
     }, 'larve_rose': {
         'name': 'Larve rose', 'id': '1265753280534020226'
     }, 'larve_grise': {
@@ -248,7 +248,7 @@ class Game {
             let value = Math.random() * 2
             let bonus = 0
             switch (key) {
-                case 'larve_violette':
+                case 'britannya':
                     value = value * 2
                     if (Math.random() < 0.5) {
                         bonus -= 1.5
