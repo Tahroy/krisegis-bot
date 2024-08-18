@@ -186,7 +186,7 @@ module.exports = {
             return interaction.reply({ 'content': 'La bonne reponse ne doit pas être dans les mauvaises !', 'ephemeral': true })
         }
 
-        if (answersArray.length < 4) {
+        if (answersArray.length < 3) {
             return interaction.reply({ 'content': 'Il faut au moins 4 reponses !', 'ephemeral': true })
         }
 
