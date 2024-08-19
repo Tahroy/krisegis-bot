@@ -80,6 +80,7 @@ module.exports = {
         }
 
         partiesEnCours[channelId] = new Game()
+        partiesEnCours[channelId].channel = interaction.channel
 
         partiesEnCours[channelId].message = await interaction.reply(partiesEnCours[channelId].getReplyButtons(interaction))
     }, async executeButton (interaction, buttonName) {
@@ -109,6 +110,8 @@ class Game {
     winner = null
     flag = ':checkered_flag:'
     sautLigne = '\n'
+    deaths = {}
+    channel = null
 
     async addNewLarve (interaction, buttonName) {
         if (this.status !== 'waiting') {
@@ -170,7 +173,7 @@ class Game {
         const interval = setInterval(async function () {
             game.updateLarves()
             await plateauMessage.edit(game.getPlateau())
-            game.checkWinner()
+            await game.checkWinner()
 
             if (game.status === 'ended') {
                 await game.annoncerGagnant(interaction)
@@ -184,6 +187,14 @@ class Game {
      *
      */
     checkWinner () {
+        const deathsCounter = Object.values(this.deaths).length
+        const larvesCounter = Object.values(LARVES).length
+//        console.log(`deathsCounter: ${deathsCounter}, larvesCounter: ${larvesCounter}`)
+        if (deathsCounter === larvesCounter) {
+            this.status = 'ended'
+            this.winner = 'nobody'
+            return
+        }
         let winner = null
         let max = 30
         for (const [key, value] of Object.entries(this.plateau)) {
@@ -197,8 +208,8 @@ class Game {
     }
 
     async annoncerGagnant (interaction) {
-        if (!this.winner) {
-            console.error('Aucun gagnant !')
+        if (this.winner === 'nobody') {
+            this.channel.send({'content': 'Aucun gagnant !'})
             return
         }
 
@@ -240,11 +251,20 @@ class Game {
 
         const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
 
+        console.log(this.deaths)
+        console.log('edit plateau')
         return base + larves.join(this.sautLigne) + end
     }
 
     updateLarves () {
         for (const [key, value] of Object.entries(this.plateau)) {
+            this.rollDeath(key);
+
+            if (this.deaths[key]) {
+                continue
+
+            }
+
             let value = Math.random() * 2
             let bonus = 0
             switch (key) {
@@ -331,8 +351,39 @@ class Game {
             retour += '-'
         }
 
+        if (this.deaths[key]) {
+            retour += '<:larve_chair:1275148668063715418>'
+            return retour
+        }
+
         const id = LARVES[key].id
 
         return retour + `<:${key}:${id}>`
+    }
+
+    rollDeath (key) {
+        if (this.deaths[key]) {
+            return;
+        }
+
+        const chance = Math.random() * 100
+
+        if (chance < 1) {
+            console.log(`${key} est morte`)
+            this.deaths[key] = true
+
+            const label = LARVES[key].name;
+
+            const DEATHS = [
+                `Une dragodinde arrive en courant et dévore **${label}**.`,
+                `Une mouette apparaît et emporte **${label}**`,
+                `Malma-Jeste marche sur **${label}**`,
+                `**${label}** a réalisé que le courses n'étaient pas sa vocation`,
+                `**${label}** est morte, simplement`
+            ];
+
+            const randomIndex = Math.floor(Math.random() * DEATHS.length);
+            this.channel.send(DEATHS[randomIndex])
+        }
     }
 }
