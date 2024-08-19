@@ -352,7 +352,7 @@ class Game {
         }
 
         if (this.deaths[key]) {
-            retour += '<:larve_chair:1275148668063715418>'
+            retour += '<:larve_chair:1275176527792832643>'
             return retour
         }
 
