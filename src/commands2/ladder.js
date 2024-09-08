@@ -27,11 +27,22 @@ module.exports = {
         const scores = await this.getTopScores(type)
 
         let text = ''
-        scores.forEach((score, index) => {
+        for (const score of scores) {
+            const index = scores.indexOf(score)
             const pluriel = score.dataValues.total_quantity > 1 ? 's' : ''
             const typeObjects = type ?? 'objet'
-            text += `${index + 1}. <@${score.user_id}> : ${score.dataValues.total_quantity} ${typeObjects}${pluriel}\n`
-        })
+
+            let userName = ''
+
+            try {
+                let user = await interaction.guild.members.fetch(score.user_id)
+                userName = user.displayName
+            } catch (error) {
+                userName = 'Anonymous'
+            }
+
+            text += `${index + 1}. ${userName} : ${score.dataValues.total_quantity} ${typeObjects}${pluriel}\n`
+        }
 
         await interaction.reply({ content: '**Top 3 !**\n' + text })
     },
