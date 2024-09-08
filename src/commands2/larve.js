@@ -378,7 +378,7 @@ class Game {
                 `Une dragodinde arrive en courant et dévore **${label}**.`,
                 `Une mouette apparaît et emporte **${label}**.`,
                 `Malma-Jeste marche sur **${label}.**`,
-                `**${label}** a réalisé ques le courses n'étaient pas sa vocation.`,
+                `**${label}** a réalisé que le courses n'étaient pas sa vocation.`,
                 `**${label}** est morte, simplement.`,
                 `Euphie pleure et noie **${label}**`,
                 `E-Bou appparaît, prêt à donner toutes les réponses du Krosmoz, avant de simplement s'enfuir avec **${label}**.`,
