@@ -222,7 +222,7 @@ class Game {
            channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
         } else {
            channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
-            addPlayerItem({ id: playerId }, larveLabel.name)
+            addPlayerItem({ id: playerId }, larveLabel.name, "larve")
         }
 
         // On enregistre dans la table larve laquelle a gagné
@@ -366,7 +366,7 @@ class Game {
             return;
         }
 
-        const chance = Math.random() * 100
+        const chance = Math.random() * 200
 
         if (chance < 1) {
             console.log(`${key} est morte`)
@@ -378,8 +378,10 @@ class Game {
                 `Une dragodinde arrive en courant et dévore **${label}**.`,
                 `Une mouette apparaît et emporte **${label}**`,
                 `Malma-Jeste marche sur **${label}**`,
-                `**${label}** a réalisé que le courses n'étaient pas sa vocation`,
-                `**${label}** est morte, simplement`
+                `**${label}** a réalisé ques le courses n'étaient pas sa vocation`,
+                `**${label}** est morte, simplement`,
+                `Euphie pleure et noie **${label}**`,
+                `E-Bou appparaît, prêt à donner toutes les réponses du Krosmoz, avant de simplement s'enfuir avec **${label}**`,
             ];
 
             const randomIndex = Math.floor(Math.random() * DEATHS.length);
