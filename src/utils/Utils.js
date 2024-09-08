@@ -245,7 +245,7 @@ module.exports = {
 
     },
 
-    async addPlayerItem (user, name) {
+    async addPlayerItem (user, name, type) {
         let playerItem = await PlayerItem.findOne({
             where: {
                 name: name,
@@ -260,7 +260,8 @@ module.exports = {
             playerItem = await PlayerItem.create({
                 name: name,
                 user_id: user.id,
-                quantity: 1
+                quantity: 1,
+                type: type
             })
         }
     }
