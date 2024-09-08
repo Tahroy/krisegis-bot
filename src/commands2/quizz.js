@@ -141,7 +141,7 @@ module.exports = {
         // Vérifiez si la réponse est correcte
         if (currentQuestion.correctAnswer === selectedAnswer) {
             currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
-            addPlayerItem(interaction.user, 'Point', 'point')
+            addPlayerItem(interaction.user, 'point quizz', 'question')
         }
 
         // Passez à la question suivante
