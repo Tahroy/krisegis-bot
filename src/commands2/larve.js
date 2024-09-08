@@ -366,7 +366,7 @@ class Game {
             return;
         }
 
-        const chance = Math.random() * 200
+        const chance = Math.random() * 50
 
         if (chance < 1) {
             console.log(`${key} est morte`)
