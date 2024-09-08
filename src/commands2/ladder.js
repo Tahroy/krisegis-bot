@@ -30,6 +30,10 @@ module.exports = {
                     {
                         name: "Wabbits",
                         value: "wabbit"
+                    },
+                    {
+                        name: "Kouinkouins",
+                        value: "kouinkouin"
                     }
                 )
         ),
