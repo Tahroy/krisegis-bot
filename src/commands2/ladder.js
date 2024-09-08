@@ -21,7 +21,7 @@ module.exports = {
                         name: 'Larves',
                         value: 'larve'
                     }, {
-                        name: 'Questions',
+                        name: 'Quizz',
                         value: 'question'
                     }, {
                         name: 'Potions',
