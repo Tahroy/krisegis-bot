@@ -164,7 +164,7 @@ module.exports = {
                     6: "Kouinkouin noir",
                     7: "Kouinkouin"
                 }
-                await addPlayerItem(catcher.user, KOUINKOUINS[kouinkouinID])
+                await addPlayerItem(catcher.user, KOUINKOUINS[kouinkouinID], "kouinkouin")
             }
             else {
                 interaction.reply('Raté !')
