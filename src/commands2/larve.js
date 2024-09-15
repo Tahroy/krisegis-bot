@@ -366,9 +366,9 @@ class Game {
             return;
         }
 
-        const chance = Math.random() * 50
+        let chance = Math.floor(Math.random() * 200) + 1;
 
-        if (chance < 1) {
+        if (chance === 1) {
             console.log(`${key} est morte`)
             this.deaths[key] = true
 
@@ -377,7 +377,7 @@ class Game {
             const DEATHS = [
                 `Une dragodinde arrive en courant et dévore **${label}**.`,
                 `Une mouette apparaît et emporte **${label}**.`,
-                `Malma-Jeste marche sur **${label}.**`,
+                `Malma-Jeste marche sur **$²{label}.**`,
                 `**${label}** a réalisé que le courses n'étaient pas sa vocation.`,
                 `**${label}** est morte, simplement.`,
                 `Euphie pleure et noie **${label}**`,
