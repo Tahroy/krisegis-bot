@@ -102,7 +102,7 @@ module.exports = {
 		})
 
 		await interaction.reply({content: `Vous avez créé la potion **${potion.name}** ! :tada: :tada: :tada:`})
-		addPlayerItem(interaction.user, `Potion : ${potion.name}`);
+		addPlayerItem(interaction.user, `Potion : ${potion.name}`, "potion");
 	}
 };
 
@@ -291,7 +291,7 @@ class MasterMindGame {
 		if (potion) {
 			// Si la potion existe, on dit qu'il a trouvé celle-ci
 			await interaction.reply({content: `Vous avez gagnez la potion **${potion.name}** ! :tada: :tada: :tada:`})
-			addPlayerItem(interaction.user, `Potion : ${potion.name}`);
+			addPlayerItem(interaction.user, `Potion : ${potion.name}`, "potion");
 		}
 		else {
 			savedPotions[interaction.user.id] = this.objectif;
