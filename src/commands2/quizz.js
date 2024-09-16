@@ -5,6 +5,7 @@ const Question = require('../database/Question')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
 const Server = require('../database/Server')
 const { createEmbed } = require('../utils/embed')
+const { addPlayerItem } = require('../utils/Utils')
 
 // Utilisez un objet pour stocker les scores des participants par canal
 const channelScores = new Map()
@@ -26,6 +27,14 @@ module.exports = {
         .addSubcommand(subcommmand => subcommmand
             .setName('start')
             .setDescription('Lance le quizz')
+            .addIntegerOption(
+                option => option
+                    .setName('nb_questions')
+                    .setDescription('Nombre de questions')
+                    .setRequired(true)
+                    .setMinValue(5)
+                    .setMaxValue(20)
+            )
         )
         .addSubcommand(
             subcommand => subcommand
@@ -132,6 +141,7 @@ module.exports = {
         // Vérifiez si la réponse est correcte
         if (currentQuestion.correctAnswer === selectedAnswer) {
             currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
+            addPlayerItem(interaction.user, 'point quizz', 'question')
         }
 
         // Passez à la question suivante
@@ -139,6 +149,8 @@ module.exports = {
         await interaction.reply({ 'content': `Tu as répondu « ${selectedAnswer} »`, 'ephemeral': true })
     },
     async startQuizz (interaction) {
+
+        const nombre = interaction.options.getInteger('nb_questions')
 
         // Créez un canal de scores pour le canal actuel
         if (!channelScores.has(interaction.channelId)) {
@@ -151,7 +163,7 @@ module.exports = {
             // Ajout de 10 questions aléatoires (sans répétition) dans le canal
             const availableQuestions = await getRandomQuestions()
             //console.log(availableQuestions)
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < nombre; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
                 let question = availableQuestions.splice(randomIndex, 1)[0]
                 question.participations = new Map()

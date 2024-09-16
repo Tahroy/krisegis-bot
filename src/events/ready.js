@@ -62,15 +62,12 @@ module.exports = async function (client) {
             if (guild.id === 185464480346537984) {
                 continue
             }
-            /*
             // Liste des membres du serveur
             await guild.members.fetch() // Récupère les membres du serveur
             console.log(`  Membres de ${guild.name}:`)
             guild.members.cache.forEach(member => {
                 console.log(`  - ${member.user.tag} (ID: ${member.id})`)
             })
-
-             */
         }
 
 
