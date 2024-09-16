@@ -30,7 +30,8 @@ const WABBITS_NAMES = {
     21: 'Blanc Pa Wabbit',
     22: 'Black Wo Wabbit',
     23: 'Wabbit en wetawd',
-    24: 'Wabbit Céphale'
+    24: 'Wabbit Céphale',
+    "malma": "Malma-Jeste",
 }
 
 let usersByChannel = {}
@@ -132,7 +133,7 @@ module.exports = {
 
             const wabbitName = WABBITS_NAMES[channelData.image]
 
-            addPlayerItem(user, wabbitName)
+            addPlayerItem(user, wabbitName, "wabbit")
 
             return interaction.reply(`${userName} a capturé un ${wabbitName} ! Il a maintenant ${userScore} point${plural}`)
         }
@@ -203,8 +204,13 @@ module.exports = {
 
         const wabbitName = WABBITS_NAMES[fileName]
 
+        let content = `Un ${wabbitName} est arrivé !`;
+        if (wabbitName === 'Malma-Jeste') {
+            content = 'Malma-Jeste est arrivée !';
+        }
+
         const message = await channel.send({
-            content: `Un ${wabbitName} est arrivé ! (${randomID})`,
+            content: content,
             components: [buttonHit],
             files: [imagePath], // Attache le fichier (l'image) au message
         })
