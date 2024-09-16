@@ -42,6 +42,10 @@ const PlayerItem = sequelize.define('PlayerItem', {
     quantity: {
         type: Sequelize.INTEGER,
         allowNull: false
+    },
+    type: {
+        type: Sequelize.STRING,
+        allowNull: false
     }
 })
 
