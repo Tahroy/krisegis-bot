@@ -273,7 +273,7 @@ class Game {
                     if (Math.random() < 0.5) {
                         bonus -= 1.5
                     } else {
-                        bonus += 2.90
+                        bonus += 3
                     }
                     break
                 case 'larve_rose':
