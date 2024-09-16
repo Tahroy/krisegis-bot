@@ -270,7 +270,7 @@ class Game {
             switch (key) {
                 case 'larve_violette':
                     value = value * 2
-                    if (Math.random() < 0.5) {
+                    if (Math.random() < 0.2) {
                         bonus -= 1.5
                     } else {
                         bonus += 3
