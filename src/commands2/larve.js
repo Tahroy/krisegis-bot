@@ -40,8 +40,10 @@ module.exports = {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
-//        await this.displayLarvesButtons(interaction)
+        await this.displayLarvesButtons(interaction)
         /* TEST */
+
+        /*
 
         interaction.reply({ content: 'Termine !', ephemeral: true })
 
@@ -64,6 +66,8 @@ module.exports = {
                 }
             }
         }
+        */
+
 
     },
 
@@ -215,9 +219,9 @@ class Game {
         const larveLabel = LARVES[this.winner]
 
         if (!playerId) {
-           //channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
+           channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
         } else {
-           //channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
+           channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
             addPlayerItem({ id: playerId }, larveLabel.name, "larve")
         }
 
@@ -266,10 +270,10 @@ class Game {
             switch (key) {
                 case 'larve_violette':
                     value = value * 2
-                    if (Math.random() < 0.4) {
+                    if (Math.random() < 0.5) {
                         bonus -= 1.5
                     } else {
-                        bonus += 3
+                        bonus += 2.90
                     }
                     break
                 case 'larve_rose':
@@ -362,7 +366,7 @@ class Game {
             return;
         }
 
-        let chance = Math.floor(Math.random() * 200                                      ) + 1;
+        let chance = Math.floor(Math.random() * 200) + 1;
 
         if (chance === 1) {
             console.log(`${key} est morte`)
@@ -381,7 +385,7 @@ class Game {
             ];
 
             const randomIndex = Math.floor(Math.random() * DEATHS.length);
-            //this.channel.send(DEATHS[randomIndex])
+            this.channel.send(DEATHS[randomIndex])
         }
     }
 }
