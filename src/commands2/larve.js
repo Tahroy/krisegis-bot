@@ -266,10 +266,10 @@ class Game {
             switch (key) {
                 case 'larve_violette':
                     value = value * 2
-                    if (Math.random() < 0.5) {
+                    if (Math.random() < 0.4) {
                         bonus -= 1.5
                     } else {
-                        bonus += 2.90
+                        bonus += 3
                     }
                     break
                 case 'larve_rose':
