@@ -40,10 +40,8 @@ module.exports = {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
-        await this.displayLarvesButtons(interaction)
+//        await this.displayLarvesButtons(interaction)
         /* TEST */
-
-        /*
 
         interaction.reply({ content: 'Termine !', ephemeral: true })
 
@@ -66,8 +64,6 @@ module.exports = {
                 }
             }
         }
-        */
-
 
     },
 
@@ -219,9 +215,9 @@ class Game {
         const larveLabel = LARVES[this.winner]
 
         if (!playerId) {
-           channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
+           //channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
         } else {
-           channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
+           //channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
             addPlayerItem({ id: playerId }, larveLabel.name, "larve")
         }
 
@@ -366,7 +362,7 @@ class Game {
             return;
         }
 
-        let chance = Math.floor(Math.random() * 200) + 1;
+        let chance = Math.floor(Math.random() * 200                                      ) + 1;
 
         if (chance === 1) {
             console.log(`${key} est morte`)
@@ -377,7 +373,7 @@ class Game {
             const DEATHS = [
                 `Une dragodinde arrive en courant et dévore **${label}**.`,
                 `Une mouette apparaît et emporte **${label}**.`,
-                `Malma-Jeste marche sur **$²{label}.**`,
+                `Malma-Jeste marche sur **${label}.**`,
                 `**${label}** a réalisé que le courses n'étaient pas sa vocation.`,
                 `**${label}** est morte, simplement.`,
                 `Euphie pleure et noie **${label}**`,
@@ -385,7 +381,7 @@ class Game {
             ];
 
             const randomIndex = Math.floor(Math.random() * DEATHS.length);
-            this.channel.send(DEATHS[randomIndex])
+            //this.channel.send(DEATHS[randomIndex])
         }
     }
 }
