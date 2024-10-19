@@ -101,7 +101,7 @@ module.exports = {
             await game.launchGame(interaction)
         } else {
             await game.addNewLarve(interaction, buttonName)
-            if (Object.values(game.larves).length === 5) {
+            if (Object.values(game.larves).length === 7) {
                 await game.launchGame(interaction)
             }
         }
