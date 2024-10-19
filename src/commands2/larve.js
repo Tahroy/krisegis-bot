@@ -84,6 +84,10 @@ module.exports = {
 
         partiesEnCours[channelId].message = await interaction.reply(partiesEnCours[channelId].getReplyButtons(interaction))
     }, async executeButton (interaction, buttonName) {
+
+        /**
+         * @var Game game
+         */
         const game = partiesEnCours[interaction.channel.id]
 
         if (!game || game.status === 'ended') {
@@ -97,6 +101,9 @@ module.exports = {
             await game.launchGame(interaction)
         } else {
             await game.addNewLarve(interaction, buttonName)
+            if (Object.values(game.larves).length === 5) {
+                await game.launchGame(interaction)
+            }
         }
 
     },
