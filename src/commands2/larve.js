@@ -155,7 +155,9 @@ class Game {
             content: `${userName} a pris la ${larveName}`, ephemeral: false
         })
 
-        this.message.edit(this.getReplyButtons(interaction))
+        if (this.message) {
+            this.message.edit(this.getReplyButtons(interaction))
+        }
     }
 
     async launchGame (interaction) {
