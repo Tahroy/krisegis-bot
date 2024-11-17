@@ -44,7 +44,6 @@ module.exports = {
     async execute (interaction) {
         const command = interaction.options.getSubcommand()
 
-        console.log(interaction.member)
         switch (command) {
             case 'roll':
                 await this.roll(interaction)
