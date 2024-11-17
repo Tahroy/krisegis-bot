@@ -13,6 +13,7 @@ const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
 const moment = require('moment/moment')
 const Larve= require('../database/Larve')
+const Capture= require('../database/Capture')
 
 const eventReminderCheckInterval = 60 * 1000 // Intervalle de vérification des rappels (5 minutes dans cet exemple)
 const eventReminderTime = 60 * 60 * 1000 // Durée en millisecondes avant le rappel (1 heure dans cet exemple)
@@ -31,6 +32,7 @@ module.exports = async function (client) {
         await PlayerItem.sync()
         await Potion.sync()
         await Larve.sync()
+        await Capture.sync()
 
         console.log('BDD Synchro !');
 
