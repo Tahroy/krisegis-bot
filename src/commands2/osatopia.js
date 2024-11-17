@@ -83,26 +83,44 @@ module.exports = {
         const name = monster.name.fr
         const look = monster.look
 
-        const capture = { monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id }
-        const captureDB = await Capture.create(capture)
 
         const hexa = Buffer.from(look).toString('hex')
         const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`
 
         const timestamp = Date.now()
 
-        const row = new ActionRowBuilder()
-            .addComponents(new ButtonBuilder()
-                               .setLabel('Capture')
-                               .setCustomId(`osatopia-capture-${captureDB.id}-${timestamp}`)
-                               .setStyle(ButtonStyle.Success))
+        // check si déjà capturé (catchUserId != null)
+        const conditionsCheckCapture = { monsterId: id, catchUserId: { [Op.ne]: null } }
+        const captureCheck = await Capture.findOne({ where: conditionsCheckCapture })
 
-        const embed = new EmbedBuilder()
-            .setTitle(`${name}`)
-            .setImage(img) // Ajouter l'image
+        const capture = { monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id }
+        const captureDB = await Capture.create(capture)
 
-        // JSON
-        interaction.reply({ embeds: [embed], components: [row] })
+        if (captureCheck) {
+            const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId)
+            const description = `Capturé par ${userCatch.username}`;
+
+            const embed = new EmbedBuilder()
+                .setTitle(`${name}`)
+                .setDescription(description)
+                .setImage(img) // Ajouter l'image
+
+            interaction.reply({ embeds: [embed] })
+        }
+        else {
+            const row = new ActionRowBuilder()
+                .addComponents(new ButtonBuilder()
+                                   .setLabel('Capture')
+                                   .setCustomId(`osatopia-capture-${captureDB.id}-${timestamp}`)
+                                   .setStyle(ButtonStyle.Success))
+
+            const embed = new EmbedBuilder()
+                .setTitle(`${name}`)
+                .setImage(img) // Ajouter l'image
+
+            // JSON
+            interaction.reply({ embeds: [embed], components: [row] })
+        }
 
     },
 
@@ -203,6 +221,15 @@ module.exports = {
 
         if (captures.length > 0) {
             await interaction.reply({ content: 'Vous avez capturé un monstre il y a moins de 3h !', ephemeral: true })
+            return
+        }
+
+        // On vérifie que le user n'a pas déjà le monstre
+        const conditions2 = { catchUserId: user.id, monsterId: capture.monsterId }
+        const captures2 = await Capture.findAll({ where: conditions2 })
+
+        if (captures2.length > 0) {
+            await interaction.reply({ content: 'Vous avez deja capturé ce monstre !', ephemeral: true })
             return
         }
 
