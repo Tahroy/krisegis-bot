@@ -53,8 +53,8 @@ module.exports = function (client) {
 
         moment.locale('fr') // Définir la locale sur français
 
-        const dateDebutFR = moment(dateDebut).format('LLLL') // Formater la date en format français
-        const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
+        const dateDebutFR = `<t:${dateDebut}:F>`
+        const dateFinFR = `<t:${dateFin}:F>`
 
         const message = `Hey ${eventRoleGeneral} !
 Un évènement **${name}** est prévu sur **${guildScheduledEvent.entityMetadata.location}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
@@ -100,8 +100,8 @@ ${link}`
 
         moment.locale('fr') // Définir la locale sur français
 
-        const dateDebutFR = moment(dateDebut).format('LLLL') // Formater la date en format français
-        const dateFinFR = moment(dateFin).format('LLLL') // Formater la date en format français
+        const dateDebutFR = `<t:${dateDebut}:F>`
+        const dateFinFR = `<t:${dateFin}:F>`
 
         const message = `Hey ${eventRoleServeur} !
 Un évènement **${name}** est prévu sur **${guildScheduledEvent.entityMetadata.location}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
