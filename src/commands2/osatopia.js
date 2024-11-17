@@ -41,6 +41,7 @@ module.exports = {
     async execute (interaction) {
         const command = interaction.options.getSubcommand()
 
+        console.log(interaction.member)
         switch (command) {
             case 'roll':
                 await this.roll(interaction)
@@ -98,7 +99,7 @@ module.exports = {
 
         if (captureCheck) {
             const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId)
-            const description = `Capturé par ${userCatch.username}`;
+            const description = `Capturé par ${userCatch.globalName}`;
 
             const embed = new EmbedBuilder()
                 .setTitle(`${name}`)
@@ -237,7 +238,7 @@ module.exports = {
 
         await Capture.update({ catchUserId: user.id, catchDate: new Date() }, { where: { id: id } })
 
-        interaction.reply(`${user.username} a capturé ${name} !`)
+        interaction.reply(`${user.globalName} a capturé ${name} !`)
     },
 
     async autocomplete (interaction) {
