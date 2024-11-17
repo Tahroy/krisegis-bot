@@ -52,6 +52,9 @@ module.exports = {
             case 'view':
                 await this.view(interaction)
                 break
+            case 'timer':
+                await this.timer(interaction)
+                break
             default:
                 break
         }
@@ -194,6 +197,51 @@ module.exports = {
         })
     },
 
+    async timer (interaction) {
+        const user = interaction.user
+        const timestamp = Date.now()
+
+        // On récupère la dernière capture du user
+        const lastCapture = await Capture.findOne({ where: { catchUserId: user.id }, order: [['catchDate', 'DESC']] })
+
+        let timeBeforeCapture = 0
+        if (lastCapture) {
+            timeBeforeCapture = timestamp - lastCapture.catchDate
+        }
+
+        let catchMonsterString = '';
+        if (timeBeforeCapture > 1) {
+            const minutes = Math.floor(timeBeforeCapture / 60000)
+            const seconds = Math.floor((timeBeforeCapture % 60000) / 1000)
+            catchMonsterString = `Vous pourrez capturer un monstre dans ${minutes} minutes et ${seconds} secondes !`
+        }
+        else {
+            catchMonsterString = 'Vous pouvez capturer un monstre !'
+        }
+
+        const lastRoll = await Capture.findOne({ where: { rollUserId: user.id }, order: [['date', 'DESC']] })
+
+        let timeBeforeRoll = 0
+        if (lastRoll) {
+            timeBeforeRoll = timestamp - lastRoll.date
+        }
+
+        let rollMonsterString = '';
+        if (timeBeforeRoll > 1) {
+            const minutes = Math.floor(timeBeforeRoll / 60000)
+            const seconds = Math.floor((timeBeforeRoll % 60000) / 1000)
+            rollMonsterString = `Vous pourrez roll un monstre dans ${minutes} minutes et ${seconds} secondes !`
+        }
+        else {
+            rollMonsterString = 'Vous pouvez roll un monstre !'
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle('Timer')
+            .setDescription(`${catchMonsterString}\n${rollMonsterString}`)
+
+        interaction.reply({ embeds: [embed] })
+    },
     async executeButton (interaction, buttonName) {
         const id = interaction.customId.split('-')[2]
         const user = interaction.user
