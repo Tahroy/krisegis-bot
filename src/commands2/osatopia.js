@@ -36,7 +36,10 @@ module.exports = {
                 .setName('id')
                 .setDescription('ID du monstre')
                 .setRequired(true)
-                .setAutocomplete(true))),
+                .setAutocomplete(true)))
+        .addSubcommand(subcommand => subcommand
+            .setName('timer')
+            .setDescription('Voir le temps restant pour roll ou capturer un monstre')),
 
     async execute (interaction) {
         const command = interaction.options.getSubcommand()
@@ -87,7 +90,6 @@ module.exports = {
         const name = monster.name.fr
         const look = monster.look
 
-
         const hexa = Buffer.from(look).toString('hex')
         const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`
 
@@ -102,7 +104,7 @@ module.exports = {
 
         if (captureCheck) {
             const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId)
-            const description = `Capturé par ${userCatch.globalName}`;
+            const description = `Capturé par ${userCatch.globalName}`
 
             const embed = new EmbedBuilder()
                 .setTitle(`${name}`)
@@ -110,8 +112,7 @@ module.exports = {
                 .setImage(img) // Ajouter l'image
 
             interaction.reply({ embeds: [embed] })
-        }
-        else {
+        } else {
             const row = new ActionRowBuilder()
                 .addComponents(new ButtonBuilder()
                                    .setLabel('Capture')
@@ -150,9 +151,7 @@ module.exports = {
         const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`
 
         const dateFr = capture.catchDate.toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+            day: '2-digit', month: '2-digit', year: 'numeric'
         })
 
         const embed = new EmbedBuilder()
@@ -181,9 +180,7 @@ module.exports = {
                 const date = capture.catchDate
                 // dd/mm/YY
                 const dateString = date.toLocaleDateString('fr-FR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
+                    day: '2-digit', month: '2-digit', year: 'numeric'
                 })
                 capturesArray.push(`${dateString} - ${capture.monsterName}`)
             }
@@ -209,30 +206,28 @@ module.exports = {
             timeBeforeCapture = timestamp - lastCapture.catchDate
         }
 
-        let catchMonsterString = '';
+        let catchMonsterString = ''
         if (timeBeforeCapture > 1) {
             const minutes = Math.floor(timeBeforeCapture / 60000)
             const seconds = Math.floor((timeBeforeCapture % 60000) / 1000)
             catchMonsterString = `Vous pourrez capturer un monstre dans ${minutes} minutes et ${seconds} secondes !`
-        }
-        else {
+        } else {
             catchMonsterString = 'Vous pouvez capturer un monstre !'
         }
 
-        const lastRoll = await Capture.findOne({ where: { rollUserId: user.id }, order: [['date', 'DESC']] })
+        const lastRoll = await Capture.findOne({ where: { rollUserId: user.id }, order: [['createdAt', 'DESC']] })
 
         let timeBeforeRoll = 0
         if (lastRoll) {
-            timeBeforeRoll = timestamp - lastRoll.date
+            timeBeforeRoll = timestamp - lastRoll.createdAt
         }
 
-        let rollMonsterString = '';
+        let rollMonsterString = ''
         if (timeBeforeRoll > 1) {
             const minutes = Math.floor(timeBeforeRoll / 60000)
             const seconds = Math.floor((timeBeforeRoll % 60000) / 1000)
             rollMonsterString = `Vous pourrez roll un monstre dans ${minutes} minutes et ${seconds} secondes !`
-        }
-        else {
+        } else {
             rollMonsterString = 'Vous pouvez roll un monstre !'
         }
 
@@ -241,8 +236,7 @@ module.exports = {
             .setDescription(`${catchMonsterString}\n${rollMonsterString}`)
 
         interaction.reply({ embeds: [embed] })
-    },
-    async executeButton (interaction, buttonName) {
+    }, async executeButton (interaction, buttonName) {
         const id = interaction.customId.split('-')[2]
         const user = interaction.user
 
@@ -260,7 +254,7 @@ module.exports = {
         }
 
         // On vérifie que la capture n'est pas trop vieille
-        if (new Date() - capture.date > 60 * 60 * 1000) {
+        if (new Date() - capture.createdAt > 60 * 60 * 1000) {
             await interaction.reply({ content: 'Cette capture est trop vieille !', ephemeral: true })
         }
 
