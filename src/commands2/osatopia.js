@@ -102,7 +102,7 @@ module.exports = {
         const captureDB = await Capture.create(capture)
 
         if (captureCheck) {
-            const guild = interaction.guild; // ou client.guilds.cache.get('GUILD_ID');
+            const guild = interaction.guild // ou client.guilds.cache.get('GUILD_ID');
             const memberCatch = await guild.members.fetch(captureCheck.catchUserId)
             const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId)
 
@@ -206,9 +206,8 @@ module.exports = {
 
         let timeBeforeCapture = 0
         if (lastCapture) {
-            timeBeforeCapture = timestamp - lastCapture.catchDate
+            timeBeforeCapture = timeBetweenCaptures - (timestamp - lastCapture.catchDate)
         }
-
         let catchMonsterString = ''
         if (timeBeforeCapture > 1) {
             const minutes = Math.floor(timeBeforeCapture / 60000)
@@ -218,11 +217,22 @@ module.exports = {
             catchMonsterString = 'Vous pouvez capturer un monstre !'
         }
 
-        const lastRoll = await Capture.findOne({ where: { rollUserId: user.id }, order: [['createdAt', 'DESC']] })
+        const conditionsLastRoll = {
+            where: {
+                rollUserId: user.id,
+                createdAt: {
+                    [Op.gte]: new Date(Date.now() - timeBetweenResetRoll) // Filtrer les rolls créés il y a moins de 3 heures
+                }
+            },
+            order: [['createdAt', 'ASC']]
+        };
+
+        const lastRolls = await Capture.findAll(conditionsLastRoll);
 
         let timeBeforeRoll = 0
-        if (lastRoll) {
-            timeBeforeRoll = timestamp - lastRoll.createdAt
+        if (lastRolls.length >= 10) {
+            const firstLastRoll = lastRolls[0]
+            timeBeforeRoll = timeBetweenResetRoll - (timestamp - firstLastRoll.createdAt)
         }
 
         let rollMonsterString = ''
@@ -265,8 +275,7 @@ module.exports = {
         const conditions = {
             catchDate: {
                 [Op.gte]: new Date(Date.now() - timeBetweenCaptures)
-            },
-            catchUserId: user.id
+            }, catchUserId: user.id
         }
         const captures = await Capture.findAll({ where: conditions })
 
