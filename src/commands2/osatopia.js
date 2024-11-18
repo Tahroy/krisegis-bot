@@ -210,9 +210,14 @@ module.exports = {
         }
         let catchMonsterString = ''
         if (timeBeforeCapture > 1) {
-            const minutes = Math.floor(timeBeforeCapture / 60000)
+            const heures = Math.floor(timeBeforeCapture / 3600000)
+            const minutes = Math.floor((timeBeforeCapture % 3600000) / 60000)
             const seconds = Math.floor((timeBeforeCapture % 60000) / 1000)
-            catchMonsterString = `Vous pourrez capturer un monstre dans ${minutes} minutes et ${seconds} secondes !`
+
+            const pluralH = heures <= 1 ? '' : 's'
+            const pluralM = minutes <= 1 ? '' : 's'
+            const pluralS = seconds <= 1 ? '' : 's'
+            catchMonsterString = `Vous pourrez capturer un monstre dans ${heures} heure${pluralH}, ${minutes} minute${pluralM} et ${seconds} seconde${pluralS} !`
         } else {
             catchMonsterString = 'Vous pouvez capturer un monstre !'
         }
