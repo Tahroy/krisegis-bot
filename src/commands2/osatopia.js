@@ -102,8 +102,12 @@ module.exports = {
         const captureDB = await Capture.create(capture)
 
         if (captureCheck) {
+            const guild = interaction.guild; // ou client.guilds.cache.get('GUILD_ID');
+            const memberCatch = await guild.members.fetch(captureCheck.catchUserId)
             const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId)
-            const description = `Capturé par ${userCatch.globalName}`
+
+            const userName = memberCatch.nickname ?? userCatch.globalName
+            const description = `Capturé par ${userName}`
 
             const embed = new EmbedBuilder()
                 .setTitle(`${name}`)
@@ -284,7 +288,12 @@ module.exports = {
 
         await Capture.update({ catchUserId: user.id, catchDate: new Date() }, { where: { id: id } })
 
-        interaction.reply(`${user.globalName} a capturé ${name} !`)
+        const guild = interaction.guild
+        const memberCatch = await guild.members.fetch(user.id)
+
+        const userName = memberCatch.nickname ?? user.globalName
+
+        interaction.reply(`${userName} a capturé ${name} !`)
     },
 
     async autocomplete (interaction) {
