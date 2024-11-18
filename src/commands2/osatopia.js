@@ -237,9 +237,14 @@ module.exports = {
 
         let rollMonsterString = ''
         if (timeBeforeRoll > 1) {
-            const minutes = Math.floor(timeBeforeRoll / 60000)
+            const heures = Math.floor(timeBeforeRoll / 3600000)
+            const minutes = Math.floor((timeBeforeRoll % 3600000) / 60000)
             const seconds = Math.floor((timeBeforeRoll % 60000) / 1000)
-            rollMonsterString = `Vous pourrez roll un monstre dans ${minutes} minutes et ${seconds} secondes !`
+
+            const pluralH = heures <= 1 ? '' : 's'
+            const pluralM = minutes <= 1 ? '' : 's'
+            const pluralS = seconds <= 1 ? '' : 's'
+            rollMonsterString = `Vous pourrez roll un monstre dans ${heures} heure${pluralH}, ${minutes} minute${pluralM} et ${seconds} seconde${pluralS} !`
         } else {
             rollMonsterString = 'Vous pouvez roll un monstre !'
         }
