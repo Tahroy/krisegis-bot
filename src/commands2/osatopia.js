@@ -66,13 +66,12 @@ module.exports = {
         // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures
         const conditions = {
             createdAt: {
-                [Op.gte]: timeBetweenResetRoll
+                [Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
             }, rollUserId: interaction.user.id
         }
         const captures = await Capture.findAll({ where: conditions })
 
         if (captures.length >= numberOfRolls) {
-            console.log(captures);
             await interaction.reply({ content: `Vous avez déjà fait vos rolls`, ephemeral: true })
             return
         }
@@ -259,7 +258,12 @@ module.exports = {
         }
 
         // On vérifie que le user n'a pas déjà roll il y a moins de 3h
-        const conditions = { catchDate: { [Op.gte]: timeBetweenCaptures }, catchUserId: user.id }
+        const conditions = {
+            catchDate: {
+                [Op.gte]: new Date(Date.now() - timeBetweenCaptures)
+            },
+            catchUserId: user.id
+        }
         const captures = await Capture.findAll({ where: conditions })
 
         if (captures.length > 0) {
