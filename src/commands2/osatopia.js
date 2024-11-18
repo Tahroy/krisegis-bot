@@ -72,6 +72,7 @@ module.exports = {
         const captures = await Capture.findAll({ where: conditions })
 
         if (captures.length >= numberOfRolls) {
+            console.log(captures);
             await interaction.reply({ content: `Vous avez déjà fait vos rolls`, ephemeral: true })
             return
         }
