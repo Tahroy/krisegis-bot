@@ -10,7 +10,7 @@ const { autocompleteLore } = require('../utils/Utils')
 // 3 heyres
 const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
-const numberOfRolls = 10
+const numberOfRolls = 1000
 
 /**
  * Jeu basé sur mudae.
@@ -72,17 +72,36 @@ module.exports = {
         const captures = await Capture.findAll({ where: conditions })
 
         if (captures.length >= numberOfRolls) {
-            await interaction.reply({ content: `Vous avez déjà fait vos rolls`, ephemeral: true })
+            try {
+                await interaction.reply({ content: `Vous avez déjà fait vos rolls`, ephemeral: true })
+            } catch (error) {
+                console.error(error)
+            }
             return
         }
 
+        let conditionRequest = '&isBoss=false&isMiniBoss=false'
+        // Nombre aléatoire entre 1 et 200
+        const randomChanceBoss = Math.floor(Math.random() * 200) + 1
+
+        // Si c'est 1, on prend un boss
+        if (randomChanceBoss === 1) {
+            conditionRequest = '&isBoss=true&isMiniBoss=false'
+        }
+        // Si c'est 2, on prend un mini boss
+        if (randomChanceBoss === 2) {
+            conditionRequest = '&isBoss=false&isMiniBoss=true'
+        }
+
+        console.log(randomChanceBoss, conditionRequest)
+
         // Requête DofusDB via Axios
-        const monstersTotalRequest = await axios.get('https://api.dofusdb.fr/monsters?$skip=0&$limit=1')
+        const monstersTotalRequest = await axios.get(`https://api.dofusdb.fr/monsters?$skip=0&$limit=1${conditionRequest}`)
         const total = monstersTotalRequest.data.total
 
         const random = Math.floor(Math.random() * total) + 1
 
-        const monsterRequest = await axios.get(`https://api.dofusdb.fr/monsters?$skip=${random}&$limit=1`)
+        const monsterRequest = await axios.get(`https://api.dofusdb.fr/monsters?$skip=${random}&$limit=1${conditionRequest}`)
         const monster = monsterRequest.data.data[0]
 
         const id = monster.id
@@ -114,7 +133,11 @@ module.exports = {
                 .setDescription(description)
                 .setImage(img) // Ajouter l'image
 
-            interaction.reply({ embeds: [embed] })
+            try {
+                interaction.reply({ embeds: [embed] })
+            } catch (error) {
+                console.error(error)
+            }
         } else {
             const row = new ActionRowBuilder()
                 .addComponents(new ButtonBuilder()
@@ -126,8 +149,12 @@ module.exports = {
                 .setTitle(`${name}`)
                 .setImage(img) // Ajouter l'image
 
-            // JSON
-            interaction.reply({ embeds: [embed], components: [row] })
+            try {
+                // JSON
+                interaction.reply({ embeds: [embed], components: [row] })
+            } catch (error) {
+                console.error(error)
+            }
         }
 
     },
@@ -138,7 +165,11 @@ module.exports = {
         const capture = await Capture.findOne({ where: { id: id } })
 
         if (!capture) {
-            await interaction.reply({ content: 'Cette capture n\'existe pas !', ephemeral: true })
+            try {
+                await interaction.reply({ content: 'Cette capture n\'existe pas !', ephemeral: true })
+            } catch (error) {
+                console.error(error)
+            }
             return
         }
 
@@ -224,15 +255,13 @@ module.exports = {
 
         const conditionsLastRoll = {
             where: {
-                rollUserId: user.id,
-                createdAt: {
+                rollUserId: user.id, createdAt: {
                     [Op.gte]: new Date(Date.now() - timeBetweenResetRoll) // Filtrer les rolls créés il y a moins de 3 heures
                 }
-            },
-            order: [['createdAt', 'ASC']]
-        };
+            }, order: [['createdAt', 'ASC']]
+        }
 
-        const lastRolls = await Capture.findAll(conditionsLastRoll);
+        const lastRolls = await Capture.findAll(conditionsLastRoll)
 
         let timeBeforeRoll = 0
         if (lastRolls.length >= 10) {
@@ -323,9 +352,8 @@ module.exports = {
         const retours = []
 
         for (const capture of captures) {
-            retours.push({
-                             name: capture.monsterName, value: capture.id
-                         })
+            retours.push({ name: capture.monsterName, value: capture.id
+            })
         }
 
         await interaction.respond(retours)
