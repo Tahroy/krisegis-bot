@@ -10,7 +10,7 @@ const { autocompleteLore } = require('../utils/Utils')
 // 3 heyres
 const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
-const numberOfRolls = 1000
+const numberOfRolls = 10
 
 /**
  * Jeu basé sur mudae.
@@ -82,18 +82,19 @@ module.exports = {
 
         let conditionRequest = '&isBoss=false&isMiniBoss=false'
         // Nombre aléatoire entre 1 et 200
-        const randomChanceBoss = Math.floor(Math.random() * 200) + 1
+        const randomChanceBoss = Math.floor(Math.random() * 100) + 1
 
         // Si c'est 1, on prend un boss
-        if (randomChanceBoss === 1) {
+        if ([1,2].includes(randomChanceBoss)) {
             conditionRequest = '&isBoss=true&isMiniBoss=false'
         }
         // Si c'est 2, on prend un mini boss
-        if (randomChanceBoss === 2) {
+        if ([6,7].includes(randomChanceBoss)) {
             conditionRequest = '&isBoss=false&isMiniBoss=true'
         }
 
-        console.log(randomChanceBoss, conditionRequest)
+      //  interaction.channel.send({ content: `Roll ${randomChanceBoss}` })
+        console.log(`Roll boss chances: ${randomChanceBoss}`)
 
         // Requête DofusDB via Axios
         const monstersTotalRequest = await axios.get(`https://api.dofusdb.fr/monsters?$skip=0&$limit=1${conditionRequest}`)
