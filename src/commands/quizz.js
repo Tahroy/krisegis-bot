@@ -3,7 +3,7 @@ const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const Question = require('../models/Question').default
 const { createEmbed } = require('../utils/embed')
-const { addPlayerItem } = require('../utils/Utils')
+const { PlayerService, ItemType } = require('../services/playerItemService')
 
 // Utilisez un objet pour stocker les scores des participants par canal
 const channelScores = new Map()
@@ -139,7 +139,7 @@ module.exports = {
         // Vérifiez si la réponse est correcte
         if (currentQuestion.correctAnswer === selectedAnswer) {
             currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
-            addPlayerItem(interaction.user, 'point quizz', 'question')
+            await PlayerService.addPlayerItem(interaction.user, 'point quizz', ItemType.QUESTION)
         }
 
         // Passez à la question suivante
