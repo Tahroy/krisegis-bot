@@ -10,7 +10,7 @@ const { autocompleteLore } = require('../utils/Utils')
 // 3 heyres
 const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
-const numberOfRolls = 10
+const numberOfRolls = 5
 
 /**
  * Jeu basé sur mudae.
