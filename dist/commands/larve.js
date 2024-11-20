@@ -1,7 +1,7 @@
 "use strict";
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
-const { addPlayerItem } = require('../utils/Utils');
 const { ButtonStyle } = require('discord-api-types/v8');
+const { PlayerService, ItemType } = require('../services/playerItemService');
 const Larve = require('../models/Larve').default;
 const LARVES = {
     'larve_bleue': {
@@ -194,7 +194,8 @@ class Game {
         }
         else {
             channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` });
-            addPlayerItem({ id: playerId }, larveLabel.name, "larve");
+            const user = await interaction.client.users.fetch(playerId);
+            await PlayerService.addPlayerItem(user, larveLabel.name, ItemType.LARVE);
         }
         // On enregistre dans la table larve laquelle a gagné
         let larve = await Larve.findOne({
