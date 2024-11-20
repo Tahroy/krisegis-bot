@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "ES2020",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "allowJs": true,        // Permet de compiler les fichiers .js
+    "checkJs": false        // Désactive la vérification stricte des fichiers JS
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
