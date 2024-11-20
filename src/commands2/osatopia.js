@@ -10,7 +10,7 @@ const { autocompleteLore } = require('../utils/Utils')
 // 3 heyres
 const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
-const numberOfRolls = 10
+const numberOfRolls = 5
 
 /**
  * Jeu basé sur mudae.
@@ -265,7 +265,7 @@ module.exports = {
         const lastRolls = await Capture.findAll(conditionsLastRoll)
 
         let timeBeforeRoll = 0
-        if (lastRolls.length >= 10) {
+        if (lastRolls.length >= numberOfRolls) {
             const firstLastRoll = lastRolls[0]
             timeBeforeRoll = timeBetweenResetRoll - (timestamp - firstLastRoll.createdAt)
         }
