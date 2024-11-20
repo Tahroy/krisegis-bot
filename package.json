@@ -4,7 +4,9 @@
   "description": "Bot pour Krisegis",
   "main": "index.js",
   "scripts": {
-    "lancement": "node index.js"
+    "lancement": "node index.js",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "author": "Tahroy",
   "license": "ISC",
@@ -12,18 +14,26 @@
     "@discordjs/builders": "^1.6.5",
     "@discordjs/rest": "^1.7",
     "app-root-path": "^3.0.0",
-    "axios": "^1.4",
+    "axios": "1.7.4",
     "axios-extensions": "^3.1.6",
     "discord-api-types": "^0.37",
-    "discord.js": "^14",
     "discord.js-buttons": "^1.0.0",
     "jsdom": "^21.1.1",
     "moment": "^2.29.4",
     "mysql2": "^3.3.3",
     "node-cron": "^3.0.0",
-    "sequelize": "^6.6.2",
+    "sequelize": "^6.37.5",
     "sequelize-cli": "^6.6.0",
-    "sqlite3": "^5.1.6"
+    "sequelize-typescript": "^2.1.6",
+    "sqlite3": "^5.1.7"
   },
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "@types/sequelize": "^4.28.20",
+    "discord.js": "^14.16.3",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
 }
