@@ -265,7 +265,7 @@ module.exports = {
         const lastRolls = await Capture.findAll(conditionsLastRoll)
 
         let timeBeforeRoll = 0
-        if (lastRolls.length >= 10) {
+        if (lastRolls.length >= numberOfRolls) {
             const firstLastRoll = lastRolls[0]
             timeBeforeRoll = timeBetweenResetRoll - (timestamp - firstLastRoll.createdAt)
         }
