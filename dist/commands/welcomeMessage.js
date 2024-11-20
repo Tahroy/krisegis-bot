@@ -1,0 +1,35 @@
+"use strict";
+const { SlashCommandBuilder } = require('discord.js');
+const WelcomeMessage = require('../models/WelcomeMessage').default;
+const { PermissionFlagsBits } = require('discord-api-types/v8');
+module.exports = {
+    opts: {
+        admin: true
+    },
+    data: new SlashCommandBuilder()
+        .setName('welcomemessage')
+        .setDescription('Ajoute un message d\'accueil')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setDMPermission(false)
+        .addStringOption(option => option.setName('message')
+        .setDescription('Le message d\'accueil')
+        .setRequired(true)),
+    async execute(interaction) {
+        const message = interaction.options.getString('message');
+        if (!message.includes('[nom]')) {
+            interaction.reply({
+                content: 'Le message d\'accueil doit contenir \'[nom]\'',
+                ephemeral: true
+            });
+        }
+        const champs = {
+            message: message,
+            guild: interaction.guild.id
+        };
+        await WelcomeMessage.create(champs);
+        interaction.reply({
+            content: 'Le message d\'accueil a été ajouté',
+            ephemeral: true
+        });
+    },
+};
