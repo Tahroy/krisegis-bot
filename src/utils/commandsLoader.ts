@@ -12,7 +12,7 @@ interface Command {
 
 // Fonction pour charger les commandes
 export default function loadCommands(client: Client & { commands: Collection<string, Command> }) {
-    const commandsPath = path.join(__dirname, '../commands2');
+    const commandsPath = path.join(__dirname, '../commands');
     const commandFiles = readdirSync(commandsPath).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 
     for (const file of commandFiles) {

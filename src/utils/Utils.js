@@ -2,11 +2,12 @@ const { JSDOM } = require('jsdom')
 const axios = require('axios')
 const { api_lore } = require('../../config/config_bot.json')
 const { createEmbed } = require('./embed')
-const Variable = require('../database/Variable')
-const Server = require('../database/Server')
 const { Op } = require('sequelize')
-const LoreElement = require('../database/LoreElement')
-const PlayerItem = require('../database/PlayerItem')
+
+const LoreElement = require('../models/LoreElement').default
+const PlayerItem = require('../models/PlayerItem').default
+const Server = require('../models/Server').default
+const Variable = require('../models/Variable').default
 
 function htmlToMarkdown (texteHTML) {
     // Remplacer les balises de paragraphe par des sauts de ligne
