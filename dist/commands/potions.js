@@ -2,7 +2,7 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, ModalBuilder } = require("discord.js");
 const { ButtonStyle, TextInputStyle } = require("discord-api-types/v8");
 const embedData = require("../utils/embed");
-const { addPlayerItem } = require('../utils/Utils');
+const { PlayerService, ItemType } = require('../services/playerItemService');
 const Potion = require('../models/Potion').default;
 const NOMBRE = 5;
 let parties = {};
@@ -80,7 +80,7 @@ module.exports = {
             ingredient_5: ingredients[4]
         });
         await interaction.reply({ content: `Vous avez créé la potion **${potion.name}** ! :tada: :tada: :tada:` });
-        addPlayerItem(interaction.user, `Potion : ${potion.name}`, "potion");
+        await PlayerService.addPlayerItem(interaction.user, `Potion : ${potion.name}`, ItemType.POTION);
     }
 };
 class MasterMindGame {
@@ -220,7 +220,7 @@ class MasterMindGame {
         if (potion) {
             // Si la potion existe, on dit qu'il a trouvé celle-ci
             await interaction.reply({ content: `Vous avez gagnez la potion **${potion.name}** ! :tada: :tada: :tada:` });
-            addPlayerItem(interaction.user, `Potion : ${potion.name}`, "potion");
+            await PlayerService.addPlayerItem(interaction.user, `Potion : ${potion.name}`, ItemType.POTION);
         }
         else {
             savedPotions[interaction.user.id] = this.objectif;

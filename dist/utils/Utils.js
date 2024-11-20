@@ -202,6 +202,14 @@ module.exports = {
             }
         });
     },
+    /**
+     * @deprecated
+     * @use PlayerItemService.addPlayerItem
+     * @param user
+     * @param name
+     * @param type
+     * @returns {Promise<void>}
+     */
     async addPlayerItem(user, name, type) {
         let playerItem = await PlayerItem.findOne({
             where: {
