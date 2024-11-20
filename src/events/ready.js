@@ -1,19 +1,21 @@
 const { version } = require('../../config/config_bot.json')
-const Variable = require('../database/Variable')
-const Server = require('../database/Server')
-const Event = require('../database/Event')
-const Participant = require('../database/Participant')
-const Question = require('../database/Question')
-const WelcomeMessage = require('../database/WelcomeMessage')
-const LoreElement = require('../database/LoreElement')
-const PlayerItem = require('../database/PlayerItem')
-const Potion = require('../database/Potion')
 const { REST } = require('@discordjs/rest')
 const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
 const moment = require('moment/moment')
-const Larve= require('../database/Larve')
-const Capture= require('../database/Capture')
+
+// Capture transpilé en JavaScript après compilation TypeScript
+const Capture = require('../models/Capture').default
+const Event = require('../models/Event').default
+const Larve = require('../models/Larve').default
+const LoreElement = require('../models/LoreElement').default
+const Participant = require('../models/Participant').default
+const PlayerItem = require('../models/PlayerItem').default
+const Potion = require('../models/Potion').default
+const Question = require('../models/Question').default
+const Server = require('../models/Server').default
+const Variable = require('../models/Variable').default
+const WelcomeMessage = require('../models/WelcomeMessage').default
 
 const eventReminderCheckInterval = 60 * 1000 // Intervalle de vérification des rappels (5 minutes dans cet exemple)
 const eventReminderTime = 60 * 60 * 1000 // Durée en millisecondes avant le rappel (1 heure dans cet exemple)
@@ -34,7 +36,7 @@ module.exports = async function (client) {
         await Larve.sync()
         await Capture.sync()
 
-        console.log('BDD Synchro !');
+        console.log('BDD Synchro !')
 
         const rest = new REST({ version: '10' }).setToken(token)
 
@@ -52,12 +54,10 @@ module.exports = async function (client) {
         }
         slashCommands = slashCommands.map(command => command.toJSON())
 
-        await rest.put(
-            Routes.applicationCommands(client_id),
-            { body: slashCommands },
-        ).then(() => console.log('Successfully registered application commands.')).catch(
-            console.error,
-        )
+        await rest.put(Routes.applicationCommands(client_id), { body: slashCommands },)
+                  .then(() => console.log('Successfully registered application commands.'))
+                  .catch(console.error,)
+        /*
         for (const guild of client.guilds.cache.values()) {
             console.log(`- ${guild.name} (ID: ${guild.id})`)
 
@@ -71,8 +71,7 @@ module.exports = async function (client) {
                 console.log(`  - ${member.user.tag} (ID: ${member.id})`)
             })
         }
-
-
+        */
         checkEventReminders()
 
     })
@@ -122,8 +121,8 @@ ${link}
                     }
 
                     event.update({
-                        recalled: true
-                    })
+                                     recalled: true
+                                 })
                 }
             }
         }, eventReminderCheckInterval)
@@ -132,17 +131,17 @@ ${link}
     // Fonction pour récupérer les événements planifiés depuis votre système de stockage (table)
     async function getScheduledEventsFromDatabase () {
         return await Event.findAll({
-            where: { recalled: false }
-        })
+                                       where: { recalled: false }
+                                   })
     }
 
     // Fonction pour récupérer les participants d'un événement depuis votre système de stockage (table)
     async function getParticipantsFromDatabase (event) {
 
         return await Participant.findAll({
-            where: {
-                event: event.id
-            }
-        })
+                                             where: {
+                                                 event: event.id
+                                             }
+                                         })
     }
 }
