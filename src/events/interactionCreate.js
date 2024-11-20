@@ -38,7 +38,7 @@ module.exports = (client) => {
             if (command?.opts?.admin && interaction.member.user.id !== owner) {
                 return await interaction.reply('Vous ne pouvez pas utiliser cette commande !')
             }
-            await command.executeButton(interaction, buttonName)
+            await command.executeButton(interaction)
         } catch (error) {
             console.error(error)
             if (interaction) {

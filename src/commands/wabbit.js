@@ -1,9 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
-const { ButtonStyle } = require('discord-api-types/v8')
+const { ButtonStyle } = require('discord-api-types/v10')
 const fs = require('fs')
 const path = require('path')
-const { addPlayerItem } = require('../utils/Utils')
+const { PlayerService, ItemType } = require('../services/playerItemService')
 
 
 const WABBITS_NAMES = {
@@ -133,7 +133,7 @@ module.exports = {
 
             const wabbitName = WABBITS_NAMES[channelData.image]
 
-            addPlayerItem(user, wabbitName, "wabbit")
+            await PlayerService.addPlayerItem(user, wabbitName, ItemType.WABBIT)
 
             return interaction.reply(`${userName} a capturé un ${wabbitName} ! Il a maintenant ${userScore} point${plural}`)
         }

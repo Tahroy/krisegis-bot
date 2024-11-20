@@ -1,11 +1,12 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // Nous importons les classes SlashCommandBuilder, ActionRowBuilder et ButtonBuilder de 'discord.js'
 // ainsi que ButtonStyle de 'discord-api-types/v8'.
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
-const { ButtonStyle } = require('discord-api-types/v8');
+const { ButtonStyle } = require('discord-api-types/v10');
 const { readdirSync } = require('node:fs');
 const { join, extname } = require('node:path');
-const { addPlayerItem } = require('../utils/Utils');
+const playerItemService_1 = require("../services/playerItemService");
 // Nous déclarons un tableau vide 'games'.
 let games = [];
 /**
@@ -137,7 +138,7 @@ module.exports = {
                     6: "Kouinkouin noir",
                     7: "Kouinkouin"
                 };
-                await addPlayerItem(catcher.user, KOUINKOUINS[kouinkouinID], "kouinkouin");
+                await playerItemService_1.PlayerService.addPlayerItem(catcher.user, KOUINKOUINS[kouinkouinID], playerItemService_1.ItemType.KOUINKOUIN);
             }
             else {
                 interaction.reply('Raté !');
