@@ -1,16 +1,27 @@
 "use strict";
-const { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, EmbedBuilder } = require('discord.js');
-const embedData = require('../utils/embed');
-const { Axios } = require('axios');
-const axios = require('axios');
-const { ButtonStyle } = require('discord-api-types/v10');
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const builders_1 = require("@discordjs/builders");
+const discord_js_1 = require("discord.js");
+const axios_1 = __importDefault(require("axios"));
+const v10_1 = require("discord-api-types/v10");
+const sequelize_1 = require("sequelize");
+const api_1 = require("../dofusdb/api");
 const Capture = require('../models/Capture').default;
-const { Op } = require('sequelize');
-const { autocompleteLore } = require('../utils/Utils');
 // 3 heyres
 const timeBetweenCaptures = 60 * 60 * 1000 * 3;
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3;
 const numberOfRolls = 5;
+const subCommandRoll = new builders_1.SlashCommandSubcommandBuilder();
+subCommandRoll.setName('roll').setDescription('Roll des monstres');
+const subCommandCaptures = new builders_1.SlashCommandSubcommandBuilder();
+subCommandCaptures.setName('captures').setDescription('Liste de vos captures');
+const subCommandView = new builders_1.SlashCommandSubcommandBuilder();
+subCommandView.setName('view').setDescription('Voir un monstre');
+const subCommandTimer = new builders_1.SlashCommandSubcommandBuilder();
+subCommandTimer.setName('timer').setDescription('Voir le temps restant pour roll ou capturer un monstre');
 /**
  * Jeu basé sur mudae.
  * Roll des monstres
@@ -18,40 +29,31 @@ const numberOfRolls = 5;
  * Inventaire
  */
 module.exports = {
-    data: new SlashCommandBuilder()
+    data: new discord_js_1.SlashCommandBuilder()
         .setName('osatopia')
         .setDescription('Jeu de capture de monstres')
-        .setDMPermission(false)
-        .addSubcommand(subcommand => subcommand
-        .setName('roll')
-        .setDescription('Roll des monstres'))
-        .addSubcommand(subcommand => subcommand
-        .setName('captures')
-        .setDescription('Liste de vos captures'))
-        .addSubcommand(subcommand => subcommand
-        .setName('view')
-        .setDescription('Voir un monstre')
-        .addIntegerOption(option => option
-        .setName('id')
-        .setDescription('ID du monstre')
-        .setRequired(true)
-        .setAutocomplete(true)))
-        .addSubcommand(subcommand => subcommand
-        .setName('timer')
-        .setDescription('Voir le temps restant pour roll ou capturer un monstre')),
+        .setContexts(discord_js_1.InteractionContextType.Guild)
+        .addSubcommand(subCommandRoll)
+        .addSubcommand(subCommandCaptures)
+        .addSubcommand(subCommandView)
+        .addSubcommand(subCommandTimer),
     async execute(interaction) {
+        if (!interaction.isCommand() || !(interaction.options instanceof discord_js_1.CommandInteractionOptionResolver)) {
+            return;
+        }
+        // Vérifier que l'interaction contient des sous-commandes avant d'essayer de les récupérer
         const command = interaction.options.getSubcommand();
         switch (command) {
-            case 'roll':
+            case subCommandRoll.name:
                 await this.roll(interaction);
                 break;
-            case 'captures':
+            case subCommandCaptures.name:
                 this.captures(interaction);
                 break;
-            case 'view':
+            case subCommandView.name:
                 await this.view(interaction);
                 break;
-            case 'timer':
+            case subCommandTimer.name:
                 await this.timer(interaction);
                 break;
             default:
@@ -62,7 +64,7 @@ module.exports = {
         // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures
         const conditions = {
             createdAt: {
-                [Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
+                [sequelize_1.Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
             }, rollUserId: interaction.user.id
         };
         const captures = await Capture.findAll({ where: conditions });
@@ -89,11 +91,13 @@ module.exports = {
         //  interaction.channel.send({ content: `Roll ${randomChanceBoss}` })
         console.log(`Roll boss chances: ${randomChanceBoss}`);
         // Requête DofusDB via Axios
-        const monstersTotalRequest = await axios.get(`https://api.dofusdb.fr/monsters?$skip=0&$limit=1${conditionRequest}`);
-        const total = monstersTotalRequest.data.total;
+        const conditionTotal = `?$skip=0&$limit=1${conditionRequest}`;
+        const monstersTotalRequest = await (0, api_1.fetchMonsters)(conditionTotal);
+        const total = monstersTotalRequest.total;
         const random = Math.floor(Math.random() * total) + 1;
-        const monsterRequest = await axios.get(`https://api.dofusdb.fr/monsters?$skip=${random}&$limit=1${conditionRequest}`);
-        const monster = monsterRequest.data.data[0];
+        const conditionMonster = `?$skip=${random}&$limit=1${conditionRequest}`;
+        const monstersRequest = await (0, api_1.fetchMonsters)(conditionMonster);
+        const monster = monstersRequest.data[0];
         const id = monster.id;
         const name = monster.name.fr;
         const look = monster.look;
@@ -101,39 +105,39 @@ module.exports = {
         const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`;
         const timestamp = Date.now();
         // check si déjà capturé (catchUserId != null)
-        const conditionsCheckCapture = { monsterId: id, catchUserId: { [Op.ne]: null } };
+        const conditionsCheckCapture = { monsterId: id, catchUserId: { [sequelize_1.Op.ne]: null } };
         const captureCheck = await Capture.findOne({ where: conditionsCheckCapture });
         const capture = { monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id };
         const captureDB = await Capture.create(capture);
         if (captureCheck) {
             const guild = interaction.guild; // ou client.guilds.cache.get('GUILD_ID');
-            const memberCatch = await guild.members.fetch(captureCheck.catchUserId);
+            const memberCatch = await guild?.members.fetch(captureCheck.catchUserId);
             const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId);
-            const userName = memberCatch.nickname ?? userCatch.globalName;
+            const userName = memberCatch?.nickname ?? userCatch.globalName;
             const description = `Capturé par ${userName}`;
-            const embed = new EmbedBuilder()
+            const embed = new discord_js_1.EmbedBuilder()
                 .setTitle(`${name}`)
                 .setDescription(description)
                 .setImage(img); // Ajouter l'image
             try {
-                interaction.reply({ embeds: [embed] });
+                await interaction.reply({ embeds: [embed] });
             }
             catch (error) {
                 console.error(error);
             }
         }
         else {
-            const row = new ActionRowBuilder()
-                .addComponents(new ButtonBuilder()
+            const row = new discord_js_1.ActionRowBuilder()
+                .addComponents(new discord_js_1.ButtonBuilder()
                 .setLabel('Capture')
                 .setCustomId(`osatopia-capture-${captureDB.id}-${timestamp}`)
-                .setStyle(ButtonStyle.Success));
-            const embed = new EmbedBuilder()
+                .setStyle(v10_1.ButtonStyle.Success));
+            const embed = new discord_js_1.EmbedBuilder()
                 .setTitle(`${name}`)
                 .setImage(img); // Ajouter l'image
             try {
                 // JSON
-                interaction.reply({ embeds: [embed], components: [row] });
+                await interaction.reply({ embeds: [embed], components: [row] });
             }
             catch (error) {
                 console.error(error);
@@ -141,6 +145,9 @@ module.exports = {
         }
     },
     async view(interaction) {
+        if (!interaction.isCommand() || !(interaction.options instanceof discord_js_1.CommandInteractionOptionResolver)) {
+            return;
+        }
         const id = interaction.options.getInteger('id');
         const capture = await Capture.findOne({ where: { id: id } });
         if (!capture) {
@@ -155,7 +162,7 @@ module.exports = {
         const name = capture.monsterName;
         const monsterId = capture.monsterId;
         // Request DofusDB
-        const monsterRequest = await axios.get(`https://api.dofusdb.fr/monsters/${monsterId}`);
+        const monsterRequest = await axios_1.default.get(`https://api.dofusdb.fr/monsters/${monsterId}`);
         const monster = monsterRequest.data;
         const look = monster.look;
         const hexa = Buffer.from(look).toString('hex');
@@ -163,20 +170,19 @@ module.exports = {
         const dateFr = capture.catchDate.toLocaleDateString('fr-FR', {
             day: '2-digit', month: '2-digit', year: 'numeric'
         });
-        const embed = new EmbedBuilder()
+        const embed = new discord_js_1.EmbedBuilder()
             .setTitle(`${name}`)
             .setDescription(`Capturé le ${dateFr}`)
             .setImage(img);
-        interaction.reply({ embeds: [embed] });
-    },
-    inventory(interaction) {
-        interaction.reply('Inventaire');
+        await interaction.reply({ embeds: [embed] });
     },
     captures(interaction) {
         const user = interaction.user;
-        Capture.findAll({ where: { catchUserId: user.id }, order: [['monsterName', 'DESC']] }).then(captures => {
+        Capture.findAll({
+            where: { catchUserId: user.id }, order: [['monsterName', 'DESC']]
+        }).then(async (captures) => {
             if (captures.length === 0) {
-                interaction.reply('Vous n\'avez pas capturé de monstres !');
+                await interaction.reply('Vous n\'avez pas capturé de monstres !');
                 return;
             }
             let capturesArray = [];
@@ -188,10 +194,10 @@ module.exports = {
                 });
                 capturesArray.push(`${dateString} - ${capture.monsterName}`);
             }
-            const embed = new EmbedBuilder()
+            const embed = new discord_js_1.EmbedBuilder()
                 .setTitle('Vos captures');
-            interaction.reply({ embeds: [embed.setDescription(capturesArray.join('\n'))] });
-        }).catch(error => {
+            await interaction.reply({ embeds: [embed.setDescription(capturesArray.join('\n'))] });
+        }).catch(function (error) {
             console.error(error);
         });
     },
@@ -220,7 +226,7 @@ module.exports = {
         const conditionsLastRoll = {
             where: {
                 rollUserId: user.id, createdAt: {
-                    [Op.gte]: new Date(Date.now() - timeBetweenResetRoll) // Filtrer les rolls créés il y a moins de 3 heures
+                    [sequelize_1.Op.gte]: new Date(Date.now() - timeBetweenResetRoll) // Filtrer les rolls créés il y a moins de 3 heures
                 }
             }, order: [['createdAt', 'ASC']]
         };
@@ -243,11 +249,12 @@ module.exports = {
         else {
             rollMonsterString = 'Vous pouvez roll un monstre !';
         }
-        const embed = new EmbedBuilder()
+        const embed = new discord_js_1.EmbedBuilder()
             .setTitle('Timer')
             .setDescription(`${catchMonsterString}\n${rollMonsterString}`);
-        interaction.reply({ embeds: [embed] });
-    }, async executeButton(interaction, buttonName) {
+        await interaction.reply({ embeds: [embed] });
+    },
+    async executeButton(interaction) {
         const id = interaction.customId.split('-')[2];
         const user = interaction.user;
         const capture = await Capture.findOne({ where: { id: id } });
@@ -260,14 +267,15 @@ module.exports = {
             await interaction.reply({ content: 'Cette capture a déjà été prise !', ephemeral: true });
             return;
         }
+        const myDate = new Date();
         // On vérifie que la capture n'est pas trop vieille
-        if (new Date() - capture.createdAt > 60 * 60 * 1000) {
+        if (myDate.getTime() - capture.createdAt > 60 * 60 * 1000) {
             await interaction.reply({ content: 'Cette capture est trop vieille !', ephemeral: true });
         }
         // On vérifie que le user n'a pas déjà roll il y a moins de 3h
         const conditions = {
             catchDate: {
-                [Op.gte]: new Date(Date.now() - timeBetweenCaptures)
+                [sequelize_1.Op.gte]: new Date(Date.now() - timeBetweenCaptures)
             }, catchUserId: user.id
         };
         const captures = await Capture.findAll({ where: conditions });
@@ -285,16 +293,17 @@ module.exports = {
         const name = capture.monsterName;
         await Capture.update({ catchUserId: user.id, catchDate: new Date() }, { where: { id: id } });
         const guild = interaction.guild;
-        const memberCatch = await guild.members.fetch(user.id);
-        const userName = memberCatch.nickname ?? user.globalName;
-        interaction.reply(`${userName} a capturé ${name} !`);
+        const memberCatch = await guild?.members.fetch(user.id);
+        const userName = memberCatch?.nickname ?? user.globalName;
+        await interaction.reply(`${userName} a capturé ${name} !`);
     },
     async autocomplete(interaction) {
         const user = interaction.user;
         const captures = await Capture.findAll({ where: { catchUserId: user.id }, order: [['monsterName', 'DESC']] });
         const retours = [];
         for (const capture of captures) {
-            retours.push({ name: capture.monsterName, value: capture.id
+            retours.push({
+                name: capture.monsterName, value: capture.id
             });
         }
         await interaction.respond(retours);

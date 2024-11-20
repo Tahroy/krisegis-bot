@@ -97,21 +97,6 @@ module.exports = {
         return {
             'data': dataFormatted, 'limit': 20, 'offset': offset, 'total': count
         }
-
-        const LIMIT = 20
-
-        const removeChars = ['=', '?', '&', '+', '#', '/', '\'', '"',]
-
-        for (let i = 0; i < removeChars.length; i++) {
-            search = search.replaceAll(removeChars[i], '')
-        }
-
-        search = encodeURIComponent(search)
-
-        const call = `${api_lore}/${route}?content="${search}"&$limit=${LIMIT}&$offset=${offset}`
-        console.log(call)
-        const response = await axios.get(call)
-        return response.data
     },
 
     async getResult (data, type = '', truncate = true) {
