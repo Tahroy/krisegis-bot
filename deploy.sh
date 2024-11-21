@@ -1,15 +1,22 @@
 #!/bin/bash
 
-# Récupérez les dernières modifications
-git pull origin main
+# Effectuer un pull des dernières modifications depuis le repository Git
+echo "Récupération des dernières modifications depuis Git..."
+git pull || { echo "Git pull a échoué !"; exit 1; }
 
-# Installez les dépendances
-sudo npm install
+# Installer les dépendances via npm
+echo "Installation des dépendances..."
+sudo npm install || { echo "npm install a échoué !"; exit 1; }
 
-# Compilez l'application
-npm run build
 
-# Redémarrez l'application avec PM2
-pm2 restart dist/index.js
+sudo npm run build || { echo "npm rund build a échoué !"; exit 1; }
 
-echo "Déploiement terminé avec succès!"
+# Arrêter et redémarrer pm2
+echo "Redémarrage de pm2..."
+pm2 restart dist/index.js || { echo "pm2 restart a échoué !"; exit 1; }
+
+# Surveiller les logs de pm2
+echo "Lancement de pm2 monit..."
+pm2 monit || { echo "pm2 monit a échoué !"; exit 1; }
+
+echo "Déploiement terminé avec succès !"
