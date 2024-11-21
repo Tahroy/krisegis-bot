@@ -4,7 +4,7 @@
 git pull origin main
 
 # Installez les dépendances
-sudo npm install
+npm install
 
 # Compilez l'application
 npm run build
