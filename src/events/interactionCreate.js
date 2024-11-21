@@ -41,11 +41,12 @@ module.exports = (client) => {
             await command.executeButton(interaction, buttonName)
         } catch (error) {
             console.error(error)
+            // on check le type d'erreur
+            if (error.message === 'The reply to this interaction has already been sent or deferred.') {
+                return
+            }
             if (interaction) {
                 console.error(`Erreur de ${interaction.user.tag} avec la commande ${commandName} et bouton ${buttonName}`)
-                await interaction.channel.send({
-                                                   content: `Une erreur a eu lieu, contactez Tahroy !`, ephemeral: true,
-                                               })
             }
         }
     }
