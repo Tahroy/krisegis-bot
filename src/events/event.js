@@ -29,8 +29,8 @@ module.exports = function (client) {
      */
     async function annoncerEventGeneral (guildScheduledEvent, event) {
         const name = guildScheduledEvent.name
-        const dateDebut = guildScheduledEvent.scheduledStartTimestamp
-        const dateFin = guildScheduledEvent.scheduledEndTimestamp
+        const dateDebut = Math.floor(guildScheduledEvent.scheduledStartTimestamp / 1000)
+        const dateFin = Math.floor(guildScheduledEvent.scheduledEndTimestamp / 1000)
         const guild = guildScheduledEvent.guild
         const link = guildScheduledEvent.url
 
@@ -76,8 +76,8 @@ ${link}`
      */
     async function annoncerEventServeur (guildScheduledEvent, event) {
         const name = guildScheduledEvent.name
-        const dateDebut = guildScheduledEvent.scheduledStartTimestamp
-        const dateFin = guildScheduledEvent.scheduledEndTimestamp
+        const dateDebut = Math.floor(guildScheduledEvent.scheduledStartTimestamp / 1000)
+        const dateFin = Math.floor(guildScheduledEvent.scheduledEndTimestamp / 1000)
         const guild = guildScheduledEvent.guild
         const link = guildScheduledEvent.url
 
