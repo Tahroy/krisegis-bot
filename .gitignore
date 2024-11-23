@@ -10,3 +10,5 @@ config.json
 /.idea
 
 ffmpeg
+
+./public

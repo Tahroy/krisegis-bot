@@ -5,11 +5,11 @@ echo "Récupération des dernières modifications depuis Git..."
 git pull || { echo "Git pull a échoué !"; exit 1; }
 
 # Installer les dépendances via npm
-echo "Installation des dépendances..."
-sudo npm install || { echo "npm install a échoué !"; exit 1; }
+#echo "Installation des dépendances..."
+#sudo npm install || { echo "npm install a échoué !"; exit 1; }
 
 
-sudo npm run build || { echo "npm rund build a échoué !"; exit 1; }
+npm run build || { echo "npm rund build a échoué !"; exit 1; }
 
 # Arrêter et redémarrer pm2
 echo "Redémarrage de pm2..."
