@@ -8,13 +8,15 @@ import {
     CommandInteractionOptionResolver,
     EmbedBuilder,
     InteractionContextType,
-    SlashCommandBuilder
+    SlashCommandBuilder,
+    User
 } from 'discord.js'
-import axios from 'axios'
 import {ButtonStyle} from 'discord-api-types/v10'
 import {Op} from 'sequelize'
-import {MonsterAPIResponse} from "../dofusdb/types/monster";
-import {fetchMonsters} from "../dofusdb/api";
+import {Monster, MonsterAPIResponse} from "../dofusdb/types/monster";
+import {fetchMonster, fetchMonsters} from "../dofusdb/api";
+import {join} from "path";
+import {PicturesManager} from "../utils/PicturesManager";
 
 const Capture = require('../models/Capture').default
 
@@ -30,11 +32,10 @@ const subCommandCaptures = new SlashCommandSubcommandBuilder();
 subCommandCaptures.setName('captures').setDescription('Liste de vos captures');
 
 const subCommandView = new SlashCommandSubcommandBuilder();
-subCommandView.setName('view').setDescription('Voir un monstre');
+subCommandView.setName('view').setDescription('Voir un monstre').addIntegerOption(option => option.setName('id').setDescription('Monstre').setAutocomplete(true));
 
 const subCommandTimer = new SlashCommandSubcommandBuilder();
 subCommandTimer.setName('timer').setDescription('Voir le temps restant pour roll ou capturer un monstre');
-
 
 /**
  * Jeu basé sur mudae.
@@ -78,15 +79,43 @@ module.exports = {
     },
 
     async roll(interaction: CommandInteraction) {
-        // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures
-        const conditions = {
-            createdAt: {
-                [Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
-            }, rollUserId: interaction.user.id
-        }
-        const captures: typeof Capture[] = await Capture.findAll({where: conditions})
+        async function getConditionsRoll(): Promise<string> {
+            let conditionRequest = '&isBoss=false&isMiniBoss=false'
+            // Nombre aléatoire entre 1 et 200
+            const randomChanceBoss = Math.floor(Math.random() * 100) + 1
 
-        if (captures.length >= numberOfRolls) {
+            // Si c'est 1, on prend un boss
+            if ([1, 2].includes(randomChanceBoss)) {
+                conditionRequest = '&isBoss=true&isMiniBoss=false'
+            }
+            // Si c'est 2, on prend un mini boss
+            if ([6, 7].includes(randomChanceBoss)) {
+                conditionRequest = '&isBoss=false&isMiniBoss=true'
+            }
+
+            // Requête DofusDB via Axios
+            const conditionTotal = `?$skip=0&$limit=1${conditionRequest}`
+            const monstersTotalRequest: MonsterAPIResponse = await fetchMonsters(conditionTotal);
+
+            const total = monstersTotalRequest.total
+
+            const random = Math.floor(Math.random() * total) + 1
+            return `?$skip=${random}&$limit=1${conditionRequest}`
+        }
+
+        async function canRoll(user: User): Promise<Boolean> {
+            const conditions = {
+                createdAt: {
+                    [Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
+                }, rollUserId: user.id
+            }
+            const captures: typeof Capture[] = await Capture.findAll({where: conditions})
+
+            return captures.length < numberOfRolls
+        }
+
+        // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures
+        if (!await canRoll(interaction.user)) {
             try {
                 await interaction.reply({content: `Vous avez déjà fait vos rolls`, ephemeral: true})
             } catch (error) {
@@ -95,67 +124,46 @@ module.exports = {
             return
         }
 
-        let conditionRequest = '&isBoss=false&isMiniBoss=false'
-        // Nombre aléatoire entre 1 et 200
-        const randomChanceBoss = Math.floor(Math.random() * 100) + 1
-
-        // Si c'est 1, on prend un boss
-        if ([1, 2].includes(randomChanceBoss)) {
-            conditionRequest = '&isBoss=true&isMiniBoss=false'
-        }
-        // Si c'est 2, on prend un mini boss
-        if ([6, 7].includes(randomChanceBoss)) {
-            conditionRequest = '&isBoss=false&isMiniBoss=true'
-        }
-
-        //  interaction.channel.send({ content: `Roll ${randomChanceBoss}` })
-        console.log(`Roll boss chances: ${randomChanceBoss}`)
-
-        // Requête DofusDB via Axios
-        const conditionTotal = `?$skip=0&$limit=1${conditionRequest}`
-        const monstersTotalRequest: MonsterAPIResponse = await fetchMonsters(conditionTotal);
-
-        const total = monstersTotalRequest.total
-
-        const random = Math.floor(Math.random() * total) + 1
-
-        const conditionMonster = `?$skip=${random}&$limit=1${conditionRequest}`
-        const monstersRequest: MonsterAPIResponse = await fetchMonsters(conditionMonster);
-        const monster = monstersRequest.data[0]
+        const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
+        const monster: Monster = monstersRequest.data[0]
 
         const id = monster.id
         const name = monster.name.fr
         const look = monster.look
 
-        const hexa = Buffer.from(look).toString('hex')
-        const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`
-
         const timestamp = Date.now()
 
-        // check si déjà capturé (catchUserId != null)
-        const conditionsCheckCapture = {monsterId: id, catchUserId: {[Op.ne]: null}}
-        const captureCheck = await Capture.findOne({where: conditionsCheckCapture})
+        // Télécharge l'image si nécessaire
+        const imgName = `${id}.png`;
+        const file = await this.getImagePath(look, imgName);
 
-        const capture = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id}
-        const captureDB = await Capture.create(capture)
+        // Vérifie si le monstre est déjà capturé
+        const conditionsCheckCapture = {
+            monsterId: id, catchUserId: {[Op.ne]: null},
+        };
+        const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
+        const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
+
+        const captureDB: typeof Capture = await Capture.create(captureData);
 
         if (captureCheck) {
-            const guild = interaction.guild // ou client.guilds.cache.get('GUILD_ID');
-            const memberCatch = await guild?.members.fetch(captureCheck.catchUserId)
-            const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId)
+            // Monstre déjà capturé
+            const guild = interaction.guild;
+            const memberCatch = await guild?.members.fetch(captureCheck.catchUserId);
+            const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId);
 
-            const userName = memberCatch?.nickname ?? userCatch.globalName
-            const description = `Capturé par ${userName}`
+            const userName = memberCatch?.nickname ?? userCatch.username;
+            const description = `Capturé par ${userName}`;
 
             const embed = new EmbedBuilder()
-                .setTitle(`${name}`)
+                .setTitle(name)
                 .setDescription(description)
-                .setImage(img) // Ajouter l'image
+                .setImage(`attachment://${imgName}`); // Utilise le chemin de fichier joint
 
             try {
-                await interaction.reply({embeds: [embed]})
+                await interaction.reply({embeds: [embed], files: [file]});
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
         } else {
             const row = new ActionRowBuilder<ButtonBuilder>()
@@ -166,11 +174,11 @@ module.exports = {
 
             const embed = new EmbedBuilder()
                 .setTitle(`${name}`)
-                .setImage(img) // Ajouter l'image
+                .setImage(`attachment://${imgName}`)
 
             try {
                 // JSON
-                await interaction.reply({embeds: [embed], components: [row]})
+                await interaction.reply({embeds: [embed], components: [row], files: [file]})
             } catch (error) {
                 console.error(error)
             }
@@ -185,14 +193,15 @@ module.exports = {
 
         const id = interaction.options.getInteger('id')
 
+        if (!id) {
+            await interaction.reply({content: 'ID manquant !', ephemeral: true})
+            return;
+        }
+
         const capture = await Capture.findOne({where: {id: id}})
 
         if (!capture) {
-            try {
-                await interaction.reply({content: 'Cette capture n\'existe pas !', ephemeral: true})
-            } catch (error) {
-                console.error(error)
-            }
+            await interaction.reply({content: `Cette capture n'existe pas !`, ephemeral: true})
             return
         }
 
@@ -200,12 +209,11 @@ module.exports = {
         const monsterId = capture.monsterId
 
         // Request DofusDB
-        const monsterRequest = await axios.get(`https://api.dofusdb.fr/monsters/${monsterId}`)
-        const monster = monsterRequest.data
+        const monster = await fetchMonster(monsterId)
         const look = monster.look
 
-        const hexa = Buffer.from(look).toString('hex')
-        const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`
+        const imgName = `${id}.png`;
+        const file = await this.getImagePath(look, imgName);
 
         const dateFr = capture.catchDate.toLocaleDateString('fr-FR', {
             day: '2-digit', month: '2-digit', year: 'numeric'
@@ -214,39 +222,35 @@ module.exports = {
         const embed = new EmbedBuilder()
             .setTitle(`${name}`)
             .setDescription(`Capturé le ${dateFr}`)
-            .setImage(img)
+            .setImage(`attachment://${imgName}`)
 
-        await interaction.reply({embeds: [embed]})
+        await interaction.reply({embeds: [embed], files: [file]})
     },
 
-    captures(interaction: CommandInteraction) {
-        const user = interaction.user
+    async captures(interaction: CommandInteraction) {
+        const user: User = interaction.user
 
-        Capture.findAll({
-            where: {catchUserId: user.id}, order: [['monsterName', 'DESC']]
-        }).then(async (captures: typeof Capture[]) => {
-            if (captures.length === 0) {
-                await interaction.reply('Vous n\'avez pas capturé de monstres !')
-                return
-            }
+        const captures = await Capture.findAll({where: {catchUserId: user.id}, order: [['catchDate', 'DESC']]});
 
-            let capturesArray = []
-            for (const capture of captures) {
-                const date = capture.catchDate
-                // dd/mm/YY
-                const dateString = date.toLocaleDateString('fr-FR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric'
-                })
-                capturesArray.push(`${dateString} - ${capture.monsterName}`)
-            }
+        if (captures.length === 0) {
+            await interaction.reply({content: 'Vous n\'avez pas capturé de monstres !', ephemeral: true})
+            return;
+        }
 
-            const embed = new EmbedBuilder()
-                .setTitle('Vos captures')
+        let capturesArray: string [] = []
+        for (const capture of captures) {
+            const date = capture.catchDate
+            // dd/mm/YY
+            const dateString = date.toLocaleDateString('fr-FR', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            })
+            capturesArray.push(`${dateString} - ${capture.monsterName}`)
+        }
 
-            await interaction.reply({embeds: [embed.setDescription(capturesArray.join('\n'))]})
-        }).catch(function (error: Error) {
-            console.error(error)
-        })
+        const embed = new EmbedBuilder()
+            .setTitle('Vos captures')
+
+        await interaction.reply({embeds: [embed.setDescription(capturesArray.join('\n'))]})
     },
 
     async timer(interaction: CommandInteraction) {
@@ -382,5 +386,15 @@ module.exports = {
         }
 
         await interaction.respond(retours)
-    }
+    },
+
+    async getImagePath(look: string, name: string) {
+        const hexa = Buffer.from(look).toString('hex');
+        const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`;
+
+        await PicturesManager.fetchImageIfNeeded(img, name, '/monsters/');
+
+        return join(__dirname, '..', '..', 'public', 'monsters', name)
+    },
+
 }
