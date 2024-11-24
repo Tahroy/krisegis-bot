@@ -21,6 +21,7 @@ import {join} from "path";
 import {PicturesManager} from "../utils/PicturesManager";
 import sequelize from '../utils/database';
 import CaptureTrade from "../models/CaptureTrade";
+import {CommandCooldownError} from "../exceptions/CommandCooldownError";
 
 const Capture = require('../models/Capture').default
 
@@ -28,6 +29,8 @@ const Capture = require('../models/Capture').default
 const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
 const numberOfRolls = 5
+
+const cooldowns = new Map<string, number>(); // Gérer les timestamps par utilisateur et commande
 
 const subCommandRoll = new SlashCommandSubcommandBuilder();
 subCommandRoll.setName('roll').setDescription('Roll des monstres');
@@ -120,7 +123,24 @@ module.exports = {
             return `?$skip=${random}&$limit=1${conditionRequest}`
         }
 
-        async function canRoll(user: User): Promise<Boolean> {
+        /**
+         *
+         * @throws Error
+         */
+        async function canRoll(user: User) {
+            const timestamp: number = Date.now()
+
+            const currentTime = Date.now();
+            const key = `${user.id}:roll`;
+            const lastUsage = cooldowns.get(key);
+
+            if (lastUsage && currentTime - lastUsage < 5000) {
+                const timeBeforeNextRoll = Math.floor(5 - (timestamp - lastUsage) / 1000)
+                const purial = timeBeforeNextRoll > 1 ? 's' : ''
+                throw new CommandCooldownError(`Vous ne pouvez faire qu'un roll toutes les 5s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
+            }
+            cooldowns.set(key, currentTime);
+
             const conditions = {
                 createdAt: {
                     [Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
@@ -128,17 +148,35 @@ module.exports = {
             }
             const captures: typeof Capture[] = await Capture.findAll({where: conditions})
 
-            return captures.length < numberOfRolls
+            if (captures.length >= numberOfRolls) {
+                const lastCapture:number = captures[captures.length - 1].createdAt
+                const timeBeforeNextRollMs = timeBetweenResetRoll - (timestamp - lastCapture);
+                const timeBeforeNextRoll = Math.floor(timeBeforeNextRollMs / 1000)
+
+                const heures = Math.floor(timeBeforeNextRollMs / 3600000)
+                const minutes = Math.floor((timeBeforeNextRollMs % 3600000) / 60000)
+                const seconds = Math.floor((timeBeforeNextRollMs % 60000) / 1000)
+
+                const pluralH = heures <= 1 ? '' : 's'
+                const pluralM = minutes <= 1 ? '' : 's'
+                const pluralS = seconds <= 1 ? '' : 's'
+
+                const catchMonsterString = `Vous pourrez roll dans ${heures} heure${pluralH}, ${minutes} minute${pluralM} et ${seconds} seconde${pluralS} !`
+
+                throw new CommandCooldownError(`Vous n'avez plus de roll disponible. ${catchMonsterString}`)
+            }
         }
 
-        // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures
-        if (!await canRoll(interaction.user)) {
-            try {
-                await interaction.reply({content: `Vous avez déjà fait vos rolls`, ephemeral: true})
-            } catch (error) {
+        // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures*
+        try {
+            await canRoll(interaction.user)
+        } catch (error) {
+            if (error instanceof CommandCooldownError) {
+                await interaction.reply({content: error.message, ephemeral: true})
+            } else {
                 console.error(error)
             }
-            return
+            return;
         }
 
         const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
@@ -544,13 +582,23 @@ module.exports = {
 
         switch (subCommand) {
             case 'trade': {
-                const user = interaction.user
                 const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
 
                 console.log(`Focused option: ${focusedOption.name}`);
                 if (focusedOption.name === 'monster1') {
-                    const captures: typeof Capture[] = await Capture.findAll(
-                        {where: {catchUserId: user.id}, order: [['monsterName', 'DESC']]})
+                    const user = interaction.user
+                    const search = focusedOption.value
+                    const userCapturesConditions = {
+                        where: {
+                            catchUserId: user.id,
+                            monsterName: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        order: [['monsterName', 'DESC']],
+                        limit: 25
+                    }
+                    const captures = await Capture.findAll(userCapturesConditions);
                     const retours = []
                     for (const capture of captures) {
                         retours.push({name: capture.monsterName, value: capture.id})
@@ -558,6 +606,7 @@ module.exports = {
                     await interaction.respond(retours)
                     return
                 } else if (focusedOption.name === 'monster2') {
+                    const search = focusedOption.value
                     // on check sur la fonction option.getUser existe
                     const user: CommandInteractionOption<CacheType> | null = interaction.options.get('user'); // Récupérer l'option 'user'
 
@@ -565,8 +614,19 @@ module.exports = {
                         await interaction.respond([])
                         return
                     }
-                    const userCaptures = await Capture.findAll(
-                        {where: {catchUserId: user?.value}, order: [['monsterName', 'DESC']]});
+
+                    const userCapturesConditions = {
+                        where: {
+                            catchUserId: user?.value,
+                            monsterName: {
+                                [Op.like]: `%${search}%`
+                            }
+                        },
+                        order: [['monsterName', 'DESC']],
+                        limit: 25
+                    }
+                    const userCaptures = await Capture.findAll(userCapturesConditions);
+
                     const retours = []
                     for (const capture of userCaptures) {
                         retours.push({name: capture.monsterName, value: capture.id})
