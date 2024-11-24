@@ -6,6 +6,7 @@ const moment = require('moment/moment')
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
+const CaptureTrade = require('../models/CaptureTrade').default
 const Event = require('../models/Event').default
 const Larve = require('../models/Larve').default
 const LoreElement = require('../models/LoreElement').default
@@ -35,6 +36,7 @@ module.exports = async function (client) {
         await Potion.sync()
         await Larve.sync()
         await Capture.sync()
+        await CaptureTrade.sync()
 
         console.log('BDD Synchro !')
 
