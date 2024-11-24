@@ -151,7 +151,6 @@ module.exports = {
             if (captures.length >= numberOfRolls) {
                 const lastCapture:number = captures[captures.length - 1].createdAt
                 const timeBeforeNextRollMs = timeBetweenResetRoll - (timestamp - lastCapture);
-                const timeBeforeNextRoll = Math.floor(timeBeforeNextRollMs / 1000)
 
                 const heures = Math.floor(timeBeforeNextRollMs / 3600000)
                 const minutes = Math.floor((timeBeforeNextRollMs % 3600000) / 60000)
@@ -190,7 +189,18 @@ module.exports = {
 
         // Télécharge l'image si nécessaire
         const imgName = `${id}.png`;
-        const file = await this.getImagePath(look, imgName);
+
+        let file = null;
+        try {
+            file = await this.getImagePath(look, imgName);
+            if (!file) {
+                await interaction.reply({content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
+                return
+            }
+        } catch (error) {
+            await interaction.reply({content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
+            return
+        }
 
         // Vérifie si le monstre est déjà capturé
         const conditionsCheckCapture = {
