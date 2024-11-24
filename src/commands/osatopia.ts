@@ -4,7 +4,9 @@ import {
     AutocompleteInteraction,
     ButtonBuilder,
     ButtonInteraction,
+    CacheType,
     CommandInteraction,
+    CommandInteractionOption,
     CommandInteractionOptionResolver,
     EmbedBuilder,
     InteractionContextType,
@@ -17,6 +19,8 @@ import {Monster, MonsterAPIResponse} from "../dofusdb/types/monster";
 import {fetchMonster, fetchMonsters} from "../dofusdb/api";
 import {join} from "path";
 import {PicturesManager} from "../utils/PicturesManager";
+import sequelize from '../utils/database';
+import CaptureTrade from "../models/CaptureTrade";
 
 const Capture = require('../models/Capture').default
 
@@ -32,10 +36,19 @@ const subCommandCaptures = new SlashCommandSubcommandBuilder();
 subCommandCaptures.setName('captures').setDescription('Liste de vos captures');
 
 const subCommandView = new SlashCommandSubcommandBuilder();
-subCommandView.setName('view').setDescription('Voir un monstre').addIntegerOption(option => option.setName('id').setDescription('Monstre').setAutocomplete(true));
+subCommandView.setName('view').setDescription('Voir un monstre').addIntegerOption(
+    option => option.setName('id').setDescription('Monstre').setAutocomplete(true));
 
 const subCommandTimer = new SlashCommandSubcommandBuilder();
 subCommandTimer.setName('timer').setDescription('Voir le temps restant pour roll ou capturer un monstre');
+
+const subCommandTrade = new SlashCommandSubcommandBuilder();
+subCommandTrade.setName('trade').setDescription('Proposer un échange')
+    .addUserOption(option => option.setName('user').setDescription('Utilisateur').setRequired(true))
+    .addIntegerOption(
+        option => option.setName('monster1').setDescription('Mon monstre').setRequired(true).setAutocomplete(true))
+    .addIntegerOption(
+        option => option.setName('monster2').setDescription('Son monstre').setRequired(true).setAutocomplete(true));
 
 /**
  * Jeu basé sur mudae.
@@ -51,7 +64,8 @@ module.exports = {
         .addSubcommand(subCommandRoll)
         .addSubcommand(subCommandCaptures)
         .addSubcommand(subCommandView)
-        .addSubcommand(subCommandTimer),
+        .addSubcommand(subCommandTimer)
+        .addSubcommand(subCommandTrade),
 
     async execute(interaction: CommandInteraction) {
         if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
@@ -65,13 +79,16 @@ module.exports = {
                 await this.roll(interaction)
                 break
             case subCommandCaptures.name:
-                this.captures(interaction)
+                await this.captures(interaction)
                 break
             case subCommandView.name:
                 await this.view(interaction)
                 break
             case subCommandTimer.name:
                 await this.timer(interaction)
+                break
+            case subCommandTrade.name:
+                await this.trade(interaction)
                 break
             default:
                 break
@@ -315,77 +332,265 @@ module.exports = {
         await interaction.reply({embeds: [embed]})
     },
 
+    async trade(interaction: CommandInteraction) {
+        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+            return;
+        }
+        const options = interaction.options
+
+        const user1 = interaction.user;
+        const user2 = options.getUser('user')
+
+        if (!user2) {
+            await interaction.reply({content: 'Veuillez fournir un utilisateur valide !', ephemeral: true})
+            return
+        }
+
+        const monster1 = options.getInteger('monster1')
+        const monster2 = options.getInteger('monster2')
+
+        if (!monster1 || !monster2) {
+            await interaction.reply({content: 'Veuillez fournir des monstres valides ! 1', ephemeral: true})
+            return
+        }
+
+        const capture1 = await Capture.findOne({where: {id: monster1, catchUserId: user1.id}})
+        const capture2 = await Capture.findOne({where: {id: monster2, catchUserId: user2.id}})
+
+        if (!capture1 || !capture2) {
+            await interaction.reply({content: 'Veuillez fournir des monstres valides ! 2', ephemeral: true})
+            return
+        }
+
+        const trade = await CaptureTrade.create({
+            user1Id: user1.id, user2Id: user2.id, capture1Id: capture1.id, capture2Id: capture2.id, status: "pending"
+        })
+
+        const row = new ActionRowBuilder<ButtonBuilder>()
+            .addComponents(new ButtonBuilder()
+                .setCustomId(`osatopia-trade-accept-${trade.id}`)
+                .setLabel('Accepter')
+                .setStyle(ButtonStyle.Success))
+            .addComponents(new ButtonBuilder()
+                .setCustomId(`osatopia-trade-refuse-${trade.id}`)
+                .setLabel('Refuser')
+                .setStyle(ButtonStyle.Danger))
+
+        await interaction.reply({
+            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${capture1.monsterName}** contre **${capture2.monsterName}**`, components: [row]
+        })
+
+        return;
+    },
+
     async executeButton(interaction: ButtonInteraction) {
-        const id = interaction.customId.split('-')[2]
-        const user = interaction.user
-
-        const capture = await Capture.findOne({where: {id: id}})
-
-        if (!capture) {
-            await interaction.reply({content: 'Cette capture n\'existe pas !', ephemeral: true})
-            return
+        if (!interaction.isButton()) {
+            return;
         }
 
-        // On vérifie que la capture n'est pas déjà prise
-        if (capture.catchUserId) {
-            await interaction.reply({content: 'Cette capture a déjà été prise !', ephemeral: true})
-            return
+        const buttonId = interaction.customId
+        const split = buttonId.split('-')
+
+        async function captureMonster(interaction: ButtonInteraction) {
+
+            const id = interaction.customId.split('-')[2]
+            const user = interaction.user
+
+            const capture = await Capture.findOne({where: {id: id}})
+
+            if (!capture) {
+                await interaction.reply({content: 'Cette capture n\'existe pas !', ephemeral: true})
+                return
+            }
+
+            // On vérifie que la capture n'est pas déjà prise
+            if (capture.catchUserId) {
+                await interaction.reply({content: 'Cette capture a déjà été prise !', ephemeral: true})
+                return
+            }
+
+            const myDate = new Date()
+            // On vérifie que la capture n'est pas trop vieille
+            if (myDate.getTime() - capture.createdAt > 60 * 60 * 1000) {
+                await interaction.reply({content: 'Cette capture est trop vieille !', ephemeral: true})
+            }
+
+            // On vérifie que le user n'a pas déjà roll il y a moins de 3h
+            const conditions = {
+                catchDate: {
+                    [Op.gte]: new Date(Date.now() - timeBetweenCaptures)
+                }, catchUserId: user.id
+            }
+            const captures = await Capture.findAll({where: conditions})
+
+            if (captures.length > 0) {
+                await interaction.reply({content: 'Vous avez capturé un monstre il y a moins de 3h !', ephemeral: true})
+                return
+            }
+
+            // On vérifie que le user n'a pas déjà le monstre
+            const conditions2 = {catchUserId: user.id, monsterId: capture.monsterId}
+            const captures2 = await Capture.findAll({where: conditions2})
+
+            if (captures2.length > 0) {
+                await interaction.reply({content: 'Vous avez deja capturé ce monstre !', ephemeral: true})
+                return
+            }
+
+            const name = capture.monsterName
+
+            await Capture.update({catchUserId: user.id, catchDate: new Date()}, {where: {id: id}})
+
+            const guild = interaction.guild
+            const memberCatch = await guild?.members.fetch(user.id)
+
+            const userName = memberCatch?.nickname ?? user.globalName
+
+            await interaction.reply(`${userName} a capturé ${name} !`)
         }
 
-        const myDate = new Date()
-        // On vérifie que la capture n'est pas trop vieille
-        if (myDate.getTime() - capture.createdAt > 60 * 60 * 1000) {
-            await interaction.reply({content: 'Cette capture est trop vieille !', ephemeral: true})
+        async function tradeMonster(interaction: ButtonInteraction) {
+            const action = split[2]
+            const tradeId = split[3]
+
+            const trade = await CaptureTrade.findOne({where: {id: tradeId}})
+
+            if (!trade) {
+                await interaction.reply({content: "Cette demande d'échange n'existe pas !", ephemeral: true})
+                return
+            }
+
+            // On vérifie que la demande est encore valide
+            if (trade.status !== 'pending') {
+                await interaction.reply({content: "Cette demande d'échange n'est plus disponible !", ephemeral: true})
+                return
+            }
+
+            const capture1Id = trade.capture1Id
+            const capture2Id = trade.capture2Id
+
+            const user1Id = trade.user1Id
+            const user2Id = trade.user2Id
+
+            const capture1 = await Capture.findOne({where: {id: capture1Id}})
+            const capture2 = await Capture.findOne({where: {id: capture2Id}})
+
+            if (!capture1 || !capture2) {
+                await interaction.reply({content: 'Cette capture n\'existe pas !', ephemeral: true})
+                return
+            }
+
+            if (user2Id !== interaction.user.id) {
+                await interaction.reply({content: "Cet échange n'est pas pour vous !", ephemeral: true})
+                return
+            }
+
+            if (`${user1Id}` !== `${capture1.catchUserId}` || `${user2Id}` !== `${capture2.catchUserId}`) {
+                await interaction.reply({content: "Cet échange n'est pas pour vous !", ephemeral: true})
+                return
+            }
+
+            if (action === 'accept') {
+                await sequelize.transaction(async (transaction) => {
+                    try {
+                        await Capture.update({catchUserId: user1Id, catchDate: new Date()}, {where: {id: capture2.id}})
+                        await Capture.update({catchUserId: user2Id, catchDate: new Date()}, {where: {id: capture1.id}})
+                        await CaptureTrade.update({status: 'done'}, {where: {id: trade.id}})
+
+                        await interaction.reply({content: 'Échange effectué !'})
+                    } catch (error) {
+                        await transaction.rollback()
+                        await interaction.reply(
+                            {content: "Une erreur est survenue lors de l'échange !", ephemeral: true})
+                        return
+                    }
+                });
+            } else {
+                await interaction.reply({content: 'Échange refusé !'})
+                await CaptureTrade.update({status: 'refused'}, {where: {id: trade.id}})
+            }
+
+            /*
+            const row = new ActionRowBuilder<ButtonBuilder>()
+                .addComponents(new ButtonBuilder()
+                    .setCustomId(`osatopia-trade-accept-${trade.id}`)
+                    .setLabel('Accepter')
+                    .setStyle(ButtonStyle.Success)
+                    .setDisabled(true))
+                .addComponents(new ButtonBuilder()
+                    .setCustomId(`osatopia-trade-refuse-${trade.id}`)
+                    .setLabel('Refuser')
+                    .setStyle(ButtonStyle.Danger)
+                    .setDisabled(true))
+
+            await interaction.update({components: [row]})
+            */
         }
 
-        // On vérifie que le user n'a pas déjà roll il y a moins de 3h
-        const conditions = {
-            catchDate: {
-                [Op.gte]: new Date(Date.now() - timeBetweenCaptures)
-            }, catchUserId: user.id
+        switch (split[1]) {
+            case subCommandTrade.name:
+                await tradeMonster(interaction)
+                break;
+            case 'capture': {
+                await captureMonster(interaction)
+                return;
+            }
         }
-        const captures = await Capture.findAll({where: conditions})
-
-        if (captures.length > 0) {
-            await interaction.reply({content: 'Vous avez capturé un monstre il y a moins de 3h !', ephemeral: true})
-            return
-        }
-
-        // On vérifie que le user n'a pas déjà le monstre
-        const conditions2 = {catchUserId: user.id, monsterId: capture.monsterId}
-        const captures2 = await Capture.findAll({where: conditions2})
-
-        if (captures2.length > 0) {
-            await interaction.reply({content: 'Vous avez deja capturé ce monstre !', ephemeral: true})
-            return
-        }
-
-        const name = capture.monsterName
-
-        await Capture.update({catchUserId: user.id, catchDate: new Date()}, {where: {id: id}})
-
-        const guild = interaction.guild
-        const memberCatch = await guild?.members.fetch(user.id)
-
-        const userName = memberCatch?.nickname ?? user.globalName
-
-        await interaction.reply(`${userName} a capturé ${name} !`)
     },
 
     async autocomplete(interaction: AutocompleteInteraction) {
-        const user = interaction.user
+        const options = interaction.options
+        const subCommand = options.getSubcommand();
 
-        const captures = await Capture.findAll({where: {catchUserId: user.id}, order: [['monsterName', 'DESC']]})
+        switch (subCommand) {
+            case 'trade': {
+                const user = interaction.user
+                const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
 
-        const retours = []
+                console.log(`Focused option: ${focusedOption.name}`);
+                if (focusedOption.name === 'monster1') {
+                    const captures: typeof Capture[] = await Capture.findAll(
+                        {where: {catchUserId: user.id}, order: [['monsterName', 'DESC']]})
+                    const retours = []
+                    for (const capture of captures) {
+                        retours.push({name: capture.monsterName, value: capture.id})
+                    }
+                    await interaction.respond(retours)
+                    return
+                } else if (focusedOption.name === 'monster2') {
+                    // on check sur la fonction option.getUser existe
+                    const user: CommandInteractionOption<CacheType> | null = interaction.options.get('user'); // Récupérer l'option 'user'
 
-        for (const capture of captures) {
-            retours.push({
-                name: capture.monsterName, value: capture.id
-            })
+                    if (!user?.value) {
+                        await interaction.respond([])
+                        return
+                    }
+                    const userCaptures = await Capture.findAll(
+                        {where: {catchUserId: user?.value}, order: [['monsterName', 'DESC']]});
+                    const retours = []
+                    for (const capture of userCaptures) {
+                        retours.push({name: capture.monsterName, value: capture.id})
+                    }
+                    await interaction.respond(retours)
+                    return
+                }
+                await interaction.respond([])
+                break;
+            }
+            case 'view': {
+                const user = interaction.user
+                const captures = await Capture.findAll(
+                    {where: {catchUserId: user.id}, order: [['monsterName', 'DESC']]})
+                const retours = []
+
+                for (const capture of captures) {
+                    retours.push({name: capture.monsterName, value: capture.id})
+                }
+
+                await interaction.respond(retours)
+                return;
+            }
         }
-
-        await interaction.respond(retours)
     },
 
     async getImagePath(look: string, name: string) {
