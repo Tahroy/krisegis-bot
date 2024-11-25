@@ -648,9 +648,17 @@ module.exports = {
                 break;
             }
             case 'view': {
+                const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
+                const search = focusedOption.value
+
                 const user = interaction.user
-                const captures = await Capture.findAll(
-                    {where: {catchUserId: user.id}, order: [['monsterName', 'DESC']]})
+                const captures = await Capture.findAll({
+                    where: {
+                        catchUserId: user.id, monsterName: {
+                            [Op.like]: `%${search}%`
+                        }
+                    }, order: [['monsterName', 'DESC']]
+                })
                 const retours = []
 
                 for (const capture of captures) {
