@@ -657,7 +657,7 @@ module.exports = {
                         catchUserId: user.id, monsterName: {
                             [Op.like]: `%${search}%`
                         }
-                    }, order: [['monsterName', 'DESC']]
+                    }, order: [['monsterName', 'DESC']], limit: 25
                 })
                 const retours = []
 
