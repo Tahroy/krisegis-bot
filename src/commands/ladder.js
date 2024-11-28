@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js')
 const PlayerItem = require('../models/PlayerItem').default
 const { Op, Sequelize } = require('sequelize')
+const Capture = require('../models/Capture').default
 
 module.exports = {
     opts: {}, data: new SlashCommandBuilder()
@@ -10,16 +11,20 @@ module.exports = {
             .setName('type')
             .setDescription('Recherche par nom d\'objet')
             .setChoices({
-                name: 'Larves', value: 'larve'
-            }, {
-                name: 'Quizz', value: 'question'
-            }, {
-                name: 'Potions', value: 'potion'
-            }, {
-                name: 'Wabbits', value: 'wabbit'
-            }, {
-                name: 'Kouinkouins', value: 'kouinkouin'
-            })), async execute (interaction) {
+                            name: 'Larves', value: 'larve'
+                        }, {
+                            name: 'Quizz', value: 'question'
+                        }, {
+                            name: 'Potions', value: 'potion'
+                        }, {
+                            name: 'Wabbits', value: 'wabbit'
+                        }, {
+                            name: 'Kouinkouins', value: 'kouinkouin'
+                        }, {
+                            name: 'Monstres', value: 'monstre'
+                        })),
+
+    async execute (interaction) {
         const type = interaction.options.getString('type')
 
         const scores = await this.getTopScores(type)
@@ -33,7 +38,7 @@ module.exports = {
             let userName = ''
 
             try {
-                let user = await interaction.guild.members.fetch(score.user_id)
+                let user = await interaction.guild.members.fetch(score.user_id ?? score.catchUserId)
                 userName = user.displayName
             } catch (error) {
                 userName = 'Anonymous'
@@ -46,6 +51,18 @@ module.exports = {
     },
 
     async getTopScores (type = null) {
+
+        if (type === 'monstre') {
+            return await Capture.findAll({
+                                             attributes: ['catchUserId', [Sequelize.fn('count', Sequelize.col('id')), 'total_quantity']],
+                                             where: { catchUserId: { [Op.ne]: null } },
+                                             group: ['catchUserId'],
+                                             order: [[Sequelize.fn('count', Sequelize.col('id')), 'DESC']],
+                                             limit: 3
+                                         })
+
+        }
+
         const whereClause = {}  // Initialiser un objet vide pour le where
 
         // Ajouter la condition sur le type si elle est fournie
@@ -56,12 +73,12 @@ module.exports = {
         }
 
         return await PlayerItem.findAll({
-            attributes: ['user_id',   // Garder l'user_id dans la sélection
-                [Sequelize.fn('SUM', Sequelize.col('quantity')), 'total_quantity']  // Calculer la somme de 'quantity'
-            ], where: whereClause,  // Ajouter le where conditionnel
-            group: ['user_id'],  // Groupement par user_id
-            order: [[Sequelize.fn('SUM', Sequelize.col('quantity')), 'DESC']],  // Tri par somme décroissante
-            limit: 3  // Récupérer uniquement le meilleur score
-        })
+                                            attributes: ['user_id',   // Garder l'user_id dans la sélection
+                                                [Sequelize.fn('SUM', Sequelize.col('quantity')), 'total_quantity']  // Calculer la somme de 'quantity'
+                                            ], where: whereClause,  // Ajouter le where conditionnel
+                                            group: ['user_id'],  // Groupement par user_id
+                                            order: [[Sequelize.fn('SUM', Sequelize.col('quantity')), 'DESC']],  // Tri par somme décroissante
+                                            limit: 3  // Récupérer uniquement le meilleur score
+                                        })
     }
 }
