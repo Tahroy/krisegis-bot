@@ -137,7 +137,8 @@ module.exports = {
             if (lastUsage && currentTime - lastUsage < 5000) {
                 const timeBeforeNextRoll = Math.floor(5 - (timestamp - lastUsage) / 1000)
                 const purial = timeBeforeNextRoll > 1 ? 's' : ''
-                throw new CommandCooldownError(`Vous ne pouvez faire qu'un roll toutes les 5s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
+                throw new CommandCooldownError(
+                    `Vous ne pouvez faire qu'un roll toutes les 5s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
             }
             cooldowns.set(key, currentTime);
 
@@ -149,7 +150,7 @@ module.exports = {
             const captures: typeof Capture[] = await Capture.findAll({where: conditions})
 
             if (captures.length >= numberOfRolls) {
-                const lastCapture:number = captures[captures.length - 1].createdAt
+                const lastCapture: number = captures[captures.length - 1].createdAt
                 const timeBeforeNextRollMs = timeBetweenResetRoll - (timestamp - lastCapture);
 
                 const heures = Math.floor(timeBeforeNextRollMs / 3600000)
@@ -194,11 +195,13 @@ module.exports = {
         try {
             file = await this.getImagePath(look, imgName);
             if (!file) {
-                await interaction.reply({content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
+                await interaction.reply(
+                    {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
                 return
             }
         } catch (error) {
-            await interaction.reply({content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
+            await interaction.reply(
+                {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
             return
         }
 
@@ -209,44 +212,43 @@ module.exports = {
         const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
         const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
 
-        const captureDB: typeof Capture = await Capture.create(captureData);
+        const transaction = await Capture.sequelize.transaction();
+        try {
+            const captureDB: typeof Capture = await Capture.create(captureData);
 
-        if (captureCheck) {
-            // Monstre déjà capturé
-            const guild = interaction.guild;
-            const memberCatch = await guild?.members.fetch(captureCheck.catchUserId);
-            const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId);
+            if (captureCheck) {
+                // Monstre déjà capturé
+                const guild = interaction.guild;
+                const memberCatch = await guild?.members.fetch(captureCheck.catchUserId);
+                const userCatch = await interaction.client.users.fetch(captureCheck.catchUserId);
 
-            const userName = memberCatch?.nickname ?? userCatch.username;
-            const description = `Capturé par ${userName}`;
+                const userName = memberCatch?.nickname ?? userCatch.username;
+                const description = `Capturé par ${userName}`;
 
-            const embed = new EmbedBuilder()
-                .setTitle(name)
-                .setDescription(description)
-                .setImage(`attachment://${imgName}`); // Utilise le chemin de fichier joint
+                const embed = new EmbedBuilder()
+                    .setTitle(name)
+                    .setDescription(description)
+                    .setImage(`attachment://${imgName}`); // Utilise le chemin de fichier joint
 
-            try {
                 await interaction.reply({embeds: [embed], files: [file]});
-            } catch (error) {
-                console.error(error);
-            }
-        } else {
-            const row = new ActionRowBuilder<ButtonBuilder>()
-                .addComponents(new ButtonBuilder()
-                    .setLabel('Capture')
-                    .setCustomId(`osatopia-capture-${captureDB.id}-${timestamp}`)
-                    .setStyle(ButtonStyle.Success))
+            } else {
+                const row = new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(new ButtonBuilder()
+                        .setLabel('Capture')
+                        .setCustomId(`osatopia-capture-${captureDB.id}-${timestamp}`)
+                        .setStyle(ButtonStyle.Success))
 
-            const embed = new EmbedBuilder()
-                .setTitle(`${name}`)
-                .setImage(`attachment://${imgName}`)
+                const embed = new EmbedBuilder()
+                    .setTitle(`${name}`)
+                    .setImage(`attachment://${imgName}`)
 
-            try {
                 // JSON
                 await interaction.reply({embeds: [embed], components: [row], files: [file]})
-            } catch (error) {
-                console.error(error)
             }
+        } catch (error) {
+            await transaction.rollback();
+            console.error(error);
+            return
         }
 
     },
@@ -600,13 +602,10 @@ module.exports = {
                     const search = focusedOption.value
                     const userCapturesConditions = {
                         where: {
-                            catchUserId: user.id,
-                            monsterName: {
+                            catchUserId: user.id, monsterName: {
                                 [Op.like]: `%${search}%`
                             }
-                        },
-                        order: [['monsterName', 'DESC']],
-                        limit: 25
+                        }, order: [['monsterName', 'DESC']], limit: 25
                     }
                     const captures = await Capture.findAll(userCapturesConditions);
                     const retours = []
@@ -627,13 +626,10 @@ module.exports = {
 
                     const userCapturesConditions = {
                         where: {
-                            catchUserId: user?.value,
-                            monsterName: {
+                            catchUserId: user?.value, monsterName: {
                                 [Op.like]: `%${search}%`
                             }
-                        },
-                        order: [['monsterName', 'DESC']],
-                        limit: 25
+                        }, order: [['monsterName', 'DESC']], limit: 25
                     }
                     const userCaptures = await Capture.findAll(userCapturesConditions);
 
