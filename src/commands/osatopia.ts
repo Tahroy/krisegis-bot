@@ -667,14 +667,7 @@ module.exports = {
     },
 
     async getImagePath(monster: Monster, name: string) {
-        const look = monster.look
-
-//        const hexa = Buffer.from(look).toString('hex');
-//        const img = `https://renderer.dofusdb.fr/look/${hexa}/full/1/150_150.png`;
-
-        console.log(monster)
-        // https://api.dofusdb.fr/img/monsters/2378.png
-        const img = `https://api.dofusdb.fr/img/monsters/${monster.id}.png`;
+        const img = monster.img;
         await PicturesManager.fetchImageIfNeeded(img, name, '/monsters/');
 
         return join(__dirname, '..', '..', 'public', 'monsters', name)

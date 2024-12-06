@@ -4,6 +4,7 @@ export interface Monster {
         fr: string;
     };
     look: string;
+    img: string;
 }
 
 export interface MonsterAPIResponse {
