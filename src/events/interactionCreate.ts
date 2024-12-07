@@ -1,0 +1,104 @@
+import {
+    Client,
+    CommandInteraction,
+    ButtonInteraction,
+    AutocompleteInteraction,
+    ModalSubmitInteraction, Interaction
+} from 'discord.js';
+import {owner} from '../../config/config_bot.json';
+import {debugMessage} from '../utils/Utils';
+
+class ClientKrisegis extends Client {
+    commands: Map<string, any> | undefined;
+}
+
+module.exports = (client: ClientKrisegis ) => {
+    const gererCommande = async (interaction: CommandInteraction) => {
+        const {commandName} = interaction;
+
+        const command = client.commands?.get(commandName);
+        try {
+            const userName = interaction.user.tag;
+            const log = `\`${userName}\` a utilisé la commande \`${commandName}\``;
+            debugMessage(interaction.guild, log);
+
+            if (command?.opts?.admin && interaction.user.id !== owner) {
+                await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
+                return;
+            }
+            if (!command) {
+                return await interaction.reply('Cette commande n\'existe pas !');
+            }
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const gererBouton = async (interaction: ButtonInteraction) => {
+        const customID = interaction.customId;
+        const [commandName, buttonName] = customID.split('-', 2);
+
+        const userName = interaction.user.tag;
+        const command = client.commands?.get(commandName);
+
+        const log = `${userName} a utilisé le bouton ${buttonName} dans la commande ${commandName}`;
+        console.log(log);
+
+        try {
+            if (command?.opts?.admin) {
+                if (!interaction.member || interaction.member.user.id !== owner) {
+                    return await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
+                }
+            }
+            await command.executeButton(interaction, buttonName);
+        } catch (error: any) {
+            console.error(error);
+            if (error.message === 'The reply to this interaction has already been sent or deferred.') {
+                return;
+            }
+            if (interaction) {
+                console.error(`Erreur de ${interaction.user.tag} avec la commande ${commandName} et bouton ${buttonName}`);
+            }
+        }
+    };
+
+    const autocomplete = async (interaction: AutocompleteInteraction) => {
+        const {commandName} = interaction;
+
+        const command = client.commands?.get(commandName);
+        try {
+            return await command?.autocomplete(interaction);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const gererModal = async (interaction: ModalSubmitInteraction) => {
+        const [commandName, modalName] = interaction.customId.split('-', 2);
+
+        const command = client.commands?.get(commandName);
+        try {
+            return await command?.gererModal(interaction, modalName);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    client.on('interactionCreate', async (interaction: Interaction) => {
+        if (!interaction) {
+            console.error('interactionCreate : interaction vide');
+            return;
+        }
+
+        if (interaction.isCommand()) {
+            await gererCommande(interaction);
+        } else if (interaction.isButton()) {
+            await gererBouton(interaction);
+        } else if (interaction.isAutocomplete()) {
+            await autocomplete(interaction);
+        } else if (interaction.isModalSubmit()) {
+            await gererModal(interaction);
+        }
+    });
+};
