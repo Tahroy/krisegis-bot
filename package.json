@@ -4,7 +4,7 @@
   "description": "Bot pour Krisegis",
   "main": "index.js",
   "scripts": {
-    "lancement": "node index.js",
+    "lancement": "node dist/index.js",
     "build": "tsc",
     "start": "node dist/index.js"
   },
