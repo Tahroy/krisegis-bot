@@ -134,11 +134,11 @@ module.exports = {
             const key = `${user.id}:roll`;
             const lastUsage = cooldowns.get(key);
 
-            if (lastUsage && currentTime - lastUsage < 5000) {
+            if (lastUsage && currentTime - lastUsage < 3000) {
                 const timeBeforeNextRoll = Math.floor(5 - (timestamp - lastUsage) / 1000)
                 const purial = timeBeforeNextRoll > 1 ? 's' : ''
                 throw new CommandCooldownError(
-                    `Vous ne pouvez faire qu'un roll toutes les 5s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
+                    `Vous ne pouvez faire qu'un roll toutes les 3s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
             }
             cooldowns.set(key, currentTime);
 
@@ -179,41 +179,40 @@ module.exports = {
             return;
         }
 
-        const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
-        const monster: Monster = monstersRequest.data[0]
-
-        const id = monster.id
-        const name = monster.name.fr
-        const look = monster.look
-
-        const timestamp = Date.now()
-
-        // Télécharge l'image si nécessaire
-        const imgName = `${id}.png`;
-
-        let file = null;
+        const transaction = await Capture.sequelize.transaction();
         try {
-            file = await this.getImagePath(monster, imgName);
-            if (!file) {
+            const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
+            const monster: Monster = monstersRequest.data[0]
+
+            const id = monster.id
+            const name = monster.name.fr
+
+            const timestamp = Date.now()
+
+            // Télécharge l'image si nécessaire
+            const imgName = `${id}.png`;
+
+            let file = null;
+            try {
+                file = await this.getImagePath(monster, imgName);
+                if (!file) {
+                    await interaction.reply(
+                        {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
+                    return
+                }
+            } catch (error) {
                 await interaction.reply(
                     {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
                 return
             }
-        } catch (error) {
-            await interaction.reply(
-                {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
-            return
-        }
 
-        // Vérifie si le monstre est déjà capturé
-        const conditionsCheckCapture = {
-            monsterId: id, catchUserId: {[Op.ne]: null},
-        };
-        const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
-        const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
+            // Vérifie si le monstre est déjà capturé
+            const conditionsCheckCapture = {
+                monsterId: id, catchUserId: {[Op.ne]: null},
+            };
+            const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
+            const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
 
-        const transaction = await Capture.sequelize.transaction();
-        try {
             const captureDB: typeof Capture = await Capture.create(captureData);
 
             if (captureCheck) {
@@ -426,7 +425,8 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger))
 
         await interaction.reply({
-            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${capture1.monsterName}** contre **${capture2.monsterName}**`, components: [row]
+            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${capture1.monsterName}** contre **${capture2.monsterName}**`,
+            components: [row]
         })
 
         return;
@@ -558,22 +558,6 @@ module.exports = {
                 await interaction.reply({content: 'Échange refusé !'})
                 await CaptureTrade.update({status: 'refused'}, {where: {id: trade.id}})
             }
-
-            /*
-            const row = new ActionRowBuilder<ButtonBuilder>()
-                .addComponents(new ButtonBuilder()
-                    .setCustomId(`osatopia-trade-accept-${trade.id}`)
-                    .setLabel('Accepter')
-                    .setStyle(ButtonStyle.Success)
-                    .setDisabled(true))
-                .addComponents(new ButtonBuilder()
-                    .setCustomId(`osatopia-trade-refuse-${trade.id}`)
-                    .setLabel('Refuser')
-                    .setStyle(ButtonStyle.Danger)
-                    .setDisabled(true))
-
-            await interaction.update({components: [row]})
-            */
         }
 
         switch (split[1]) {
