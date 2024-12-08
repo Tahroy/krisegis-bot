@@ -53,6 +53,17 @@ subCommandTrade.setName('trade').setDescription('Proposer un échange')
     .addIntegerOption(
         option => option.setName('monster2').setDescription('Son monstre').setRequired(true).setAutocomplete(true));
 
+
+const subCommandRelease = new SlashCommandSubcommandBuilder();
+subCommandRelease.setName('release')
+    .setDescription('Relâcher un monstre capturé')
+    .addIntegerOption(option =>
+        option.setName('monster')
+            .setDescription('Le monstre à relâcher')
+            .setRequired(true)
+            .setAutocomplete(true)
+    );
+
 /**
  * Jeu basé sur mudae.
  * Roll des monstres
@@ -68,7 +79,9 @@ module.exports = {
         .addSubcommand(subCommandCaptures)
         .addSubcommand(subCommandView)
         .addSubcommand(subCommandTimer)
-        .addSubcommand(subCommandTrade),
+        .addSubcommand(subCommandTrade)
+        .addSubcommand(subCommandRelease)
+    ,
 
     async execute(interaction: CommandInteraction) {
         if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
@@ -92,6 +105,9 @@ module.exports = {
                 break
             case subCommandTrade.name:
                 await this.trade(interaction)
+                break
+            case subCommandRelease.name:
+                await this.release(interaction)
                 break
             default:
                 break
@@ -290,6 +306,40 @@ module.exports = {
             .setImage(`attachment://${imgName}`)
 
         await interaction.reply({embeds: [embed], files: [file]})
+    },
+
+    async release(interaction: CommandInteraction) {
+
+        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+            return;
+        }
+
+        const user = interaction.user
+        const id = interaction.options.getInteger('monster')
+
+        if (!id) {
+            await interaction.reply({content: 'Monstre manquant !', ephemeral: true})
+            return;
+        }
+
+        const capture = await Capture.findOne({where: {id: id, catchUserId: user.id}})
+
+        if (!capture) {
+            await interaction.reply({content: `Cette capture n'existe pas !`, ephemeral: true})
+            return
+        }
+
+        const name = capture.monsterName;
+        const guild = interaction.guild
+        const memberCatch = await guild?.members.fetch(user.id)
+
+        const userName = memberCatch?.nickname ?? user.globalName
+
+        const message: string = `${userName} a relâché ${name} !`
+
+        await Capture.update({catchUserId: null, catchDate: null}, {where: {id: id}})
+
+        await interaction.reply({content: message})
     },
 
     async captures(interaction: CommandInteraction) {
@@ -576,10 +626,9 @@ module.exports = {
         const subCommand = options.getSubcommand();
 
         switch (subCommand) {
-            case 'trade': {
+            case subCommandTrade.name: {
                 const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
 
-                console.log(`Focused option: ${focusedOption.name}`);
                 if (focusedOption.name === 'monster1') {
                     const user = interaction.user
                     const search = focusedOption.value
@@ -626,7 +675,8 @@ module.exports = {
                 await interaction.respond([])
                 break;
             }
-            case 'view': {
+            case subCommandRelease.name:
+            case subCommandView.name: {
                 const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
                 const search = focusedOption.value
 
