@@ -2,7 +2,7 @@
 import axios from 'axios';
 import {Monster, MonsterAPIResponse} from './types/monster';
 
-const API_URL = 'https://api.dofusdb.fr/monsters';
+const API_URL = 'https://api.beta.dofusdb.fr/monsters';
 
 export const fetchMonsters = async (conditionRequest: string): Promise<MonsterAPIResponse> => {
     try {
