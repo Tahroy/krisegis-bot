@@ -4,7 +4,7 @@
   "description": "Bot pour Krisegis",
   "main": "index.js",
   "scripts": {
-    "lancement": "node index.js",
+    "lancement": "node dist/index.js",
     "build": "tsc",
     "start": "node dist/index.js"
   },
@@ -27,8 +27,7 @@
     "sequelize": "^6.37.5",
     "sequelize-cli": "^6.6.0",
     "sequelize-typescript": "^2.1.6",
-    "sqlite3": "^5.1.7",
-    "typescript": "^5.6.3"
+    "sqlite3": "^5.1.7"
   },
   "keywords": [],
   "devDependencies": {
@@ -36,6 +35,6 @@
     "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   }
 }
