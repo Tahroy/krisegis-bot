@@ -53,6 +53,17 @@ subCommandTrade.setName('trade').setDescription('Proposer un échange')
     .addIntegerOption(
         option => option.setName('monster2').setDescription('Son monstre').setRequired(true).setAutocomplete(true));
 
+
+const subCommandRelease = new SlashCommandSubcommandBuilder();
+subCommandRelease.setName('release')
+    .setDescription('Relâcher un monstre capturé')
+    .addIntegerOption(option =>
+        option.setName('monster')
+            .setDescription('Le monstre à relâcher')
+            .setRequired(true)
+            .setAutocomplete(true)
+    );
+
 /**
  * Jeu basé sur mudae.
  * Roll des monstres
@@ -68,7 +79,9 @@ module.exports = {
         .addSubcommand(subCommandCaptures)
         .addSubcommand(subCommandView)
         .addSubcommand(subCommandTimer)
-        .addSubcommand(subCommandTrade),
+        .addSubcommand(subCommandTrade)
+        .addSubcommand(subCommandRelease)
+    ,
 
     async execute(interaction: CommandInteraction) {
         if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
@@ -92,6 +105,9 @@ module.exports = {
                 break
             case subCommandTrade.name:
                 await this.trade(interaction)
+                break
+            case subCommandRelease.name:
+                await this.release(interaction)
                 break
             default:
                 break
@@ -134,11 +150,11 @@ module.exports = {
             const key = `${user.id}:roll`;
             const lastUsage = cooldowns.get(key);
 
-            if (lastUsage && currentTime - lastUsage < 5000) {
+            if (lastUsage && currentTime - lastUsage < 3000) {
                 const timeBeforeNextRoll = Math.floor(5 - (timestamp - lastUsage) / 1000)
                 const purial = timeBeforeNextRoll > 1 ? 's' : ''
                 throw new CommandCooldownError(
-                    `Vous ne pouvez faire qu'un roll toutes les 5s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
+                    `Vous ne pouvez faire qu'un roll toutes les 3s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
             }
             cooldowns.set(key, currentTime);
 
@@ -179,41 +195,40 @@ module.exports = {
             return;
         }
 
-        const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
-        const monster: Monster = monstersRequest.data[0]
-
-        const id = monster.id
-        const name = monster.name.fr
-        const look = monster.look
-
-        const timestamp = Date.now()
-
-        // Télécharge l'image si nécessaire
-        const imgName = `${id}.png`;
-
-        let file = null;
+        const transaction = await Capture.sequelize.transaction();
         try {
-            file = await this.getImagePath(monster, imgName);
-            if (!file) {
+            const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
+            const monster: Monster = monstersRequest.data[0]
+
+            const id = monster.id
+            const name = monster.name.fr
+
+            const timestamp = Date.now()
+
+            // Télécharge l'image si nécessaire
+            const imgName = `${id}.png`;
+
+            let file = null;
+            try {
+                file = await this.getImagePath(monster, imgName);
+                if (!file) {
+                    await interaction.reply(
+                        {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
+                    return
+                }
+            } catch (error) {
                 await interaction.reply(
                     {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
                 return
             }
-        } catch (error) {
-            await interaction.reply(
-                {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
-            return
-        }
 
-        // Vérifie si le monstre est déjà capturé
-        const conditionsCheckCapture = {
-            monsterId: id, catchUserId: {[Op.ne]: null},
-        };
-        const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
-        const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
+            // Vérifie si le monstre est déjà capturé
+            const conditionsCheckCapture = {
+                monsterId: id, catchUserId: {[Op.ne]: null},
+            };
+            const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
+            const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
 
-        const transaction = await Capture.sequelize.transaction();
-        try {
             const captureDB: typeof Capture = await Capture.create(captureData);
 
             if (captureCheck) {
@@ -291,6 +306,40 @@ module.exports = {
             .setImage(`attachment://${imgName}`)
 
         await interaction.reply({embeds: [embed], files: [file]})
+    },
+
+    async release(interaction: CommandInteraction) {
+
+        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+            return;
+        }
+
+        const user = interaction.user
+        const id = interaction.options.getInteger('monster')
+
+        if (!id) {
+            await interaction.reply({content: 'Monstre manquant !', ephemeral: true})
+            return;
+        }
+
+        const capture = await Capture.findOne({where: {id: id, catchUserId: user.id}})
+
+        if (!capture) {
+            await interaction.reply({content: `Cette capture n'existe pas !`, ephemeral: true})
+            return
+        }
+
+        const name = capture.monsterName;
+        const guild = interaction.guild
+        const memberCatch = await guild?.members.fetch(user.id)
+
+        const userName = memberCatch?.nickname ?? user.globalName
+
+        const message: string = `${userName} a relâché ${name} !`
+
+        await Capture.update({catchUserId: null, catchDate: null}, {where: {id: id}})
+
+        await interaction.reply({content: message})
     },
 
     async captures(interaction: CommandInteraction) {
@@ -426,7 +475,8 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger))
 
         await interaction.reply({
-            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${capture1.monsterName}** contre **${capture2.monsterName}**`, components: [row]
+            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${capture1.monsterName}** contre **${capture2.monsterName}**`,
+            components: [row]
         })
 
         return;
@@ -559,22 +609,6 @@ module.exports = {
                 await interaction.reply({content: 'Échange refusé !'})
                 await CaptureTrade.update({status: 'refused'}, {where: {id: trade.id}})
             }
-
-            /*
-            const row = new ActionRowBuilder<ButtonBuilder>()
-                .addComponents(new ButtonBuilder()
-                    .setCustomId(`osatopia-trade-accept-${trade.id}`)
-                    .setLabel('Accepter')
-                    .setStyle(ButtonStyle.Success)
-                    .setDisabled(true))
-                .addComponents(new ButtonBuilder()
-                    .setCustomId(`osatopia-trade-refuse-${trade.id}`)
-                    .setLabel('Refuser')
-                    .setStyle(ButtonStyle.Danger)
-                    .setDisabled(true))
-
-            await interaction.update({components: [row]})
-            */
         }
 
         switch (split[1]) {
@@ -593,10 +627,9 @@ module.exports = {
         const subCommand = options.getSubcommand();
 
         switch (subCommand) {
-            case 'trade': {
+            case subCommandTrade.name: {
                 const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
 
-                console.log(`Focused option: ${focusedOption.name}`);
                 if (focusedOption.name === 'monster1') {
                     const user = interaction.user
                     const search = focusedOption.value
@@ -643,7 +676,8 @@ module.exports = {
                 await interaction.respond([])
                 break;
             }
-            case 'view': {
+            case subCommandRelease.name:
+            case subCommandView.name: {
                 const focusedOption = interaction.options.getFocused(true); // Récupère l'option en cours de complétion
                 const search = focusedOption.value
 
