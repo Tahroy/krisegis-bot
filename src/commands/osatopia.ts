@@ -462,6 +462,7 @@ module.exports = {
             // On vérifie que la capture n'est pas trop vieille
             if (myDate.getTime() - capture.createdAt > 60 * 60 * 1000) {
                 await interaction.reply({content: 'Cette capture est trop vieille !', ephemeral: true})
+                return;
             }
 
             // On vérifie que le user n'a pas déjà roll il y a moins de 3h
