@@ -1,6 +1,6 @@
 // /src/api/dofusdb.ts
 import axios from 'axios';
-import {Monster, MonsterAPIResponse} from './types/monster';
+import {MonsterDb, MonsterAPIResponse} from './types/monster';
 
 const API_URL = 'https://api.beta.dofusdb.fr/monsters';
 
@@ -14,7 +14,7 @@ export const fetchMonsters = async (conditionRequest: string): Promise<MonsterAP
     }
 };
 
-export const fetchMonster = async (id: number): Promise<Monster> => {
+export const fetchMonster = async (id: number): Promise<MonsterDb> => {
     try {
         const response = await axios.get(`${API_URL}/${id}`);
         return response.data;
