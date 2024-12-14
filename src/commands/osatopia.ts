@@ -15,13 +15,14 @@ import {
 } from 'discord.js'
 import {ButtonStyle} from 'discord-api-types/v10'
 import {Op} from 'sequelize'
-import {Monster, MonsterAPIResponse} from "../dofusdb/types/monster";
-import {fetchMonster, fetchMonsters} from "../dofusdb/api";
+import {MonsterAPIResponse} from "../dofusdb/types/monster";
+import {fetchMonsters} from "../dofusdb/api";
 import {join} from "path";
 import {PicturesManager} from "../utils/PicturesManager";
 import sequelize from '../utils/database';
 import CaptureTrade from "../models/CaptureTrade";
 import {CommandCooldownError} from "../exceptions/CommandCooldownError";
+import Monster from "../models/Monster";
 
 const Capture = require('../models/Capture').default
 
@@ -64,6 +65,10 @@ subCommandRelease.setName('release')
             .setAutocomplete(true)
     );
 
+const subCommandSynchro = new SlashCommandSubcommandBuilder();
+subCommandSynchro.setName('synchro')
+    .setDescription('Synchroniser avec DofusDB')
+
 /**
  * Jeu basé sur mudae.
  * Roll des monstres
@@ -81,6 +86,7 @@ module.exports = {
         .addSubcommand(subCommandTimer)
         .addSubcommand(subCommandTrade)
         .addSubcommand(subCommandRelease)
+        .addSubcommand(subCommandSynchro)
     ,
 
     async execute(interaction: CommandInteraction) {
@@ -109,38 +115,40 @@ module.exports = {
             case subCommandRelease.name:
                 await this.release(interaction)
                 break
+            case subCommandSynchro.name:
+                const user = interaction.user
+                if (user.id != "178147970385051649") {
+                    await interaction.reply({content: 'Vous ne pouvez pas utiliser cette commande', ephemeral: true})
+                    return;
+                }
+                await this.synchro(interaction)
+                break;
             default:
+                await interaction.reply(({content: "Commande incorrecte", ephemeral: true}))
                 break
         }
     },
 
     async roll(interaction: CommandInteraction) {
-        async function getConditionsRoll(): Promise<string> {
-            let conditionRequest = '&isBoss=false&isMiniBoss=false'
-            // Nombre aléatoire entre 1 et 200
+        function getConditionsRoll(): { isBoss: boolean, isMiniBoss: boolean } {
+            // Nombre aléatoire entre 1 et 100
             const randomChanceBoss = Math.floor(Math.random() * 100) + 1
+
+            let conditions: { isBoss: boolean, isMiniBoss: boolean } = {isBoss: false, isMiniBoss: false}
 
             // Si c'est 1, on prend un boss
             if ([1, 2].includes(randomChanceBoss)) {
-                conditionRequest = '&isBoss=true&isMiniBoss=false'
+                conditions = {isBoss: true, isMiniBoss: false}
             }
             // Si c'est 2, on prend un mini boss
             if ([6, 7].includes(randomChanceBoss)) {
-                conditionRequest = '&isBoss=false&isMiniBoss=true'
+                conditions = {isBoss: false, isMiniBoss: true}
             }
 
-            // Requête DofusDB via Axios
-            const conditionTotal = `?$skip=0&$limit=1${conditionRequest}`
-            const monstersTotalRequest: MonsterAPIResponse = await fetchMonsters(conditionTotal);
-
-            const total = monstersTotalRequest.total
-
-            const random = Math.floor(Math.random() * total) + 1
-            return `?$skip=${random}&$limit=1${conditionRequest}`
+            return conditions
         }
 
         /**
-         *
          * @throws Error
          */
         async function canRoll(user: User) {
@@ -196,12 +204,22 @@ module.exports = {
         }
 
         const transaction = await Capture.sequelize.transaction();
+
         try {
-            const monstersRequest: MonsterAPIResponse = await fetchMonsters(await getConditionsRoll());
-            const monster: Monster = monstersRequest.data[0]
+            const conditions = getConditionsRoll()
+
+            const monster: Monster | null = await Monster.findOne({
+                where: conditions,
+                order: Capture.sequelize.random()
+            })
+
+            if (!monster) {
+                await interaction.reply({content: "Aucun monstre disponible", ephemeral: true})
+                return;
+            }
 
             const id = monster.id
-            const name = monster.name.fr
+            const name = monster.name
 
             const timestamp = Date.now()
 
@@ -287,11 +305,14 @@ module.exports = {
             return
         }
 
-        const name = capture.monsterName
-        const monsterId = capture.monsterId
+        const monster = await Monster.findOne({where: {id: capture.monsterId}})
 
-        // Request DofusDB
-        const monster = await fetchMonster(monsterId)
+        if (!monster) {
+            await interaction.reply({content: "Erreur lors de la récupération du monstre", ephemeral: true})
+            return;
+        }
+
+        const name = monster.name
 
         const imgName = `${id}.png`;
         const file = await this.getImagePath(monster, imgName);
@@ -329,7 +350,14 @@ module.exports = {
             return
         }
 
-        const name = capture.monsterName;
+        const monster = await Monster.findOne({where: {id: capture.monsterId}})
+
+        if (!monster) {
+            await interaction.reply({content: "Ce monstre n'existe pas !", ephemeral: true})
+            return;
+        }
+
+        const name = monster.name;
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
 
@@ -342,6 +370,57 @@ module.exports = {
         await interaction.reply({content: message})
     },
 
+    async synchro(interaction: CommandInteraction) {
+        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+            return;
+        }
+
+        let skip = 0;
+        let limit = 50;
+
+        await interaction.reply({content: "Synchronisation lancée !", ephemeral: true})
+
+        let hasMonsters = true;
+        let total = 0;
+        while (hasMonsters) {
+            const conditionRequest = `?$skip=${skip}&$limit=${limit}`
+            const monstersRequest: MonsterAPIResponse = await fetchMonsters(conditionRequest);
+
+            if (monstersRequest.data.length === 0) {
+                hasMonsters = false;
+                break;
+            }
+            console.log(`skip: ${skip}`)
+            for (const monster of monstersRequest.data) {
+                // On cherche le monstre
+                const conditions = {where: {id: monster.id}}
+
+                let myMonster: Monster | null = await Monster.findOne(conditions);
+
+                if (myMonster) {
+                    continue;
+                }
+
+                myMonster = await Monster.create({
+                    id: monster.id,
+                    name: monster.name.fr,
+                    isBoss: monster.isBoss,
+                    isMiniBoss: monster.isMiniBoss,
+                    gfxId: monster.gfxId
+                })
+
+                total++;
+                console.log(`Synchro de ${myMonster.name} (${myMonster.id})`)
+            }
+
+            skip += limit;
+
+            // pause de 0.5s
+            await new Promise(resolve => setTimeout(resolve, 0.5));
+        }
+
+        console.log(`${total} monstres ajoutés !`)
+    },
     async captures(interaction: CommandInteraction) {
         const user: User = interaction.user
 
@@ -354,12 +433,13 @@ module.exports = {
 
         let capturesArray: string [] = []
         for (const capture of captures) {
+            const monster = await Monster.findOne({where: {id: capture.monsterId}})
+
             const date = capture.catchDate
+
             // dd/mm/YY
-            const dateString = date.toLocaleDateString('fr-FR', {
-                day: '2-digit', month: '2-digit', year: 'numeric'
-            })
-            capturesArray.push(`${dateString} - ${capture.monsterName}`)
+            const dateString = date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'})
+            capturesArray.push(`${dateString} - ${monster?.name}`)
         }
 
         const embed = new EmbedBuilder()
@@ -460,6 +540,9 @@ module.exports = {
             return
         }
 
+        const myMonster1 = await Monster.findOne({where: {id: capture1.monsterId}})
+        const myMonster2 = await Monster.findOne({where: {id: capture2.monsterId}})
+
         const trade = await CaptureTrade.create({
             user1Id: user1.id, user2Id: user2.id, capture1Id: capture1.id, capture2Id: capture2.id, status: "pending"
         })
@@ -475,7 +558,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger))
 
         await interaction.reply({
-            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${capture1.monsterName}** contre **${capture2.monsterName}**`,
+            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${myMonster1?.name}** contre **${myMonster2?.name}**`,
             components: [row]
         })
 
@@ -537,7 +620,8 @@ module.exports = {
                 return
             }
 
-            const name = capture.monsterName
+            const monster = await Monster.findOne({where: {id: capture.monsterId}})
+            const name = monster?.name
 
             await Capture.update({catchUserId: user.id, catchDate: new Date()}, {where: {id: id}})
 
@@ -634,16 +718,25 @@ module.exports = {
                     const user = interaction.user
                     const search = focusedOption.value
                     const userCapturesConditions = {
+                        include: {
+                            model: Monster,
+                            as: 'monster', // Préciser l'alias exact utilisé dans l'association
+                            required: true, // Utilisez false pour LEFT JOIN si nécessaire
+                            attributes: ['name'], // Récupération des colonnes associées du modèle Monster
+                        },
                         where: {
-                            catchUserId: user.id, monsterName: {
-                                [Op.like]: `%${search}%`
-                            }
-                        }, order: [['monsterName', 'DESC']], limit: 25
-                    }
+                            catchUserId: user.id, // Filtre sur le modèle Capture
+                            '$monster.name$': { // Filtre sur le modèle Monster via son alias
+                                [Op.like]: `%${search}%`,
+                            },
+                        },
+                        order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                        limit: 25, // Limite des résultats
+                    };
                     const captures = await Capture.findAll(userCapturesConditions);
                     const retours = []
                     for (const capture of captures) {
-                        retours.push({name: capture.monsterName, value: capture.id})
+                        retours.push({name: capture.monster.name, value: capture.id})
                     }
                     await interaction.respond(retours)
                     return
@@ -658,17 +751,26 @@ module.exports = {
                     }
 
                     const userCapturesConditions = {
+                        include: {
+                            model: Monster,
+                            as: 'monster', // Préciser l'alias exact utilisé dans l'association
+                            required: true, // Utilisez false pour LEFT JOIN si nécessaire
+                            attributes: ['name'], // Récupération des colonnes associées du modèle Monster
+                        },
                         where: {
-                            catchUserId: user?.value, monsterName: {
-                                [Op.like]: `%${search}%`
-                            }
-                        }, order: [['monsterName', 'DESC']], limit: 25
-                    }
+                            catchUserId: user?.value, // Filtre sur le modèle Capture
+                            '$monster.name$': { // Filtre sur le modèle Monster via son alias
+                                [Op.like]: `%${search}%`,
+                            },
+                        },
+                        order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                        limit: 25, // Limite des résultats
+                    };
                     const userCaptures = await Capture.findAll(userCapturesConditions);
 
                     const retours = []
                     for (const capture of userCaptures) {
-                        retours.push({name: capture.monsterName, value: capture.id})
+                        retours.push({name: capture.monster.name, value: capture.id})
                     }
                     await interaction.respond(retours)
                     return
@@ -682,17 +784,27 @@ module.exports = {
                 const search = focusedOption.value
 
                 const user = interaction.user
-                const captures = await Capture.findAll({
+                const userCapturesConditions = {
+                    include: {
+                        model: Monster,
+                        as: 'monster', // Préciser l'alias exact utilisé dans l'association
+                        required: true, // Utilisez false pour LEFT JOIN si nécessaire
+                        attributes: ['name'], // Récupération des colonnes associées du modèle Monster
+                    },
                     where: {
-                        catchUserId: user.id, monsterName: {
-                            [Op.like]: `%${search}%`
-                        }
-                    }, order: [['monsterName', 'DESC']], limit: 25
-                })
+                        catchUserId: user.id, // Filtre sur le modèle Capture
+                        '$monster.name$': { // Filtre sur le modèle Monster via son alias
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                    order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                    limit: 25, // Limite des résultats
+                };
+                const captures = await Capture.findAll(userCapturesConditions)
                 const retours = []
 
                 for (const capture of captures) {
-                    retours.push({name: capture.monsterName, value: capture.id})
+                    retours.push({name: capture.monster.name, value: capture.id})
                 }
 
                 await interaction.respond(retours)
@@ -702,7 +814,7 @@ module.exports = {
     },
 
     async getImagePath(monster: Monster, name: string) {
-        const img = monster.img;
+        const img = `https://api.dofusdb.fr/img/monsters/${monster.gfxId}.png`;
         await PicturesManager.fetchImageIfNeeded(img, name, '/monsters/');
 
         return join(__dirname, '..', '..', 'public', 'monsters', name)
