@@ -3,6 +3,7 @@ const { REST } = require('@discordjs/rest')
 const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
 const moment = require('moment/moment')
+const Monster = require("../models/Monster").default;
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -37,6 +38,7 @@ module.exports = async function (client) {
         await Larve.sync()
         await Capture.sync()
         await CaptureTrade.sync()
+        await Monster.sync()
 
         console.log('BDD Synchro !')
 
