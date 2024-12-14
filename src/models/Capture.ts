@@ -1,11 +1,15 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../utils/database';
+import Monster from "./Monster";
 
 interface CaptureAttributes {
     id: number;
     rollUserId: string;
     catchUserId?: string | null;
     monsterId: number;
+    /**
+     * @deprecated
+     */
     monsterName: string;
     catchDate?: Date | null;
 }
@@ -17,6 +21,9 @@ class Capture extends Model<CaptureAttributes, CaptureCreationAttributes> implem
     public rollUserId!: string;
     public catchUserId!: string | null;
     public monsterId!: number;
+    /**
+     * @deprecated
+     */
     public monsterName!: string;
     public catchDate!: Date | null;
     public readonly createdAt!: Date;
@@ -57,5 +64,10 @@ Capture.init(
         timestamps: true,
     }
 );
+
+Capture.belongsTo(Monster, {
+    foreignKey: 'monsterId',
+    as: 'monster',
+});
 
 export default Capture;
