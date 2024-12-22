@@ -1,33 +1,12 @@
 import {token} from './../config/config_bot.json'; // Import du token
-import {Client, Collection, GatewayIntentBits, Partials} from 'discord.js';
 import {readdirSync} from 'fs';
 import path from 'path';
 import loadCommands from './utils/commandsLoader';
+import KrisegisClient from "./models/KrisegisClient";
 
 // Définir une interface pour les commandes
-interface Command {
-    data: {
-        name: string;
-    };
-    execute: (interaction: any) => Promise<void>;
 
-    [key: string]: any; // Pour les options supplémentaires
-}
-
-// Étendre le client pour inclure les commandes
-class ExtendedClient extends Client {
-    commands: Collection<string, Command>;
-
-    constructor() {
-        super({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildEmojisAndStickers, GatewayIntentBits.GuildScheduledEvents, GatewayIntentBits.DirectMessages],
-            partials: [Partials.Channel, Partials.User]
-        });
-        this.commands = new Collection();
-    }
-}
-
-const client = new ExtendedClient();
+const client = new KrisegisClient();
 
 loadCommands(client);
 
