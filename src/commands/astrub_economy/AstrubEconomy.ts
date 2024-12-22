@@ -4,7 +4,7 @@ import Recolte from "./Recolte";
 
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
-    name: string = "astrub_economy";
+    name: string = "astrub_economie";
 
     constructor() {
         super();
