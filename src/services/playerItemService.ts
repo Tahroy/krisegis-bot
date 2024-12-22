@@ -28,7 +28,7 @@ export class PlayerService {
 
             // Si l'item existe, on incrémente la quantité
             if (playerItem) {
-                playerItem.quantity += 1;
+                playerItem.quantity += quantity;
                 await playerItem.save();
             } else {
                 // Sinon, on crée un nouvel item pour le joueur
