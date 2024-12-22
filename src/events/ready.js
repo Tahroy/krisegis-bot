@@ -3,6 +3,8 @@ const { REST } = require('@discordjs/rest')
 const { token, client_id } = require('../../config/config_bot.json')
 const { Routes } = require('discord-api-types/v10')
 const moment = require('moment/moment')
+const {Collection} = require("discord.js");
+const AstrubEconomy = require("../commands/astrub_economy/AstrubEconomy").default;
 const Monster = require("../models/Monster").default;
 
 // Capture transpilé en JavaScript après compilation TypeScript
@@ -18,6 +20,8 @@ const Question = require('../models/Question').default
 const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
 const WelcomeMessage = require('../models/WelcomeMessage').default
+const Job = require('../models/Job').default
+const Player = require('../models/Player').default
 
 const eventReminderCheckInterval = 60 * 1000 // Intervalle de vérification des rappels (5 minutes dans cet exemple)
 const eventReminderTime = 60 * 60 * 1000 // Durée en millisecondes avant le rappel (1 heure dans cet exemple)
@@ -39,6 +43,8 @@ module.exports = async function (client) {
         await Capture.sync()
         await CaptureTrade.sync()
         await Monster.sync()
+        await Job.sync();
+        await Player.sync();
 
         console.log('BDD Synchro !')
 
@@ -56,6 +62,14 @@ module.exports = async function (client) {
             let slashCommand = commandData.data
             slashCommands.push(slashCommand)
         }
+
+        for (const command of client.typedCommands) {
+            const commandData = command[1]
+
+            let slashCommand = commandData.getSlashCommandBuild()
+            slashCommands.push(slashCommand)
+        }
+
         slashCommands = slashCommands.map(command => command.toJSON())
 
         await rest.put(Routes.applicationCommands(client_id), { body: slashCommands },)
