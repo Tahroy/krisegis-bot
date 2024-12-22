@@ -7,6 +7,8 @@ export enum ItemType {
     LARVE = 'larve',
     WABBIT = 'wabbit',
     QUESTION = 'question',
+    MONSTRE = 'monstre',
+    RESSOURCE = 'ressource'
 }
 
 /**
@@ -15,7 +17,7 @@ export enum ItemType {
 export class PlayerService {
 
     // Ajoute un item pour le joueur
-    static async addPlayerItem(user: User, name: string, type: ItemType): Promise<void> {
+    static async addPlayerItem(user: User, name: string, type: ItemType, quantity: number = 1): Promise<void> {
         try {
             // Recherche d'un item existant pour ce joueur
             let playerItem = await PlayerItem.findOne({
@@ -31,7 +33,7 @@ export class PlayerService {
             } else {
                 // Sinon, on crée un nouvel item pour le joueur
                 playerItem = await PlayerItem.create({
-                    name: name, user_id: user.id, quantity: 1, type: type,
+                    name: name, user_id: user.id, quantity: quantity, type: type,
                 });
             }
         } catch (error) {
