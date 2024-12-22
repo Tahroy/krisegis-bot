@@ -2,6 +2,7 @@ import { readdirSync } from 'fs';
 import path from 'path';
 import {Client, Collection, CommandInteraction} from 'discord.js';
 import AstrubEconomy from './../commands/astrub_economy/AstrubEconomy';
+import Inventory from './../commands/Inventory';
 import AbstractCommand from "./AbstractCommand";
 import Command from "../models/OldCommand";
 import KrisegisClient from "../models/KrisegisClient";
@@ -32,11 +33,13 @@ export default function loadCommands(client: KrisegisClient): void {
         console.log(`Commande chargée : ${command.data.name}`);
     }
 
-
     const typedCommands: Collection<string, AbstractCommand> = new Collection();
 
     const astrubEconomy = new AstrubEconomy();
     typedCommands.set(astrubEconomy.name, astrubEconomy)
+
+    const inventory = new Inventory();
+    typedCommands.set(inventory.name, inventory)
 
     client.typedCommands = typedCommands;
 }
