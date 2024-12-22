@@ -18,7 +18,7 @@ class Inventory extends AbstractCommand {
         const playerItems = await playerItem.findAll({
             where: {user_id: user.id},
             order: [['name', 'ASC']],
-            limit: 6
+            limit: this.limit + 1
         })
 
         if (playerItems.length === 0) {
