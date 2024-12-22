@@ -7,32 +7,43 @@ import {
 } from 'discord.js';
 import {owner} from '../../config/config_bot.json';
 import {debugMessage} from '../utils/Utils';
+import KrisegisClient from "../models/KrisegisClient";
+import AbstractCommand from "../utils/AbstractCommand";
 
-class ClientKrisegis extends Client {
-    commands: Map<string, any> | undefined;
-}
-
-module.exports = (client: ClientKrisegis ) => {
+module.exports = (client: KrisegisClient) => {
     const gererCommande = async (interaction: CommandInteraction) => {
         const {commandName} = interaction;
 
-        const command = client.commands?.get(commandName);
-        try {
+        const command = client.commands.get(commandName);
+        if (command) {
+            try {
+                const userName = interaction.user.tag;
+                const log = `\`${userName}\` a utilisé la commande \`${commandName}\``;
+                debugMessage(interaction.guild, log);
+
+                if (command?.opts?.admin && interaction.user.id !== owner) {
+                    await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
+                    return;
+                }
+                await command.execute(interaction);
+                return
+            } catch (error) {
+                console.error(error);
+                return;
+            }
+        }
+
+        const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
+        if (typedCommand) {
             const userName = interaction.user.tag;
             const log = `\`${userName}\` a utilisé la commande \`${commandName}\``;
             debugMessage(interaction.guild, log);
 
-            if (command?.opts?.admin && interaction.user.id !== owner) {
-                await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
-                return;
-            }
-            if (!command) {
-                return await interaction.reply('Cette commande n\'existe pas !');
-            }
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(error);
+            typedCommand.execute(interaction);
+            return
         }
+
+        await interaction.reply('Cette commande n\'existe pas !');
     };
 
     const gererBouton = async (interaction: ButtonInteraction) => {
@@ -51,7 +62,7 @@ module.exports = (client: ClientKrisegis ) => {
                     return await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
                 }
             }
-            await command.executeButton(interaction, buttonName);
+            await command?.executeButton(interaction, buttonName);
         } catch (error: any) {
             console.error(error);
             if (error.message === 'The reply to this interaction has already been sent or deferred.') {

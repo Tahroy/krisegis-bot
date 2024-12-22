@@ -1,17 +1,14 @@
 import { readdirSync } from 'fs';
 import path from 'path';
 import {Client, Collection, CommandInteraction} from 'discord.js';
+import AstrubEconomy from './../commands/astrub_economy/AstrubEconomy';
+import AbstractCommand from "./AbstractCommand";
+import Command from "../models/OldCommand";
+import KrisegisClient from "../models/KrisegisClient";
 
-interface Command {
-    data: {
-        name: string;
-    };
-    execute: (interaction: CommandInteraction) => Promise<void>;
-    [key: string]: any; // Pour des propriétés supplémentaires comme admin, cooldown, etc.
-}
 
 // Fonction pour charger les commandes
-export default function loadCommands(client: Client & { commands: Collection<string, Command> }) {
+export default function loadCommands(client: KrisegisClient): void {
     const commandsPath = path.join(__dirname, '../commands');
     const commandFiles = readdirSync(commandsPath).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 
@@ -34,4 +31,12 @@ export default function loadCommands(client: Client & { commands: Collection<str
         client.commands.set(command.data.name, command);
         console.log(`Commande chargée : ${command.data.name}`);
     }
+
+
+    const typedCommands: Collection<string, AbstractCommand> = new Collection();
+
+    const astrubEconomy = new AstrubEconomy();
+    typedCommands.set(astrubEconomy.name, astrubEconomy)
+
+    client.typedCommands = typedCommands;
 }
