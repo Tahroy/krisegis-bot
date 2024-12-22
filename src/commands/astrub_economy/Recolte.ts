@@ -62,6 +62,8 @@ class Recolte extends AbstractSubCommand {
 
         let text = `${userName} a récolté ${quantity} x ${ressource} !`;
 
+
+
         await interaction.reply({content: text,});
     }
 
