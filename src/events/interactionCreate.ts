@@ -56,22 +56,24 @@ module.exports = (client: KrisegisClient) => {
         const log = `${userName} a utilisé le bouton ${buttonName} dans la commande ${commandName}`;
         console.log(log);
 
-        try {
+        if (command) {
             if (command?.opts?.admin) {
                 if (!interaction.member || interaction.member.user.id !== owner) {
                     return await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
                 }
             }
             await command?.executeButton(interaction, buttonName);
-        } catch (error: any) {
-            console.error(error);
-            if (error.message === 'The reply to this interaction has already been sent or deferred.') {
-                return;
-            }
-            if (interaction) {
-                console.error(`Erreur de ${interaction.user.tag} avec la commande ${commandName} et bouton ${buttonName}`);
-            }
+            return;
         }
+
+        const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
+
+        if (typedCommand) {
+            await typedCommand.executeButton(interaction);
+            return
+        }
+
+        await interaction.reply('Cette commande n\'existe pas !');
     };
 
     const autocomplete = async (interaction: AutocompleteInteraction) => {
