@@ -17,6 +17,12 @@ class JobUtil {
     static isLessThanXMinutesAgo(date: Date, minutes: number): boolean {
         return (Date.now() - date.getTime()) < minutes * 60 * 1000;
     }
+
+    static getLevelAndRemainingXP(currentXP: number, baseXP: number = 10): { level: number, remainingXP: number } {
+        const level = this.getLevelFromXP(currentXP, baseXP);
+        const remainingXP = baseXP * (level + 1) ** 2 - currentXP;
+        return { level, remainingXP };
+    }
 }
 
 export default JobUtil;
