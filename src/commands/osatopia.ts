@@ -23,6 +23,7 @@ import sequelize from '../utils/database';
 import CaptureTrade from "../models/CaptureTrade";
 import {CommandCooldownError} from "../exceptions/CommandCooldownError";
 import Monster from "../models/Monster";
+import embedData from "../utils/embed";
 
 const Capture = require('../models/Capture').default
 
@@ -68,6 +69,8 @@ subCommandRelease.setName('release')
 const subCommandSynchro = new SlashCommandSubcommandBuilder();
 subCommandSynchro.setName('synchro')
     .setDescription('Synchroniser avec DofusDB')
+
+const CAPTURES_LIMIT = 20;
 
 /**
  * Jeu basé sur mudae.
@@ -423,6 +426,9 @@ module.exports = {
     },
     async captures(interaction: CommandInteraction) {
         const user: User = interaction.user
+        const guild = interaction.guild;
+        const member = await guild?.members.fetch(user.id)
+        const memberName = member?.nickname ?? user.globalName
 
         const captures = await Capture.findAll({where: {catchUserId: user.id}, order: [['catchDate', 'DESC']]});
 
@@ -432,7 +438,11 @@ module.exports = {
         }
 
         let capturesArray: string [] = []
+        let count = 0;
         for (const capture of captures) {
+            if (count === CAPTURES_LIMIT) {
+                break;
+            }
             const monster = await Monster.findOne({where: {id: capture.monsterId}})
 
             const date = capture.catchDate
@@ -440,12 +450,41 @@ module.exports = {
             // dd/mm/YY
             const dateString = date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'})
             capturesArray.push(`${dateString} - ${monster?.name}`)
+            count++;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle('Vos captures')
+        const embed = embedData.createEmbed([], {
+            title: `Collection de ${memberName}`,
+            description: capturesArray.join('\n')
+        })
 
-        await interaction.reply({embeds: [embed.setDescription(capturesArray.join('\n'))]})
+        if (count === CAPTURES_LIMIT) {
+            const updatedRow = new ActionRowBuilder<ButtonBuilder>()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`osatopia-captures-${user.id}_0`)
+                        .setLabel('◀️ Précédent')
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(true),
+                    new ButtonBuilder()
+                        .setCustomId(`osatopia-captures-${user.id}_2`)
+                        .setLabel('▶️ Suivant')
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(false)
+                );
+
+            await interaction.reply({
+                embeds: embed.embeds,
+                files: embed.files,
+                components: [updatedRow]
+            })
+            return;
+        }
+
+        await interaction.reply({
+            embeds: embed.embeds,
+            files: embed.files
+        })
     },
 
     async timer(interaction: CommandInteraction) {
@@ -695,12 +734,82 @@ module.exports = {
             }
         }
 
+        async function capturesMonster(interaction: ButtonInteraction) {
+            const customId = interaction.customId;
+
+            const [, ,userIdAndPage] = customId.split('-');
+            const [userId, pageIndex] = userIdAndPage.split('_');
+
+            const guild = interaction.guild;
+            const member = await guild?.members.fetch(userId)
+            const memberName = member?.nickname ?? member?.user.globalName
+
+            const captures = await Capture.findAll({where: {catchUserId: userId}, order: [['catchDate', 'DESC']]});
+
+            const page = parseInt(pageIndex)
+            const counter = page - 1;
+
+            const items = [];
+            let count = 0;
+            for (const [index, capture] of captures.entries()) {
+                if (index < counter * CAPTURES_LIMIT) continue;
+                if (count === CAPTURES_LIMIT) break;
+
+                const monster = await Monster.findOne({where: {id: capture.monsterId}})
+
+                const date = capture.catchDate
+
+                // dd/mm/YY
+                const dateString = date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'})
+                items.push(`${dateString} - ${monster?.name}`)
+                count++;
+            }
+
+            const maxPages = Math.ceil(captures.length / CAPTURES_LIMIT);
+
+            const embed = embedData.createEmbed([], {
+                title: `Collection de ${memberName}`,
+                description: items.join('\n')
+            })
+
+            const message = interaction.message;
+
+            const pagePrevious = page - 1;
+            const pageNext = page + 1;
+
+            const updatedRow = new ActionRowBuilder<ButtonBuilder>()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`osatopia-captures-${userId}_${pagePrevious}`)
+                        .setLabel('◀️ Précédent')
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(pagePrevious === 0),
+                    new ButtonBuilder()
+                        .setCustomId(`osatopia-captures-${userId}_${pageNext}`)
+                        .setLabel('▶️ Suivant')
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(page === maxPages)
+                );
+
+            await interaction.deferUpdate()
+            await message.edit({
+                embeds: embed.embeds,
+                files: embed.files,
+                components: [updatedRow]
+            })
+
+        }
+
         switch (split[1]) {
             case subCommandTrade.name:
                 await tradeMonster(interaction)
                 break;
             case 'capture': {
                 await captureMonster(interaction)
+                return;
+            }
+            case subCommandCaptures.name: {
+                await capturesMonster(interaction)
                 return;
             }
         }
