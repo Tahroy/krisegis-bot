@@ -27,14 +27,18 @@ class Inventory extends AbstractCommand {
 
         let items = [];
         let typeActuel = null;
+        let count = 0;
         for (const playerItem of playerItems) {
-            if (items.length === this.limit) break;
+            if (count === this.limit) {
+                break;
+            }
 
             if (playerItem.get('type') !== typeActuel) {
                 items.push(`**${this.capitalizeFirstLetter(playerItem.get('type'))}**`)
                 typeActuel = playerItem.get('type')
             }
             items.push(`${playerItem.get('quantity')} x ${playerItem.get('name')}`)
+            count++;
         }
 
         const embed = embedData.createEmbed([], {
@@ -42,7 +46,7 @@ class Inventory extends AbstractCommand {
             description: items.join('\n')
         })
 
-        if (playerItems.length > this.limit) {
+        if (count === this.limit) {
             const updatedRow = new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(
                     new ButtonBuilder()
@@ -91,15 +95,17 @@ class Inventory extends AbstractCommand {
 
         const items = [];
         let typeActuel = null;
+        let count = 0
         for (const [index, playerItem] of playerItems.entries()) {
             if (index < counter * this.limit) continue;
-            if (items.length === this.limit * (counter + 1)) break;
+            if (count === this.limit * (counter + 1)) break;
 
             if (playerItem.get('type') !== typeActuel) {
                 items.push(`**${this.capitalizeFirstLetter(playerItem.get('type'))}**`)
                 typeActuel = playerItem.get('type')
             }
             items.push(`${playerItem.get('quantity')} x ${playerItem.get('name')}`)
+            count++;
         }
 
         const maxPages = Math.ceil(playerItems.length / this.limit);
