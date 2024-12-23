@@ -17,8 +17,7 @@ class Inventory extends AbstractCommand {
 
         const playerItems = await playerItem.findAll({
             where: {user_id: user.id},
-            order: [['type', 'ASC'], ['name', 'ASC']],
-            limit: this.limit + 1
+            order: [['type', 'ASC'], ['name', 'ASC']]
         })
 
         if (playerItems.length === 0) {
@@ -104,7 +103,6 @@ class Inventory extends AbstractCommand {
         }
 
         const maxPages = Math.ceil(playerItems.length / this.limit);
-        console.log(maxPages);
 
         const embed = embedData.createEmbed([], {
             title: `Inventaire de ${memberName}`,
@@ -115,8 +113,6 @@ class Inventory extends AbstractCommand {
 
         const pagePrevious = page - 1;
         const pageNext = page + 1;
-
-        console.log(`maxPages: ${maxPages} page: ${page} pageNext: ${pageNext} pagePrevious: ${pagePrevious}`)
 
         const updatedRow = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(
