@@ -98,7 +98,7 @@ class Inventory extends AbstractCommand {
         let count = 0
         for (const [index, playerItem] of playerItems.entries()) {
             if (index < counter * this.limit) continue;
-            if (count === this.limit * (counter + 1)) break;
+            if (count === this.limit) break;
 
             if (playerItem.get('type') !== typeActuel) {
                 items.push(`**${this.capitalizeFirstLetter(playerItem.get('type'))}**`)
