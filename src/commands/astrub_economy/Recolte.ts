@@ -27,7 +27,7 @@ class Recolte extends AbstractSubCommand {
         const job = await this.getJob(interaction.user, jobChoice);
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
-        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {
+        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 1)) {
             await interaction.reply({
                 content: "Vous ne pouvez récolter qu'une fois toutes les 15 minutes.",
                 ephemeral: true
@@ -52,17 +52,22 @@ class Recolte extends AbstractSubCommand {
         }
 
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity)
-        await job.update({experience: job.experience});
         await player.update({lastHarvest: new Date()})
-
         const user = interaction.user;
+
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
+        const level = JobUtil.getLevelFromXP(job.experience)
 
-        let text = `${userName} a récolté ${quantity} x ${ressource} !`;
 
+        console.log(`level: ${job.level}. xp: ${job.experience}`)
+        let text = `**${userName}** a récolté ${quantity} x ${ressource} !`;
+        if (level != job.level) {
+            text += `\n**${userName}** passe ${job.name} niveau ${level} !`
+        }
 
+        await job.update({experience: job.experience, level: level});
 
         await interaction.reply({content: text,});
     }
@@ -72,7 +77,8 @@ class Recolte extends AbstractSubCommand {
             {name: "Mineur", value: JobEnum.MINEUR},
             {name: "Bûcheron", value: JobEnum.BUCHERON},
             {name: "Paysan", value: JobEnum.PAYSAN},
-            {name: "Alchimiste", value: JobEnum.ALCHIMISTE}
+            {name: "Alchimiste", value: JobEnum.ALCHIMISTE},
+            {name: "Pêcheur", value: JobEnum.PECHEUR}
         ]
 
         builder.addStringOption(
