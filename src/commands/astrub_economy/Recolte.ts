@@ -27,7 +27,7 @@ class Recolte extends AbstractSubCommand {
         const job = await this.getJob(interaction.user, jobChoice);
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
-        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 1)) {
+        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {
             await interaction.reply({
                 content: "Vous ne pouvez récolter qu'une fois toutes les 15 minutes.",
                 ephemeral: true
