@@ -21,7 +21,7 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
-    getRessource(): "Fer" | "Frêne" | "Blé" | "Ortie" | null {
+    getRessource(): "Fer" | "Frêne" | "Blé" | "Ortie" | "Goujon" | null {
         switch (this.name) {
             case 'mineur':
                 return "Fer";
@@ -31,6 +31,8 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
                 return "Blé"
             case "alchimiste":
                 return "Ortie";
+            case "pecheur":
+                return "Goujon"
             default:
                 return null;
         }
@@ -72,7 +74,8 @@ enum JobEnum {
     MINEUR = "mineur",
     BUCHERON = "bucheron",
     PAYSAN = "paysan",
-    ALCHIMISTE = "alchimiste"
+    ALCHIMISTE = "alchimiste",
+    PECHEUR = 'pecheur',
 }
 
 export {JobEnum};
