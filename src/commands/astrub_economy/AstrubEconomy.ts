@@ -1,6 +1,9 @@
 import AbstractCommand from "../../utils/AbstractCommand";
-import {CommandInteraction} from "discord.js";
 import Recolte from "./Recolte";
+import Sell from "./Sell";
+import Prices from "./Prices";
+import Profil from "./Profil";
+import Buy from "./Buy";
 
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -9,6 +12,10 @@ class AstrubEconomy extends AbstractCommand {
     constructor() {
         super();
         this.subCommands.set("recolte", Recolte);
+        this.subCommands.set('sell', Sell);
+        this.subCommands.set('buy', Buy)
+        this.subCommands.set("prices", Prices)
+        this.subCommands.set("profil", Profil)
     }
 }
 

@@ -1,3 +1,5 @@
+import Ressource, {Ressources, RessourceEnum} from "../../models/Ressource";
+
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
         // Initialisation des variables
@@ -22,6 +24,10 @@ class JobUtil {
         const level = this.getLevelFromXP(currentXP, baseXP);
         const remainingXP = baseXP * (level + 1) ** 2 - currentXP;
         return { level, remainingXP };
+    }
+
+    static getRessource(ressource: string): Ressource|null {
+        return Ressources[ressource as RessourceEnum] ?? null
     }
 }
 
