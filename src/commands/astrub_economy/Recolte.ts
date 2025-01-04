@@ -61,7 +61,6 @@ class Recolte extends AbstractSubCommand {
         const level = JobUtil.getLevelFromXP(job.experience)
 
 
-        console.log(`level: ${job.level}. xp: ${job.experience}`)
         let text = `**${userName}** a récolté ${quantity} x ${ressource} !`;
         if (level != job.level) {
             text += `\n**${userName}** passe ${job.name} niveau ${level} !`
@@ -82,7 +81,7 @@ class Recolte extends AbstractSubCommand {
         ]
 
         builder.addStringOption(
-            option => option.setName("metier").setDescription("Métier de récolte").addChoices(
+            option => option.setName("metier").setRequired(true).setDescription("Métier de récolte").addChoices(
                 ...metiers.map((metier: { name: string, value: string }) => ({
                     name: metier.name,
                     value: metier.value,
