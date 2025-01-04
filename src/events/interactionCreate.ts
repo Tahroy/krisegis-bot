@@ -80,10 +80,23 @@ module.exports = (client: KrisegisClient) => {
         const {commandName} = interaction;
 
         const command = client.commands?.get(commandName);
-        try {
-            return await command?.autocomplete(interaction);
-        } catch (error) {
-            console.error(error);
+
+        if (command) {
+            if (command?.opts?.admin) {
+                if (!interaction.member || interaction.member.user.id !== owner) {
+                    await interaction.respond([])
+                    return;
+                }
+            }
+            await command?.autocomplete(interaction);
+            return;
+        }
+
+        const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
+
+        if (typedCommand) {
+            await typedCommand.automplete(interaction);
+            return
         }
     };
 

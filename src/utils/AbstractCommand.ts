@@ -12,7 +12,7 @@ abstract class AbstractCommand {
     abstract description: string;
     subCommands: Map<string, new () => AbstractSubCommand> = new Map();
 
-    execute(interaction: CommandInteraction): void {
+    async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
             return;
         }
@@ -22,7 +22,7 @@ abstract class AbstractCommand {
         const subCommand = this.subCommands.get(command);
         if (subCommand) {
             const subCommandInstance = new subCommand();
-            subCommandInstance.execute(interaction);
+            await subCommandInstance.execute(interaction);
         }
     }
 
@@ -31,7 +31,14 @@ abstract class AbstractCommand {
     };
 
     async automplete(interaction: AutocompleteInteraction): Promise<void> {
-        await interaction.respond([])
+        const command = interaction.options.getSubcommand();
+
+        const subCommand = this.subCommands.get(command);
+        console.log(subCommand)
+        if (subCommand) {
+            const subCommandInstance = new subCommand();
+            await subCommandInstance.automplete(interaction);
+        }
     };
 
     async gererModal(interaction: ModalSubmitInteraction): Promise<void> {
