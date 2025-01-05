@@ -1,8 +1,8 @@
 import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver, User} from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import Job, {JobEnum} from './../../models/Job'
-import Player from "../../models/Player";
+import Job, {JobEnum} from '../../models/astrub_economy/Job'
+import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import JobUtil from "./JobUtil";
 

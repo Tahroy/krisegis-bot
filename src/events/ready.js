@@ -20,8 +20,8 @@ const Question = require('../models/Question').default
 const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
 const WelcomeMessage = require('../models/WelcomeMessage').default
-const Job = require('../models/Job').default
-const Player = require('../models/Player').default
+const Job = require('../models/astrub_economy/Job').default
+const Player = require('../models/astrub_economy/Player').default
 
 const eventReminderCheckInterval = 60 * 1000 // Intervalle de vérification des rappels (5 minutes dans cet exemple)
 const eventReminderTime = 60 * 60 * 1000 // Durée en millisecondes avant le rappel (1 heure dans cet exemple)

@@ -1,4 +1,8 @@
-import Ressource, {Ressources, RessourceEnum} from "../../models/Ressource";
+import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
+import Tool, {Tools, ToolsEnum} from "../../models/astrub_economy/Tool";
+import {RessourcesEnum} from "../../models/astrub_economy/Ressource";
+import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
+import {Crafts} from "../../models/astrub_economy/Craft";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -27,7 +31,27 @@ class JobUtil {
     }
 
     static getRessource(ressource: string): Ressource|null {
-        return Ressources[ressource as RessourceEnum] ?? null
+        return Object.values(Ressources).find(r => r.name === ressource) ?? null
+    }
+
+    static getTool(tool: string): Tool|null {
+        return Object.values(Tools).find(t => t.name === tool) ?? null
+    }
+
+    static getCraft(craft: string): BaseItem|null {
+        return Object.values(Crafts).find(c => c.name === craft) ?? null
+    }
+
+    static getItem(name: string): BaseItem | undefined {
+        return Object.values({...Ressources, ...Tools, ...Crafts}).find(item => item.name === name);
+    }
+
+    static getAllItems(): BaseItem[] {
+        const items: BaseItem[] = [];
+        for (const category of Object.values(Items)) {
+            items.push(...Object.values(category));
+        }
+        return items;
     }
 }
 

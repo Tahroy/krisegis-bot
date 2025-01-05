@@ -1,5 +1,6 @@
 import PlayerItem from '../models/PlayerItem';
 import {User} from 'discord.js';
+import {Op} from "sequelize";
 
 export enum ItemType {
     KOUINKOUIN = 'kouinkouin',
@@ -8,7 +9,9 @@ export enum ItemType {
     WABBIT = 'wabbit',
     QUESTION = 'question',
     MONSTRE = 'monstre',
-    RESSOURCE = 'ressource'
+    RESSOURCE = 'ressource',
+    OUTIL = 'outil',
+    FABRICATION = 'fabrication'
 }
 
 /**
@@ -17,6 +20,10 @@ export enum ItemType {
 export class PlayerService {
 
     // Ajoute un item pour le joueur
+    static async getItems(user: User, types: ItemType[]):Promise<PlayerItem[]> {
+        return await PlayerItem.findAll({where: {user_id: user.id, type: {[Op.in]: types}}, order: [['type', 'ASC'], ['name', 'ASC']]});
+    }
+
     static async addPlayerItem(user: User, name: string, type: ItemType, quantity: number = 1): Promise<void> {
         try {
             // Recherche d'un item existant pour ce joueur

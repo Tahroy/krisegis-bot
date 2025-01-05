@@ -2,10 +2,10 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "./JobUtil";
-import Job from "../../models/Job";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {Ressources} from "../../models/Ressource";
+import {Ressources} from "../../models/astrub_economy/Ressource";
+import {Tools} from "../../models/astrub_economy/Tool";
 
 class Sale extends AbstractSubCommand {
     description: string = 'Acheter un objet';
@@ -31,9 +31,10 @@ class Sale extends AbstractSubCommand {
 
         let playerItem = await PlayerItem.findOne({where: {name: 'Kamas', user_id: user.id,},});
 
-        const price = (JobUtil.getRessource(item)?.buy ?? 0);
+        const baseItem = JobUtil.getItem(item);
+        const price = baseItem?.buy ?? 0
 
-        if (!price) {
+        if (!price || !baseItem) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", ephemeral: true})
             return
         }
@@ -54,7 +55,7 @@ class Sale extends AbstractSubCommand {
             content: `${userName} a acheté ${quantity} x ${item} pour ${price * quantity} kamas`
         })
 
-        await PlayerService.addPlayerItem(interaction.user, item, ItemType.RESSOURCE, quantity)
+        await PlayerService.addPlayerItem(interaction.user, item, baseItem.type, quantity)
         await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, -price * quantity)
     }
 
@@ -85,16 +86,26 @@ class Sale extends AbstractSubCommand {
         switch (focused.name) {
             case 'item':
                 const ressources = Object.values(Ressources);
+                const tools = Object.values(Tools)
 
                 for (let ressource of ressources) {
+                    if (retour.length >= 20) break;
                     if (ressource.buy === 0) continue;
                     if (ressource.name.toLowerCase().includes(search.toLowerCase()) || !search) {
-                        if (retour.length >= 20) {
-                            break;
-                        }
                         retour.push({
                             name: `${ressource.name} (${ressource.buy} kamas)`,
                             value: ressource.name
+                        })
+                    }
+                }
+
+                for (let tool of tools) {
+                    if (retour.length >= 20) break;
+                    if (tool.buy === 0) continue;
+                    if (tool.name.toLowerCase().includes(search.toLowerCase()) || !search) {
+                        retour.push({
+                            name: `${tool.name} (${tool.buy} kamas)`,
+                            value: tool.name
                         })
                     }
                 }
