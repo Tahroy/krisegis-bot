@@ -1,6 +1,6 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
-import Ressource, {RessourceEnum, Ressources} from "../../models/Ressource";
+import {Ressources} from "../../models/astrub_economy/Ressource";
 
 class Prices extends AbstractSubCommand {
     description: string = "Voir le tableau des prix";
@@ -17,7 +17,7 @@ class Prices extends AbstractSubCommand {
 
         // Construction des lignes du tableau
         const rows = Object.values(Ressources).map(ressource => {
-            return `| ${ressource.name.padEnd(10)} | ${String(ressource.sale).padStart(13)} | ${String(ressource.buy).padStart(12)} |`;
+            return `| ${ressource.name.padEnd(10)} | ${String(ressource.sell).padStart(13)} | ${String(ressource.buy).padStart(12)} |`;
         });
 
         // Retourner le tableau formaté
