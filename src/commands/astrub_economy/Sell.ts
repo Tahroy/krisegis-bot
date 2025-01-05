@@ -5,7 +5,6 @@ import JobUtil from "./JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {Op} from "sequelize";
 import {ItemType, PlayerService} from "../../services/playerItemService";
-import {RessourceEnum} from "../../models/Ressource";
 
 class Sell extends AbstractSubCommand {
     description: string = 'Vendre un objet';
@@ -36,9 +35,10 @@ class Sell extends AbstractSubCommand {
             return;
         }
 
-        const price = JobUtil.getRessource(item)?.sale ?? 0;
+        const itemBase = JobUtil.getItem(item);
+        const price = itemBase?.sell ?? 0
 
-        if (!price) {
+        if (!price || !itemBase) {
             await interaction.reply({content: "Cet objet ne peut pas être vendu", ephemeral: true})
             return
         }
@@ -51,7 +51,7 @@ class Sell extends AbstractSubCommand {
             content: `${userName} a vendu ${quantity} x ${item} pour ${price * quantity} kamas`
         })
 
-        await PlayerService.addPlayerItem(interaction.user, item, ItemType.RESSOURCE, -quantity)
+        await PlayerService.addPlayerItem(interaction.user, item, itemBase.type, -quantity)
         await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, price * quantity)
     }
 
@@ -72,7 +72,6 @@ class Sell extends AbstractSubCommand {
         )
     }
 
-
     async automplete(interaction: AutocompleteInteraction): Promise<void> {
         const options = interaction.options
         const focused = options.getFocused(true)
@@ -84,7 +83,7 @@ class Sell extends AbstractSubCommand {
                 const items = await this.getUserItems(interaction.user, search)
 
                 for (let item of items) {
-                    const price = JobUtil.getRessource(item.name)?.sale ?? 0;
+                    const price = JobUtil.getItem(item.name)?.sell ?? 0;
                     if (price === 0) continue;
                     if (retour.length >= 20) {
                         break;
@@ -102,11 +101,18 @@ class Sell extends AbstractSubCommand {
     }
 
     private async getUserItems(user: User, search: string): Promise<PlayerItem[]> {
-        const sellablesItems: string [] = [
-            RessourceEnum.BLE,
-            RessourceEnum.ORTIE,
-            RessourceEnum.GOUJON
-        ]
+        const items = JobUtil.getAllItems();
+
+        let sellablesItems: string [] = []
+
+        for (let item of items) {
+            if (!item.sell) {
+                continue
+            }
+            if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
+                sellablesItems.push(item.name)
+            }
+        }
 
         return await PlayerItem.findAll({
             where: {

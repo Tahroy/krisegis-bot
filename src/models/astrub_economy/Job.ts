@@ -1,5 +1,5 @@
 import {DataTypes, Model, Optional} from "sequelize";
-import sequelize from '../utils/database';
+import sequelize from '../../utils/database';
 
 interface JobAttributes {
     id: number;
