@@ -6,7 +6,6 @@ import {ItemType} from "../../services/playerItemService";
 interface Craft extends BaseItem {
     recipe: object;
     sell: number;
-    tool: string;
 }
 
 /*

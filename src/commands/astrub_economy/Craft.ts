@@ -7,6 +7,7 @@ import PlayerItem from "../../models/PlayerItem";
 import player from "../../models/astrub_economy/Player";
 import playerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
+import craft from "../../models/astrub_economy/Craft";
 
 class Craft extends AbstractSubCommand {
     description: string = 'Créer un object';
@@ -46,6 +47,20 @@ class Craft extends AbstractSubCommand {
             if (!playerItem || playerItem.quantity < quantity) {
                 await interaction.reply({
                     content: `Vous n'avez pas la quantité de ${ingredient} nécessaire pour fabriquer ${itemName}`,
+                    ephemeral: true
+                })
+                return
+            }
+        }
+
+        // S'il y a un objet nécessaire, on vérifie que l'utilisateur l'a bien
+        if (item.tool) {
+            const playerTool = await PlayerItem.findOne({where: {
+                user_id: interaction.user.id, name: item.tool
+            }})
+            if (!playerTool || playerTool.quantity < 1) {
+                await interaction.reply({
+                    content: `Vous devez avoir un ${item.tool} pour fabriquer ${itemName}`,
                     ephemeral: true
                 })
                 return
