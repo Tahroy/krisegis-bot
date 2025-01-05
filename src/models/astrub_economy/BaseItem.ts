@@ -11,6 +11,7 @@ interface BaseItem {
     job?: string | null;
     recipe?: object | null;
     level?: number;
+    tool?: string;
 }
 
 const Items: Record<string, Record<string, BaseItem>> = {
