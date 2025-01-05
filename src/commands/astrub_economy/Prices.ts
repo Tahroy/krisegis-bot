@@ -1,6 +1,7 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import {Ressources} from "../../models/astrub_economy/Ressource";
+import JobUtil from "./JobUtil";
 
 class Prices extends AbstractSubCommand {
     description: string = "Voir le tableau des prix";
@@ -12,12 +13,12 @@ class Prices extends AbstractSubCommand {
         }
 
         // En-tête du tableau
-        const header    = `| Nom        | Prix de vente | Prix d'achat |`;
-        const separator = `|------------|---------------|--------------|`;
+        const header    = `| Nom                 | Prix de vente | Prix d'achat |`;
+        const separator = `|---------------------|---------------|--------------|`;
 
         // Construction des lignes du tableau
-        const rows = Object.values(Ressources).map(ressource => {
-            return `| ${ressource.name.padEnd(10)} | ${String(ressource.sell).padStart(13)} | ${String(ressource.buy).padStart(12)} |`;
+        const rows = Object.values(JobUtil.getAllItems()).map(ressource => {
+            return `| ${ressource.name.padEnd(19)} | ${String(ressource.sell).padStart(13)} | ${String(ressource.buy ?? 0).padStart(12)} |`;
         });
 
         // Retourner le tableau formaté
