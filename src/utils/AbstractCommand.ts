@@ -37,7 +37,7 @@ abstract class AbstractCommand {
         console.log(subCommand)
         if (subCommand) {
             const subCommandInstance = new subCommand();
-            await subCommandInstance.automplete(interaction);
+            await subCommandInstance.autocomplete(interaction);
         }
     };
 

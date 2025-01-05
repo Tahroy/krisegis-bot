@@ -17,7 +17,7 @@ abstract class AbstractSubCommand {
         await interaction.reply({content: 'Not implemented', ephemeral: true})
     };
 
-    async automplete(interaction: AutocompleteInteraction): Promise<void> {
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         await interaction.respond([])
     };
 
