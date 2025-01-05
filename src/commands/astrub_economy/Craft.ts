@@ -90,7 +90,7 @@ class Craft extends AbstractSubCommand {
         builder.addStringOption(option => option.setName('name').setDescription("Objet").setRequired(true).setAutocomplete(true));
     }
 
-    async automplete(interaction: AutocompleteInteraction): Promise<void> {
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const options = interaction.options;
         const focused = options.getFocused(true);
         const search = focused.value;

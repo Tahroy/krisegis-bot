@@ -6,6 +6,7 @@ import Profil from "./Profil";
 import Buy from "./Buy";
 import Craft from "./Craft";
 import Inventory from "./Inventory";
+import Give from "./Give";
 
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -20,6 +21,7 @@ class AstrubEconomy extends AbstractCommand {
         this.subCommands.set("profil", Profil)
         this.subCommands.set('craft', Craft)
         this.subCommands.set('inventory', Inventory)
+        this.subCommands.set('give', Give)
     }
 }
 

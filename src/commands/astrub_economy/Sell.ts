@@ -72,7 +72,7 @@ class Sell extends AbstractSubCommand {
         )
     }
 
-    async automplete(interaction: AutocompleteInteraction): Promise<void> {
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const options = interaction.options
         const focused = options.getFocused(true)
         const search = focused.value
