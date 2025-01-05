@@ -19,23 +19,23 @@ enum ToolsEnum {
 const Tools: Record<ToolsEnum, Tool> = {
     [ToolsEnum.FOUR_A_PAIN]: {
         name: ToolsEnum.FOUR_A_PAIN,
-        buy: 3000,
-        sell:2400,
-        recipe: {[RessourcesEnum.FER]: 200, [RessourcesEnum.FRENE]: 200},
+        buy: 2000,
+        sell:1800,
+        recipe: {[RessourcesEnum.FER]: 150, [RessourcesEnum.FRENE]: 150},
         type: ItemType.OUTIL,
     },
     [ToolsEnum.ATELIER_A_POISSON]: {
         name: ToolsEnum.ATELIER_A_POISSON,
-        buy: 3000,
-        sell:2400,
-        recipe: {[RessourcesEnum.FER]: 300, [RessourcesEnum.FRENE]: 100},
+        buy: 2000,
+        sell:1800,
+        recipe: {[RessourcesEnum.FER]: 250, [RessourcesEnum.FRENE]: 50},
         type: ItemType.OUTIL,
     },
     [ToolsEnum.MARMITE]: {
         name: ToolsEnum.MARMITE,
-        buy: 3000,
-        sell: 2400,
-        recipe: {[RessourcesEnum.FER]: 100, [RessourcesEnum.FRENE]: 300},
+        buy: 2000,
+        sell: 1800,
+        recipe: {[RessourcesEnum.FER]: 50, [RessourcesEnum.FRENE]: 250},
         type: ItemType.OUTIL,
     }
 };
