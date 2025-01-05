@@ -1,13 +1,9 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver} from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {Tools} from "../../models/astrub_economy/Tool";
 import JobUtil from "./JobUtil";
 import PlayerItem from "../../models/PlayerItem";
-import player from "../../models/astrub_economy/Player";
-import playerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
-import craft from "../../models/astrub_economy/Craft";
 
 class Craft extends AbstractSubCommand {
     description: string = 'Créer un object';
@@ -21,9 +17,9 @@ class Craft extends AbstractSubCommand {
         const options: CommandInteractionOptionResolver = interaction.options;
 
         const itemName: string | null = options.getString('name');
+        const craftQuantity = options.getInteger('quantity');
 
-        console.log(itemName);
-        if (!itemName) {
+        if (!itemName || !craftQuantity) {
             await interaction.reply({content: "Commande incorrecte", ephemeral: true})
             return;
         }
@@ -44,7 +40,7 @@ class Craft extends AbstractSubCommand {
         for (let [ingredient, quantity] of Object.entries(item.recipe)) {
             const playerItem = await PlayerItem.findOne({where: {user_id: interaction.user.id, name: ingredient}})
 
-            if (!playerItem || playerItem.quantity < quantity) {
+            if (!playerItem || playerItem.quantity < (quantity * craftQuantity)) {
                 await interaction.reply({
                     content: `Vous n'avez pas la quantité de ${ingredient} nécessaire pour fabriquer ${itemName}`,
                     ephemeral: true
@@ -69,11 +65,11 @@ class Craft extends AbstractSubCommand {
 
         // Retrait des ingrédients
         for (let [ingredient, quantity] of Object.entries(item.recipe)) {
-            await PlayerService.addPlayerItem(interaction.user, ingredient, ItemType.RESSOURCE, -quantity)
+            await PlayerService.addPlayerItem(interaction.user, ingredient, ItemType.RESSOURCE, -quantity * craftQuantity)
         }
 
         // Ajout de l'item
-        await PlayerService.addPlayerItem(interaction.user, itemName, ItemType.OUTIL, 1)
+        await PlayerService.addPlayerItem(interaction.user, itemName, ItemType.OUTIL, craftQuantity)
 
         const user = interaction.user;
         const guild = interaction.guild
@@ -81,13 +77,14 @@ class Craft extends AbstractSubCommand {
         const userName = memberCatch?.nickname ?? user.globalName
 
         await interaction.reply({
-            content: `${userName} a fabriqué ${itemName}`
+            content: `${userName} a fabriqué ${craftQuantity} x ${itemName}`
         })
 
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(option => option.setName('name').setDescription("Objet").setRequired(true).setAutocomplete(true));
+        builder.addIntegerOption(option => option.setName('quantity').setDescription("Quantité").setRequired(true));
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
