@@ -28,14 +28,14 @@ const Tools: Record<ToolsEnum, Tool> = {
         name: ToolsEnum.ATELIER_A_POISSON,
         buy: 2000,
         sell:1800,
-        recipe: {[RessourcesEnum.FER]: 250, [RessourcesEnum.FRENE]: 50},
+        recipe: {[RessourcesEnum.FER]: 50, [RessourcesEnum.FRENE]: 250},
         type: ItemType.OUTIL,
     },
     [ToolsEnum.MARMITE]: {
         name: ToolsEnum.MARMITE,
         buy: 2000,
         sell: 1800,
-        recipe: {[RessourcesEnum.FER]: 50, [RessourcesEnum.FRENE]: 250},
+        recipe: {[RessourcesEnum.FER]: 250, [RessourcesEnum.FRENE]: 50},
         type: ItemType.OUTIL,
     }
 };
