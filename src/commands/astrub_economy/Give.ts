@@ -35,7 +35,7 @@ class Give extends AbstractSubCommand {
             return;
         }
 
-        if (![ItemType.RESSOURCE, ItemType.FABRICATION].includes(playerItem.type as ItemType)) {
+        if (![ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL].includes(playerItem.type as ItemType)) {
 
             console.log('bad type')
             console.log(playerItem)
