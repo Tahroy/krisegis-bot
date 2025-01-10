@@ -12,6 +12,7 @@ interface BaseItem {
     recipe?: object | null;
     level?: number;
     tool?: string;
+    emoji?: string;
 }
 
 const Items: Record<string, Record<string, BaseItem>> = {

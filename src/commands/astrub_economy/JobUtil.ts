@@ -1,6 +1,5 @@
 import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
-import Tool, {Tools, ToolsEnum} from "../../models/astrub_economy/Tool";
-import {RessourcesEnum} from "../../models/astrub_economy/Ressource";
+import Tool, {Tools} from "../../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
 
