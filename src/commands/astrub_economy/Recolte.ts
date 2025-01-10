@@ -1,10 +1,11 @@
 import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver, User} from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import Job, {JobEnum} from '../../models/astrub_economy/Job'
+import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import JobUtil from "./JobUtil";
+import {JobEnum} from "../../models/astrub_economy/Enums";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
