@@ -1,28 +1,10 @@
 import BaseItem from "./BaseItem";
-import {RessourcesEnum} from "./Ressource";
-import Tool, {Tools, ToolsEnum} from "./Tool";
 import {ItemType} from "../../services/playerItemService";
+import {CraftEnum, RessourcesEnum, ToolsEnum} from "./Enums";
 
 interface Craft extends BaseItem {
     recipe: object;
     sell: number;
-}
-
-/*
-Pain d’Incarnam
-Potion de mini soin
-Goujon en tranche
-Pain aux orties
-Sandwich au goujon
-
- */
-enum CraftEnum {
-    PAIN_INCARNAM = "Pain d’Incarnam",
-    POTION_MINI_SOIN = "Potion de mini soin",
-    GOUJON_EN_TRANCHE = "Goujon en tranche",
-    PAIN_AUX_ORTIES = "Pain aux orties",
-    SANDWICH_AU_GOUGON = "Sandwich au goujon",
-    GOUJON_AUX_ORTIES = "Goujon aux orties"
 }
 
 const Crafts: Record<CraftEnum, Craft> = {
@@ -61,13 +43,14 @@ const Crafts: Record<CraftEnum, Craft> = {
         tool: ToolsEnum.ATELIER_A_POISSON,
         type: ItemType.FABRICATION,
     },
-    [CraftEnum.SANDWICH_AU_GOUGON]: {
-        name: CraftEnum.SANDWICH_AU_GOUGON,
+    [CraftEnum.SANDWICH_AU_GOUJON]: {
+        name: CraftEnum.SANDWICH_AU_GOUJON,
         recipe: {[CraftEnum.PAIN_INCARNAM]: 1, [CraftEnum.GOUJON_EN_TRANCHE]: 3},
         sell: 96,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
-    },
+    } //
+
 }
 export default Craft;
-export {CraftEnum, Crafts}
+export {Crafts}
