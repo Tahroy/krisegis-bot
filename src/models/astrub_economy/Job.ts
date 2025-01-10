@@ -1,6 +1,8 @@
 import {DataTypes, Model, Optional} from "sequelize";
 import sequelize from '../../utils/database';
 
+import {RessourcesEnum} from "./Enums";
+
 interface JobAttributes {
     id: number;
     name: string;
@@ -21,21 +23,21 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
-    getRessource(): "Fer" | "Frêne" | "Blé" | "Ortie" | "Goujon" | null {
+    getRessource(): string | undefined {
         switch (this.name) {
             case 'mineur':
-                return "Fer";
+                return RessourcesEnum.FER;
             case 'bucheron':
-                return "Frêne"
+                return RessourcesEnum.FRENE
             case 'paysan':
-                return "Blé"
+                return RessourcesEnum.BLE
             case "alchimiste":
-                return "Ortie";
+                return RessourcesEnum.ORTIE
             case "pecheur":
-                return "Goujon"
-            default:
-                return null;
+                return RessourcesEnum.GOUJON
         }
+
+        return undefined
     }
 }
 
@@ -70,12 +72,3 @@ Job.init(
 
 export default Job;
 
-enum JobEnum {
-    MINEUR = "mineur",
-    BUCHERON = "bucheron",
-    PAYSAN = "paysan",
-    ALCHIMISTE = "alchimiste",
-    PECHEUR = 'pecheur',
-}
-
-export {JobEnum};

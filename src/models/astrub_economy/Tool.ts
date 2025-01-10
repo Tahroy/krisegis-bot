@@ -1,6 +1,6 @@
-import {RessourcesEnum} from "./Ressource";
 import BaseItem from "./BaseItem";
 import {ItemType} from "../../services/playerItemService";
+import {RessourcesEnum, ToolsEnum} from "./Enums";
 
 interface Tool extends BaseItem {
     buy: number,
@@ -8,12 +8,6 @@ interface Tool extends BaseItem {
 }
 
 export default Tool;
-
-enum ToolsEnum {
-    FOUR_A_PAIN = "Four à pain",
-    ATELIER_A_POISSON = "Atelier à poisson",
-    MARMITE = "Marmite"
-}
 
 // Exemple d'utilisation
 const Tools: Record<ToolsEnum, Tool> = {
@@ -41,4 +35,4 @@ const Tools: Record<ToolsEnum, Tool> = {
 };
 
 
-export {Tools, ToolsEnum}
+export {Tools}
