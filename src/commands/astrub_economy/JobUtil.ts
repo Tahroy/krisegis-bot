@@ -23,6 +23,10 @@ class JobUtil {
         return (Date.now() - date.getTime()) < minutes * 60 * 1000;
     }
 
+    static getTimeBeforeNextHarvest(lastHarvest: Date, minutes: number): number {
+        const nextHarvest = new Date(lastHarvest.getTime() + minutes * 60 * 1000);
+        return Math.floor((nextHarvest.getTime() - Date.now()));
+    }
     static getLevelAndRemainingXP(currentXP: number, baseXP: number = 10): { level: number, remainingXP: number } {
         const level = this.getLevelFromXP(currentXP, baseXP);
         const remainingXP = baseXP * (level + 1) ** 2 - currentXP;

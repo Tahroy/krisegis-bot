@@ -28,22 +28,23 @@ class Recolte extends AbstractSubCommand {
         const job = await this.getJob(interaction.user, jobChoice);
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
-        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {
+        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 0)) {
+            const timeBeforeNext = JobUtil.getTimeBeforeNextHarvest(player.lastHarvest, 0)
+
+            const minutes = Math.floor((timeBeforeNext % 3600000) / 60000)
+            const seconds = Math.floor((timeBeforeNext % 60000) / 1000)
+
+            const pluralM = minutes <= 1 ? '' : 's'
+            const pluralS = seconds <= 1 ? '' : 's'
+
             await interaction.reply({
-                content: "Vous ne pouvez récolter qu'une fois toutes les 15 minutes.",
+                content: `Vous pourrez récolter dans ${minutes} minute${pluralM} et ${seconds} seconde${pluralS}.`,
                 ephemeral: true
             })
             return;
         }
 
-        // Quantity = Niveau + random(0,3)
-        const quantity: number = job.level + Math.floor(Math.random() * 3);
-        const xp: number = 10;
-
-        job.experience += xp;
-
         const ressource = job.getRessource()
-
         if (!ressource) {
             await interaction.reply({
                 content: 'Aucune ressource disponible',
@@ -51,6 +52,15 @@ class Recolte extends AbstractSubCommand {
             })
             return;
         }
+
+        const item = JobUtil.getRessource(ressource);
+
+        const quantity: number = this.getQuantity(job.level, item?.level ?? 1)
+        const xp: number = 10;
+
+        job.experience += xp;
+
+
 
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity)
         await player.update({lastHarvest: new Date()})
@@ -74,11 +84,11 @@ class Recolte extends AbstractSubCommand {
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         const metiers: { name: string, value: string }[] = [
-            {name: "Mineur", value: JobEnum.MINEUR},
-            {name: "Bûcheron", value: JobEnum.BUCHERON},
-            {name: "Paysan", value: JobEnum.PAYSAN},
-            {name: "Alchimiste", value: JobEnum.ALCHIMISTE},
-            {name: "Pêcheur", value: JobEnum.PECHEUR}
+            {name: JobEnum.ALCHIMISTE, value: JobEnum.ALCHIMISTE},
+            {name: JobEnum.BUCHERON, value: JobEnum.BUCHERON},
+            {name: JobEnum.MINEUR, value: JobEnum.MINEUR},
+            {name: JobEnum.PAYSAN, value: JobEnum.PAYSAN},
+            {name: JobEnum.PECHEUR, value: JobEnum.PECHEUR}
         ]
 
         builder.addStringOption(
@@ -119,6 +129,19 @@ class Recolte extends AbstractSubCommand {
 
         return await Job.create({name: jobChoice, user_id: user.id, level: 1, experience: 0})
     }
+
+    getRandomInt(min: number, max: number) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    private getQuantity(jobLevel: number, itemLevel: number): number {
+        const randomBase = this.getRandomInt(1, 3); // Random entre 1 et 3
+        const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel); // Random entre niveau/2 et niveau, arrondi au supérieur
+        const quantity = randomBase + randomLevel - itemLevel;
+
+        return Math.max(quantity, 0); // Assure que la quantité ne soit pas négative
+    }
+
 }
 
 export default Recolte;
