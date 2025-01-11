@@ -1,7 +1,7 @@
 import {DataTypes, Model, Optional} from "sequelize";
 import sequelize from '../../utils/database';
 
-import {RessourcesEnum} from "./Enums";
+import {JobEnum, RessourcesEnum} from "./Enums";
 
 interface JobAttributes {
     id: number;
@@ -25,15 +25,15 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
 
     getRessource(): string | undefined {
         switch (this.name) {
-            case 'mineur':
+            case JobEnum.MINEUR:
                 return RessourcesEnum.FER;
-            case 'bucheron':
+            case JobEnum.BUCHERON:
                 return RessourcesEnum.FRENE
-            case 'paysan':
+            case JobEnum.PAYSAN:
                 return RessourcesEnum.BLE
-            case "alchimiste":
+            case JobEnum.ALCHIMISTE:
                 return RessourcesEnum.ORTIE
-            case "pecheur":
+            case JobEnum.PECHEUR:
                 return RessourcesEnum.GOUJON
         }
 
