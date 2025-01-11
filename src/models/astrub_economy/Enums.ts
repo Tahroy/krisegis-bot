@@ -1,36 +1,37 @@
 enum RessourcesEnum {
+    BLE = "Blé",
     FER = "Fer",
     FRENE = "Frêne",
-    BLE = "Blé",
-    ORTIE = "Ortie",
     GOUJON = "Goujon",
+    ORTIE = "Ortie",
 }
 
 export {RessourcesEnum};
+
 enum CraftEnum {
-    PAIN_INCARNAM = "Pain d’Incarnam",
-    POTION_MINI_SOIN = "Potion de mini soin",
+    GOUJON_AUX_ORTIES = "Goujon aux orties",
     GOUJON_EN_TRANCHE = "Goujon en tranche",
     PAIN_AUX_ORTIES = "Pain aux orties",
-    SANDWICH_AU_GOUJON = "Sandwich au goujon",
-    GOUJON_AUX_ORTIES = "Goujon aux orties"
+    PAIN_INCARNAM = "Pain d’Incarnam",
+    POTION_MINI_SOIN = "Potion de mini soin",
+    SANDWICH_AU_GOUJON = "Sandwich au goujon"
 }
 
 export {CraftEnum};
 
 enum JobEnum {
-    MINEUR = "mineur",
-    BUCHERON = "bucheron",
-    PAYSAN = "paysan",
-    ALCHIMISTE = "alchimiste",
-    PECHEUR = 'pecheur',
+    ALCHIMISTE = "Alchimiste",
+    BUCHERON = "Bûcheron",
+    MINEUR = "Mineur",
+    PAYSAN = "Paysan",
+    PECHEUR = 'Pêcheur',
 }
 
 export {JobEnum};
 
 enum ToolsEnum {
-    FOUR_A_PAIN = "Four à pain",
     ATELIER_A_POISSON = "Atelier à poisson",
+    FOUR_A_PAIN = "Four à pain",
     MARMITE = "Marmite"
 }
 
