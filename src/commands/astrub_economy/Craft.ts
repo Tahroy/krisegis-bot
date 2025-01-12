@@ -4,6 +4,7 @@ import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "./JobUtil";
 import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
+import Job from "../../models/astrub_economy/Job";
 
 class Craft extends AbstractSubCommand {
     description: string = 'Créer un object';
@@ -51,9 +52,11 @@ class Craft extends AbstractSubCommand {
 
         // S'il y a un objet nécessaire, on vérifie que l'utilisateur l'a bien
         if (item.tool) {
-            const playerTool = await PlayerItem.findOne({where: {
-                user_id: interaction.user.id, name: item.tool
-            }})
+            const playerTool = await PlayerItem.findOne({
+                where: {
+                    user_id: interaction.user.id, name: item.tool
+                }
+            })
             if (!playerTool || playerTool.quantity < 1) {
                 await interaction.reply({
                     content: `Vous devez avoir un ${item.tool} pour fabriquer ${itemName}`,
@@ -71,13 +74,39 @@ class Craft extends AbstractSubCommand {
         // Ajout de l'item
         await PlayerService.addPlayerItem(interaction.user, itemName, ItemType.OUTIL, craftQuantity)
 
+
         const user = interaction.user;
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
 
+        let textUp = '';
+        // Expérience
+        if (item.experience && item.jobs) {
+            const experience = item.experience / item.jobs.length * craftQuantity;
+
+            for (let job of item.jobs) {
+                let myJob = await Job.findOne({where: {name: job, user_id: interaction.user.id}})
+                if (!myJob) {
+                    myJob = await Job.create({name: job, user_id: interaction.user.id, level: 1, experience: 0})
+                    continue
+                }
+
+                myJob.experience += experience
+
+                const level = JobUtil.getLevelFromXP(myJob.experience)
+
+                if (level != myJob.level) {
+                    textUp += `\n**${userName}** passe ${myJob.name} niveau ${level} !`
+                }
+
+                await myJob.update({experience: myJob.experience, level: level});
+            }
+
+        }
+
         await interaction.reply({
-            content: `${userName} a fabriqué ${craftQuantity} x ${itemName}`
+            content: `${userName} a fabriqué ${craftQuantity} x ${itemName}` + (textUp ? `\n${textUp}` : '')
         })
 
     }
