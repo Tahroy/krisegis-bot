@@ -2,6 +2,8 @@ import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import Tool, {Tools} from "../../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
+import {User} from "discord.js";
+import Player from "../../models/astrub_economy/Player";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -56,6 +58,21 @@ class JobUtil {
         }
         return items;
     }
+
+    static async  getPlayer(user: User): Promise<Player> {
+        let player = await Player.findOne({
+            where: {
+                id: user.id
+            }
+        })
+
+        if (player) {
+            return player;
+        }
+
+        return await Player.create({id: user.id})
+    }
+
 }
 
 export default JobUtil;
