@@ -120,9 +120,7 @@ class Give extends AbstractSubCommand {
     }
 
     private async getUserItems(user: User, search: string): Promise<PlayerItem[]> {
-        const ressources = Object.values(Ressources)
-        const crafts = Object.values(Crafts)
-        const items = [...ressources, ...crafts]
+        const items = JobUtil.getAllItems()
 
         let sellablesItems: string [] = []
 
