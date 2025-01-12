@@ -28,8 +28,8 @@ class Recolte extends AbstractSubCommand {
         const job = await this.getJob(interaction.user, jobChoice);
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
-        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 0)) {
-            const timeBeforeNext = JobUtil.getTimeBeforeNextHarvest(player.lastHarvest, 0)
+        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {
+            const timeBeforeNext = JobUtil.getTimeBeforeNextHarvest(player.lastHarvest, 15)
 
             const minutes = Math.floor((timeBeforeNext % 3600000) / 60000)
             const seconds = Math.floor((timeBeforeNext % 60000) / 1000)
