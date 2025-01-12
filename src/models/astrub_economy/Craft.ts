@@ -1,10 +1,12 @@
 import BaseItem from "./BaseItem";
 import {ItemType} from "../../services/playerItemService";
-import {CraftEnum, RessourcesEnum, ToolsEnum} from "./Enums";
+import {CraftEnum, JobEnum, RessourcesEnum, ToolsEnum} from "./Enums";
 
 interface Craft extends BaseItem {
     recipe: object;
     sell: number;
+    experience: number;
+    jobs: JobEnum[];
 }
 
 const Crafts: Record<CraftEnum, Craft> = {
@@ -14,6 +16,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 22,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
+        experience: 2,
+        jobs: [JobEnum.PAYSAN]
     },
     [CraftEnum.POTION_MINI_SOIN]: {
         name: CraftEnum.POTION_MINI_SOIN,
@@ -21,6 +25,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 22,
         tool: ToolsEnum.MARMITE,
         type: ItemType.FABRICATION,
+        experience: 2,
+        jobs: [JobEnum.ALCHIMISTE]
     },
     [CraftEnum.GOUJON_EN_TRANCHE]: {
         name: CraftEnum.GOUJON_EN_TRANCHE,
@@ -28,6 +34,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 22,
         tool: ToolsEnum.ATELIER_A_POISSON,
         type: ItemType.FABRICATION,
+        experience: 2,
+        jobs: [JobEnum.PECHEUR]
     },
     [CraftEnum.PAIN_AUX_ORTIES]: {
         name: CraftEnum.PAIN_AUX_ORTIES,
@@ -35,6 +43,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 46,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
+        experience: 2,
+        jobs: [JobEnum.PAYSAN, JobEnum.ALCHIMISTE]
     },
     [CraftEnum.GOUJON_AUX_ORTIES]: {
         name: CraftEnum.GOUJON_AUX_ORTIES,
@@ -42,6 +52,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 92,
         tool: ToolsEnum.ATELIER_A_POISSON,
         type: ItemType.FABRICATION,
+        experience: 2,
+        jobs: [JobEnum.PECHEUR, JobEnum.ALCHIMISTE]
     },
     [CraftEnum.SANDWICH_AU_GOUJON]: {
         name: CraftEnum.SANDWICH_AU_GOUJON,
@@ -49,6 +61,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 96,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
+        experience: 2,
+        jobs: [JobEnum.PAYSAN, JobEnum.PECHEUR]
     } //
 
 }
