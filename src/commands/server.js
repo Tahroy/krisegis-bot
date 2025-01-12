@@ -1,7 +1,7 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
-const { ButtonStyle } = require('discord-api-types/v10')
-const { PermissionFlagsBits } = require('discord-api-types/v8')
-const { debugMessage, checkTags } = require('../utils/Utils')
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.js')
+const {ButtonStyle} = require('discord-api-types/v10')
+const {PermissionFlagsBits} = require('discord-api-types/v8')
+const {debugMessage, checkTags} = require('../utils/Utils')
 
 const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
@@ -72,12 +72,17 @@ module.exports = {
         )
         .addSubcommand(
             subcommand => subcommand
+                .setName('roles')
+                .setDescription('Afficher les rôles autres configurés')
+        )
+        .addSubcommand(
+            subcommand => subcommand
                 .setName('debug')
                 .setDescription('Affiche la configuration actuelle')
         )
 
     ,
-    async execute (interaction) {
+    async execute(interaction) {
         const subCommand = interaction.options.getSubcommand()
 
         const commands = {
@@ -85,22 +90,23 @@ module.exports = {
             remove: () => this.removeServer(interaction),
             list: () => this.listServers(interaction),
             rp: () => this.listRP(interaction),
+            roles: () => this.listRoles(interaction),
             debug: () => this.debugAdmin(interaction),
-            default: () => interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
+            default: () => interaction.reply({content: 'Commande inconnue !', ephemeral: true})
         }
 
         const command = commands[subCommand] || commands.default
         await command()
     },
-    async executeButton (interaction, buttonName) {
+    async executeButton(interaction, buttonName) {
         const args = buttonName.split('_')
 
         const action = args[0]
         const roleID = args[1]
 
-        if (roleID === 'rp' || roleID === 'event') {
+        if (['rp', 'event', 'hrp', 'horskrosmoz'].includes(roleID)) {
             await this.addRemoveRP(interaction, buttonName)
-            return
+            return;
         }
 
         await this.addRemoveServer(interaction, buttonName)
@@ -110,12 +116,12 @@ module.exports = {
     },
 
     // Vérification des rôles de l'utilisateur
-    async checkJeuxPrincipaux (member) {
+    async checkJeuxPrincipaux(member) {
 
         const guild = member.guild;
 
         const allServers = await Server.findAll({where: {guild: member.guild.id}});
-        const allGames = await Server.findAll({ attributes: ['game'], group: ['game'], where: {guild: member.guild.id}});
+        const allGames = await Server.findAll({attributes: ['game'], group: ['game'], where: {guild: member.guild.id}});
 
         // On récupère les rôles du membre
         const roles = member.roles.cache.map(role => role.id)
@@ -142,14 +148,13 @@ module.exports = {
             if (games.includes(gameID)) {
                 console.log("Ajout du jeu " + role.name + " au membre " + member.user.username);
                 member.roles.add(role);
-            }
-            else {
+            } else {
                 console.log("Retrait du jeu " + role.name + " au membre " + member.user.username);
                 member.roles.remove(role);
             }
         })
     },
-    sendWelcomeMessage (roles, action, interaction, self) {
+    sendWelcomeMessage(roles, action, interaction, self) {
         if (action !== 'add') {
             return
         }
@@ -171,7 +176,7 @@ module.exports = {
 
             if (message) {
                 const welcomeChannelObj = await interaction.guild.channels.cache.get(welcomeChannel.data)
-                welcomeChannelObj.send({ content: message })
+                welcomeChannelObj.send({content: message})
             }
 
         }).catch((err) => {
@@ -180,7 +185,7 @@ module.exports = {
     },
 
     // Ajout / Retrait
-    async addRemoveServer (interaction, buttonName) {
+    async addRemoveServer(interaction, buttonName) {
         const args = buttonName.split('_')
 
         const action = args[0]
@@ -254,7 +259,7 @@ module.exports = {
         console.log(interaction.user.username + ` ${action} ${role.name}`)
 
     },
-    async addServer (interaction) {
+    async addServer(interaction) {
         const server = interaction.options.getRole('server')
         const game = interaction.options.getRole('game')
         const tag = interaction.options.getString('tag')
@@ -275,11 +280,11 @@ module.exports = {
             ephemeral: true
         })
     },
-    async removeServer (interaction) {
+    async removeServer(interaction) {
         const server = interaction.options.getRole('server')
 
         await Server.destroy({
-            where: { id: server.id, }
+            where: {id: server.id,}
         })
 
         interaction.reply({
@@ -289,12 +294,12 @@ module.exports = {
     },
 
     // Liste
-    async listServers (interaction) {
+    async listServers(interaction) {
 
         Server.findAll({
             attributes: ['game'],
             group: ['game'],
-            where: { guild: interaction.guild.id }
+            where: {guild: interaction.guild.id}
         })
             .then(async (games) => {
                 for (const game of games) {
@@ -305,9 +310,9 @@ module.exports = {
                 console.error('Erreur lors de la récupération des jeux :', error)
             })
 
-        await interaction.reply({ content: 'Voici la liste', ephemeral: true })
+        await interaction.reply({content: 'Voici la liste', ephemeral: true})
     },
-    async sendServers (interaction, game) {
+    async sendServers(interaction, game) {
         console.log('----- game ----')
         console.log(game);
         const jeuPrincipal = interaction.guild.roles.cache.find(role => role.id === game.game)
@@ -321,12 +326,12 @@ module.exports = {
         }
 
         const servers = await Server.findAll({
-            where: { game: game.game },
+            where: {game: game.game},
         })
 
         await this.send(servers, interaction, nomJeuPrincipal)
     },
-    async send (servers, interaction, name) {
+    async send(servers, interaction, name) {
         let rowAjouter = new ActionRowBuilder()
         let rowRetirer = new ActionRowBuilder()
 
@@ -361,16 +366,16 @@ module.exports = {
 
         if (count > 0) {
             const titre = count === servers.length ? `**Serveurs ${name} :**` : ''
-            await interaction.channel.send({ content: titre, components: [rowAjouter, rowRetirer] })
+            await interaction.channel.send({content: titre, components: [rowAjouter, rowRetirer]})
         }
     },
 
     // Debug admin
-    async debugAdmin (interaction) {
+    async debugAdmin(interaction) {
         await Server.findAll({
-            where: { guild: interaction.guild.id }
+            where: {guild: interaction.guild.id}
         }).then(async (servers) => {
-            await interaction.reply({ content: 'Voici la liste', ephemeral: true })
+            await interaction.reply({content: 'Voici la liste', ephemeral: true})
             for (const server of servers) {
                 const game = await interaction.guild.roles.cache.find(role => role.id === server.game)
                 const role = await interaction.guild.roles.cache.find(role => role.id === server.id)
@@ -384,15 +389,15 @@ module.exports = {
 * Discord game : ${game.name}
 * Discord channel : ${channel?.name ?? 'absent'}`
 
-                await interaction.channel.send({ content: line })
-                await interaction.channel.send({ content: '-----------' })
+                await interaction.channel.send({content: line})
+                await interaction.channel.send({content: '-----------'})
             }
         })
 
     },
 
     // Role Play
-    async listRP (interaction) {
+    async listRP(interaction) {
 
         let rowAjouter = new ActionRowBuilder()
         let rowRetirer = new ActionRowBuilder()
@@ -461,9 +466,9 @@ module.exports = {
             components: [rowAjouter, rowRetirer]
         })
 
-        await interaction.reply({ 'content': 'Voilà !', 'ephemeral': true })
+        await interaction.reply({'content': 'Voilà !', 'ephemeral': true})
     },
-    async addRemoveRP (interaction, buttonName) {
+    async addRemoveRP(interaction, buttonName) {
         const args = buttonName.split('_')
 
         const action = args[0]
@@ -473,30 +478,43 @@ module.exports = {
         let roleKey = null
         let message = ''
 
-        if (eventRP === 'rp') {
-            if (allServer === 'all') {
-                roleKey = 'alerte_rp_generale'
-                message = 'Rôle Alerte RP générale'
-            } else {
-                roleKey = 'alerte_rp_serveur'
-                message = 'Rôle Alerte RP serveur'
+        switch (eventRP) {
+            case 'rp':
+                if (allServer === 'all') {
+                    roleKey = 'alerte_rp_generale'
+                    message = 'Rôle Alerte RP générale'
+                } else {
+                    roleKey = 'alerte_rp_serveur'
+                    message = 'Rôle Alerte RP serveur'
+                }
+                break
+            case 'event':
+                if (allServer === 'all') {
+                    roleKey = 'alerte_event_generale'
+                    message = 'Rôle Alerte évènement général'
+                } else {
+                    roleKey = 'alerte_event_serveur'
+                    message = 'Rôle Alerte,evènement serveur'
+                }
+                break
+            case 'hrp': {
+                roleKey = 'role_hrp'
+                message = 'Rôle HRP'
+                break
             }
-        } else {
-            if (allServer === 'all') {
-                roleKey = 'alerte_event_generale'
-                message = 'Rôle Alerte évènement général'
-            } else {
-                roleKey = 'alerte_event_serveur'
-                message = 'Rôle Alerte évènement serveur'
+            case 'horskrosmoz': {
+                roleKey = 'role_horskrosmoz'
+                message = 'Rôle Hors Krosmoz'
+                break
             }
         }
 
-        let roleID = await Variable.findOne({ where: { name: roleKey } })
+        let roleID = await Variable.findOne({where: {name: roleKey}})
         roleID = roleID.data ?? null
 
         if (!roleID) {
-            debugMessage(interaction.guild, `Aucune configuration role RP/event trouvée pour ${roleKey}`)
-            await interaction.reply({ content: 'Aucun rôle RP/event trouvé ! Contactez un admin', ephemeral: true })
+            debugMessage(interaction.guild, `Aucune configuration trouvée pour ${roleKey}`)
+            await interaction.reply({content: 'Aucun rôle RP/event trouvé ! Contactez un admin', ephemeral: true})
             return
         }
 
@@ -504,9 +522,10 @@ module.exports = {
 
         if (!role) {
             debugMessage(interaction.guild, 'Aucun rôle trouvé !')
-            await interaction.reply({ content: 'Aucun rôle trouvé ! Contactez un admin', ephemeral: true })
+            await interaction.reply({content: 'Aucun rôle trouvé ! Contactez un admin', ephemeral: true})
             return
         }
+
         if (action === 'add') {
             message += ' ajouté !'
             await interaction.member.roles.add(role)
@@ -517,19 +536,58 @@ module.exports = {
 
         debugMessage(interaction.guild, 'Rôle ``' + role.name + '`` ' + action + ' pour ``' + interaction.user.tag + '``')
         try {
-            await interaction.reply({ content: message, ephemeral: true })
+            await interaction.reply({content: message, ephemeral: true})
         } catch (error) {
             console.error(error)
         }
     },
 
     // get message welcome
-    async getRandomWelcomeMessage (member) {
+    async getRandomWelcomeMessage(member) {
         const guild = member.guild;
         // Get variable from WelcomeMessage table
-        const messages = await WelcomeMessage.findAll({where: { guild: guild.id }})
+        const messages = await WelcomeMessage.findAll({where: {guild: guild.id}})
         const randomIndex = Math.floor(Math.random() * messages.length)
         let message = messages[randomIndex].get('message')
         return message.replaceAll('[nom]', `<@${member.id}>`)
+    },
+    async listRoles(interaction) {
+        await interaction.reply({'content': 'Liste des rôles', 'ephemeral': true})
+
+
+        // Rôle Play
+        const rowAjouter = new ActionRowBuilder()
+        const rowRetirer = new ActionRowBuilder()
+
+        rowAjouter.addComponents(
+            new ButtonBuilder()
+                .setCustomId('server-add_hrp')
+                .setEmoji('✅')
+                .setLabel('Accéder au canal HRP')
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId('server-add_horskrosmoz')
+                .setEmoji('✅')
+                .setLabel('Accéder au forum Hors Krosmoz')
+                .setStyle(ButtonStyle.Success))
+
+        rowRetirer.addComponents(
+            new ButtonBuilder()
+                .setCustomId('server-remove_hrp')
+                .setEmoji('⛔')
+                .setLabel(`Accéder au HRP`)
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId('server-remove_horskrosmoz')
+                .setEmoji('⛔')
+                .setLabel('Accéder au forum Hors Krosmoz')
+                .setStyle(ButtonStyle.Danger)
+        )
+
+        await interaction.channel.send({
+            content: '**Rôles supplémentaires**',
+            components: [rowAjouter, rowRetirer]
+        })
+
     }
 }
