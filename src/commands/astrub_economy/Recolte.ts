@@ -5,7 +5,7 @@ import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import JobUtil from "./JobUtil";
-import {JobEnum} from "../../models/astrub_economy/Enums";
+import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
@@ -17,15 +17,22 @@ class Recolte extends AbstractSubCommand {
         }
 
         const options = interaction.options;
-        const jobChoice = options.getString('metier');
+        const ressourceChoice = options.getString('ressource');
 
-        if (!jobChoice) {
-            await interaction.reply({content: "Vous devez choisir un métier !", ephemeral: true})
+        if (!ressourceChoice) {
+            await interaction.reply({content: "Vous devez choisir une ressource !", ephemeral: true})
             return;
         }
 
-        const player = await this.getPlayer(interaction.user);
-        const job = await this.getJob(interaction.user, jobChoice);
+        const item = JobUtil.getRessource(ressourceChoice);
+
+        if (!item) {
+            await interaction.reply({content: "Cette ressource n'existe pas !", ephemeral: true})
+            return
+        }
+
+        const player: Player = await JobUtil.getPlayer(interaction.user);
+        const job: Job = await player.getJob(item.job)
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
         if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {
@@ -53,13 +60,18 @@ class Recolte extends AbstractSubCommand {
             return;
         }
 
-        const item = JobUtil.getRessource(ressource);
+        if (item && item.level > job.level) {
+            await interaction.reply({
+                content: `Vous devez avoir un niveau ${item.level} pour récolter ${ressource} !`,
+                ephemeral: true
+            })
+            return
+        }
 
         const quantity: number = this.getQuantity(job.level, item?.level ?? 1)
-        const xp: number = 10;
+        const xp: number = 10 + job.level/1.5 - item.level;
 
         job.experience += xp;
-
 
 
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity)
@@ -70,7 +82,6 @@ class Recolte extends AbstractSubCommand {
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
         const level = JobUtil.getLevelFromXP(job.experience)
-
 
         let text = `**${userName}** a récolté ${quantity} x ${ressource} !`;
         if (level != job.level) {
@@ -83,36 +94,29 @@ class Recolte extends AbstractSubCommand {
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
-        const metiers: { name: string, value: string }[] = [
-            {name: JobEnum.ALCHIMISTE, value: JobEnum.ALCHIMISTE},
-            {name: JobEnum.BUCHERON, value: JobEnum.BUCHERON},
-            {name: JobEnum.MINEUR, value: JobEnum.MINEUR},
-            {name: JobEnum.PAYSAN, value: JobEnum.PAYSAN},
-            {name: JobEnum.PECHEUR, value: JobEnum.PECHEUR}
-        ]
-
         builder.addStringOption(
-            option => option.setName("metier").setRequired(true).setDescription("Métier de récolte").addChoices(
-                ...metiers.map((metier: { name: string, value: string }) => ({
-                    name: metier.name,
-                    value: metier.value,
-                }))
-            )
+            option => option.setName("ressource").setRequired(true).setDescription("Ressource à récolter").setAutocomplete(true)
         )
     }
 
-    private async getPlayer(user: User): Promise<Player> {
-        let player = await Player.findOne({
-            where: {
-                id: user.id
-            }
-        })
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const ressources: Ressource[] = Object.values(Ressources).sort((a, b) => a.name.localeCompare(b.name))
 
-        if (player) {
-            return player;
+        const responses = [];
+        for (const ressource of ressources) {
+
+            // Si au-dessus du level 1, on vérifie
+            if (ressource.level > 1) {
+                const job = await Job.findOne({where: {user_id: interaction.user.id, name: ressource.name}})
+                if (!job || job.level < ressource.level) {
+                    continue
+                }
+            }
+
+            responses.push({name: ressource.name, value: ressource.name})
         }
 
-        return await Player.create({id: user.id})
+        await interaction.respond(responses)
     }
 
     private async getJob(user: User, jobChoice: string): Promise<Job> {
