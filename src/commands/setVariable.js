@@ -24,7 +24,9 @@ module.exports = {
                       {name: 'Rôle alerte RP serveur', value: 'alerte_rp_serveur'},
                       {name: 'Rôle alerte évènements générale', value: 'alerte_event_generale'},
                       {name: 'Rôle alerte évènements serveur', value: 'alerte_event_serveur'},
-                      {name: "Salon d'accueil", value: "welcomeChannel"}
+                      {name: "Salon d'accueil", value: "welcomeChannel"},
+                      {name: "Rôle HRP", value: "role_hrp"},
+                      {name: "Rôle Hors Krosmoz", value: "role_horskrosmoz"},
                   )
         )
         .addStringOption(option =>
