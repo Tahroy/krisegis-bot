@@ -2,6 +2,7 @@ import {Ressources} from "./Ressource";
 import {Tools} from "./Tool";
 import {Crafts} from "./Craft";
 import {ItemType} from "../../services/playerItemService";
+import {JobEnum} from "./Enums";
 
 interface BaseItem {
     type: ItemType;
@@ -13,6 +14,9 @@ interface BaseItem {
     level?: number;
     tool?: string;
     emoji?: string;
+    experience?: number;
+    jobs?: JobEnum[];
+
 }
 
 const Items: Record<string, Record<string, BaseItem>> = {
