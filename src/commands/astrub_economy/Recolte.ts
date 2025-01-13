@@ -84,7 +84,7 @@ class Recolte extends AbstractSubCommand {
         const userName = memberCatch?.nickname ?? user.globalName
         const level = JobUtil.getLevelFromXP(job.experience)
 
-        let text = `**${userName}** a récolté ${quantity} x ${emoji}${ressource} !`;
+        let text = `**${userName}** a récolté ${quantity} x ${emoji ? emoji : ressource} !`;
         if (level != job.level) {
             text += `\n**${userName}** passe ${job.name} niveau ${level} !`
         }
