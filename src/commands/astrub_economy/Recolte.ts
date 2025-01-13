@@ -25,11 +25,12 @@ class Recolte extends AbstractSubCommand {
         }
 
         const item = JobUtil.getRessource(ressourceChoice);
-
         if (!item) {
             await interaction.reply({content: "Cette ressource n'existe pas !", ephemeral: true})
             return
         }
+
+        const emoji = await JobUtil.getEmoji(item, interaction.client) + ' '
 
         const player: Player = await JobUtil.getPlayer(interaction.user);
         const job: Job = await player.getJob(item.job)
@@ -69,7 +70,7 @@ class Recolte extends AbstractSubCommand {
         }
 
         const quantity: number = this.getQuantity(job.level, item?.level ?? 1)
-        const xp: number = 10 + job.level/1.5 - item.level;
+        const xp: number = Math.ceil(10 + job.level/1.5 - item.level);
 
         job.experience += xp;
 
@@ -83,7 +84,7 @@ class Recolte extends AbstractSubCommand {
         const userName = memberCatch?.nickname ?? user.globalName
         const level = JobUtil.getLevelFromXP(job.experience)
 
-        let text = `**${userName}** a récolté ${quantity} x ${ressource} !`;
+        let text = `**${userName}** a récolté ${quantity} x ${emoji}${ressource} !`;
         if (level != job.level) {
             text += `\n**${userName}** passe ${job.name} niveau ${level} !`
         }
