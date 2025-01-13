@@ -2,7 +2,7 @@ import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import Tool, {Tools} from "../../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
-import {User} from "discord.js";
+import {Client, User} from "discord.js";
 import Player from "../../models/astrub_economy/Player";
 
 class JobUtil {
@@ -29,21 +29,22 @@ class JobUtil {
         const nextHarvest = new Date(lastHarvest.getTime() + minutes * 60 * 1000);
         return Math.floor((nextHarvest.getTime() - Date.now()));
     }
+
     static getLevelAndRemainingXP(currentXP: number, baseXP: number = 10): { level: number, remainingXP: number } {
         const level = this.getLevelFromXP(currentXP, baseXP);
         const remainingXP = baseXP * (level + 1) ** 2 - currentXP;
-        return { level, remainingXP };
+        return {level, remainingXP};
     }
 
-    static getRessource(ressource: string): Ressource|null {
+    static getRessource(ressource: string): Ressource | null {
         return Object.values(Ressources).find(r => r.name === ressource) ?? null
     }
 
-    static getTool(tool: string): Tool|null {
+    static getTool(tool: string): Tool | null {
         return Object.values(Tools).find(t => t.name === tool) ?? null
     }
 
-    static getCraft(craft: string): BaseItem|null {
+    static getCraft(craft: string): BaseItem | null {
         return Object.values(Crafts).find(c => c.name === craft) ?? null
     }
 
@@ -59,7 +60,7 @@ class JobUtil {
         return items;
     }
 
-    static async  getPlayer(user: User): Promise<Player> {
+    static async getPlayer(user: User): Promise<Player> {
         let player = await Player.findOne({
             where: {
                 id: user.id
@@ -73,6 +74,27 @@ class JobUtil {
         return await Player.create({id: user.id})
     }
 
+
+    static async getEmoji(item: BaseItem, client: Client): Promise<string> {
+        if (!item.emoji) {
+            return '';
+        }
+
+        if (!client.application) {
+            return '';
+        }
+
+
+        const clientApplicationEmojis = await client.application.emojis.fetch()
+
+        const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === item.emoji)
+
+        if (!searchEmoji) {
+            return '';
+        }
+        return `<:${searchEmoji.name}:${searchEmoji.id}>`
+
+    }
 }
 
 export default JobUtil;
