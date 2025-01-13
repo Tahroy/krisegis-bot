@@ -1,10 +1,10 @@
-const { version } = require('../../config/config_bot.json')
-const { REST } = require('@discordjs/rest')
-const { token, client_id } = require('../../config/config_bot.json')
-const { Routes } = require('discord-api-types/v10')
+const {version} = require('../../config/config_bot.json')
+const {REST} = require('@discordjs/rest')
+const {token, client_id} = require('../../config/config_bot.json')
+const {Routes} = require('discord-api-types/v10')
 const moment = require('moment/moment')
-const {Collection} = require("discord.js");
-const AstrubEconomy = require("../commands/astrub_economy/AstrubEconomy").default;
+const {readdirSync} = require("fs");
+const {join} = require("path");
 const Monster = require("../models/Monster").default;
 
 // Capture transpilé en JavaScript après compilation TypeScript
@@ -48,7 +48,7 @@ module.exports = async function (client) {
 
         console.log('BDD Synchro !')
 
-        const rest = new REST({ version: '10' }).setToken(token)
+        const rest = new REST({version: '10'}).setToken(token)
 
         let slashCommands = []
 
@@ -72,9 +72,27 @@ module.exports = async function (client) {
 
         slashCommands = slashCommands.map(command => command.toJSON())
 
-        await rest.put(Routes.applicationCommands(client_id), { body: slashCommands },)
-                  .then(() => console.log('Successfully registered application commands.'))
-                  .catch(console.error,)
+        await rest.put(Routes.applicationCommands(client_id), {body: slashCommands},)
+            .then(() => console.log('Successfully registered application commands.'))
+            .catch(console.error,)
+
+        // Récupération des emojis dans assets/emojis
+        const emojis = await client.application.emojis.fetch()
+        const emojisNames = emojis.map(emoji => emoji.name)
+
+        const images = readdirSync(join('assets', 'emojis'))
+        for (const image of images) {
+            const imageName = image.split('.')[0]
+            const imgPath = join('assets', 'emojis', image)
+
+            if (emojisNames.includes(imageName)) {
+                continue
+            }
+
+            client.application.emojis.create({attachment: imgPath, name: imageName})
+                .then(emoji => console.log(`Created new emoji with name ${emoji.name}!`))
+                .catch(console.error);
+        }
         /*
         for (const guild of client.guilds.cache.values()) {
             console.log(`- ${guild.name} (ID: ${guild.id})`)
@@ -94,7 +112,7 @@ module.exports = async function (client) {
 
     })
 
-    function checkEventReminders () {
+    function checkEventReminders() {
         var a = setInterval(async () => {
             const scheduledEvents = await getScheduledEventsFromDatabase()
 
@@ -139,27 +157,27 @@ ${link}
                     }
 
                     event.update({
-                                     recalled: true
-                                 })
+                        recalled: true
+                    })
                 }
             }
         }, eventReminderCheckInterval)
     }
 
     // Fonction pour récupérer les événements planifiés depuis votre système de stockage (table)
-    async function getScheduledEventsFromDatabase () {
+    async function getScheduledEventsFromDatabase() {
         return await Event.findAll({
-                                       where: { recalled: false }
-                                   })
+            where: {recalled: false}
+        })
     }
 
     // Fonction pour récupérer les participants d'un événement depuis votre système de stockage (table)
-    async function getParticipantsFromDatabase (event) {
+    async function getParticipantsFromDatabase(event) {
 
         return await Participant.findAll({
-                                             where: {
-                                                 event: event.id
-                                             }
-                                         })
+            where: {
+                event: event.id
+            }
+        })
     }
 }
