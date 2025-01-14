@@ -100,13 +100,17 @@ module.exports = async function (client) {
                 continue
             }
 
+            /*
             // Liste des membres du serveur
             await guild.members.fetch() // Récupère les membres du serveur
             console.log(`  Membres de ${guild.name}:`)
+            let count_members = 0
             guild.members.cache.forEach(member => {
                 console.log(`  - ${member.user.tag} (ID: ${member.id})`)
+                count_members++
             })
-
+            console.log(`  - ${count_members} membres`)
+            */
         }
         checkEventReminders()
 
