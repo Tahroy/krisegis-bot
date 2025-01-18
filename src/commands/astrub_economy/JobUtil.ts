@@ -4,6 +4,10 @@ import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
 import {Client, User} from "discord.js";
 import Player from "../../models/astrub_economy/Player";
+import fs from "fs";
+import Meteo, {Meteos} from "../../models/astrub_economy/Meteo";
+import cron from 'node-cron';
+import KrisegisClient from "../../models/KrisegisClient";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -94,6 +98,56 @@ class JobUtil {
         }
         return `<:${searchEmoji.name}:${searchEmoji.id}>`
 
+    }
+
+    static updateMeteo(client: KrisegisClient) {
+        const meteos = Object.values(Meteos);
+
+        const randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
+
+        this.sauvegarderMeteo(randomMeteo);
+
+        const channel = client.channels.cache.get('1113468003288371204');
+
+        if (channel && channel.isSendable()) {
+            let text = `**Météo du jour** : ${randomMeteo.name}`;
+            //console.log(randomMeteo);
+            randomMeteo.effects.forEach(effect => {
+                console.log(effect)
+                text += `\n* ${effect.description}`
+            })
+
+            channel.send({content: text});
+        }
+    }
+
+    static sauvegarderMeteo(meteo: Meteo) {
+        const name = meteo.name;
+        fs.writeFileSync('meteo.json', JSON.stringify({meteo: name, date: new Date()}));
+    }
+
+    static chargerMeteo(client: KrisegisClient): string | null {
+        try {
+            if (fs.existsSync('meteo.json') && false) {
+                const data = JSON.parse(fs.readFileSync('meteo.json').toString());
+                return data.meteo;
+            } else {
+                this.updateMeteo(client);
+                const data = JSON.parse(fs.readFileSync('meteo.json').toString());
+                return data.meteo || null;
+            }
+        } catch (error) {
+            console.error('Erreur lors de la lecture du fichier meteo.json:', error);
+            return null;
+        }
+    }
+
+    startReminder(client: KrisegisClient) {
+        // Définir la tâche à exécuter chaque jour à 10h
+        cron.schedule('0 10 * * *', () => {
+            JobUtil.updateMeteo(client);
+        });
+        JobUtil.chargerMeteo(client)
     }
 }
 
