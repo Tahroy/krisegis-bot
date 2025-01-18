@@ -6,6 +6,7 @@ const moment = require('moment/moment')
 const {readdirSync} = require("fs");
 const {join} = require("path");
 const Monster = require("../models/Monster").default;
+import JobUtil from '../commands/astrub_economy/JobUtil';
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -27,9 +28,7 @@ const eventReminderCheckInterval = 60 * 1000 // Intervalle de vérification des 
 const eventReminderTime = 60 * 60 * 1000 // Durée en millisecondes avant le rappel (1 heure dans cet exemple)
 
 module.exports = async function (client) {
-    client.once('ready', async () => {
-        console.log(`Krisegis V${version} prêt !`)
-
+    async function synchroBDD() {
         await Variable.sync()
         await Server.sync()
         await Event.sync()
@@ -45,11 +44,10 @@ module.exports = async function (client) {
         await Monster.sync()
         await Job.sync();
         await Player.sync();
-
         console.log('BDD Synchro !')
+    }
 
-        const rest = new REST({version: '10'}).setToken(token)
-
+    async function synchroCommands(rest) {
         let slashCommands = []
 
         // Commandes générales
@@ -74,8 +72,10 @@ module.exports = async function (client) {
 
         await rest.put(Routes.applicationCommands(client_id), {body: slashCommands},)
             .then(() => console.log('Successfully registered application commands.'))
-            .catch(console.error,)
+            .catch(console.error)
+    }
 
+    async function synchroEmojis(client) {
         // Récupération des emojis dans assets/emojis
         const emojis = await client.application.emojis.fetch()
         const emojisNames = emojis.map(emoji => emoji.name)
@@ -93,31 +93,30 @@ module.exports = async function (client) {
                 .then(emoji => console.log(`Created new emoji with name ${emoji.name}!`))
                 .catch(console.error);
         }
+    }
+
+    async function listGuilds() {
         for (const guild of client.guilds.cache.values()) {
             console.log(`- ${guild.name} (ID: ${guild.id})`)
-
-            if (guild.id === 185464480346537984) {
-                continue
-            }
-
-            /*
-            // Liste des membres du serveur
-            await guild.members.fetch() // Récupère les membres du serveur
-            console.log(`  Membres de ${guild.name}:`)
-            let count_members = 0
-            guild.members.cache.forEach(member => {
-                console.log(`  - ${member.user.tag} (ID: ${member.id})`)
-                count_members++
-            })
-            console.log(`  - ${count_members} membres`)
-            */
         }
-        checkEventReminders()
+    }
+    client.once('ready', async () => {
+        console.log(`Krisegis V${version} prêt !`)
+
+        const rest = new REST({version: '10'}).setToken(token)
+
+        await synchroBDD();
+        await synchroCommands(rest);
+        await synchroEmojis(client);
+        await listGuilds()
+        await checkEventReminders()
+        const jobUtil = new JobUtil();
+        jobUtil.startReminder(client);
 
     })
 
     function checkEventReminders() {
-        var a = setInterval(async () => {
+        const a = setInterval(async () => {
             const scheduledEvents = await getScheduledEventsFromDatabase()
 
             const now = Date.now()
@@ -160,12 +159,12 @@ ${link}
                         }
                     }
 
-                    event.update({
+                    await event.update({
                         recalled: true
                     })
                 }
             }
-        }, eventReminderCheckInterval)
+        }, eventReminderCheckInterval);
     }
 
     // Fonction pour récupérer les événements planifiés depuis votre système de stockage (table)

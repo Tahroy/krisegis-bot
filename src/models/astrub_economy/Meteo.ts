@@ -1,50 +1,8 @@
-import Ressource from "./Ressource";
 import {RessourcesEnum} from "./Enums";
 
-/*
-Voici un résumé des effets par événement météo pour chaque ressource, avec un total de +20% pour chacune et un bonus/malus compris entre -30% et +30% :
-Pluie
-
-    Goujon : L'eau trouble rend la pêche plus difficile. → -20%
-    Frêne : Le bois devient humide, rendant la coupe plus difficile. → -30%
-    Orties : L'humidité favorise une croissance dense. → +30%
-    Fer : L'humidité facilite l'extraction. → +25%
-    Blé : La pluie favorise une meilleure croissance. → +30%
-
-Sécheresse
-
-    Goujon : Les poissons sont concentrés, facilitant la capture. → +30%
-    Frêne : Le bois sec est plus facile à couper. → +30%
-    Orties : Les orties se dessèchent rapidement. → -30%
-    Fer : Les mines sont plus accessibles. → +20%
-    Blé : La sécheresse ralentit la croissance du blé. → -30%
-
-Vent fort
-
-    Goujon : Les eaux agitées compliquent la pêche. → -30%
-    Frêne : Les branches tombent naturellement à cause des vents. → +20%
-    Orties : Les orties sont dispersées par le vent. → -20%
-    Fer : Une meilleure ventilation rend l'extraction plus efficace. → +30%
-    Blé : Le vent abîme les épis de blé. → -25%
-
-Gel
-
-    Goujon : Les poissons se réfugient sous la glace. → -10%
-    Frêne : Le bois devient cassant, facilitant la coupe. → +30%
-    Orties : Le gel ralentit leur croissance. → -10%
-    Fer : Le gel stabilise les sols d'extraction. → +5%
-    Blé : Le gel détruit les cultures de blé. → -30%
-
-Canicule
-
-    Goujon : L'eau plus chaude stimule l'activité des poissons. → +30%
-    Frêne : La chaleur excessive fragilise les arbres. → -30%
-    Orties : La chaleur stimule leur prolifération. → +30%
-    Fer : La chaleur rend l'extraction plus fatigante. → -5%
-    Blé : La chaleur accélère la maturation du blé. → +30%
- */
 interface Meteo {
     name: string;
+    description: string;
     effects: MeteoEffect[];
 }
 
@@ -54,158 +12,167 @@ interface MeteoEffect {
     value: number;
 }
 
-enum MeteoEnum {
-    PLUIE = "Pluie",
-    SECHERESSE = "Sécheresse",
-    VENT_FORT = "Vent fort",
-    GEL = "Gel",
-    CANICULE = "Canicule"
+enum MeteosEnum {
+    PLUIE = "🌧️ Pluie",
+    BRUME_EPAISSE = "🌫️ Brume épaisse",
+    VENT_FORT = "💨 Vent fort",
+    GEL = "❄️ Gel",
+    CANICULE = "☀️ Canicule"
 }
 
-const Meteos: Record<MeteoEnum, Meteo> = {
-    [MeteoEnum.PLUIE]: {
-        name: MeteoEnum.PLUIE,
+const Meteos: Record<MeteosEnum, Meteo> = {
+    [MeteosEnum.PLUIE]: {
+        name: MeteosEnum.PLUIE,
+        description: "La pluie s'abat avec force sur Astrub et les enfants se réfugient chez eux. Les gouttes tombent en cadence, transformant les terres en un paysage fertile et vivant.",
         effects: [
             {
-                description: "L'eau trouble rend la pêche plus difficile.",
+                description: "Les pluies abondantes enrichissent les rivières. Les pêcheurs, protégés des intempéries profitent de cette effervescence.",
                 ressource: RessourcesEnum.GOUJON,
-                value: -10
-            },
-            {
-                description: "Le bois devient humide, rendant la coupe plus difficile.",
-                ressource: RessourcesEnum.FRENE,
-                value: -30
-            },
-            {
-                description: "L'humidité favorise une croissance dense.",
-                ressource: RessourcesEnum.ORTIE,
-                value: 30
-            },
-            {
-                description: "L'humidité facilite l'extraction.",
-                ressource: RessourcesEnum.FER,
-                value: 25
-            },
-            {
-                description: "La pluie favorise une meilleure croissance.",
-                ressource: RessourcesEnum.BLE,
                 value: 40
             },
-        ]
-    },
-    [MeteoEnum.SECHERESSE]: {
-        name: MeteoEnum.SECHERESSE, effects: [
             {
-                description: "Les poissons sont concentrés, facilitant la capture.",
-                ressource: RessourcesEnum.GOUJON,
-                value: 30
-            },
-            {
-                description: "Le bois sec est plus facile à couper.",
+                description: "Dans la forêt, les arbres alourdis par l'humidité offrent un spectacle mélancolique. Les troncs glissants rendent chaque coup de hache plus laborieux et le transport du bois jusqu'au marché est rend plus pénible.",
                 ressource: RessourcesEnum.FRENE,
-                value: 30
-            },
-            {
-                description: "Les orties se dessèchent rapidement.",
-                ressource: RessourcesEnum.ORTIE,
                 value: -20
             },
             {
-                description: "Les mines sont plus accessibles.",
-                ressource: RessourcesEnum.FER,
-                value: 10
+                description: "Dans les prairies et les bois, les plantes prospèrent et les alchimistes sont vêtus de leurs grands manteaux. La prolifération offre une cueillette abondante.",
+                ressource: RessourcesEnum.ORTIE,
+                value: 30
             },
             {
-                description: "La sécheresse ralentit la croissance du blé.",
+                description: "Les mines souffrent d'infiltrations d'eau qui rendent les sols instables et les veines les plus riches sont innondées.",
+                ressource: RessourcesEnum.FER,
+                value: -20
+            },
+            {
+                description: "Enfin, dans les champs au nord du marché, les paysans sourient sous leurs capes. Le blé profite de cette pluie bienveillante et s'élève dans le ciel. Une journée abondante s'offre à eux.",
                 ressource: RessourcesEnum.BLE,
-                value: -10
+                value: 30
             },
         ]
     },
-    [MeteoEnum.VENT_FORT]: {
-        name: MeteoEnum.VENT_FORT, effects: [
+    [MeteosEnum.BRUME_EPAISSE]: {
+        name: MeteosEnum.BRUME_EPAISSE,
+        description: "Une épaisse nappe de brume enveloppe Astrub, plongeant les terres dans une ambiance silencieuse. Malgré ce climat, les récolteurs doivent continuer leurs activités.",
+        effects: [
             {
-                description: "Les eaux agitées compliquent la pêche.",
+                description: "La brume rend difficile la localisation des bancs de poissons pour les pêcheurs.",
                 ressource: RessourcesEnum.GOUJON,
                 value: -20
             },
             {
-                description: "Les branches tombent naturellement à cause des vents.",
+                description: "Les arbres se perdent dans le paysage embrumé. La coupe est rendue compliquée et les monstres rodent...",
                 ressource: RessourcesEnum.FRENE,
-                value: 20
+                value: -20
             },
             {
-                description: "Les orties sont dispersées par le vent.",
+                description: "Dans l'humidité enveloppante, les plantes prolifèrent, au grand bonheur des alchimistes.",
                 ressource: RessourcesEnum.ORTIE,
-                value: -10
-            },
-            {
-                description: "Une meilleure ventilation rend l'extraction plus efficace.",
-                ressource: RessourcesEnum.FER,
-                value: 25
-            },
-            {
-                description: "Le vent abîme les épis de blé.",
-                ressource: RessourcesEnum.BLE,
-                value: -25
-            },
-        ]
-    },
-    [MeteoEnum.GEL]: {
-        name: MeteoEnum.GEL, effects: [
-            {
-                description: "Les poissons se réfugient sous la glace.",
-                ressource: RessourcesEnum.GOUJON,
-                value: -10
-            },
-            {
-                description: "Le bois devient cassant, facilitant la coupe.",
-                ressource: RessourcesEnum.FRENE,
                 value: 30
             },
             {
-                description: "Le gel ralentit leur croissance.",
-                ressource: RessourcesEnum.ORTIE,
-                value: -10
-            },
-            {
-                description: "Le gel stabilise les sols d'extraction.",
+                description: "L'air ambiant offre aux galeries un environnement frais et plus confortable pour les mineurs.",
                 ressource: RessourcesEnum.FER,
-                value: 10
+                value: 40
             },
             {
-                description: "Le gel détruit les cultures de blé.",
+                description: "Le microclimat offert par la brume favorise la croissance des céréales. Les paysans découvrent avec joie des champs verdoyants.",
+                ressource: RessourcesEnum.BLE,
+                value: 30
+            },
+        ]
+    },
+    [MeteosEnum.VENT_FORT]: {
+        name: MeteosEnum.VENT_FORT,
+        description: "Les rafales se déchainent sur Astrub, emportant tout sur leur passage. Ce Tumulte, certainement causé par une déesse malicieuse, complique le travail des récolteurs.",
+        effects: [
+            {
+                description: "Les eaux sont agitées et effraient les poissons. Les cannes à pêche se brisent et les filets peinent à résister aux remous.",
+                ressource: RessourcesEnum.GOUJON,
+                value: -20
+            },
+            {
+                description: "Les vents forts abattent les branches et les arbres. Malgré les dangers, les bûcherons peuvent récolter le bois sans effort.",
+                ressource: RessourcesEnum.FRENE,
+                value: 40
+            },
+            {
+                description: "Les rafales de vent emportent les plantes avec elles. Les alchimistes découvrent leurs coins préférés dépouillés.",
+                ressource: RessourcesEnum.ORTIE,
+                value: -30
+            },
+            {
+                description: "L'air s'infiltre dans les mines et améliore la ventilation. Les mineurs en profitent avec plaisir.",
+                ressource: RessourcesEnum.FER,
+                value: 40
+            },
+            {
+                description: "Les champs souffrent des bourrasques de vent. Les épis de blé brisé tombent au sol et cassent avant la maturation.",
                 ressource: RessourcesEnum.BLE,
                 value: -30
             },
         ]
     },
-    [MeteoEnum.CANICULE]: {
-        name: MeteoEnum.CANICULE, effects: [
+    [MeteosEnum.GEL]: {
+        name: MeteosEnum.GEL,
+        description: "Une vague glaciale s'abat sur Astrub, transformant la région en un paysage figé. Le froid mordant détruit les récoltes et les habitants restent au chaud chez eux.",
+        effects: [
             {
-                description: "L'eau plus chaude stimule l'activité des poissons.",
+                description: "Les poissons se réfugient sous la glace, rendant leur capture particulièrement difficile.",
                 ressource: RessourcesEnum.GOUJON,
-                value: 20
+                value: -20
             },
             {
-                description: "La chaleur excessive fragilise les arbres.",
+                description: "Le gel durcit les troncs, rendant la coupe plus difficile. Cependant, les besoins d'Astrub augmentent pour chauffer les demeures et les bûcherons se mettent au travail.",
                 ressource: RessourcesEnum.FRENE,
+                value: 40
+            },
+            {
+                description: "Sous la glace et le givre, les plantes se font rares. Les alchimistes peinent à trouver des spécimens exploitables.",
+                ressource: RessourcesEnum.ORTIE,
+                value: -40
+            },
+            {
+                description: "Le gel rend les outils glissants et l'extraction plus compliquée. Les mineurs engourdis doivent faire des efforts supplémentaires.",
+                ressource: RessourcesEnum.FER,
+                value: -20
+            },
+            {
+                description: "Le gel fragilise les cultures et les récoltes sont fortement compromises. Il faudra attendre le retour des beaux jours.",
+                ressource: RessourcesEnum.BLE,
                 value: -30
             },
+        ]
+    },
+    [MeteosEnum.CANICULE]: {
+        name: MeteosEnum.CANICULE,
+        description: "Une chaleur étouffante s'installe sur Astrub, rendant l'air lourd et pesant.",
+        effects: [
             {
-                description: "La chaleur stimule leur prolifération.",
+                description: "L'eau surchauffée rend les poissons plus actifs. Équipés de leurs plus beaux chapeaux de paille, les pêcheurs s'en donnent à coeur joie !",
+                ressource: RessourcesEnum.GOUJON,
+                value: 40
+            },
+            {
+                description: "La chaleur intense rend les efforts des bûcherons plus bien compliqués. Les pauses sont plus régulières et la récolte plus épuisante.",
+                ressource: RessourcesEnum.FRENE,
+                value: -20
+            },
+            {
+                description: "Les plantes se révèlent résistantes et prolifèrent sous la chaleur, offrant une cueillante abondante.",
                 ressource: RessourcesEnum.ORTIE,
                 value: 30
             },
             {
-                description: "La chaleur rend l'extraction plus fatigante.",
+                description: "La chaleur rend l'air des mines suffocant, ralentissant les efforts des mineurs.",
                 ressource: RessourcesEnum.FER,
-                value: -50
+                value: -20
             },
             {
-                description: "La chaleur accélère la maturation du blé.",
+                description: "Les céréales profitent du soleil et les paysans se dépèchent de récolter avant que les épis ne se dessèchent.",
                 ressource: RessourcesEnum.BLE,
-                value: 30
+                value: 20
             }
         ]
     }
@@ -213,5 +180,5 @@ const Meteos: Record<MeteoEnum, Meteo> = {
 
 export default Meteo;
 
-export {MeteoEffect};
+export {MeteoEffect, MeteosEnum, Meteos};
 
