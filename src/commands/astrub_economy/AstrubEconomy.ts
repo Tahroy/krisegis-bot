@@ -9,12 +9,6 @@ import Inventory from "./Inventory";
 import Give from "./Give";
 import Recipes from "./Recipes";
 
-/*
- * Commande pour connaître les joueurs actifs
-    SELECT "<@" || id || ">"
-        FROM players
-        WHERE lastHarvest >= datetime('now', '-72 hours');
- */
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
     name: string = "astrub_economie";
