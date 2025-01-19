@@ -154,7 +154,9 @@ module.exports = {
         /**
          * @throws Error
          */
-        async function canRoll(user: User) {
+        async function canRoll(interaction: CommandInteraction) {
+            const user = interaction.user;
+            const guild = interaction.guild
             const timestamp: number = Date.now()
 
             const currentTime = Date.now();
@@ -172,7 +174,9 @@ module.exports = {
             const conditions = {
                 createdAt: {
                     [Op.gte]: new Date(Date.now() - timeBetweenResetRoll)
-                }, rollUserId: user.id
+                },
+                rollUserId: user.id,
+                guildId: guild?.id ?? 0
             }
             const captures: typeof Capture[] = await Capture.findAll({where: conditions})
 
@@ -196,7 +200,7 @@ module.exports = {
 
         // On vérifie que le user n'a pas déjà roll 3 fois depuis 3 heures*
         try {
-            await canRoll(interaction.user)
+            await canRoll(interaction)
         } catch (error) {
             if (error instanceof CommandCooldownError) {
                 await interaction.reply({content: error.message, ephemeral: true})
@@ -206,6 +210,7 @@ module.exports = {
             return;
         }
 
+        const guild = interaction.guild
         const transaction = await Capture.sequelize.transaction();
 
         try {
@@ -245,10 +250,18 @@ module.exports = {
 
             // Vérifie si le monstre est déjà capturé
             const conditionsCheckCapture = {
-                monsterId: id, catchUserId: {[Op.ne]: null},
+                monsterId: id,
+                catchUserId: {[Op.ne]: null},
+                guildId: guild?.id ?? 0
             };
             const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
-            const captureData = {monsterId: id, date: new Date(), monsterName: name, rollUserId: interaction.user.id,};
+            const captureData = {
+                monsterId: id,
+                date: new Date(),
+                monsterName: name,
+                rollUserId: interaction.user.id,
+                guildId: guild?.id ?? 0
+            };
 
             const captureDB: typeof Capture = await Capture.create(captureData);
 
@@ -430,7 +443,10 @@ module.exports = {
         const member = await guild?.members.fetch(user.id)
         const memberName = member?.nickname ?? user.globalName
 
-        const captures = await Capture.findAll({where: {catchUserId: user.id}, order: [['catchDate', 'DESC']]});
+        const captures = await Capture.findAll({
+            where: {catchUserId: user.id, guildId: guild?.id ?? 0},
+            order: [['catchDate', 'DESC']]
+        });
 
         if (captures.length === 0) {
             await interaction.reply({content: 'Vous n\'avez pas capturé de monstres !', ephemeral: true})
@@ -492,7 +508,10 @@ module.exports = {
         const timestamp = Date.now()
 
         // On récupère la dernière capture du user
-        const lastCapture = await Capture.findOne({where: {catchUserId: user.id}, order: [['catchDate', 'DESC']]})
+        const lastCapture = await Capture.findOne({
+            where: {catchUserId: user.id, guildId: interaction.guild?.id ?? 0},
+            order: [['catchDate', 'DESC']]
+        })
 
         let timeBeforeCapture = 0
         if (lastCapture) {
@@ -514,9 +533,11 @@ module.exports = {
 
         const conditionsLastRoll = {
             where: {
-                rollUserId: user.id, createdAt: {
+                rollUserId: user.id,
+                createdAt: {
                     [Op.gte]: new Date(Date.now() - timeBetweenResetRoll) // Filtrer les rolls créés il y a moins de 3 heures
-                }
+                },
+                guildId: interaction.guild?.id ?? 0
             }, order: [['createdAt', 'ASC']]
         }
 
@@ -571,8 +592,8 @@ module.exports = {
             return
         }
 
-        const capture1 = await Capture.findOne({where: {id: monster1, catchUserId: user1.id}})
-        const capture2 = await Capture.findOne({where: {id: monster2, catchUserId: user2.id}})
+        const capture1 = await Capture.findOne({where: {id: monster1, catchUserId: user1.id, guildId: interaction.guild?.id ?? 0}})
+        const capture2 = await Capture.findOne({where: {id: monster2, catchUserId: user2.id, guildId: interaction.guild?.id ?? 0}})
 
         if (!capture1 || !capture2) {
             await interaction.reply({content: 'Veuillez fournir des monstres valides ! 2', ephemeral: true})
@@ -583,7 +604,11 @@ module.exports = {
         const myMonster2 = await Monster.findOne({where: {id: capture2.monsterId}})
 
         const trade = await CaptureTrade.create({
-            user1Id: user1.id, user2Id: user2.id, capture1Id: capture1.id, capture2Id: capture2.id, status: "pending"
+            user1Id: user1.id,
+            user2Id: user2.id,
+            capture1Id: capture1.id,
+            capture2Id: capture2.id,
+            status: "pending"
         })
 
         const row = new ActionRowBuilder<ButtonBuilder>()
@@ -641,7 +666,9 @@ module.exports = {
             const conditions = {
                 catchDate: {
                     [Op.gte]: new Date(Date.now() - timeBetweenCaptures)
-                }, catchUserId: user.id
+                },
+                catchUserId: user.id,
+                guildId: interaction.guild?.id ?? 0
             }
             const captures = await Capture.findAll({where: conditions})
 
@@ -650,14 +677,6 @@ module.exports = {
                 return
             }
 
-            // On vérifie que le user n'a pas déjà le monstre
-            const conditions2 = {catchUserId: user.id, monsterId: capture.monsterId}
-            const captures2 = await Capture.findAll({where: conditions2})
-
-            if (captures2.length > 0) {
-                await interaction.reply({content: 'Vous avez deja capturé ce monstre !', ephemeral: true})
-                return
-            }
 
             const monster = await Monster.findOne({where: {id: capture.monsterId}})
             const name = monster?.name
@@ -744,7 +763,13 @@ module.exports = {
             const member = await guild?.members.fetch(userId)
             const memberName = member?.nickname ?? member?.user.globalName
 
-            const captures = await Capture.findAll({where: {catchUserId: userId}, order: [['catchDate', 'DESC']]});
+            const captures = await Capture.findAll({
+                where: {
+                    catchUserId: userId,
+                    guildId: guild?.id ?? 0
+                },
+                order: [['catchDate', 'DESC']],
+            });
 
             const page = parseInt(pageIndex)
             const counter = page - 1;
@@ -838,6 +863,7 @@ module.exports = {
                             '$monster.name$': { // Filtre sur le modèle Monster via son alias
                                 [Op.like]: `%${search}%`,
                             },
+                            guildId: interaction.guild?.id ?? 0
                         },
                         order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                         limit: 25, // Limite des résultats
@@ -871,6 +897,7 @@ module.exports = {
                             '$monster.name$': { // Filtre sur le modèle Monster via son alias
                                 [Op.like]: `%${search}%`,
                             },
+                            guildId: interaction.guild?.id ?? 0
                         },
                         order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                         limit: 25, // Limite des résultats
@@ -905,6 +932,7 @@ module.exports = {
                         '$monster.name$': { // Filtre sur le modèle Monster via son alias
                             [Op.like]: `%${search}%`,
                         },
+                        guildId: interaction.guild?.id ?? 0
                     },
                     order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                     limit: 25, // Limite des résultats
