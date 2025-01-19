@@ -13,8 +13,6 @@ module.exports = {
                 .setRequired(true)
                 .setAutocomplete(true)
         )
-        .setDMPermission(true)
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     ,
     async execute (interaction) {
         return executeLore(interaction, 'npc');
