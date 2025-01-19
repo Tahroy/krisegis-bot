@@ -1,4 +1,4 @@
-import {RessourcesEnum} from "./Enums";
+import {JobEnum, RessourcesEnum} from "./Enums";
 
 interface Meteo {
     name: string;
@@ -8,14 +8,14 @@ interface Meteo {
 
 interface MeteoEffect {
     description: string;
-    ressource: RessourcesEnum;
+    job: JobEnum;
     value: number;
 }
 
 enum MeteosEnum {
     PLUIE = "🌧️ Pluie",
     BRUME_EPAISSE = "🌫️ Brume épaisse",
-    VENT_FORT = "💨 Vent fort",
+    VENT_FORT = "💨 Vents forts",
     GEL = "❄️ Gel",
     CANICULE = "☀️ Canicule"
 }
@@ -27,27 +27,27 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         effects: [
             {
                 description: "Les pluies abondantes enrichissent les rivières. Les pêcheurs, protégés des intempéries profitent de cette effervescence.",
-                ressource: RessourcesEnum.GOUJON,
+                job: JobEnum.PECHEUR,
                 value: 40
             },
             {
                 description: "Dans la forêt, les arbres alourdis par l'humidité offrent un spectacle mélancolique. Les troncs glissants rendent chaque coup de hache plus laborieux et le transport du bois jusqu'au marché est rend plus pénible.",
-                ressource: RessourcesEnum.FRENE,
+                job: JobEnum.BUCHERON,
                 value: -20
             },
             {
                 description: "Dans les prairies et les bois, les plantes prospèrent et les alchimistes sont vêtus de leurs grands manteaux. La prolifération offre une cueillette abondante.",
-                ressource: RessourcesEnum.ORTIE,
+                job: JobEnum.ALCHIMISTE,
                 value: 30
             },
             {
                 description: "Les mines souffrent d'infiltrations d'eau qui rendent les sols instables et les veines les plus riches sont innondées.",
-                ressource: RessourcesEnum.FER,
+                job: JobEnum.MINEUR,
                 value: -20
             },
             {
                 description: "Enfin, dans les champs au nord du marché, les paysans sourient sous leurs capes. Le blé profite de cette pluie bienveillante et s'élève dans le ciel. Une journée abondante s'offre à eux.",
-                ressource: RessourcesEnum.BLE,
+                job: JobEnum.PAYSAN,
                 value: 30
             },
         ]
@@ -58,27 +58,27 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         effects: [
             {
                 description: "La brume rend difficile la localisation des bancs de poissons pour les pêcheurs.",
-                ressource: RessourcesEnum.GOUJON,
+                job: JobEnum.PECHEUR,
                 value: -20
             },
             {
                 description: "Les arbres se perdent dans le paysage embrumé. La coupe est rendue compliquée et les monstres rodent...",
-                ressource: RessourcesEnum.FRENE,
+                job: JobEnum.BUCHERON,
                 value: -20
             },
             {
                 description: "Dans l'humidité enveloppante, les plantes prolifèrent, au grand bonheur des alchimistes.",
-                ressource: RessourcesEnum.ORTIE,
+                job: JobEnum.ALCHIMISTE,
                 value: 30
             },
             {
                 description: "L'air ambiant offre aux galeries un environnement frais et plus confortable pour les mineurs.",
-                ressource: RessourcesEnum.FER,
+                job: JobEnum.MINEUR,
                 value: 40
             },
             {
                 description: "Le microclimat offert par la brume favorise la croissance des céréales. Les paysans découvrent avec joie des champs verdoyants.",
-                ressource: RessourcesEnum.BLE,
+                job: JobEnum.PAYSAN,
                 value: 30
             },
         ]
@@ -89,27 +89,27 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         effects: [
             {
                 description: "Les eaux sont agitées et effraient les poissons. Les cannes à pêche se brisent et les filets peinent à résister aux remous.",
-                ressource: RessourcesEnum.GOUJON,
+                job: JobEnum.PECHEUR,
                 value: -20
             },
             {
                 description: "Les vents forts abattent les branches et les arbres. Malgré les dangers, les bûcherons peuvent récolter le bois sans effort.",
-                ressource: RessourcesEnum.FRENE,
+                job: JobEnum.BUCHERON,
                 value: 40
             },
             {
                 description: "Les rafales de vent emportent les plantes avec elles. Les alchimistes découvrent leurs coins préférés dépouillés.",
-                ressource: RessourcesEnum.ORTIE,
+                job: JobEnum.ALCHIMISTE,
                 value: -30
             },
             {
                 description: "L'air s'infiltre dans les mines et améliore la ventilation. Les mineurs en profitent avec plaisir.",
-                ressource: RessourcesEnum.FER,
+                job: JobEnum.MINEUR,
                 value: 40
             },
             {
                 description: "Les champs souffrent des bourrasques de vent. Les épis de blé brisé tombent au sol et cassent avant la maturation.",
-                ressource: RessourcesEnum.BLE,
+                job: JobEnum.PAYSAN,
                 value: -30
             },
         ]
@@ -120,27 +120,27 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         effects: [
             {
                 description: "Les poissons se réfugient sous la glace, rendant leur capture particulièrement difficile.",
-                ressource: RessourcesEnum.GOUJON,
+                job: JobEnum.PECHEUR,
                 value: -20
             },
             {
                 description: "Le gel durcit les troncs, rendant la coupe plus difficile. Cependant, les besoins d'Astrub augmentent pour chauffer les demeures et les bûcherons se mettent au travail.",
-                ressource: RessourcesEnum.FRENE,
+                job: JobEnum.BUCHERON,
                 value: 40
             },
             {
                 description: "Sous la glace et le givre, les plantes se font rares. Les alchimistes peinent à trouver des spécimens exploitables.",
-                ressource: RessourcesEnum.ORTIE,
+                job: JobEnum.ALCHIMISTE,
                 value: -40
             },
             {
                 description: "Le gel rend les outils glissants et l'extraction plus compliquée. Les mineurs engourdis doivent faire des efforts supplémentaires.",
-                ressource: RessourcesEnum.FER,
+                job: JobEnum.MINEUR,
                 value: -20
             },
             {
                 description: "Le gel fragilise les cultures et les récoltes sont fortement compromises. Il faudra attendre le retour des beaux jours.",
-                ressource: RessourcesEnum.BLE,
+                job: JobEnum.PAYSAN,
                 value: -30
             },
         ]
@@ -151,27 +151,27 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         effects: [
             {
                 description: "L'eau surchauffée rend les poissons plus actifs. Équipés de leurs plus beaux chapeaux de paille, les pêcheurs s'en donnent à coeur joie !",
-                ressource: RessourcesEnum.GOUJON,
+                job: JobEnum.PECHEUR,
                 value: 40
             },
             {
                 description: "La chaleur intense rend les efforts des bûcherons plus bien compliqués. Les pauses sont plus régulières et la récolte plus épuisante.",
-                ressource: RessourcesEnum.FRENE,
+                job: JobEnum.BUCHERON,
                 value: -20
             },
             {
                 description: "Les plantes se révèlent résistantes et prolifèrent sous la chaleur, offrant une cueillante abondante.",
-                ressource: RessourcesEnum.ORTIE,
+                job: JobEnum.ALCHIMISTE,
                 value: 30
             },
             {
                 description: "La chaleur rend l'air des mines suffocant, ralentissant les efforts des mineurs.",
-                ressource: RessourcesEnum.FER,
+                job: JobEnum.MINEUR,
                 value: -20
             },
             {
                 description: "Les céréales profitent du soleil et les paysans se dépèchent de récolter avant que les épis ne se dessèchent.",
-                ressource: RessourcesEnum.BLE,
+                job: JobEnum.PAYSAN,
                 value: 20
             }
         ]

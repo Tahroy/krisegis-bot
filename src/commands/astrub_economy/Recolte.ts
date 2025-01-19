@@ -1,4 +1,10 @@
-import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver, User} from "discord.js";
+import {
+    AutocompleteInteraction,
+    CommandInteraction,
+    CommandInteractionOptionResolver,
+    MessageFlags,
+    User
+} from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import Job from '../../models/astrub_economy/Job'
@@ -6,6 +12,8 @@ import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import JobUtil from "./JobUtil";
 import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
+import KrisegisClient from "../../models/KrisegisClient";
+import {Meteos} from "../../models/astrub_economy/Meteo";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
@@ -20,13 +28,13 @@ class Recolte extends AbstractSubCommand {
         const ressourceChoice = options.getString('ressource');
 
         if (!ressourceChoice) {
-            await interaction.reply({content: "Vous devez choisir une ressource !", ephemeral: true})
+            await interaction.reply({content: "Vous devez choisir une ressource !", flags: MessageFlags.Ephemeral})
             return;
         }
 
         const item = JobUtil.getRessource(ressourceChoice);
         if (!item) {
-            await interaction.reply({content: "Cette ressource n'existe pas !", ephemeral: true})
+            await interaction.reply({content: "Cette ressource n'existe pas !", flags: MessageFlags.Ephemeral})
             return
         }
 
@@ -47,7 +55,7 @@ class Recolte extends AbstractSubCommand {
 
             await interaction.reply({
                 content: `Vous pourrez récolter dans ${minutes} minute${pluralM} et ${seconds} seconde${pluralS}.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
             return;
         }
@@ -56,7 +64,7 @@ class Recolte extends AbstractSubCommand {
         if (!ressource) {
             await interaction.reply({
                 content: 'Aucune ressource disponible',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
             return;
         }
@@ -64,12 +72,12 @@ class Recolte extends AbstractSubCommand {
         if (item && item.level > job.level) {
             await interaction.reply({
                 content: `Vous devez avoir un niveau ${item.level} pour récolter ${ressource} !`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
             return
         }
 
-        const quantity: number = this.getQuantity(job.level, item?.level ?? 1)
+        const quantity: number = this.getQuantity(job, item?.level ?? 1, interaction.client as KrisegisClient);
         const xp: number = Math.ceil(10 + job.level/1.5 - item.level);
 
         job.experience += xp;
@@ -139,11 +147,29 @@ class Recolte extends AbstractSubCommand {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    private getQuantity(jobLevel: number, itemLevel: number): number {
+    private getQuantity(job: Job, itemLevel: number, client: KrisegisClient): number {
+
+        let percent = 100;
+
+        const jobLevel = job.level;
+        const meteoName = JobUtil.chargerMeteo(client);
+        if (meteoName) {
+            const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
+            if (meteo) {
+                const effect = meteo.effects.find(e => e.job === job.name) ?? null
+
+                if (effect) {
+                    percent += effect.value
+                }
+            }
+        }
+
         const randomBase = this.getRandomInt(1, 3); // Random entre 1 et 3
         const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel); // Random entre niveau/2 et niveau, arrondi au supérieur
-        const quantity = randomBase + randomLevel - itemLevel;
+        const quantityBase =  randomBase + randomLevel - itemLevel
+        const quantity = Math.ceil(quantityBase * (percent / 100));
 
+        console.log(quantity, quantityBase)
         return Math.max(quantity, 0); // Assure que la quantité ne soit pas négative
     }
 

@@ -111,6 +111,7 @@ class JobUtil {
 
         if (channel && channel.isSendable()) {
             let text = `**Météo du jour** : ${randomMeteo.name}`;
+            text += `\n ${randomMeteo.description}\n`
             //console.log(randomMeteo);
             randomMeteo.effects.forEach(effect => {
                 console.log(effect)
@@ -128,7 +129,7 @@ class JobUtil {
 
     static chargerMeteo(client: KrisegisClient): string | null {
         try {
-            if (fs.existsSync('meteo.json') && false) {
+            if (fs.existsSync('meteo.json')) {
                 const data = JSON.parse(fs.readFileSync('meteo.json').toString());
                 return data.meteo;
             } else {
