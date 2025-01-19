@@ -1,4 +1,4 @@
-import { Model, DataTypes, Optional } from 'sequelize';
+import {Model, DataTypes, Optional} from 'sequelize';
 import sequelize from '../utils/database';
 import Monster from "./Monster";
 
@@ -12,9 +12,11 @@ interface CaptureAttributes {
      */
     monsterName: string;
     catchDate?: Date | null;
+    guildId: string;
 }
 
-interface CaptureCreationAttributes extends Optional<CaptureAttributes, 'id' | 'catchUserId' | 'catchDate'> {}
+interface CaptureCreationAttributes extends Optional<CaptureAttributes, 'id' | 'catchUserId' | 'catchDate'> {
+}
 
 class Capture extends Model<CaptureAttributes, CaptureCreationAttributes> implements CaptureAttributes {
     public id!: number;
@@ -26,6 +28,7 @@ class Capture extends Model<CaptureAttributes, CaptureCreationAttributes> implem
      */
     public monsterName!: string;
     public catchDate!: Date | null;
+    public guildId!: string;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
@@ -57,6 +60,11 @@ Capture.init(
             type: DataTypes.DATE,
             allowNull: true,
         },
+        guildId: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: 0
+        }
     },
     {
         sequelize,
