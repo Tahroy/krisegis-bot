@@ -8,9 +8,7 @@ const Variable = require('../models/Variable').default
 const WelcomeMessage = require('../models/WelcomeMessage').default
 
 module.exports = {
-    opts: {
-        admin: true
-    },
+    opts: {},
     data: new SlashCommandBuilder()
         .setName('server')
         .setDescription('Choisir son serveur - Discord RP')
