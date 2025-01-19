@@ -8,7 +8,7 @@ module.exports = {
     },
     data: new SlashCommandBuilder()
         .setName('welcomemessage')
-        .setDescription('Ajoute un message d\'accueil')
+        .setDescription('Ajoute un message d\'accueil - Discord RP')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false)
         .addStringOption(option =>

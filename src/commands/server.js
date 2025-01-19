@@ -8,16 +8,18 @@ const Variable = require('../models/Variable').default
 const WelcomeMessage = require('../models/WelcomeMessage').default
 
 module.exports = {
-    opts: {},
+    opts: {
+        admin: true
+    },
     data: new SlashCommandBuilder()
         .setName('server')
-        .setDescription('Choisir son serveur.')
+        .setDescription('Choisir son serveur - Discord RP')
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .setDMPermission(false)
         .addSubcommand(
             subcommand => subcommand
                 .setName('add')
-                .setDescription('Ajouter un serveur')
+                .setDescription('Ajouter un serveur - Discord RP')
                 .addRoleOption(
                     option => option
                         .setName('server')
@@ -52,7 +54,7 @@ module.exports = {
         .addSubcommand(
             subcommand => subcommand
                 .setName('remove')
-                .setDescription('Retirer un serveur')
+                .setDescription('Retirer un serveur - Discord RP')
                 .addRoleOption(
                     option => option
                         .setName('server')
@@ -63,22 +65,22 @@ module.exports = {
         .addSubcommand(
             subcommand => subcommand
                 .setName('list')
-                .setDescription('Liste des serveurs')
+                .setDescription('Liste des serveurs - Discord RP')
         )
         .addSubcommand(
             subcommand => subcommand
                 .setName('rp')
-                .setDescription('Affiche les boutons pour le RP')
+                .setDescription('Affiche les boutons pour le RP - Discord RP')
         )
         .addSubcommand(
             subcommand => subcommand
                 .setName('roles')
-                .setDescription('Afficher les rôles autres configurés')
+                .setDescription('Afficher les rôles autres configurés - Discord RP')
         )
         .addSubcommand(
             subcommand => subcommand
                 .setName('debug')
-                .setDescription('Affiche la configuration actuelle')
+                .setDescription('Affiche la configuration actuelle - Discord RP')
         )
 
     ,
