@@ -14,7 +14,7 @@ module.exports = {
     },
     data: new SlashCommandBuilder()
         .setName('synchro')
-        .setDescription('Synchroniser les données')
+        .setDescription('Synchroniser les données - Discord RP')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption(option => option
             .setName('type')

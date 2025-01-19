@@ -29,7 +29,6 @@ module.exports = {
 	opts: {}, data: new SlashCommandBuilder()
 		.setName('potions')
 		.setDescription('Lance le jeu des potions')
-		.setDMPermission(false)
 	,
 	async execute(interaction) {
 
