@@ -48,7 +48,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {
                 description: "Enfin, dans les champs au nord du marché, les paysans sourient sous leurs capes. Le blé profite de cette pluie bienveillante et s'élève dans le ciel. Une journée abondante s'offre à eux.",
                 job: JobEnum.PAYSAN,
-                value: 30
+                value: 20
             },
         ]
     },
@@ -121,17 +121,17 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {
                 description: "Les poissons se réfugient sous la glace, rendant leur capture particulièrement difficile.",
                 job: JobEnum.PECHEUR,
-                value: -20
+                value: -30
             },
             {
                 description: "Le gel durcit les troncs, rendant la coupe plus difficile. Cependant, les besoins d'Astrub augmentent pour chauffer les demeures et les bûcherons se mettent au travail.",
                 job: JobEnum.BUCHERON,
-                value: 40
+                value: 30
             },
             {
                 description: "Sous la glace et le givre, les plantes se font rares. Les alchimistes peinent à trouver des spécimens exploitables.",
                 job: JobEnum.ALCHIMISTE,
-                value: -40
+                value: -50
             },
             {
                 description: "Le gel rend les outils glissants et l'extraction plus compliquée. Les mineurs engourdis doivent faire des efforts supplémentaires.",
@@ -141,7 +141,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {
                 description: "Le gel fragilise les cultures et les récoltes sont fortement compromises. Il faudra attendre le retour des beaux jours.",
                 job: JobEnum.PAYSAN,
-                value: -30
+                value: -40
             },
         ]
     },
@@ -152,22 +152,22 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {
                 description: "L'eau surchauffée rend les poissons plus actifs. Équipés de leurs plus beaux chapeaux de paille, les pêcheurs s'en donnent à coeur joie !",
                 job: JobEnum.PECHEUR,
-                value: 40
+                value: 30
             },
             {
                 description: "La chaleur intense rend les efforts des bûcherons plus bien compliqués. Les pauses sont plus régulières et la récolte plus épuisante.",
                 job: JobEnum.BUCHERON,
-                value: -20
+                value: -30
             },
             {
                 description: "Les plantes se révèlent résistantes et prolifèrent sous la chaleur, offrant une cueillante abondante.",
                 job: JobEnum.ALCHIMISTE,
-                value: 30
+                value: 20
             },
             {
                 description: "La chaleur rend l'air des mines suffocant, ralentissant les efforts des mineurs.",
                 job: JobEnum.MINEUR,
-                value: -20
+                value: -40
             },
             {
                 description: "Les céréales profitent du soleil et les paysans se dépèchent de récolter avant que les épis ne se dessèchent.",
