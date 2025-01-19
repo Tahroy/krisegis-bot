@@ -6,9 +6,9 @@ const { debugMessage } = require('../utils/Utils')
 module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
-        .setName('roleplay - Discord RP')
+        .setName('roleplay')
         .setDMPermission(false)
-        .setDescription('Annoncer du RP en jeu')
+        .setDescription('Annoncer du RP en jeu - Discord RP')
         .addStringOption(option => option
             .setName('serveur')
             .setDescription('Nom du serveur')
