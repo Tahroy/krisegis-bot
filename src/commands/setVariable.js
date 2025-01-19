@@ -8,7 +8,7 @@ module.exports = {
     },
     data: new SlashCommandBuilder()
         .setName('setvariable')
-        .setDescription('Met en place une variable')
+        .setDescription('Met en place une variable - Discord RP')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setDMPermission(false)
         .addStringOption(option =>

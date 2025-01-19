@@ -6,7 +6,7 @@ const { debugMessage } = require('../utils/Utils')
 module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
-        .setName('roleplay')
+        .setName('roleplay - Discord RP')
         .setDMPermission(false)
         .setDescription('Annoncer du RP en jeu')
         .addStringOption(option => option
