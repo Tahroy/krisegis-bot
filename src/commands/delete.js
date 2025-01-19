@@ -6,7 +6,7 @@ module.exports = {
     },
     data: new SlashCommandBuilder()
         .setName('delete')
-        .setDescription('Supprime X message(s)')
+        .setDescription('Supprime X message(s) - Discord RP')
         .addIntegerOption(option =>
             option.setName('nb')
                   .setDescription('Nombre de messages à supprimer')
