@@ -107,7 +107,7 @@ class JobUtil {
 
         this.sauvegarderMeteo(randomMeteo);
 
-        const channel = client.channels.cache.get('1113468003288371204');
+        const channel = client.channels.cache.get('1320394869323075604');
 
         if (channel && channel.isSendable()) {
             let text = `**Météo du jour** : ${randomMeteo.name}`;
