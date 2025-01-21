@@ -41,7 +41,7 @@ class Recolte extends AbstractSubCommand {
         const emoji = await JobUtil.getEmoji(item, interaction.client) + ' '
 
         const player: Player = await JobUtil.getPlayer(interaction.user);
-        const job: Job = await player.getJob(item.job)
+        const job: Job = await player.getJob(item.job ?? '');
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
         if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {

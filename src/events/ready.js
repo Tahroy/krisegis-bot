@@ -1,3 +1,5 @@
+import PlayerHouse from "../models/astrub_economy/PlayerHouse";
+
 const {version} = require('../../config/config_bot.json')
 const {REST} = require('@discordjs/rest')
 const {token, client_id} = require('../../config/config_bot.json')
@@ -44,6 +46,7 @@ module.exports = async function (client) {
         await Monster.sync()
         await Job.sync();
         await Player.sync();
+        await PlayerHouse.sync();
         console.log('BDD Synchro !')
     }
 
