@@ -4,6 +4,11 @@ enum RessourcesEnum {
     FRENE = "Frêne",
     GOUJON = "Goujon",
     ORTIE = "Ortie",
+
+    KAMAS = "Kamas",
+
+    PIERRE = "Pierre",
+    LAINE_DE_BOUFTOU = "Laine de bouftou",
 }
 
 export {RessourcesEnum};
