@@ -1,3 +1,5 @@
+import Npc from "../models/Npc";
+
 const {version} = require('../../config/config_bot.json')
 const {REST} = require('@discordjs/rest')
 const {token, client_id} = require('../../config/config_bot.json')
@@ -42,6 +44,7 @@ module.exports = async function (client) {
         await Capture.sync()
         await CaptureTrade.sync()
         await Monster.sync()
+        await Npc.sync();
         await Job.sync();
         await Player.sync();
         console.log('BDD Synchro !')
