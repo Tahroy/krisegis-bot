@@ -10,13 +10,14 @@ import {
     CommandInteractionOptionResolver,
     EmbedBuilder,
     InteractionContextType,
+    MessageFlags,
     SlashCommandBuilder,
     User
 } from 'discord.js'
 import {ButtonStyle} from 'discord-api-types/v10'
 import {Op} from 'sequelize'
 import {MonsterAPIResponse} from "../dofusdb/types/monster";
-import {fetchMonsters} from "../dofusdb/api";
+import {fetchMonsters, fetchNpcs} from "../dofusdb/api";
 import {join} from "path";
 import {PicturesManager} from "../utils/PicturesManager";
 import sequelize from '../utils/database';
@@ -24,6 +25,8 @@ import CaptureTrade from "../models/CaptureTrade";
 import {CommandCooldownError} from "../exceptions/CommandCooldownError";
 import Monster from "../models/Monster";
 import embedData from "../utils/embed";
+import {NpcAPIResponse} from "../dofusdb/types/npc";
+import Npc from "../models/Npc";
 
 const Capture = require('../models/Capture').default
 
@@ -133,23 +136,6 @@ module.exports = {
     },
 
     async roll(interaction: CommandInteraction) {
-        function getConditionsRoll(): { isBoss: boolean, isMiniBoss: boolean } {
-            // Nombre aléatoire entre 1 et 100
-            const randomChanceBoss = Math.floor(Math.random() * 100) + 1
-
-            let conditions: { isBoss: boolean, isMiniBoss: boolean } = {isBoss: false, isMiniBoss: false}
-
-            // Si c'est 1, on prend un boss
-            if ([1, 2].includes(randomChanceBoss)) {
-                conditions = {isBoss: true, isMiniBoss: false}
-            }
-            // Si c'est 2, on prend un mini boss
-            if ([6, 7].includes(randomChanceBoss)) {
-                conditions = {isBoss: false, isMiniBoss: true}
-            }
-
-            return conditions
-        }
 
         /**
          * @throws Error
@@ -210,60 +196,37 @@ module.exports = {
             return;
         }
 
-        const guild = interaction.guild
+        const timestamp = Date.now()
+        await interaction.deferReply();
         const transaction = await Capture.sequelize.transaction();
 
         try {
-            const conditions = getConditionsRoll()
+            const npcOrMonster: 'monster' | 'npc' = Math.random() < 0.5 ? "npc" : "monster";
 
-            const monster: Monster | null = await Monster.findOne({
-                where: conditions,
-                order: Capture.sequelize.random()
-            })
+            let captureCheck: typeof Capture | null;
+            let captureDB: typeof Capture;
+            let name: string;
+            let imgName: string;
+            let file: string;
 
-            if (!monster) {
-                await interaction.reply({content: "Aucun monstre disponible", ephemeral: true})
-                return;
+
+            if (npcOrMonster === 'monster') {
+                ({
+                    captureCheck,
+                    captureDB,
+                    name,
+                    imgName,
+                    file
+                } = await this.rollMonster(interaction));
+            } else {
+                ({
+                    captureCheck,
+                    captureDB,
+                    name,
+                    imgName,
+                    file
+                } = await this.rollNpc(interaction));
             }
-
-            const id = monster.id
-            const name = monster.name
-
-            const timestamp = Date.now()
-
-            // Télécharge l'image si nécessaire
-            const imgName = `${id}.png`;
-
-            let file = null;
-            try {
-                file = await this.getImagePath(monster, imgName);
-                if (!file) {
-                    await interaction.reply(
-                        {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
-                    return
-                }
-            } catch (error) {
-                await interaction.reply(
-                    {content: 'Une erreur est survenue lors de la recherche de l\'image !', ephemeral: true})
-                return
-            }
-
-            // Vérifie si le monstre est déjà capturé
-            const conditionsCheckCapture = {
-                monsterId: id,
-                catchUserId: {[Op.ne]: null},
-                guildId: guild?.id ?? 0
-            };
-            const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
-            const captureData = {
-                monsterId: id,
-                date: new Date(),
-                monsterName: name,
-                rollUserId: interaction.user.id,
-                guildId: guild?.id ?? 0
-            };
-
-            const captureDB: typeof Capture = await Capture.create(captureData);
 
             if (captureCheck) {
                 // Monstre déjà capturé
@@ -292,8 +255,9 @@ module.exports = {
                     .setImage(`attachment://${imgName}`)
 
                 // JSON
-                await interaction.reply({embeds: [embed], components: [row], files: [file]})
+                await interaction.editReply({embeds: [embed], components: [row], files: [file]})
             }
+
         } catch (error) {
             await transaction.rollback();
             console.error(error);
@@ -302,8 +266,148 @@ module.exports = {
 
     },
 
+    async rollMonster(interaction: CommandInteraction): Promise<{
+        captureCheck: typeof Capture | null,
+        captureDB: typeof Capture,
+        name: string,
+        imgName: string,
+        file: string,
+    }> {
+        const guild = interaction.guild;
+
+        function getConditionsRoll(): { isBoss: boolean, isMiniBoss: boolean } {
+            // Nombre aléatoire entre 1 et 100
+            const randomChanceBoss = Math.floor(Math.random() * 100) + 1
+
+            let conditions: { isBoss: boolean, isMiniBoss: boolean } = {isBoss: false, isMiniBoss: false}
+
+            // Si c'est 1, on prend un boss
+            if ([1, 2].includes(randomChanceBoss)) {
+                conditions = {isBoss: true, isMiniBoss: false}
+            }
+            // Si c'est 2, on prend un mini boss
+            if ([6, 7].includes(randomChanceBoss)) {
+                conditions = {isBoss: false, isMiniBoss: true}
+            }
+
+            return conditions
+        }
+
+        const conditions = getConditionsRoll()
+        const monster: Monster | null = await Monster.findOne({
+            where: conditions,
+            order: Capture.sequelize.random()
+        })
+
+        if (!monster) {
+            throw new Error('Impossible de trouver un monstre disponible !');
+        }
+
+        const id = monster.id
+        const name = monster.name
+
+        // Télécharge l'image si nécessaire
+        const imgName = `${id}.png`;
+
+        let file = null;
+        try {
+            file = await monster.getImage();
+            if (!file) {
+                throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
+            }
+        } catch (error) {
+            throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
+        }
+
+        // Vérifie si le monstre est déjà capturé
+        const conditionsCheckCapture = {
+            monsterId: id,
+            catchUserId: {[Op.ne]: null},
+            guildId: guild?.id ?? 0
+        };
+
+        const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
+
+        const captureData = {
+            monsterId: id,
+            date: new Date(),
+            monsterName: name,
+            rollUserId: interaction.user.id,
+            guildId: guild?.id ?? 0
+        };
+
+        const capture = await Capture.create(captureData);
+
+        return {
+            captureDB: capture,
+            name: monster.name,
+            captureCheck: captureCheck,
+            imgName: imgName,
+            file: file,
+        }
+
+    },
+
+    async rollNpc(interaction: CommandInteraction): Promise<{
+        captureCheck: typeof Capture | null,
+        captureDB: typeof Capture,
+        name: string,
+        imgName: string,
+        file: string,
+    }> {
+        const guild = interaction.guild;
+
+        const npc: Npc | null = await Npc.findOne({
+            order: Capture.sequelize.random()
+        })
+
+        if (!npc) {
+            throw new Error('Impossible de trouver un PNJ disponible !');
+        }
+
+        const id = npc.id
+
+        // Télécharge l'image si nécessaire
+        const imgName = `${id}.png`;
+
+        let file = null;
+        try {
+            file = await npc.getImage()
+            if (!file) {
+                throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
+            }
+        } catch (error) {
+            throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
+        }
+
+        // Vérifie si le monstre est déjà capturé
+        const conditionsCheckCapture = {
+            npcId: id,
+            catchUserId: {[Op.ne]: null},
+            guildId: guild?.id ?? 0
+        };
+
+        const captureCheck = await Capture.findOne({where: conditionsCheckCapture});
+
+        const captureData = {
+            npcId: id,
+            date: new Date(),
+            rollUserId: interaction.user.id,
+            guildId: guild?.id ?? 0
+        };
+        const capture = await Capture.create(captureData);
+
+        return {
+            captureDB: capture,
+            name: npc.name,
+            captureCheck: captureCheck,
+            imgName: imgName,
+            file: file,
+        }
+    },
+
     async view(interaction: CommandInteraction) {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
@@ -321,17 +425,10 @@ module.exports = {
             return
         }
 
-        const monster = await Monster.findOne({where: {id: capture.monsterId}})
+        const imgName = capture.monsterId ? `${capture.monsterId}.png` : `${capture.npcId}.png`;
 
-        if (!monster) {
-            await interaction.reply({content: "Erreur lors de la récupération du monstre", ephemeral: true})
-            return;
-        }
-
-        const name = monster.name
-
-        const imgName = `${id}.png`;
-        const file = await this.getImagePath(monster, imgName);
+        let name: string = await capture.getName();
+        let file: string = await capture.getImage();
 
         const dateFr = capture.catchDate.toLocaleDateString('fr-FR', {
             day: '2-digit', month: '2-digit', year: 'numeric'
@@ -347,7 +444,7 @@ module.exports = {
 
     async release(interaction: CommandInteraction) {
 
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
@@ -366,14 +463,7 @@ module.exports = {
             return
         }
 
-        const monster = await Monster.findOne({where: {id: capture.monsterId}})
-
-        if (!monster) {
-            await interaction.reply({content: "Ce monstre n'existe pas !", ephemeral: true})
-            return;
-        }
-
-        const name = monster.name;
+        const name = await capture.getName();
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
 
@@ -387,7 +477,7 @@ module.exports = {
     },
 
     async synchro(interaction: CommandInteraction) {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
@@ -396,17 +486,20 @@ module.exports = {
 
         await interaction.reply({content: "Synchronisation lancée !", ephemeral: true})
 
-        let hasMonsters = true;
+        console.log("Synchro monstres")
+
+        let hasMonsters = false;
         let total = 0;
         while (hasMonsters) {
             const conditionRequest = `?$skip=${skip}&$limit=${limit}`
             const monstersRequest: MonsterAPIResponse = await fetchMonsters(conditionRequest);
-
+            console.log(`skip: ${skip}`)
+            skip += limit;
             if (monstersRequest.data.length === 0) {
                 hasMonsters = false;
                 break;
             }
-            console.log(`skip: ${skip}`)
+
             for (const monster of monstersRequest.data) {
                 // On cherche le monstre
                 const conditions = {where: {id: monster.id}}
@@ -429,13 +522,48 @@ module.exports = {
                 console.log(`Synchro de ${myMonster.name} (${myMonster.id})`)
             }
 
-            skip += limit;
 
             // pause de 0.5s
             await new Promise(resolve => setTimeout(resolve, 0.5));
         }
 
-        console.log(`${total} monstres ajoutés !`)
+        console.log("Synchro PNJ")
+
+        let hasNpcs = true;
+        let totalNpcs = 0;
+        let skipNpcs = 0;
+        while (hasNpcs) {
+            const conditionRequest = `?$skip=${skipNpcs}&$limit=${limit}`
+            const npcsRequest: NpcAPIResponse = await fetchNpcs(conditionRequest);
+            skipNpcs += limit;
+            console.log(`skip: ${skipNpcs}`)
+            if (npcsRequest.data.length === 0) {
+                hasNpcs = false;
+                break;
+            }
+            for (const npc of npcsRequest.data) {
+                // On cherche le PNJ
+                const conditions = {where: {id: npc.id}};
+                let myNpc: Npc | null = await Npc.findOne(conditions);
+
+                if (myNpc) {
+                    continue
+                }
+
+                myNpc = await Npc.create({
+                    id: npc.id,
+                    name: npc.name.fr,
+                    look: npc.look
+                })
+
+                totalNpcs++;
+                console.log(`Synchro de ${myNpc.name} (${myNpc.id})`)
+            }
+
+            // Pause de 0.5s
+            await new Promise(resolve => setTimeout(resolve, 0.5));
+        }
+        console.log(`${totalNpcs} PNJ ajoutés !`)
     },
     async captures(interaction: CommandInteraction) {
         const user: User = interaction.user
@@ -459,13 +587,13 @@ module.exports = {
             if (count === CAPTURES_LIMIT) {
                 break;
             }
-            const monster = await Monster.findOne({where: {id: capture.monsterId}})
 
             const date = capture.catchDate
+            const name = await capture.getName();
 
             // dd/mm/YY
             const dateString = date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'})
-            capturesArray.push(`${dateString} - ${monster?.name}`)
+            capturesArray.push(`${dateString} - ${name}`)
             count++;
         }
 
@@ -571,7 +699,7 @@ module.exports = {
     },
 
     async trade(interaction: CommandInteraction) {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
         const options = interaction.options
@@ -592,16 +720,28 @@ module.exports = {
             return
         }
 
-        const capture1 = await Capture.findOne({where: {id: monster1, catchUserId: user1.id, guildId: interaction.guild?.id ?? 0}})
-        const capture2 = await Capture.findOne({where: {id: monster2, catchUserId: user2.id, guildId: interaction.guild?.id ?? 0}})
+        const capture1 = await Capture.findOne({
+            where: {
+                id: monster1,
+                catchUserId: user1.id,
+                guildId: interaction.guild?.id ?? 0
+            }
+        })
+        const capture2 = await Capture.findOne({
+            where: {
+                id: monster2,
+                catchUserId: user2.id,
+                guildId: interaction.guild?.id ?? 0
+            }
+        })
 
         if (!capture1 || !capture2) {
             await interaction.reply({content: 'Veuillez fournir des monstres valides ! 2', ephemeral: true})
             return
         }
 
-        const myMonster1 = await Monster.findOne({where: {id: capture1.monsterId}})
-        const myMonster2 = await Monster.findOne({where: {id: capture2.monsterId}})
+        const name1 = capture1.getName();
+        const name2 = capture2.getName()
 
         const trade = await CaptureTrade.create({
             user1Id: user1.id,
@@ -622,7 +762,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger))
 
         await interaction.reply({
-            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${myMonster1?.name}** contre **${myMonster2?.name}**`,
+            content: `<@${user1.id}> propose un échange pour <@${user2.id}> !\n` + `**${name1}** contre **${name2}**`,
             components: [row]
         })
 
@@ -678,8 +818,7 @@ module.exports = {
             }
 
 
-            const monster = await Monster.findOne({where: {id: capture.monsterId}})
-            const name = monster?.name
+            const name = await capture.getName()
 
             await Capture.update({catchUserId: user.id, catchDate: new Date()}, {where: {id: id}})
 
@@ -756,7 +895,7 @@ module.exports = {
         async function capturesMonster(interaction: ButtonInteraction) {
             const customId = interaction.customId;
 
-            const [, ,userIdAndPage] = customId.split('-');
+            const [, , userIdAndPage] = customId.split('-');
             const [userId, pageIndex] = userIdAndPage.split('_');
 
             const guild = interaction.guild;
@@ -780,13 +919,12 @@ module.exports = {
                 if (index < counter * CAPTURES_LIMIT) continue;
                 if (count === CAPTURES_LIMIT) break;
 
-                const monster = await Monster.findOne({where: {id: capture.monsterId}})
-
+                const name = await capture.getName();
                 const date = capture.catchDate
 
                 // dd/mm/YY
                 const dateString = date.toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'})
-                items.push(`${dateString} - ${monster?.name}`)
+                items.push(`${dateString} - ${name}`)
                 count++;
             }
 
@@ -852,26 +990,35 @@ module.exports = {
                     const user = interaction.user
                     const search = focusedOption.value
                     const userCapturesConditions = {
-                        include: {
-                            model: Monster,
-                            as: 'monster', // Préciser l'alias exact utilisé dans l'association
-                            required: true, // Utilisez false pour LEFT JOIN si nécessaire
-                            attributes: ['name'], // Récupération des colonnes associées du modèle Monster
-                        },
+                        include: [
+                            {
+                                model: Monster,
+                                as: 'monster',
+                                required: false,
+                                attributes: ['name'],
+                            },
+                            {
+                                model: Npc,
+                                as: 'npc',
+                                required: false,
+                                attributes: ['name'],
+                            },
+                        ],
                         where: {
                             catchUserId: user.id, // Filtre sur le modèle Capture
-                            '$monster.name$': { // Filtre sur le modèle Monster via son alias
-                                [Op.like]: `%${search}%`,
-                            },
+                            [Op.or]: [
+                                { '$monster.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Monster.name
+                                { '$npc.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Npc.name
+                            ],
                             guildId: interaction.guild?.id ?? 0
                         },
-                        order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                //        order: [[Capture, 'id', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                         limit: 25, // Limite des résultats
                     };
                     const captures = await Capture.findAll(userCapturesConditions);
                     const retours = []
                     for (const capture of captures) {
-                        retours.push({name: capture.monster.name, value: capture.id})
+                        retours.push({name: capture.monster?.name || capture.npc?.name, value: capture.id})
                     }
                     await interaction.respond(retours)
                     return
@@ -886,27 +1033,36 @@ module.exports = {
                     }
 
                     const userCapturesConditions = {
-                        include: {
-                            model: Monster,
-                            as: 'monster', // Préciser l'alias exact utilisé dans l'association
-                            required: true, // Utilisez false pour LEFT JOIN si nécessaire
-                            attributes: ['name'], // Récupération des colonnes associées du modèle Monster
-                        },
+                        include: [
+                            {
+                                model: Monster,
+                                as: 'monster',
+                                required: false,
+                                attributes: ['name'],
+                            },
+                            {
+                                model: Npc,
+                                as: 'npc',
+                                required: false,
+                                attributes: ['name'],
+                            },
+                        ],
                         where: {
                             catchUserId: user?.value, // Filtre sur le modèle Capture
-                            '$monster.name$': { // Filtre sur le modèle Monster via son alias
-                                [Op.like]: `%${search}%`,
-                            },
+                            [Op.or]: [
+                                { '$monster.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Monster.name
+                                { '$npc.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Npc.name
+                            ],
                             guildId: interaction.guild?.id ?? 0
                         },
-                        order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                    //    order: [[Capture, 'id', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                         limit: 25, // Limite des résultats
                     };
                     const userCaptures = await Capture.findAll(userCapturesConditions);
 
                     const retours = []
                     for (const capture of userCaptures) {
-                        retours.push({name: capture.monster.name, value: capture.id})
+                        retours.push({name: capture.monster?.name || capture.npc?.name, value: capture.id})
                     }
                     await interaction.respond(retours)
                     return
@@ -921,27 +1077,37 @@ module.exports = {
 
                 const user = interaction.user
                 const userCapturesConditions = {
-                    include: {
-                        model: Monster,
-                        as: 'monster', // Préciser l'alias exact utilisé dans l'association
-                        required: true, // Utilisez false pour LEFT JOIN si nécessaire
-                        attributes: ['name'], // Récupération des colonnes associées du modèle Monster
-                    },
-                    where: {
-                        catchUserId: user.id, // Filtre sur le modèle Capture
-                        '$monster.name$': { // Filtre sur le modèle Monster via son alias
-                            [Op.like]: `%${search}%`,
+                    include: [
+                        {
+                            model: Monster,
+                            as: 'monster', // Doit correspondre à l'alias
+                            attributes: ['name'],
+                            required: false,
                         },
-                        guildId: interaction.guild?.id ?? 0
+                        {
+                            model: Npc,
+                            as: 'npc', // Doit correspondre à l'alias
+                            attributes: ['name'],
+                            required: false,
+                        },
+                    ],
+                    where: {
+                        catchUserId: user.id,
+                        guildId: interaction.guild?.id ?? 0,
+                        [Op.or]: [
+                            { '$monster.name$': { [Op.like]: `%${search}%` } },
+                            { '$npc.name$': { [Op.like]: `%${search}%` } },
+                        ],
                     },
-                    order: [[Monster, 'name', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
-                    limit: 25, // Limite des résultats
+                    order: [['id', 'DESC']],
+                    limit: 25,
                 };
+
                 const captures = await Capture.findAll(userCapturesConditions)
                 const retours = []
 
                 for (const capture of captures) {
-                    retours.push({name: capture.monster.name, value: capture.id})
+                    retours.push({name: capture.monster?.name || capture.npc?.name, value: capture.id})
                 }
 
                 await interaction.respond(retours)
@@ -949,12 +1115,4 @@ module.exports = {
             }
         }
     },
-
-    async getImagePath(monster: Monster, name: string) {
-        const img = `https://api.dofusdb.fr/img/monsters/${monster.gfxId}.png`;
-        await PicturesManager.fetchImageIfNeeded(img, name, '/monsters/');
-
-        return join(__dirname, '..', '..', 'public', 'monsters', name)
-    },
-
 }
