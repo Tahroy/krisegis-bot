@@ -197,7 +197,7 @@ module.exports = {
         }
 
         const timestamp = Date.now()
-        await interaction.deferReply();
+//        await interaction.deferReply();
         const transaction = await Capture.sequelize.transaction();
 
         try {
