@@ -197,7 +197,7 @@ module.exports = {
         }
 
         const timestamp = Date.now()
-//        await interaction.deferReply();
+        await interaction.deferReply();
         const transaction = await Capture.sequelize.transaction();
 
         try {
@@ -242,7 +242,7 @@ module.exports = {
                     .setDescription(description)
                     .setImage(`attachment://${imgName}`); // Utilise le chemin de fichier joint
 
-                await interaction.reply({embeds: [embed], files: [file]});
+                await interaction.editReply({embeds: [embed], files: [file]});
             } else {
                 const row = new ActionRowBuilder<ButtonBuilder>()
                     .addComponents(new ButtonBuilder()
