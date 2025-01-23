@@ -333,7 +333,8 @@ module.exports = {
             date: new Date(),
             monsterName: name,
             rollUserId: interaction.user.id,
-            guildId: guild?.id ?? 0
+            guildId: guild?.id ?? 0,
+            npcId: 0
         };
 
         const capture = await Capture.create(captureData);
@@ -393,7 +394,9 @@ module.exports = {
             npcId: id,
             date: new Date(),
             rollUserId: interaction.user.id,
-            guildId: guild?.id ?? 0
+            guildId: guild?.id ?? 0,
+            monsterId: 0,
+            monsterName: ''
         };
         const capture = await Capture.create(captureData);
 
