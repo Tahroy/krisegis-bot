@@ -19,7 +19,7 @@ const Tools: Record<ToolsEnum, Tool> = {
         sell: 720,
         recipe: {[RessourcesEnum.FER]: 150, [RessourcesEnum.FRENE]: 150},
         type: ItemType.OUTIL,
-        experience: 60,
+        experience: 150,
         jobs: [JobEnum.MINEUR, JobEnum.BUCHERON]
     },
     [ToolsEnum.ATELIER_A_POISSON]: {
@@ -28,7 +28,7 @@ const Tools: Record<ToolsEnum, Tool> = {
         sell: 720,
         recipe: {[RessourcesEnum.FRENE]: 300},
         type: ItemType.OUTIL,
-        experience: 60,
+        experience: 150,
         jobs: [JobEnum.BUCHERON]
     },
     [ToolsEnum.MARMITE]: {
@@ -37,7 +37,7 @@ const Tools: Record<ToolsEnum, Tool> = {
         sell: 720,
         recipe: {[RessourcesEnum.FER]: 300},
         type: ItemType.OUTIL,
-        experience: 60,
+        experience: 150,
         jobs: [JobEnum.MINEUR]
     }
 };
