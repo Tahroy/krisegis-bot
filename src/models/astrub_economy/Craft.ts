@@ -16,7 +16,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 22,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
-        experience: 2,
+        experience: 5,
         jobs: [JobEnum.PAYSAN]
     },
     [CraftEnum.POTION_MINI_SOIN]: {
@@ -25,7 +25,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 22,
         tool: ToolsEnum.MARMITE,
         type: ItemType.FABRICATION,
-        experience: 2,
+        experience: 5,
         jobs: [JobEnum.ALCHIMISTE]
     },
     [CraftEnum.GOUJON_EN_TRANCHE]: {
@@ -34,7 +34,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 22,
         tool: ToolsEnum.ATELIER_A_POISSON,
         type: ItemType.FABRICATION,
-        experience: 2,
+        experience: 5,
         jobs: [JobEnum.PECHEUR]
     },
     [CraftEnum.PAIN_AUX_ORTIES]: {
@@ -43,7 +43,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 46,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
-        experience: 2,
+        experience: 5,
         jobs: [JobEnum.PAYSAN, JobEnum.ALCHIMISTE]
     },
     [CraftEnum.GOUJON_AUX_ORTIES]: {
@@ -52,7 +52,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 92,
         tool: ToolsEnum.ATELIER_A_POISSON,
         type: ItemType.FABRICATION,
-        experience: 2,
+        experience: 5,
         jobs: [JobEnum.PECHEUR, JobEnum.ALCHIMISTE]
     },
     [CraftEnum.SANDWICH_AU_GOUJON]: {
@@ -61,9 +61,9 @@ const Crafts: Record<CraftEnum, Craft> = {
         sell: 96,
         tool: ToolsEnum.FOUR_A_PAIN,
         type: ItemType.FABRICATION,
-        experience: 2,
+        experience: 5,
         jobs: [JobEnum.PAYSAN, JobEnum.PECHEUR]
-    } //
+    }
 
 }
 export default Craft;
