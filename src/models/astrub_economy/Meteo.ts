@@ -41,7 +41,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
                 value: 30
             },
             {
-                description: "Les mines souffrent d'infiltrations d'eau qui rendent les sols instables et les veines les plus riches sont innondées.",
+                description: "Les mines souffrent d'infiltrations d'eau qui rendent les sols instables et les veines les plus riches sont inondées.",
                 job: JobEnum.MINEUR,
                 value: -20
             },
@@ -62,7 +62,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
                 value: -20
             },
             {
-                description: "Les arbres se perdent dans le paysage embrumé. La coupe est rendue compliquée et les monstres rodent...",
+                description: "Les arbres se perdent dans le paysage embrumé. La coupe est rendue compliquée et les monstres rôdent...",
                 job: JobEnum.BUCHERON,
                 value: -20
             },
@@ -160,7 +160,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
                 value: -30
             },
             {
-                description: "Les plantes se révèlent résistantes et prolifèrent sous la chaleur, offrant une cueillante abondante.",
+                description: "Les plantes se révèlent résistantes et prolifèrent sous la chaleur, offrant une cueillette abondante.",
                 job: JobEnum.ALCHIMISTE,
                 value: 20
             },

@@ -34,7 +34,7 @@ abstract class AbstractCommand {
         const command = interaction.options.getSubcommand();
 
         const subCommand = this.subCommands.get(command);
-        console.log(subCommand)
+     //   console.log(subCommand)
         if (subCommand) {
             const subCommandInstance = new subCommand();
             await subCommandInstance.autocomplete(interaction);
@@ -53,7 +53,6 @@ abstract class AbstractCommand {
     }
 
     getSlashCommandBuild(): SlashCommandBuilder {
-        console.log('getSlashCommandBuild')
         const slashCommandBuilder = new SlashCommandBuilder()
             .setName(this.name)
             .setDescription(this.description);

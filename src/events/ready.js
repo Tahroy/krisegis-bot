@@ -1,3 +1,5 @@
+import Npc from "../models/Npc";
+
 import PlayerHouse from "../models/astrub_economy/PlayerHouse";
 
 const {version} = require('../../config/config_bot.json')
@@ -44,6 +46,7 @@ module.exports = async function (client) {
         await Capture.sync()
         await CaptureTrade.sync()
         await Monster.sync()
+        await Npc.sync();
         await Job.sync();
         await Player.sync();
         await PlayerHouse.sync();
