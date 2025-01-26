@@ -39,7 +39,7 @@ export class PlayerService {
                 await playerItem.save();
             } else {
                 // Sinon, on crée un nouvel item pour le joueur
-                playerItem = await PlayerItem.create({
+                await PlayerItem.create({
                     name: name, user_id: user.id, quantity: quantity, type: type,
                 });
             }
