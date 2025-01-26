@@ -71,7 +71,6 @@ module.exports = async function (client) {
 
         for (const command of client.typedCommands) {
             const commandData = command[1]
-            console.log(commandData.getSlashCommandBuild())
 
             let slashCommand = commandData.getSlashCommandBuild()
             slashCommands.push(slashCommand)
