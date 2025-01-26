@@ -19,12 +19,6 @@ class Build extends AbstractSubCommand {
             return;
         }
 
-        if (interaction.user.id !== '178147970385051649') {
-            await interaction.reply({
-                content: "Vous n'avez pas les droits pour utiliser cette commande",
-                flags: MessageFlags.Ephemeral
-            })
-        }
 
         const buildOption = interaction.options.getString('build');
         const ressource = interaction.options.getString('item');
@@ -86,8 +80,12 @@ class Build extends AbstractSubCommand {
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, -finalQuantity)
         await buildingGuild.save();
 
+        const user = interaction.user;
+        const memberCatch = await interaction.guild?.members.fetch(user.id)
+        const userName = memberCatch?.nickname ?? user.globalName
+
         await interaction.reply({
-            content: `Vous avez ajoutez ${finalQuantity} x ${ressource} à la construction de ${building.name}`,
+            content: `${userName} a ajouté ${finalQuantity} x ${ressource} à la construction de ${building.name}`,
         })
 
         await this.checkBuildingGuild(buildingGuild, interaction);
