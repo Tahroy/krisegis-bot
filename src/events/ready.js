@@ -11,6 +11,7 @@ const {readdirSync} = require("fs");
 const {join} = require("path");
 const Monster = require("../models/Monster").default;
 import JobUtil from '../commands/astrub_economy/JobUtil';
+import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -50,6 +51,7 @@ module.exports = async function (client) {
         await Job.sync();
         await Player.sync();
         await PlayerHouse.sync();
+        await BuildingGuild.sync()
         console.log('BDD Synchro !')
     }
 
@@ -69,6 +71,7 @@ module.exports = async function (client) {
 
         for (const command of client.typedCommands) {
             const commandData = command[1]
+            console.log(commandData.getSlashCommandBuild())
 
             let slashCommand = commandData.getSlashCommandBuild()
             slashCommands.push(slashCommand)

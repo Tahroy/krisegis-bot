@@ -2,12 +2,15 @@ import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import Tool, {Tools} from "../../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
-import {Client, User} from "discord.js";
+import {Client, Guild, User} from "discord.js";
 import Player from "../../models/astrub_economy/Player";
 import fs from "fs";
 import Meteo, {Meteos} from "../../models/astrub_economy/Meteo";
 import cron from 'node-cron';
 import KrisegisClient from "../../models/KrisegisClient";
+import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
+import Building, {Buildings} from "../../models/astrub_economy/Building";
+import build from "./Build";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -149,6 +152,42 @@ class JobUtil {
             JobUtil.updateMeteo(client);
         });
         JobUtil.chargerMeteo(client)
+    }
+
+    static async getBuildingsGuild(guild:Guild|null): Promise<string[]> {
+        if (!guild) {
+            return []
+        }
+
+        const builds = await BuildingGuild.findAll({
+            where: {status: "completed"}
+        })
+
+        const retour = [];
+
+        for (const build of builds) {
+            retour.push(build.name);
+        }
+
+        return retour;
+    }
+
+    static getBuilding(value: string) {
+        return Object.values(Buildings).find(r => r.name === value) ?? null
+    }
+
+    static getEmptyRecipe(building: Building): Record<string, number> {
+        const resetValues = (obj: Record<string, number>): Record<string, number> => {
+            const newObj: Record<string, number> = {};
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    newObj[key] = 0;
+                }
+            }
+            return newObj;
+        };
+
+        return resetValues(building.recipe)
     }
 }
 

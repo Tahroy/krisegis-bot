@@ -19,7 +19,9 @@ enum CraftEnum {
     PAIN_AUX_ORTIES = "Pain aux orties",
     PAIN_INCARNAM = "Pain d’Incarnam",
     POTION_MINI_SOIN = "Potion de mini soin",
-    SANDWICH_AU_GOUJON = "Sandwich au goujon"
+    SANDWICH_AU_GOUJON = "Sandwich au goujon",
+    PLANCHE = "Planche",
+    BARRE_DE_FER = "Barre de fer",
 }
 
 export {CraftEnum};
