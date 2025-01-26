@@ -6,6 +6,7 @@ import {
     SlashCommandBuilder
 } from "discord.js";
 import AbstractSubCommand from "./AbstractSubCommand";
+import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 
 abstract class AbstractCommand {
     abstract name: string;
@@ -58,8 +59,13 @@ abstract class AbstractCommand {
             .setDescription(this.description);
 
         this.addSubCommands(slashCommandBuilder);
+        this.addOptions(slashCommandBuilder);
 
         return slashCommandBuilder;
+    }
+
+    protected addOptions(builder: SlashCommandBuilder) {
+
     }
 }
 

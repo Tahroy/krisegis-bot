@@ -6,6 +6,7 @@ import Inventory from './../commands/Inventory';
 import AbstractCommand from "./AbstractCommand";
 import Command from "../models/OldCommand";
 import KrisegisClient from "../models/KrisegisClient";
+import Say from "../commands/Say";
 
 
 // Fonction pour charger les commandes
@@ -40,6 +41,9 @@ export default function loadCommands(client: KrisegisClient): void {
 
     const inventory = new Inventory();
     typedCommands.set(inventory.name, inventory)
+
+    const say = new Say();
+    typedCommands.set(say.name, say)
 
     client.typedCommands = typedCommands;
 }
