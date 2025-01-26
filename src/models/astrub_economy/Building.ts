@@ -43,7 +43,7 @@ const Buildings: Record<BuildingEnum, Building> = {
             [RessourcesEnum.FRENE]: 800,
             [RessourcesEnum.FER]: 2000,
             [RessourcesEnum.PIERRE]: 800,
-            [RessourcesEnum.KAMAS]: 2000
+            [RessourcesEnum.KAMAS]: 5000
         },
         image: 'forge.png'
     }
