@@ -66,6 +66,7 @@ class Build extends AbstractSubCommand {
             return;
         }
 
+
         const contributionActuelle = buildingGuild.resourcesContributed[ressource]
         const contributionNecessaire = building.recipe[ressource]
 
@@ -73,10 +74,11 @@ class Build extends AbstractSubCommand {
 
         const finalQuantity = Math.min(quantity, restant)
 
-        const updatedResources = {...buildingGuild.resourcesContributed}; // Clone l'objet
-        updatedResources[ressource] += finalQuantity; // Mets à jour la valeur
 
-        buildingGuild.set('resourcesContributed', updatedResources); // Mets à jour explicitement
+        const updatedResources = buildingGuild.resourcesContributed;
+        updatedResources[ressource] += finalQuantity;
+
+        buildingGuild.set('resourcesContributed', updatedResources);
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, -finalQuantity)
         await buildingGuild.save();
 
@@ -179,11 +181,9 @@ class Build extends AbstractSubCommand {
                 where: {guildId: interaction.guild?.id ?? '0', name: building.name}
             })
 
-            let restant = quantity;
+            let contributionActuelle = 0
             if (buildingGuild) {
-                const contributionActuelle = buildingGuild.resourcesContributed[ingredient]
-                const contributionNecessaire = building.recipe[ingredient]
-                restant = contributionNecessaire - contributionActuelle
+                 contributionActuelle = buildingGuild.resourcesContributed[ingredient] ?? 0
             }
 
             if (retour.length >= 20) {
@@ -192,7 +192,7 @@ class Build extends AbstractSubCommand {
 
             if (ingredient.toLowerCase().startsWith(search.toLowerCase()) || !search) {
                 retour.push({
-                    name: `${ingredient}: ${restant} / ${quantity} `,
+                    name: `${ingredient}: ${contributionActuelle ?? 0} / ${quantity} `,
                     value: ingredient,
                 });
             }
