@@ -20,17 +20,18 @@ class Say extends AbstractCommand {
         }
 
         const channel = interaction.options.getChannel('channel') as TextChannel
-        const message = interaction.options.getString('message')
-
+        const message = interaction.options.getString('message') ?? ''
         if (!channel || !message) {
             await interaction.reply({content: `Channel ou message manquant`, flags: MessageFlags.Ephemeral})
             return
         }
 
+        const formattedMessage = message.replace(/\\n/g, '\n');
+
         const embed = new EmbedBuilder()
             .setTitle('Krisegis')
             .setColor('#0099ff')
-            .setDescription(message)
+            .setDescription(formattedMessage)
 
         try {
             await channel.send({embeds: [embed]})
