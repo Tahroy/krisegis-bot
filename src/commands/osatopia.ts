@@ -743,8 +743,8 @@ module.exports = {
             return
         }
 
-        const name1 = capture1.getName();
-        const name2 = capture2.getName()
+        const name1 = await capture1.getName();
+        const name2 = await capture2.getName()
 
         const trade = await CaptureTrade.create({
             user1Id: user1.id,
