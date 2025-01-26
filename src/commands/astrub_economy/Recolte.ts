@@ -20,7 +20,7 @@ class Recolte extends AbstractSubCommand {
     name: string = "recolte";
 
     public async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
@@ -77,7 +77,7 @@ class Recolte extends AbstractSubCommand {
             return
         }
 
-        const quantity: number = this.getQuantity(job, item?.level ?? 1, interaction.client as KrisegisClient);
+        const quantity: number = await this.getQuantity(job, item?.level ?? 1, interaction.client as KrisegisClient);
         const xp: number = Math.ceil(10 + job.level/1.5 - item.level);
 
         job.experience += xp;
@@ -147,12 +147,12 @@ class Recolte extends AbstractSubCommand {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    private getQuantity(job: Job, itemLevel: number, client: KrisegisClient): number {
+    private async getQuantity(job: Job, itemLevel: number, client: KrisegisClient): Promise<number> {
 
         let percent = 100;
 
         const jobLevel = job.level;
-        const meteoName = JobUtil.chargerMeteo(client);
+        const meteoName = await JobUtil.chargerMeteo(client);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo) {
@@ -166,7 +166,7 @@ class Recolte extends AbstractSubCommand {
 
         const randomBase = this.getRandomInt(1, 3); // Random entre 1 et 3
         const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel); // Random entre niveau/2 et niveau, arrondi au supérieur
-        const quantityBase =  randomBase + randomLevel - itemLevel
+        const quantityBase = randomBase + randomLevel - itemLevel
         const quantity = Math.ceil(quantityBase * (percent / 100));
 
         console.log(quantity, quantityBase)
