@@ -18,8 +18,11 @@ class Prices extends AbstractSubCommand {
 
         // Construction des lignes du tableau
         const rows = Object.values(JobUtil.getAllItems()).map(ressource => {
+            if (!ressource.sell && !ressource.buy) {
+                return '';
+            }
             return `| ${ressource.name.padEnd(19)} | ${String(ressource.sell).padStart(13)} | ${String(ressource.buy ?? 0).padStart(12)} |`;
-        });
+        }).filter(row => row !== '');
 
         // Retourner le tableau formaté
         const table = `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``;
