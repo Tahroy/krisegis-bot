@@ -18,10 +18,10 @@ const Buildings: Record<BuildingEnum, Building> = {
         name: BuildingEnum.SANCTUAIRE,
         description: "Petit sanctuaire fait de pierre et de bois disposé au centre du marché. Les habitants peuvent y déposer une offrande dans la coupe pour espérer que les Dix leur répondent.",
         recipe: {
-            [RessourcesEnum.PIERRE]: 300,
-            [CraftEnum.PLANCHE]: 150,
-            [CraftEnum.BARRE_DE_FER]: 150,
-            [RessourcesEnum.KAMAS]: 1000
+            [RessourcesEnum.PIERRE]: 600,
+            [CraftEnum.PLANCHE]: 300,
+            [CraftEnum.BARRE_DE_FER]: 300,
+            [RessourcesEnum.KAMAS]: 5000
         },
         image: 'sanctuaire.png'
     },
@@ -29,10 +29,10 @@ const Buildings: Record<BuildingEnum, Building> = {
         name: BuildingEnum.SCIERIE,
         description: "Scierie fabriquée en bois avec une scie en fer. Les bûcherons peuvent y découper leur bois pour créer des planches.",
         recipe: {
-            [RessourcesEnum.FRENE]: 1000,
-            [RessourcesEnum.FER]: 400,
-            [RessourcesEnum.PIERRE]: 400,
-            [RessourcesEnum.KAMAS]: 1000
+            [RessourcesEnum.FRENE]: 2000,
+            [RessourcesEnum.FER]: 800,
+            [RessourcesEnum.PIERRE]: 800,
+            [RessourcesEnum.KAMAS]: 5000
         },
         image: 'scierie.png'
     },
@@ -40,10 +40,10 @@ const Buildings: Record<BuildingEnum, Building> = {
         name: BuildingEnum.FORGE,
         description: "Forge fabriquée en pierre avec plusieurs belles enclumes. Les mineurs peuvent y fabriquer des barres de fer.",
         recipe: {
-            [RessourcesEnum.FRENE]: 400,
-            [RessourcesEnum.FER]: 1000,
-            [RessourcesEnum.PIERRE]: 400,
-            [RessourcesEnum.KAMAS]: 1000
+            [RessourcesEnum.FRENE]: 800,
+            [RessourcesEnum.FER]: 2000,
+            [RessourcesEnum.PIERRE]: 800,
+            [RessourcesEnum.KAMAS]: 2000
         },
         image: 'forge.png'
     }
