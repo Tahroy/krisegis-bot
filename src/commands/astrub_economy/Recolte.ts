@@ -113,7 +113,9 @@ class Recolte extends AbstractSubCommand {
 
         const responses = [];
         for (const ressource of ressources) {
-
+            if (!ressource.job) {
+                continue;
+            }
             // Si au-dessus du level 1, on vérifie
             if (ressource.level > 1) {
                 const job = await Job.findOne({where: {user_id: interaction.user.id, name: ressource.name}})
