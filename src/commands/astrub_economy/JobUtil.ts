@@ -2,7 +2,7 @@ import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import Tool, {Tools} from "../../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
-import {Client, Guild, User} from "discord.js";
+import {Client, Guild, TextChannel, User} from "discord.js";
 import Player from "../../models/astrub_economy/Player";
 import fs from "fs";
 import Meteo, {Meteos} from "../../models/astrub_economy/Meteo";
@@ -103,7 +103,7 @@ class JobUtil {
 
     }
 
-    static updateMeteo(client: KrisegisClient) {
+    static async updateMeteo(client: KrisegisClient) {
         const meteos = Object.values(Meteos);
 
         const randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
@@ -112,16 +112,14 @@ class JobUtil {
 
         const channel = client.channels.cache.get('1320394869323075604');
 
-        if (channel && channel.isSendable()) {
+        if (channel && channel instanceof TextChannel) {
             let text = `**Météo du jour** : ${randomMeteo.name}`;
             text += `\n ${randomMeteo.description}\n`
-            //console.log(randomMeteo);
             randomMeteo.effects.forEach(effect => {
-                console.log(effect)
                 text += `\n* ${effect.description}`
             })
 
-            channel.send({content: text});
+            await channel.send({content: text});
         }
     }
 
@@ -130,13 +128,13 @@ class JobUtil {
         fs.writeFileSync('meteo.json', JSON.stringify({meteo: name, date: new Date()}));
     }
 
-    static chargerMeteo(client: KrisegisClient): string | null {
+    static async chargerMeteo(client: KrisegisClient): Promise<string | null> {
         try {
             if (fs.existsSync('meteo.json')) {
                 const data = JSON.parse(fs.readFileSync('meteo.json').toString());
                 return data.meteo;
             } else {
-                this.updateMeteo(client);
+                await this.updateMeteo(client);
                 const data = JSON.parse(fs.readFileSync('meteo.json').toString());
                 return data.meteo || null;
             }
@@ -146,15 +144,15 @@ class JobUtil {
         }
     }
 
-    startReminder(client: KrisegisClient) {
+    async startReminder(client: KrisegisClient) {
         // Définir la tâche à exécuter chaque jour à 10h
-        cron.schedule('0 10 * * *', () => {
-            JobUtil.updateMeteo(client);
+        cron.schedule('0 10 * * *', async () => {
+            await JobUtil.updateMeteo(client);
         });
-        JobUtil.chargerMeteo(client)
+        await JobUtil.chargerMeteo(client)
     }
 
-    static async getBuildingsGuild(guild:Guild|null): Promise<string[]> {
+    static async getBuildingsGuild(guild: Guild | null): Promise<string[]> {
         if (!guild) {
             return []
         }
