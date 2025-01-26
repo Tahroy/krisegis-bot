@@ -11,11 +11,11 @@ class Sell extends AbstractSubCommand {
     name: string = 'sell';
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
-        const options: CommandInteractionOptionResolver = interaction.options;
+        const options = interaction.options;
 
         const item: string = options.getString('item') ?? '';
         const quantity: number = options.getInteger('quantity') ?? 0;
@@ -24,10 +24,10 @@ class Sell extends AbstractSubCommand {
             await interaction.reply({content: "Commande incorrecte", ephemeral: true})
             return;
         }
+
         const user = interaction.user;
 
         // On vérifie si la personne a le bon nombre d'objets
-
         let playerItem = await PlayerItem.findOne({where: {name: item, user_id: user.id,},});
 
         if (!playerItem || playerItem.get('quantity') < quantity) {
@@ -80,7 +80,7 @@ class Sell extends AbstractSubCommand {
         const retour = [];
         switch (focused.name) {
             case 'item':
-                const items = await this.getUserItems(interaction.user, search)
+                const items = (await this.getUserItems(interaction.user, search)).sort((a, b) => a.name.localeCompare(b.name));
 
                 for (let item of items) {
                     const price = JobUtil.getItem(item.name)?.sell ?? 0;
