@@ -26,6 +26,14 @@ class Say extends AbstractCommand {
             return
         }
 
+
+        if (interaction.user.id !== '178147970385051649') {
+            await interaction.reply({
+                content: "Vous n'avez pas les droits pour utiliser cette commande",
+                flags: MessageFlags.Ephemeral
+            })
+        }
+
         const formattedMessage = message.replace(/\\n/g, '\n');
 
         const embed = new EmbedBuilder()
