@@ -112,7 +112,7 @@ class JobUtil {
 
         const channel = client.channels.cache.get('1320394869323075604');
 
-        if (channel && channel instanceof TextChannel) {
+        if (channel && channel.isSendable()) {
             let text = `**Météo du jour** : ${randomMeteo.name}`;
             text += `\n ${randomMeteo.description}\n`
             randomMeteo.effects.forEach(effect => {
