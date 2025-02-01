@@ -76,9 +76,14 @@ class Build extends AbstractSubCommand {
 
 
         const updatedResources = buildingGuild.resourcesContributed;
-        updatedResources[ressource] += finalQuantity;
+        updatedResources[ressource] = contributionActuelle + quantity
 
-        buildingGuild.set('resourcesContributed', updatedResources);
+        await BuildingGuild.update(
+            {resourcesContributed: updatedResources},
+            {where: {guildId: interaction.guild?.id ?? '0', name: building.name}
+        })
+
+//        buildingGuild.set('resourcesContributed', updatedResources);
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, -finalQuantity)
         await buildingGuild.save();
 
