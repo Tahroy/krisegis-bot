@@ -8,6 +8,7 @@ import Command from "../models/OldCommand";
 import KrisegisClient from "../models/KrisegisClient";
 import Say from "../commands/Say";
 import Pray from "../commands/astrub_economy/Pray";
+import Meteo from '../commands/astrub_economy/Meteo';
 
 
 // Fonction pour charger les commandes
@@ -48,6 +49,9 @@ export default function loadCommands(client: KrisegisClient): void {
 
     const pray = new Pray();
     typedCommands.set(pray.name, pray)
+
+    const meteo = new Meteo();
+    typedCommands.set(meteo.name, meteo)
 
     client.typedCommands = typedCommands;
 }
