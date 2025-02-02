@@ -90,7 +90,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         type: ItemType.FABRICATION,
         experience: 2,
         jobs: [JobEnum.MINEUR],
-        buildings: [BuildingEnum.FORGE]
+        buildings: [BuildingEnum.FONDERIE]
     }
 }
 export default Craft;
