@@ -103,24 +103,22 @@ class JobUtil {
 
     }
 
-    static async updateMeteo(client: KrisegisClient) {
-        const meteos = Object.values(Meteos);
+    static async updateMeteo() {
 
-        const randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
+        let meteo: string | null = null
+        if (fs.existsSync('meteo.json')) {
+            const data = JSON.parse(fs.readFileSync('meteo.json').toString());
+            meteo = data.meteo;
+        }
+        const meteos = Object.values(Meteos);
+        let randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
+
+        // Si c'est la même météo, on relance UNE fois
+        if (meteo === randomMeteo.name) {
+            randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
+        }
 
         this.sauvegarderMeteo(randomMeteo);
-
-        const channel = client.channels.cache.get('1320394869323075604');
-
-        if (channel && channel.isSendable()) {
-            let text = `**Météo du jour** : ${randomMeteo.name}`;
-            text += `\n ${randomMeteo.description}\n`
-            randomMeteo.effects.forEach(effect => {
-                text += `\n* ${effect.description}`
-            })
-
-            await channel.send({content: text});
-        }
     }
 
     static sauvegarderMeteo(meteo: Meteo) {
@@ -128,13 +126,13 @@ class JobUtil {
         fs.writeFileSync('meteo.json', JSON.stringify({meteo: name, date: new Date()}));
     }
 
-    static async chargerMeteo(client: KrisegisClient): Promise<string | null> {
+    static async chargerMeteo(): Promise<string | null> {
         try {
             if (fs.existsSync('meteo.json')) {
                 const data = JSON.parse(fs.readFileSync('meteo.json').toString());
                 return data.meteo;
             } else {
-                await this.updateMeteo(client);
+                await this.updateMeteo();
                 const data = JSON.parse(fs.readFileSync('meteo.json').toString());
                 return data.meteo || null;
             }
@@ -144,12 +142,14 @@ class JobUtil {
         }
     }
 
+
     async startReminder(client: KrisegisClient) {
         // Définir la tâche à exécuter chaque jour à 10h
         cron.schedule('0 10 * * *', async () => {
-            await JobUtil.updateMeteo(client);
+            await JobUtil.updateMeteo();
+            await JobUtil.annoncerMeteo(client)
         });
-        await JobUtil.chargerMeteo(client)
+        await JobUtil.chargerMeteo()
     }
 
     static async getBuildingsGuild(guild: Guild | null): Promise<string[]> {
@@ -186,6 +186,21 @@ class JobUtil {
         };
 
         return resetValues(building.recipe)
+    }
+
+    public static async annoncerMeteo(client: KrisegisClient) {
+
+        const meteoName = await JobUtil.chargerMeteo();
+        const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
+
+        if (!meteo) {
+            return
+        }
+        const channel = client.channels.cache.get('1320394869323075604');
+
+        if (channel && channel.isSendable()) {
+            await channel.send({content: meteo.getText()});
+        }
     }
 }
 
