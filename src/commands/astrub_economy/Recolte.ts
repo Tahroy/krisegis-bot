@@ -77,7 +77,7 @@ class Recolte extends AbstractSubCommand {
             return
         }
 
-        const quantity: number = await this.getQuantity(job, item?.level ?? 1, interaction.client as KrisegisClient);
+        const quantity: number = await this.getQuantity(job, item?.level ?? 1);
         const xp: number = Math.ceil(10 + job.level/1.5 - item.level);
 
         job.experience += xp;
@@ -149,12 +149,12 @@ class Recolte extends AbstractSubCommand {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    private async getQuantity(job: Job, itemLevel: number, client: KrisegisClient): Promise<number> {
+    private async getQuantity(job: Job, itemLevel: number): Promise<number> {
 
         let percent = 100;
 
         const jobLevel = job.level;
-        const meteoName = await JobUtil.chargerMeteo(client);
+        const meteoName = await JobUtil.chargerMeteo();
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo) {
