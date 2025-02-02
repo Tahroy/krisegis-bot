@@ -10,7 +10,7 @@ interface Building {
 enum BuildingEnum {
     SANCTUAIRE = "Sanctuaire",
     SCIERIE = "Scierie",
-    FORGE = "Forge",
+    FONDERIE = "Fonderie",
 }
 
 const Buildings: Record<BuildingEnum, Building> = {
@@ -36,9 +36,9 @@ const Buildings: Record<BuildingEnum, Building> = {
         },
         image: 'scierie.png'
     },
-    [BuildingEnum.FORGE]: {
-        name: BuildingEnum.FORGE,
-        description: "Forge fabriquée en pierre avec plusieurs belles enclumes. Les mineurs peuvent y fabriquer des barres de fer.",
+    [BuildingEnum.FONDERIE]: {
+        name: BuildingEnum.FONDERIE,
+        description: "Une magnifique fonderie où les animaux ont tendance à se rapprocher en période de gel. Les mineurs y viennent afin de raffiner les minerais bruts.",
         recipe: {
             [RessourcesEnum.FRENE]: 2500,
             [RessourcesEnum.FER]: 5000,
