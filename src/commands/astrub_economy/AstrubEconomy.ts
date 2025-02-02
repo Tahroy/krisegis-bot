@@ -11,6 +11,7 @@ import Recipes from "./Recipes";
 import Information from "./Information";
 import Housing from "./Housing";
 import Build from "./Build";
+import Meteo from "./Meteo";
 
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -30,6 +31,7 @@ class AstrubEconomy extends AbstractCommand {
         this.subCommands.set('information', Information);
    //     this.subCommands.set('housing', Housing);
         this.subCommands.set('build', Build)
+        this.subCommands.set('meteo', Meteo)
     }
 }
 
