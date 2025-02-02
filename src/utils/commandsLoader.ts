@@ -50,8 +50,5 @@ export default function loadCommands(client: KrisegisClient): void {
     const pray = new Pray();
     typedCommands.set(pray.name, pray)
 
-    const meteo = new Meteo();
-    typedCommands.set(meteo.name, meteo)
-
     client.typedCommands = typedCommands;
 }
