@@ -3,6 +3,7 @@ import {AutocompleteInteraction, CommandInteraction, MessageFlags, SlashCommandB
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "./JobUtil";
 import KrisegisClient from "../../models/KrisegisClient";
+import {Meteos} from "../../models/astrub_economy/Meteo";
 
 class Pray extends AbstractCommand {
     name = 'pray'
@@ -54,7 +55,16 @@ class Pray extends AbstractCommand {
         })
 
         // On recharge la météo
-        await JobUtil.updateMeteo(interaction.client as KrisegisClient)
+        await JobUtil.updateMeteo()
+
+        if (interaction?.channel?.isSendable()) {
+            const meteoName = await JobUtil.chargerMeteo();
+            const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
+
+            await interaction.channel.send({
+                content: meteo?.getText() ?? "Aucune météo"
+            });
+        }
     }
 
     protected addOptions(builder: SlashCommandBuilder) {

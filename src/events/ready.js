@@ -119,7 +119,7 @@ module.exports = async function (client) {
         await listGuilds()
         await checkEventReminders()
         const jobUtil = new JobUtil();
-        jobUtil.startReminder(client);
+        await jobUtil.startReminder(client);
 
     })
 
