@@ -1,16 +1,17 @@
 import {CraftEnum, RessourcesEnum} from "./Enums";
 
-interface Building {
-    name: string
-    description: string
-    recipe: Record<string, number>,
-    image: string
+class Building {
+    name!: string
+    description!: string
+    recipe!: Record<string, number>
+    image!: string
 }
 
 enum BuildingEnum {
     SANCTUAIRE = "Sanctuaire",
     SCIERIE = "Scierie",
     FONDERIE = "Fonderie",
+    BOUFTONNERIE = "Bouftonnerie",
 }
 
 const Buildings: Record<BuildingEnum, Building> = {
@@ -46,6 +47,17 @@ const Buildings: Record<BuildingEnum, Building> = {
             [RessourcesEnum.KAMAS]: 10000
         },
         image: 'forge.png'
+    },
+    [BuildingEnum.BOUFTONNERIE]: {
+        name: BuildingEnum.BOUFTONNERIE,
+        description: "Une bouftonnerie habituée par un vieil homme en fin de carrière. Il a décidé de s'installer à Astrub et d'offrir son expertise à ceux qui viennent nourrir ses bêtes",
+        recipe: {
+            [RessourcesEnum.BLE]: 2500,
+            [RessourcesEnum.PIERRE]: 1000,
+            [CraftEnum.PLANCHE]: 1000,
+            [RessourcesEnum.KAMAS]: 10000
+        },
+        image: 'bouftonnerie.png'
     }
 }
 

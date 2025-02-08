@@ -9,6 +9,7 @@ enum RessourcesEnum {
 
     PIERRE = "Pierre",
     LAINE_DE_BOUFTOU = "Laine de bouftou",
+    BOUFTOU = "Bouftou"
 }
 
 export {RessourcesEnum};
