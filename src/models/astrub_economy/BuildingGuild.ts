@@ -1,6 +1,5 @@
 import {DataTypes, Model} from "sequelize";
 import sequelize from '../../utils/database';
-import {BuildingEnum} from "./Building";
 
 interface BuilderGuildAttributes {
     id: number;
