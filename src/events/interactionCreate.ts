@@ -39,7 +39,7 @@ module.exports = (client: KrisegisClient) => {
             const log = `\`${userName}\` a utilisé la commande \`${commandName}\``;
             debugMessage(interaction.guild, log);
 
-            typedCommand.execute(interaction);
+            await typedCommand.execute(interaction);
             return
         }
 
