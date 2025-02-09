@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, InteractionContextType} = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v8')
 const { PlayerService, ItemType } = require('../services/playerItemService')
 const Larve = require('../models/Larve').default
@@ -18,7 +18,11 @@ const LARVES = {
         'name': 'Larve rose', 'id': '1265753280534020226'
     }, 'larve_grise': {
         'name': 'Larve grise', 'id': '1265760658063102058'
-    },
+    }, 'britalarve': {
+        'name': 'Britalarve',
+        //'id': '1338230581921583176'
+        'id': '1338228518861144077'
+    }
 }
 
 let partiesEnCours = []
@@ -27,7 +31,11 @@ module.exports = {
     opts: {}, data: new SlashCommandBuilder()
         .setName('larve')
         .setDescription('Permet de jouer au jeu des larves')
-        .setDMPermission(false), async execute (interaction) {
+        .setContexts(
+            InteractionContextType.Guild
+        ),
+
+    async execute (interaction) {
         // const subCommand = interaction.options.getSubcommand();
         this.client = interaction.client
 
@@ -101,6 +109,7 @@ module.exports = {
 }
 
 class Game {
+    larvesGame = {}
     status = 'waiting'
     message = null
     larves = {}
@@ -111,6 +120,9 @@ class Game {
     deaths = {}
     channel = null
 
+    constructor() {
+        this.larvesGame = this.getRandomLarves(LARVES)
+    }
     async addNewLarve (interaction, buttonName) {
         if (this.status !== 'waiting') {
             interaction.reply({
@@ -121,7 +133,6 @@ class Game {
         const userId = interaction.user.id
         const userName = interaction.member.nickname ?? interaction.member.user.globalName
 
-        // On vérifie que la larve n'est pas déjà prise
         const larvesEnCours = this.larves
 
         if (larvesEnCours[buttonName]) {
@@ -140,7 +151,7 @@ class Game {
 
         larvesEnCours[buttonName] = userId
 
-        const larveName = LARVES[buttonName].name
+        const larveName = this.larvesGame[buttonName].name
 
         interaction.reply({
             content: `${userName} a pris la ${larveName}`, ephemeral: false
@@ -161,7 +172,8 @@ class Game {
 
         this.status = 'started'
         this.plateau = {}
-        for (const [key, value] of Object.entries(LARVES)) {
+
+        for (const [key, value] of Object.entries(this.larvesGame)) {
             this.plateau[key] = 0
         }
 
@@ -188,8 +200,7 @@ class Game {
      */
     checkWinner () {
         const deathsCounter = Object.values(this.deaths).length
-        const larvesCounter = Object.values(LARVES).length
-//        console.log(`deathsCounter: ${deathsCounter}, larvesCounter: ${larvesCounter}`)
+        const larvesCounter = Object.values(this.larvesGame).length
         if (deathsCounter === larvesCounter) {
             this.status = 'ended'
             this.winner = 'nobody'
@@ -216,7 +227,7 @@ class Game {
         const channel = interaction.channel
 
         const playerId = this.larves[this.winner]
-        const larveLabel = LARVES[this.winner]
+        const larveLabel = this.larvesGame[this.winner]
 
         if (!playerId) {
            channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
@@ -259,7 +270,7 @@ class Game {
     }
 
     updateLarves () {
-        for (const [key, value] of Object.entries(this.plateau)) {
+        for (const [key] of Object.entries(this.plateau)) {
             this.rollDeath(key);
 
             if (this.deaths[key]) {
@@ -288,6 +299,16 @@ class Game {
                         bonus += 7.1
                     }
                     break
+                case 'britalarve':
+                    // Britalarve a 10 % de chance d'arriver à la même place que le premier
+                    if (Math.random() < 0.1) {
+                        const maxPosition = Math.max(...Object.values(this.plateau))
+                        if (maxPosition > this.plateau[key]) {
+                            this.plateau[key] = maxPosition + value
+                            continue;
+                        }
+                    }
+                    break
                 default:
                     value = value * 3
             }
@@ -312,21 +333,21 @@ class Game {
         let row2 = new ActionRowBuilder()
 
         let count = 0
-        for (const [key, value] of Object.entries(LARVES)) {
+        for (const [key, value] of Object.entries(this.larvesGame)) {
             count++
             if (count <= 5) {
                 row1.addComponents(new ButtonBuilder()
                     .setCustomId(`larve-${key}`)
                     .setLabel(value.name)
                     .setStyle(ButtonStyle.Primary)
-                    .setEmoji(`<:${key}:${LARVES[key].id}>`)
+                    .setEmoji(`<:${key}:${this.larvesGame[key].id}>`)
                     .setDisabled(!!larves[key]))
             } else {
                 row2.addComponents(new ButtonBuilder()
                     .setCustomId(`larve-${key}`)
                     .setLabel(value.name)
                     .setStyle(ButtonStyle.Primary)
-                    .setEmoji(`<:${key}:${LARVES[key].id}>`)
+                    .setEmoji(`<:${key}:${this.larvesGame[key].id}>`)
                     .setDisabled(!!larves[key]))
             }
         }
@@ -358,7 +379,7 @@ class Game {
             return retour
         }
 
-        const id = LARVES[key].id
+        const id = this.larvesGame[key].id
 
         return retour + `<:${key}:${id}>`
     }
@@ -389,5 +410,19 @@ class Game {
             const randomIndex = Math.floor(Math.random() * DEATHS.length);
             this.channel.send(DEATHS[randomIndex])
         }
+    }
+
+    getRandomLarves(larves) {
+        // Convertir l'objet en tableau
+        const larvesArray = Object.entries(larves);
+
+        // Mélanger le tableau (algorithme de Fisher-Yates)
+        for (let i = larvesArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [larvesArray[i], larvesArray[j]] = [larvesArray[j], larvesArray[i]];
+        }
+
+        // Prendre les 7 premiers éléments et reconvertir en objet
+        return Object.fromEntries(larvesArray.slice(0, 7));
     }
 }
