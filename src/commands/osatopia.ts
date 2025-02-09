@@ -43,7 +43,7 @@ subCommandCaptures.setName('captures').setDescription('Liste de vos captures');
 
 const subCommandView = new SlashCommandSubcommandBuilder();
 subCommandView.setName('view').setDescription('Voir un monstre').addIntegerOption(
-    option => option.setName('id').setDescription('Monstre').setAutocomplete(true));
+    option => option.setName('id').setDescription('Monstre').setAutocomplete(true).setRequired(true));
 
 const subCommandTimer = new SlashCommandSubcommandBuilder();
 subCommandTimer.setName('timer').setDescription('Voir le temps restant pour roll ou capturer un monstre');
