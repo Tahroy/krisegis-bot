@@ -71,7 +71,7 @@ class Capture extends Model<CaptureAttributes, CaptureCreationAttributes> implem
         return imageUrl;
     }
 
-Amél    public async getView(user: User): Promise<{
+    public async getView(user: User): Promise<{
         embeds: EmbedBuilder[],
         files: string[],
         components: ActionRowBuilder<ButtonBuilder>[]
