@@ -82,12 +82,12 @@ module.exports = {
             return
         }
 
-        interaction.deferReply()
+//        interaction.deferReply()
         partiesEnCours[channelId] = new Game(interaction.client)
         partiesEnCours[channelId].channel = interaction.channel
 
         const replyButtons = await partiesEnCours[channelId].getReplyButtons();
-        partiesEnCours[channelId].message = await interaction.editReply(replyButtons)
+        partiesEnCours[channelId].message = await interaction.reply(replyButtons)
     }, async executeButton (interaction, buttonName) {
 
         /**
