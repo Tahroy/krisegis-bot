@@ -20,12 +20,16 @@ const LARVES = {
         'name': 'Larve grise', 'id': '1265760658063102058'
     }, 'britalarve': {
         'name': 'Britalarve',
-        //'id': '1338230581921583176'
         'id': '1338228518861144077'
+    },
+    'larve_rushu': {
+        'name': 'Larve de Rushu',
+        'id': null
     }
 }
 
 let partiesEnCours = []
+let emojis = {};
 
 module.exports = {
     opts: {}, data: new SlashCommandBuilder()
@@ -43,14 +47,15 @@ module.exports = {
         /* TEST */
 
         /*
-
         interaction.reply({ content: 'Termine !', ephemeral: true })
 
         for (let i = 0; i < 10000; i++) {
 
-            partiesEnCours[i] = new Game()
+            partiesEnCours[i] = new Game(interaction.client)
+            partiesEnCours[i].modeTest = true;
+            partiesEnCours[i].channel = interaction.channel
             const game = partiesEnCours[i]
-            for (const [key, value] of Object.entries(LARVES)) {
+            for (const [key, value] of Object.entries(game.larvesGame)) {
                 game.plateau[key] = 0
             }
             while (true) {
@@ -67,7 +72,6 @@ module.exports = {
         }
         */
 
-
     },
 
     async displayLarvesButtons (interaction) {
@@ -78,10 +82,12 @@ module.exports = {
             return
         }
 
-        partiesEnCours[channelId] = new Game()
+        interaction.deferReply()
+        partiesEnCours[channelId] = new Game(interaction.client)
         partiesEnCours[channelId].channel = interaction.channel
 
-        partiesEnCours[channelId].message = await interaction.reply(partiesEnCours[channelId].getReplyButtons(interaction))
+        const replyButtons = await partiesEnCours[channelId].getReplyButtons();
+        partiesEnCours[channelId].message = await interaction.editReply(replyButtons)
     }, async executeButton (interaction, buttonName) {
 
         /**
@@ -106,6 +112,7 @@ module.exports = {
         }
 
     },
+
 }
 
 class Game {
@@ -119,9 +126,12 @@ class Game {
     sautLigne = '\n'
     deaths = {}
     channel = null
+    client = null
+    modeTest = false;
 
-    constructor() {
+    constructor(client) {
         this.larvesGame = this.getRandomLarves(LARVES)
+        this.client = client;
     }
     async addNewLarve (interaction, buttonName) {
         if (this.status !== 'waiting') {
@@ -158,7 +168,7 @@ class Game {
         })
 
         if (this.message) {
-            this.message.edit(this.getReplyButtons(interaction))
+            this.message.edit(await this.getReplyButtons())
         }
     }
 
@@ -177,14 +187,23 @@ class Game {
             this.plateau[key] = 0
         }
 
-        const plateauMessage = await interaction.channel.send(this.getPlateau())
-        interaction.reply({
-            content: 'C\'est parti !', ephemeral: true
-        })
+        const plateau = await this.getPlateau();
+        const plateauMessage = await interaction.channel.send(plateau)
+
+        if (!this.modeTest) {
+            interaction.reply({
+                content: 'C\'est parti !', ephemeral: true
+            })
+        }
+
         let game = this
+
         const interval = setInterval(async function () {
             game.updateLarves()
-            await plateauMessage.edit(game.getPlateau())
+            const plateau = await game.getPlateau();
+
+            await plateauMessage.edit(plateau)
+
             await game.checkWinner()
 
             if (game.status === 'ended') {
@@ -229,13 +248,18 @@ class Game {
         const playerId = this.larves[this.winner]
         const larveLabel = this.larvesGame[this.winner]
 
+        let message = '';
         if (!playerId) {
-           channel.send({ content: `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !` })
+            message = `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !`;
         } else {
-           channel.send({ content: `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>` })
+            message = `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>`;
 
             const user = await interaction.client.users.fetch(playerId)
             await PlayerService.addPlayerItem(user, larveLabel.name, ItemType.LARVE)
+        }
+
+        if (!this.modeTest) {
+            channel.send({content: message})
         }
 
         // On enregistre dans la table larve laquelle a gagné
@@ -255,17 +279,15 @@ class Game {
         partiesEnCours[channel.id] = null
     }
 
-    getPlateau () {
+    async getPlateau() {
         const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
         const larves = []
         for (const [key, value] of Object.entries(this.plateau)) {
-            larves.push(this.getLarve(key))
+            larves.push(await this.getLarve(key))
         }
 
         const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
 
-        console.log(this.deaths)
-        console.log('edit plateau')
         return base + larves.join(this.sautLigne) + end
     }
 
@@ -283,25 +305,25 @@ class Game {
             switch (key) {
                 case 'larve_violette':
                     value = value * 2
-                    if (Math.random() < 0.5) {
+                    if (Math.random() < 0.52) {
                         bonus -= 1.5
                     } else {
-                        bonus += 2.90
+                        bonus += 3
                     }
                     break
                 case 'larve_rose':
                     value = value * 2
-                    bonus += 1.1
+                    bonus += 1.05
                     break
                 case 'larve_grise':
                     value = value * 2
                     if (Math.random() < 0.1) {
-                        bonus += 7.1
+                        bonus += 7
                     }
                     break
                 case 'britalarve':
-                    // Britalarve a 10 % de chance d'arriver à la même place que le premier
-                    if (Math.random() < 0.1) {
+                    // Britalarve a un % de chance d'arriver à la même place que le premier
+                    if (Math.random() < 0.22) {
                         const maxPosition = Math.max(...Object.values(this.plateau))
                         if (maxPosition > this.plateau[key]) {
                             this.plateau[key] = maxPosition + value
@@ -309,8 +331,30 @@ class Game {
                         }
                     }
                     break
+                case 'larve_rushu': {
+                    // La larve de rushu cible une autre larve. Si celle-ci est devant, elle échange de place avec elle
+                    value = value * 2.5
+                    if (Math.random() < 0.3) {
+                        const autresLarves = Object.keys(this.plateau).filter(otherKey =>
+                            otherKey !== key && !this.deaths[otherKey]
+                        )
+
+                        if (autresLarves.length > 0) {
+                            const targetKey = autresLarves[Math.floor(Math.random() * autresLarves.length)]
+
+                            if (this.plateau[targetKey] > this.plateau[key]) {
+                                const tempPosition = this.plateau[key]
+                                this.plateau[key] = this.plateau[targetKey]
+                                this.plateau[targetKey] = tempPosition
+                                value = 0
+                            }
+                        }
+                    }
+                    break;
+
+                }
                 default:
-                    value = value * 3
+                    value = value * 2.90
             }
 
             value = Math.floor(bonus + value)
@@ -321,10 +365,8 @@ class Game {
     /**
      * Permet de générer le message avec les boutons des larves
      *
-     * @param interaction
-     * @returns {{components: *[], content: string}}
      */
-    getReplyButtons (interaction) {
+    async getReplyButtons() {
         const larves = this.larves
 
         // On va créer un bouton par larve
@@ -335,19 +377,20 @@ class Game {
         let count = 0
         for (const [key, value] of Object.entries(this.larvesGame)) {
             count++
+            const emoji = await this.getEmoji(key);
             if (count <= 5) {
                 row1.addComponents(new ButtonBuilder()
                     .setCustomId(`larve-${key}`)
                     .setLabel(value.name)
                     .setStyle(ButtonStyle.Primary)
-                    .setEmoji(`<:${key}:${this.larvesGame[key].id}>`)
+                    .setEmoji(emoji)
                     .setDisabled(!!larves[key]))
             } else {
                 row2.addComponents(new ButtonBuilder()
                     .setCustomId(`larve-${key}`)
                     .setLabel(value.name)
                     .setStyle(ButtonStyle.Primary)
-                    .setEmoji(`<:${key}:${this.larvesGame[key].id}>`)
+                    .setEmoji(emoji)
                     .setDisabled(!!larves[key]))
             }
         }
@@ -366,7 +409,7 @@ class Game {
         }
     }
 
-    getLarve (key) {
+    async getLarve(key) {
         let retour = this.flag
 
         const larve = this.plateau[key]
@@ -375,13 +418,11 @@ class Game {
         }
 
         if (this.deaths[key]) {
-            retour += '<:larve_chair:1275176527792832643>'
+            retour += await this.getEmoji('larve_chair')
             return retour
         }
 
-        const id = this.larvesGame[key].id
-
-        return retour + `<:${key}:${id}>`
+        return retour + await this.getEmoji(key)
     }
 
     rollDeath (key) {
@@ -392,7 +433,6 @@ class Game {
         let chance = Math.floor(Math.random() * 200) + 1;
 
         if (chance === 1) {
-            console.log(`${key} est morte`)
             this.deaths[key] = true
 
             const label = LARVES[key].name;
@@ -408,7 +448,10 @@ class Game {
             ];
 
             const randomIndex = Math.floor(Math.random() * DEATHS.length);
-            this.channel.send(DEATHS[randomIndex])
+
+            if (!this.modeTest) {
+                this.channel.send(DEATHS[randomIndex])
+            }
         }
     }
 
@@ -424,5 +467,23 @@ class Game {
 
         // Prendre les 7 premiers éléments et reconvertir en objet
         return Object.fromEntries(larvesArray.slice(0, 7));
+    }
+
+    async getEmoji(search) {
+        if (emojis[search]) {
+            return emojis[search];
+        }
+        const clientApplicationEmojis = await this.client.application.emojis.fetch()
+        const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === search)
+
+
+        if (!searchEmoji) {
+            return '';
+        }
+
+        const emoji =  `<:${searchEmoji.name}:${searchEmoji.id}>`
+
+        emojis[search] = emoji;
+        return emoji;
     }
 }
