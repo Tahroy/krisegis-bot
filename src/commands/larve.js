@@ -216,18 +216,28 @@ class Game {
         }
 
         let game = this
+        let intervalId = null  
 
-        const interval = setInterval(async function () {
-            game.updateLarves()
-            const plateau = await game.getPlateau();
+        intervalId = setInterval(async function () {
+            try {
+                game.updateLarves()
+                const plateau = await game.getPlateau();
+                await plateauMessage.edit(plateau)
 
-            await plateauMessage.edit(plateau)
+                await game.checkWinner()
 
-            await game.checkWinner()
-
-            if (game.status === 'ended') {
-                await game.annoncerGagnant(interaction)
-                await clearInterval(interval)
+                if (game.status === 'ended') {
+                    clearInterval(intervalId)  
+                    await game.annoncerGagnant(interaction)
+                }
+            } catch (error) {
+                console.error('Erreur dans l\'intervalle de jeu:', error)
+                clearInterval(intervalId)
+                try {
+                    await game.channel.send({content: 'Une erreur est survenue pendant la partie'})
+                } catch (e) {
+                    console.error('Impossible d\'envoyer le message d\'erreur:', e)
+                }
             }
         }, GAME_CONSTANTS.UPDATE_INTERVAL)
     }
