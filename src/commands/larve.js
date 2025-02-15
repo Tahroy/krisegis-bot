@@ -115,6 +115,10 @@ module.exports = {
         const game = partiesEnCours.get(interaction.channel.id)
 
         if (!game || game.status === 'ended') {
+
+            if (game.status === 'ended') {
+                partiesEnCours.delete(interaction.channel.id)
+            }
             interaction.reply({
                 content: 'Aucune partie en cours', ephemeral: true
             })
