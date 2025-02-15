@@ -28,7 +28,16 @@ const LARVES = {
     }
 }
 
-let partiesEnCours = []
+const GAME_CONSTANTS = {
+    MAX_SCORE: 30,
+    MAX_PLAYERS: 7,
+    DEATH_CHANCE: 200,
+    UPDATE_INTERVAL: 1000,
+    FLAG: ':checkered_flag:',
+    NEW_LINE: '\n'
+}
+
+let partiesEnCours = new Map()
 let emojis = {};
 
 module.exports = {
@@ -77,23 +86,33 @@ module.exports = {
     async displayLarvesButtons (interaction) {
         const channelId = interaction.channel.id
 
-        if (partiesEnCours[channelId]) {
+        if (partiesEnCours.has(channelId)) {
             await interaction.reply('Une partie est déjà en cours !')
             return
         }
 
-//        interaction.deferReply()
-        partiesEnCours[channelId] = new Game(interaction.client)
-        partiesEnCours[channelId].channel = interaction.channel
+        interaction.deferReply()
 
-        const replyButtons = await partiesEnCours[channelId].getReplyButtons();
-        partiesEnCours[channelId].message = await interaction.reply(replyButtons)
-    }, async executeButton (interaction, buttonName) {
+//        interaction.deferReply()
+        partiesEnCours.set(channelId, new Game(interaction.client))
+        const game = partiesEnCours.get(channelId)
+        game.channel = interaction.channel
+
+        const replyButtons = await game.getReplyButtons();
+
+        try {
+            game.message = await interaction.editReply(replyButtons)
+        } catch (error) {
+            console.error('Erreur lors de la récupération des boutons :', error)
+        }
+    }, 
+    
+    async executeButton (interaction, buttonName) {
 
         /**
          * @var Game game
          */
-        const game = partiesEnCours[interaction.channel.id]
+        const game = partiesEnCours.get(interaction.channel.id)
 
         if (!game || game.status === 'ended') {
             interaction.reply({
@@ -106,7 +125,7 @@ module.exports = {
             await game.launchGame(interaction)
         } else {
             await game.addNewLarve(interaction, buttonName)
-            if (Object.values(game.larves).length === 7) {
+            if (Object.values(game.larves).length === GAME_CONSTANTS.MAX_PLAYERS) {
                 await game.launchGame(interaction)
             }
         }
@@ -122,8 +141,8 @@ class Game {
     larves = {}
     plateau = {}
     winner = null
-    flag = ':checkered_flag:'
-    sautLigne = '\n'
+    flag = GAME_CONSTANTS.FLAG
+    sautLigne = GAME_CONSTANTS.NEW_LINE
     deaths = {}
     channel = null
     client = null
@@ -210,7 +229,7 @@ class Game {
                 await game.annoncerGagnant(interaction)
                 await clearInterval(interval)
             }
-        }, 1000)
+        }, GAME_CONSTANTS.UPDATE_INTERVAL)
     }
 
     /**
@@ -226,69 +245,93 @@ class Game {
             return
         }
         let winner = null
-        let max = 30
+        let max = GAME_CONSTANTS.MAX_SCORE
         for (const [key, value] of Object.entries(this.plateau)) {
             if (value >= max) {
                 winner = key
                 max = value
                 this.status = 'ended'
                 this.winner = winner
+                return;
             }
         }
     }
 
     async annoncerGagnant (interaction) {
-        if (this.winner === 'nobody') {
-            this.channel.send({'content': 'Aucun gagnant !'})
-            return
+        try {
+            if (this.winner === 'nobody') {
+                await this.channel.send({'content': 'Aucun gagnant !'})
+                return
+            }
+
+            const channel = interaction.channel
+            const playerId = this.larves[this.winner]
+            const larveLabel = this.larvesGame[this.winner]
+
+            // Vérification que larveLabel existe
+            if (!larveLabel) {
+                console.error(`Larve gagnante invalide: ${this.winner}`)
+                await channel.send({content: 'Erreur lors de l\'annonce du gagnant'})
+                return
+            }
+
+            let message = '';
+            if (!playerId) {
+                message = `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !`;
+            } else {
+                message = `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>`;
+
+                try {
+                    const user = await interaction.client.users.fetch(playerId)
+                    await PlayerService.addPlayerItem(user, larveLabel.name, ItemType.LARVE)
+                } catch (error) {
+                    console.error('Erreur lors de l\'ajout de l\'item au joueur:', error)
+                    // On continue quand même pour annoncer le gagnant
+                }
+            }
+
+            if (!this.modeTest) {
+                await channel.send({content: message})
+            }
+
+            try {
+                // On enregistre dans la table larve laquelle a gagné
+                let larve = await Larve.findOne({
+                    where: { name: this.winner }
+                })
+
+                if (larve) {
+                    larve.nb += 1
+                    await larve.save()
+                } else {
+                    await Larve.create({
+                        name: this.winner, nb: 1
+                    })
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'enregistrement de la victoire:', error)
+            }
+
+            partiesEnCours.delete(channel.id)
+        } catch (error) {
+            console.error('Erreur lors de l\'annonce du gagnant:', error)
+            try {
+                await this.channel.send({content: 'Une erreur est survenue lors de l\'annonce du gagnant'})
+            } catch (e) {
+                console.error('Impossible d\'envoyer le message d\'erreur:', e)
+            }
+        } finally {
+            partiesEnCours.delete(interaction.channel.id)
         }
-
-        const channel = interaction.channel
-
-        const playerId = this.larves[this.winner]
-        const larveLabel = this.larvesGame[this.winner]
-
-        let message = '';
-        if (!playerId) {
-            message = `${larveLabel.name} a gagné, mais personne ne l'a choisie, dommage !`;
-        } else {
-            message = `${larveLabel.name} a gagné ! Bravo à <@!${playerId}>`;
-
-            const user = await interaction.client.users.fetch(playerId)
-            await PlayerService.addPlayerItem(user, larveLabel.name, ItemType.LARVE)
-        }
-
-        if (!this.modeTest) {
-            channel.send({content: message})
-        }
-
-        // On enregistre dans la table larve laquelle a gagné
-        let larve = await Larve.findOne({
-            where: { name: this.winner }
-        })
-
-        if (larve) {
-            larve.nb += 1
-            await larve.save()
-        } else {
-            await Larve.create({
-                name: this.winner, nb: 1
-            })
-        }
-
-        partiesEnCours[channel.id] = null
     }
 
     async getPlateau() {
-        const base = this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.sautLigne
-        const larves = []
-        for (const [key, value] of Object.entries(this.plateau)) {
-            larves.push(await this.getLarve(key))
-        }
-
-        const end = this.sautLigne + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag + this.flag
-
-        return base + larves.join(this.sautLigne) + end
+        const flagLine = GAME_CONSTANTS.FLAG.repeat(11) + this.sautLigne
+        const larves = await Promise.all(
+            Object.entries(this.plateau).map(([key]) => this.getLarve(key))
+        )
+        
+        return flagLine + larves.join(this.sautLigne) + this.sautLigne + flagLine
     }
 
     updateLarves () {
@@ -430,7 +473,7 @@ class Game {
             return;
         }
 
-        let chance = Math.floor(Math.random() * 200) + 1;
+        let chance = Math.floor(Math.random() * GAME_CONSTANTS.DEATH_CHANCE) + 1;
 
         if (chance === 1) {
             this.deaths[key] = true
@@ -443,8 +486,9 @@ class Game {
                 `Malma-Jeste marche sur **${label}.**`,
                 `**${label}** a réalisé que le courses n'étaient pas sa vocation.`,
                 `**${label}** est morte, simplement.`,
-                `Euphie pleure et noie **${label}**`,
                 `E-Bou appparaît, prêt à donner toutes les réponses du Krosmoz, avant de simplement s'enfuir avec **${label}**.`,
+                `Euphie apparaît et emporte avec elle **${label}** pour la sauver des courses.`,
+                `**${label}** a été écrasée par une grosse pierre.`,
             ];
 
             const randomIndex = Math.floor(Math.random() * DEATHS.length);
@@ -471,19 +515,24 @@ class Game {
 
     async getEmoji(search) {
         if (emojis[search]) {
-            return emojis[search];
+            return emojis[search]
         }
-        const clientApplicationEmojis = await this.client.application.emojis.fetch()
-        const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === search)
-
-
-        if (!searchEmoji) {
-            return '';
+        
+        try {
+            const clientApplicationEmojis = await this.client.application.emojis.fetch()
+            const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === search)
+            
+            if (!searchEmoji) {
+                emojis[search] = ''
+                return ''
+            }
+            
+            const emoji = `<:${searchEmoji.name}:${searchEmoji.id}>`
+            emojis[search] = emoji
+            return emoji
+        } catch (error) {
+            console.error(`Erreur lors de la récupération de l'emoji ${search}:`, error)
+            return ''
         }
-
-        const emoji =  `<:${searchEmoji.name}:${searchEmoji.id}>`
-
-        emojis[search] = emoji;
-        return emoji;
     }
 }
