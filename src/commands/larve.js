@@ -91,9 +91,7 @@ module.exports = {
             return
         }
 
-        interaction.deferReply()
 
-//        interaction.deferReply()
         partiesEnCours.set(channelId, new Game(interaction.client))
         const game = partiesEnCours.get(channelId)
         game.channel = interaction.channel
@@ -101,7 +99,7 @@ module.exports = {
         const replyButtons = await game.getReplyButtons();
 
         try {
-            game.message = await interaction.editReply(replyButtons)
+            game.message = await interaction.reply(replyButtons)
         } catch (error) {
             console.error('Erreur lors de la récupération des boutons :', error)
         }
