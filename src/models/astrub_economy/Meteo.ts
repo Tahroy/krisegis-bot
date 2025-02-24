@@ -15,7 +15,9 @@ class Meteo {
         let text = `**Météo du jour** : ${this.name}`;
         text += `\n ${this.description}\n`
         this.effects.forEach(effect => {
-            text += `\n* ${effect.description}`
+            if (effect.description.length > 0) {
+                text += `\n* ${effect.description}`
+            }
         })
 
         return text
@@ -34,7 +36,8 @@ enum MeteosEnum {
     VENT_FORT = "💨 Vents forts",
     GEL = "❄️ Gel",
     CANICULE = "🥵 Canicule",
-    SOLEIL = "☀️ Soleil"
+    SOLEIL = "☀️ Soleil",
+    SILVOSSE = "🪓 Cycle de Silvosse",
 }
 
 const Meteos: Record<MeteosEnum, Meteo> = {
@@ -172,9 +175,16 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             description: "Les céréales profitent du soleil et les paysans se dépèchent de récolter avant que les épis ne se dessèchent.",
             job: JobEnum.PAYSAN,
             value: 20
-        }
+        },
     ]),
-    [MeteosEnum.SOLEIL]: new Meteo(MeteosEnum.SOLEIL, "Le soleil illumine le ciel d'Astrub. Les enfants jouent dehors et certains en profitent pour se promener, faire un peu de bricolage... une journée parfaite !", [])
+    [MeteosEnum.SOLEIL]: new Meteo(MeteosEnum.SOLEIL, "Le soleil illumine le ciel d'Astrub. Les enfants jouent dehors et certains en profitent pour se promener, faire un peu de bricolage... une journée parfaite !", []),
+    [MeteosEnum.SILVOSSE]: new Meteo(MeteosEnum.SILVOSSE, "Le Protecteur de Flovor foule à nouveau le sol du Monde des Douze et gare aux bûcherons imprudents qui croiseront son chemin !", [
+        {
+            description: "",
+            job: JobEnum.BUCHERON,
+            value: -20
+        }
+    ])
 }
 
 export default Meteo;
