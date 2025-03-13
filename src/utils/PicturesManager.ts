@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
-
+import https from 'https'; // Import pour l'agent HTTPS
 
 export class PicturesManager {
     static async fetchImageIfNeeded(imageUrl: string, imageName: string, folder: string): Promise<string> {
@@ -17,7 +17,15 @@ export class PicturesManager {
         // Vérifie si le fichier existe déjà
         if (!fs.existsSync(imagePath)) {
             console.log(`Téléchargement de l'image : ${imageUrl}`);
-            const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false,
+            });
+
+            const response = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                httpsAgent
+            });
             fs.writeFileSync(imagePath, response.data);
         } else {
             console.log(`L'image existe déjà : ${imagePath}`);
@@ -25,4 +33,5 @@ export class PicturesManager {
 
         return `./public/${folder}/${imageName}`;
     }
+
 }
