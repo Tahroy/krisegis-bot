@@ -9,6 +9,7 @@ interface PlayerItemAttributes {
     user_id: string;  // ID de l'utilisateur
     quantity: number; // Quantité
     type: string;     // Type d'item
+    guild_id?: string | null;
 }
 
 // Interface pour la création (exclut `id` car il est auto-incrémenté)
@@ -21,6 +22,7 @@ class PlayerItem extends Model<PlayerItemAttributes, PlayerItemCreationAttribute
     public user_id!: string;
     public quantity!: number;
     public type!: string;
+    public guild_id!: string | null;
 
     // Timestamps (créés automatiquement si activé dans les options du modèle)
     public readonly createdAt!: Date;
@@ -51,6 +53,11 @@ PlayerItem.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
+        guild_id: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
     },
     {
         sequelize, // Instance Sequelize
