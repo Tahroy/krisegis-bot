@@ -37,7 +37,8 @@ enum MeteosEnum {
     GEL = "❄️ Gel",
     CANICULE = "🥵 Canicule",
     SOLEIL = "☀️ Soleil",
-    SILVOSSE = "🪓 Cycle de Silvosse",
+    //SILVOSSE = "🪓 Cycle de Silvosse",
+    ULGRUDE = "⚡ Tonnerre grondant d'Ulgrude"
 }
 
 const Meteos: Record<MeteosEnum, Meteo> = {
@@ -178,12 +179,41 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         },
     ]),
     [MeteosEnum.SOLEIL]: new Meteo(MeteosEnum.SOLEIL, "Le soleil illumine le ciel d'Astrub. Les enfants jouent dehors et certains en profitent pour se promener, faire un peu de bricolage... une journée parfaite !", []),
+    /*
     [MeteosEnum.SILVOSSE]: new Meteo(MeteosEnum.SILVOSSE, "Le Protecteur de Flovor foule à nouveau le sol du Monde des Douze et gare aux bûcherons imprudents qui croiseront son chemin !", [
         {
             description: "",
             job: JobEnum.BUCHERON,
             value: -20
         }
+    ])
+     */
+    [MeteosEnum.ULGRUDE]: new Meteo(MeteosEnum.ULGRUDE, "Les sautes d'humeur du Protecteur de Martalo sont aussi imprévisibles que dangereuses. Nul n'est à l'abri d'un coup de foudre.", [
+        {
+            description: "",
+            job: JobEnum.PECHEUR,
+            value: -20
+        },
+        {
+            description: "",
+            job: JobEnum.BUCHERON,
+            value: -20
+        },
+        {
+            description: "",
+            job: JobEnum.ALCHIMISTE,
+            value: -20
+        },
+        {
+            description: "",
+            job: JobEnum.MINEUR,
+            value: -20
+        },
+        {
+            description: "",
+            job: JobEnum.PAYSAN,
+            value: -20
+        },
     ])
 }
 
