@@ -78,7 +78,7 @@ class Recolte extends AbstractSubCommand {
         }
 
         const quantity: number = await this.getQuantity(job, item?.level ?? 1);
-        const xp: number = Math.ceil(10 + job.level/1.5 - item.level);
+        const xp: number = await this.getExperience(job, item?.level ?? 1);
 
         job.experience += xp;
 
@@ -175,6 +175,27 @@ class Recolte extends AbstractSubCommand {
         return Math.max(quantity, 0); // Assure que la quantité ne soit pas négative
     }
 
+    private async getExperience(job: Job, number: number) {
+        let percent = 100;
+
+        const jobLevel = job.level;
+        const meteoName = await JobUtil.chargerMeteo();
+        if (meteoName) {
+            const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
+            if (meteo) {
+                const effect = meteo.effects.find(e => e.job === job.name) ?? null
+
+                if (effect) {
+                    percent -= effect.value
+                }
+            }
+        }
+
+        const experienceBase = 10;
+        const experience = Math.ceil(experienceBase * (percent / 100));
+
+        return Math.max(experience * number, 0);
+    }
 }
 
 export default Recolte;
