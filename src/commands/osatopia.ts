@@ -148,7 +148,7 @@ module.exports = {
             const lastUsage = cooldowns.get(key);
 
             if (lastUsage && currentTime - lastUsage < 3000) {
-                const timeBeforeNextRoll = Math.floor(5 - (timestamp - lastUsage) / 1000)
+                const timeBeforeNextRoll = Math.floor(3 - (timestamp - lastUsage) / 1000)
                 const purial = timeBeforeNextRoll > 1 ? 's' : ''
                 throw new CommandCooldownError(
                     `Vous ne pouvez faire qu'un roll toutes les 3s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
