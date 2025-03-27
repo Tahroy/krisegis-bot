@@ -157,10 +157,10 @@ class Recolte extends AbstractSubCommand {
         const meteoName = await JobUtil.chargerMeteo();
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
-            if (meteo) {
+            if (meteo !== null) {
                 const effect = meteo.effects.find(e => e.job === job.name) ?? null
 
-                if (effect) {
+                if (effect !== null) {
                     percent += effect.value
                 }
             }
@@ -180,16 +180,17 @@ class Recolte extends AbstractSubCommand {
         const xp: number = Math.ceil(10 + job.level/1.5 - 1);
 
         return xp;
+        /*
         let percent = 100;
 
         const jobLevel = job.level;
         const meteoName = await JobUtil.chargerMeteo();
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
-            if (meteo) {
+            if (meteo !== null) {
                 const effect = meteo.effects.find(e => e.job === job.name) ?? null
 
-                if (effect) {
+                if (effect !== null) {
                     percent -= effect.value
                 }
             }
@@ -199,6 +200,8 @@ class Recolte extends AbstractSubCommand {
         const experience = Math.ceil(experienceBase * (percent / 100));
 
         return Math.max(experience * number, 0);
+
+         */
     }
 }
 
