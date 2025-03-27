@@ -176,6 +176,10 @@ class Recolte extends AbstractSubCommand {
     }
 
     private async getExperience(job: Job, number: number) {
+
+        const xp: number = Math.ceil(10 + job.level/1.5 - item.level);
+
+        return xp;
         let percent = 100;
 
         const jobLevel = job.level;
