@@ -1,11 +1,14 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
-import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver, User} from "discord.js";
+import {
+    AutocompleteInteraction,
+    CommandInteraction,
+    MessageFlags,
+    User
+} from "discord.js";
 import {Op} from "sequelize";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "./JobUtil";
 import PlayerItem from "../../models/PlayerItem";
-import {Ressources} from "../../models/astrub_economy/Ressource";
-import {Crafts} from "../../models/astrub_economy/Craft";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
 
@@ -14,7 +17,16 @@ class Give extends AbstractSubCommand {
     name: string = "give";
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
             return;
         }
 
@@ -24,22 +36,19 @@ class Give extends AbstractSubCommand {
         const quantity = interaction.options.getInteger('quantity')
 
         if (!cible || !itemName || !quantity) {
-            await interaction.reply({content: "Commande incorrecte", ephemeral: true})
+            await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
             return;
         }
 
-        let playerItem = await PlayerItem.findOne({where: {name: itemName, user_id: user.id,},});
+        let playerItem = await PlayerItem.findOne({where: {name: itemName, user_id: user.id, guildId: guildId}});
 
         if (!playerItem || playerItem.get('quantity') < quantity) {
-            await interaction.reply({content: "Vous n'avez pas la quantité nécessaire", ephemeral: true})
+            await interaction.reply({content: "Vous n'avez pas la quantité nécessaire", flags: MessageFlags.Ephemeral})
             return;
         }
 
         if (![ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL].includes(playerItem.type as ItemType)) {
-
-            console.log('bad type')
-            console.log(playerItem)
-            await interaction.reply({content: "Cet objet ne peut pas être donné", ephemeral: true})
+            await interaction.reply({content: "Cet objet ne peut pas être donné", flags: MessageFlags.Ephemeral})
             return
         }
 
@@ -51,13 +60,12 @@ class Give extends AbstractSubCommand {
         }
 
         if (!item) {
-            console.log('no item')
-            await interaction.reply({content: "Cet objet ne peut pas être donné", ephemeral: true})
+            await interaction.reply({content: "Cet objet ne peut pas être donné", flags: MessageFlags.Ephemeral})
             return
         }
 
-        await PlayerService.addPlayerItem(user, itemName, item.type, -quantity)
-        await PlayerService.addPlayerItem(cible, itemName, item.type, quantity)
+        await PlayerService.addPlayerItem(user, itemName, item.type, -quantity, guildId)
+        await PlayerService.addPlayerItem(cible, itemName, item.type, quantity, guildId)
 
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
@@ -67,7 +75,7 @@ class Give extends AbstractSubCommand {
         const memberCible = await guild?.members.fetch(cible.id)
         const cibleName = memberCible?.nickname ? memberCible.nickname :(cible.globalName ? cible.globalName : cible.username)
 
-        await interaction.reply({content: `${userName} donné ${quantity} x ${item.name} à ${cibleName}`})
+        await interaction.reply({content: `${userName} donné ${quantity} x ${item.name} à ${cibleName}`, flags: MessageFlags.Ephemeral})
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
@@ -85,6 +93,11 @@ class Give extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
         const options = interaction.options
         const focused = options.getFocused(true)
         const search = focused.value
@@ -92,7 +105,7 @@ class Give extends AbstractSubCommand {
         const retour = [];
         switch (focused.name) {
             case 'item':
-                const items = await this.getUserItems(interaction.user, search)
+                const items = await this.getUserItems(interaction.user, search, guildId)
 
                 for (let item of items) {
                     const price = JobUtil.getItem(item.name)?.sell ?? 0;
@@ -119,7 +132,7 @@ class Give extends AbstractSubCommand {
         await interaction.respond(retour)
     }
 
-    private async getUserItems(user: User, search: string): Promise<PlayerItem[]> {
+    private async getUserItems(user: User, search: string, guildId: string): Promise<PlayerItem[]> {
         const items = JobUtil.getAllItems()
 
         let sellablesItems: string [] = []
@@ -136,7 +149,8 @@ class Give extends AbstractSubCommand {
         return await PlayerItem.findAll({
             where: {
                 user_id: user.id,
-                name: {[Op.in]: sellablesItems,}
+                name: {[Op.in]: sellablesItems,},
+                guildId: guildId
             }
         });
     }

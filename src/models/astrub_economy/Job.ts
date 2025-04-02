@@ -1,12 +1,14 @@
-import {DataTypes, Model, Optional} from "sequelize";
+import {DataTypes, Model, Optional, ForeignKey} from "sequelize";
 import sequelize from '../../utils/database';
+import Player from "./Player";
 
 import {JobEnum, RessourcesEnum} from "./Enums";
 
 interface JobAttributes {
     id: number;
     name: string;
-    user_id: string;
+    user_id: ForeignKey<Player['userId']>;
+    guildId: string;
     level: number;
     experience: number;
 }
@@ -16,7 +18,8 @@ type JobCreationAttributes = Optional<JobAttributes, 'id' | 'experience'>
 class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttributes {
     public id!: number;
     public name!: string;
-    public user_id!: string;
+    public user_id!: ForeignKey<Player['userId']>;
+    public guildId!: string;
     public level!: number;
     public experience!: number;
 
@@ -53,7 +56,16 @@ Job.init(
             allowNull: false
         },
         user_id: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
+            allowNull: false,
+            references: {
+                model: Player,
+                key: 'userId'
+            }
+        },
+        guildId: {
+            type: DataTypes.STRING,
+            allowNull: false
         },
         level: {
             type: DataTypes.INTEGER,
@@ -66,9 +78,14 @@ Job.init(
         sequelize,
         modelName: 'Job',
         tableName: 'jobs',
-        timestamps: true
+        timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['user_id', 'guildId', 'name']
+            }
+        ]
     }
 )
 
 export default Job;
-
