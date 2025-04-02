@@ -111,11 +111,15 @@ class JobUtil {
             meteo = data.meteo;
         }
         const meteos = Object.values(Meteos);
-        let randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
+
+        // On trie les météos pour avoir seulement celles avec active à true
+        const meteosActive = meteos.filter(m => m.active);
+
+        let randomMeteo = meteosActive[Math.floor(Math.random() * meteosActive.length)];
 
         // Si c'est la même météo, on relance UNE fois
         if (meteo === randomMeteo.name) {
-            randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
+            randomMeteo = meteosActive[Math.floor(Math.random() * meteosActive.length)];
         }
 
         this.sauvegarderMeteo(randomMeteo);
