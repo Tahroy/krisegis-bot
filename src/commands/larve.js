@@ -295,7 +295,12 @@ class Game {
 
                 try {
                     const user = await interaction.client.users.fetch(playerId)
-                    await PlayerService.addPlayerItem(user, larveLabel.name, ItemType.LARVE)
+                    await PlayerService.addPlayerItem(
+                        user,
+                        larveLabel.name,
+                        ItemType.LARVE,
+                        1,
+                        interaction.guild.id ?? 0)
                 } catch (error) {
                     console.error('Erreur lors de l\'ajout de l\'item au joueur:', error)
                     // On continue quand même pour annoncer le gagnant
