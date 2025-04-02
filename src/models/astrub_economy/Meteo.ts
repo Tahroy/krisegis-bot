@@ -4,6 +4,7 @@ class Meteo {
     name: string;
     description: string;
     effects: MeteoEffect[];
+    active: boolean;
 
     constructor(name: string, description: string, effects: MeteoEffect[], active: boolean = true) {
         this.name = name;
