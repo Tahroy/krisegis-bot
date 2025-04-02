@@ -1,10 +1,4 @@
-import {
-    AutocompleteInteraction,
-    CommandInteraction,
-    CommandInteractionOptionResolver,
-    MessageFlags,
-    User
-} from "discord.js";
+import {AutocompleteInteraction, CommandInteraction, MessageFlags, User} from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import Job from '../../models/astrub_economy/Job'
@@ -12,7 +6,6 @@ import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import JobUtil from "./JobUtil";
 import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
-import KrisegisClient from "../../models/KrisegisClient";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 
 class Recolte extends AbstractSubCommand {
@@ -21,6 +14,15 @@ class Recolte extends AbstractSubCommand {
 
     public async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
             return;
         }
 
@@ -40,7 +42,7 @@ class Recolte extends AbstractSubCommand {
 
         const emoji = await JobUtil.getEmoji(item, interaction.client) + ' '
 
-        const player: Player = await JobUtil.getPlayer(interaction.user);
+        const player: Player = await JobUtil.getPlayer(interaction.user, guildId);
         const job: Job = await player.getJob(item.job ?? '');
 
         // Si la dernière récolte était il y a moins de 15 min, on refuse
@@ -77,13 +79,13 @@ class Recolte extends AbstractSubCommand {
             return
         }
 
-        const quantity: number = await this.getQuantity(job, item?.level ?? 1);
-        const xp: number = await this.getExperience(job, item?.level ?? 1);
+        const quantity: number = await this.getQuantity(job, item?.level ?? 1, guildId);
+        const xp: number = await this.getExperience(job, item?.level ?? 1, guildId);
 
         job.experience += xp;
 
 
-        await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity)
+        await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity, guildId)
         await player.update({lastHarvest: new Date()})
         const user = interaction.user;
 
@@ -109,6 +111,11 @@ class Recolte extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
         const ressources: Ressource[] = Object.values(Ressources).sort((a, b) => a.name.localeCompare(b.name))
 
         const responses = [];
@@ -118,7 +125,14 @@ class Recolte extends AbstractSubCommand {
             }
             // Si au-dessus du level 1, on vérifie
             if (ressource.level > 1) {
-                const job = await Job.findOne({where: {user_id: interaction.user.id, name: ressource.name}})
+                const job = await Job.findOne({
+                    where: {
+                        user_id: interaction.user.id,
+                        name: ressource.name,
+                        guildId: guildId
+                    }
+                })
+
                 if (!job || job.level < ressource.level) {
                     continue
                 }
@@ -129,32 +143,19 @@ class Recolte extends AbstractSubCommand {
 
         await interaction.respond(responses)
     }
-
-    private async getJob(user: User, jobChoice: string): Promise<Job> {
-        let job = await Job.findOne({
-            where: {
-                user_id: user.id,
-                name: jobChoice
-            }
-        });
-
-        if (job) {
-            return job;
-        }
-
-        return await Job.create({name: jobChoice, user_id: user.id, level: 1, experience: 0})
-    }
-
     getRandomInt(min: number, max: number) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    private async getQuantity(job: Job, itemLevel: number): Promise<number> {
+    /**
+     * Voir tableur du jeu
+     */
+    private async getQuantity(job: Job, itemLevel: number, guildId: string): Promise<number> {
 
         let percent = 100;
 
         const jobLevel = job.level;
-        const meteoName = await JobUtil.chargerMeteo();
+        const meteoName = await JobUtil.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {
@@ -166,25 +167,23 @@ class Recolte extends AbstractSubCommand {
             }
         }
 
-        const randomBase = this.getRandomInt(1, 3); // Random entre 1 et 3
-        const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel); // Random entre niveau/2 et niveau, arrondi au supérieur
+        const randomBase = this.getRandomInt(1, 3);
+        const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel);
         const quantityBase = randomBase + randomLevel - itemLevel
         const quantity = Math.ceil(quantityBase * (percent / 100));
 
         console.log(quantity, quantityBase)
-        return Math.max(quantity, 0); // Assure que la quantité ne soit pas négative
+        return Math.max(quantity, 0);
     }
 
-    private async getExperience(job: Job, number: number) {
+    private async getExperience(job: Job, number: number, guildId: string) {
 
-        const xp: number = Math.ceil(10 + job.level/1.5 - 1);
-
-        return xp;
+        return Math.ceil(10 + job.level / 1.5 - 1);
         /*
         let percent = 100;
 
         const jobLevel = job.level;
-        const meteoName = await JobUtil.chargerMeteo();
+        const meteoName = await JobUtil.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {

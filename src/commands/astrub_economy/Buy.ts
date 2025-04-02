@@ -1,5 +1,5 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
-import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver} from "discord.js";
+import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "./JobUtil";
 import {ItemType, PlayerService} from "../../services/playerItemService";
@@ -12,11 +12,17 @@ class Sale extends AbstractSubCommand {
     name: string = 'buy';
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
-        const options: CommandInteractionOptionResolver = interaction.options;
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({ content: "This command can only be used in a server.", ephemeral: true });
+            return;
+        }
+
+        const options = interaction.options;
 
         const item: string | null = options.getString('item');
         const quantity: number | null = options.getInteger('quantity');
@@ -28,21 +34,26 @@ class Sale extends AbstractSubCommand {
         const user = interaction.user;
 
         // On vérifie si la personne a le bon nombre d'objets
-
-        let playerItem = await PlayerItem.findOne({where: {name: 'Kamas', user_id: user.id,},});
+        let playerItem = await PlayerItem.findOne({
+            where: {
+                name: 'Kamas',
+                user_id: user.id,
+                guildId: guildId
+            }
+        });
 
         const baseItem = JobUtil.getItem(item);
         const price = baseItem?.buy ?? 0
 
         if (!price || !baseItem) {
-            await interaction.reply({content: "Cet objet ne peut pas être acheté", ephemeral: true})
+            await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
             return
         }
 
         if (!playerItem || playerItem.get('quantity') < quantity * price) {
             await interaction.reply({
                 content: "Vous n'avez pas la quantité nécessaire de kamas pour acheter",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             })
             return;
         }
@@ -55,8 +66,8 @@ class Sale extends AbstractSubCommand {
             content: `${userName} a acheté ${quantity} x ${item} pour ${price * quantity} kamas`
         })
 
-        await PlayerService.addPlayerItem(interaction.user, item, baseItem.type, quantity)
-        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, -price * quantity)
+        await PlayerService.addPlayerItem(interaction.user, item, baseItem.type, quantity, guildId)
+        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, -price * quantity, guildId)
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
@@ -77,6 +88,11 @@ class Sale extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
         const options = interaction.options
         const focused = options.getFocused(true)
         const search = focused.value
