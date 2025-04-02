@@ -2,8 +2,8 @@ import {
     AutocompleteInteraction,
     ButtonInteraction,
     CommandInteraction,
-    ModalSubmitInteraction,
-    SlashCommandBuilder
+    MessageFlags,
+    ModalSubmitInteraction
 } from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 
@@ -14,7 +14,7 @@ abstract class AbstractSubCommand {
     abstract execute(interaction: CommandInteraction): Promise<void>;
 
     async executeButton(interaction: ButtonInteraction): Promise<void> {
-        await interaction.reply({content: 'Not implemented', ephemeral: true})
+        await interaction.reply({content: 'Not implemented', flags: MessageFlags.Ephemeral})
     };
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

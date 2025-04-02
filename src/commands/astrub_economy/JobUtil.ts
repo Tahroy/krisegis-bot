@@ -2,15 +2,14 @@ import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import Tool, {Tools} from "../../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../../models/astrub_economy/BaseItem";
 import {Crafts} from "../../models/astrub_economy/Craft";
-import {Client, Guild, TextChannel, User} from "discord.js";
+import {Client, Guild, User} from "discord.js";
 import Player from "../../models/astrub_economy/Player";
-import fs from "fs";
 import Meteo, {Meteos} from "../../models/astrub_economy/Meteo";
 import cron from 'node-cron';
 import KrisegisClient from "../../models/KrisegisClient";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 import Building, {Buildings} from "../../models/astrub_economy/Building";
-import build from "./Build";
+import WeatherGuild from "../../models/astrub_economy/WeatherGuild";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -67,10 +66,11 @@ class JobUtil {
         return items;
     }
 
-    static async getPlayer(user: User): Promise<Player> {
+    static async getPlayer(user: User, guildId: string): Promise<Player> {
         let player = await Player.findOne({
             where: {
-                id: user.id
+                userId: user.id,
+                guildId: guildId
             }
         })
 
@@ -78,7 +78,7 @@ class JobUtil {
             return player;
         }
 
-        return await Player.create({id: user.id})
+        return await Player.create({userId: user.id, guildId: guildId})
     }
 
 
@@ -103,53 +103,42 @@ class JobUtil {
 
     }
 
-    static async updateMeteo() {
-
-        let meteo: string | null = null
-        if (fs.existsSync('meteo.json')) {
-            const data = JSON.parse(fs.readFileSync('meteo.json').toString());
-            meteo = data.meteo;
-        }
+    static async updateMeteo(guildId: string) {
         const meteos = Object.values(Meteos);
         let randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
 
+        const currentWeather = await WeatherGuild.findOne({ where: { guildId } });
+
         // Si c'est la même météo, on relance UNE fois
-        if (meteo === randomMeteo.name) {
+        if (currentWeather && currentWeather.name === randomMeteo.name) {
             randomMeteo = meteos[Math.floor(Math.random() * meteos.length)];
         }
 
-        this.sauvegarderMeteo(randomMeteo);
+        await JobUtil.sauvegarderMeteo(randomMeteo, guildId);
     }
 
-    static sauvegarderMeteo(meteo: Meteo) {
-        const name = meteo.name;
-        fs.writeFileSync('meteo.json', JSON.stringify({meteo: name, date: new Date()}));
+    static async sauvegarderMeteo(meteo: Meteo, guildId: string) {
+        await WeatherGuild.upsert({
+            guildId: guildId,
+            name: meteo.name,
+            lastUpdate: new Date()
+        });
     }
 
-    static async chargerMeteo(): Promise<string | null> {
-        try {
-            if (fs.existsSync('meteo.json')) {
-                const data = JSON.parse(fs.readFileSync('meteo.json').toString());
-                return data.meteo;
-            } else {
-                await this.updateMeteo();
-                const data = JSON.parse(fs.readFileSync('meteo.json').toString());
-                return data.meteo || null;
-            }
-        } catch (error) {
-            console.error('Erreur lors de la lecture du fichier meteo.json:', error);
-            return null;
-        }
+    static async chargerMeteo(guildId: string): Promise<string | null> {
+        const weather = await WeatherGuild.findOne({ where: { guildId } });
+        return weather ? weather.name : null;
     }
 
 
     async startReminder(client: KrisegisClient) {
         // Définir la tâche à exécuter chaque jour à 10h
         cron.schedule('0 10 * * *', async () => {
-            await JobUtil.updateMeteo();
-            await JobUtil.annoncerMeteo(client)
+            for (const guild of client.guilds.cache.values()) {
+                await JobUtil.updateMeteo(guild.id);
+                await JobUtil.annoncerMeteo(client, guild.id)
+            }
         });
-        await JobUtil.chargerMeteo()
     }
 
     static async getBuildingsGuild(guild: Guild | null): Promise<string[]> {
@@ -158,7 +147,7 @@ class JobUtil {
         }
 
         const builds = await BuildingGuild.findAll({
-            where: {status: "completed"}
+            where: {status: "completed", guildId: guild.id}
         })
 
         const retour = [];
@@ -188,17 +177,23 @@ class JobUtil {
         return resetValues(building.recipe)
     }
 
-    public static async annoncerMeteo(client: KrisegisClient) {
+    public static async annoncerMeteo(client: KrisegisClient, guildId: string) {
 
-        const meteoName = await JobUtil.chargerMeteo();
+        const meteoName = await JobUtil.chargerMeteo(guildId);
         const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
 
         if (!meteo) {
             return
         }
-        const channel = client.channels.cache.get('1320394869323075604');
 
-        if (channel && channel.isSendable()) {
+        const guild = client.guilds.cache.get(guildId);
+        if (!guild) {
+            return;
+        }
+
+        const channel = guild.channels.cache.find(channel => channel.name === 'Astrub Économie');
+
+        if (channel && channel.isTextBased()) {
             await channel.send({content: meteo.getText()});
         }
     }

@@ -12,6 +12,7 @@ const {join} = require("path");
 const Monster = require("../models/Monster").default;
 import JobUtil from '../commands/astrub_economy/JobUtil';
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
+import WeatherGuild from "../models/astrub_economy/WeatherGuild";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -52,6 +53,7 @@ module.exports = async function (client) {
         await Player.sync();
         await PlayerHouse.sync();
         await BuildingGuild.sync()
+        await WeatherGuild.sync();
         console.log('BDD Synchro !')
     }
 
@@ -108,6 +110,7 @@ module.exports = async function (client) {
             console.log(`- ${guild.name} (ID: ${guild.id})`)
         }
     }
+
     client.once('ready', async () => {
         console.log(`Krisegis V${version} prêt !`)
 

@@ -1,5 +1,11 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
-import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver, User} from "discord.js";
+import {
+    AutocompleteInteraction,
+    CommandInteraction,
+    CommandInteractionOptionResolver,
+    MessageFlags,
+    User
+} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "./JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
@@ -15,23 +21,33 @@ class Sell extends AbstractSubCommand {
             return;
         }
 
+        const guild = interaction.guild
+        if (!guild) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
+
+        const guildId = guild.id;
         const options = interaction.options;
 
         const item: string = options.getString('item') ?? '';
         const quantity: number = options.getInteger('quantity') ?? 0;
 
         if (!item || !quantity) {
-            await interaction.reply({content: "Commande incorrecte", ephemeral: true})
+            await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
             return;
         }
 
         const user = interaction.user;
 
         // On vérifie si la personne a le bon nombre d'objets
-        let playerItem = await PlayerItem.findOne({where: {name: item, user_id: user.id,},});
+        let playerItem = await PlayerItem.findOne({where: {name: item, user_id: user.id, guildId: guildId}});
 
         if (!playerItem || playerItem.get('quantity') < quantity) {
-            await interaction.reply({content: "Vous n'avez pas la quantité nécessaire pour vendre", ephemeral: true})
+            await interaction.reply({content: "Vous n'avez pas la quantité nécessaire pour vendre", flags: MessageFlags.Ephemeral})
             return;
         }
 
@@ -39,20 +55,20 @@ class Sell extends AbstractSubCommand {
         const price = itemBase?.sell ?? 0
 
         if (!price || !itemBase) {
-            await interaction.reply({content: "Cet objet ne peut pas être vendu", ephemeral: true})
+            await interaction.reply({content: "Cet objet ne peut pas être vendu", flags: MessageFlags.Ephemeral})
             return
         }
 
-        const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
 
         await interaction.reply({
-            content: `${userName} a vendu ${quantity} x ${item} pour ${price * quantity} kamas`
+            content: `${userName} a vendu ${quantity} x ${item} pour ${price * quantity} kamas`,
+            flags: MessageFlags.Ephemeral
         })
 
-        await PlayerService.addPlayerItem(interaction.user, item, itemBase.type, -quantity)
-        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, price * quantity)
+        await PlayerService.addPlayerItem(interaction.user, item, itemBase.type, -quantity, guildId)
+        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, price * quantity, guildId)
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
@@ -73,6 +89,11 @@ class Sell extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
         const options = interaction.options
         const focused = options.getFocused(true)
         const search = focused.value
@@ -80,7 +101,7 @@ class Sell extends AbstractSubCommand {
         const retour = [];
         switch (focused.name) {
             case 'item':
-                const items = (await this.getUserItems(interaction.user, search)).sort((a, b) => a.name.localeCompare(b.name));
+                const items = (await this.getUserItems(interaction.user, search, guildId)).sort((a, b) => a.name.localeCompare(b.name));
 
                 for (let item of items) {
                     const price = JobUtil.getItem(item.name)?.sell ?? 0;
@@ -100,7 +121,7 @@ class Sell extends AbstractSubCommand {
         await interaction.respond(retour)
     }
 
-    private async getUserItems(user: User, search: string): Promise<PlayerItem[]> {
+    private async getUserItems(user: User, search: string, guildId: string): Promise<PlayerItem[]> {
         const items = JobUtil.getAllItems();
 
         let sellablesItems: string [] = []
@@ -117,7 +138,8 @@ class Sell extends AbstractSubCommand {
         return await PlayerItem.findAll({
             where: {
                 user_id: user.id,
-                name: {[Op.in]: sellablesItems,}
+                name: {[Op.in]: sellablesItems,},
+                guildId: guildId
             }
         });
     }
