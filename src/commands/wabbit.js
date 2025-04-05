@@ -133,7 +133,7 @@ module.exports = {
 
             const wabbitName = WABBITS_NAMES[channelData.image]
 
-            await PlayerService.addPlayerItem(user, wabbitName, ItemType.WABBIT)
+            await PlayerService.addPlayerItem(user, wabbitName, ItemType.WABBIT, 1, interaction.guild.id ?? 0)
 
             return interaction.reply(`${userName} a capturé un ${wabbitName} ! Il a maintenant ${userScore} point${plural}`)
         }

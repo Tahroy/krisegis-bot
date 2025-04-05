@@ -258,7 +258,7 @@ module.exports = {
         let playerItem = await PlayerItem.findOne({
             where: {
                 name: name,
-                user_id: user.id
+                userId: user.id
             }
         })
 
@@ -268,7 +268,7 @@ module.exports = {
         } else {
             playerItem = await PlayerItem.create({
                 name: name,
-                user_id: user.id,
+                userId: user.id,
                 quantity: 1,
                 type: type
             })

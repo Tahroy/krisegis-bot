@@ -139,7 +139,13 @@ module.exports = {
         // Vérifiez si la réponse est correcte
         if (currentQuestion.correctAnswer === selectedAnswer) {
             currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
-            await PlayerService.addPlayerItem(interaction.user, 'point quizz', ItemType.QUESTION)
+            await PlayerService.addPlayerItem(
+                interaction.user,
+                'point quizz',
+                ItemType.QUESTION,
+                1,
+                interaction.guild.id ?? 0
+            )
         }
 
         // Passez à la question suivante

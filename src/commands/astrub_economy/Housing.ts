@@ -12,7 +12,7 @@ class Housing extends AbstractSubCommand {
     async execute(interaction: CommandInteraction): Promise<void> {
         const playerHouse = await PlayerHouse.findOne({
             where: {
-                user_id: interaction.user.id
+                userId: interaction.user.id
             }
         })
 

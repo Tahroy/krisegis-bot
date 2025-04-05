@@ -16,7 +16,7 @@ class Inventory extends AbstractCommand {
         const memberName = member?.nickname ?? user.globalName
 
         const playerItems = await playerItem.findAll({
-            where: {user_id: user.id},
+            where: {userId: user.id},
             order: [['type', 'ASC'], ['name', 'ASC']]
         })
 
@@ -86,7 +86,7 @@ class Inventory extends AbstractCommand {
         const memberName = member?.nickname ?? member?.user.globalName
 
         const playerItems = await playerItem.findAll({
-            where: {user_id: userId},
+            where: {userId: userId},
             order: [['type', 'ASC'], ['name', 'ASC']],
         })
 
