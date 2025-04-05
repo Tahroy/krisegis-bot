@@ -1,5 +1,5 @@
 import PlayerItem from '../models/PlayerItem';
-import {User} from 'discord.js';
+import {Guild, User} from 'discord.js';
 import {Op} from "sequelize";
 
 export enum ItemType {
@@ -20,16 +20,25 @@ export enum ItemType {
 export class PlayerService {
 
     // Ajoute un item pour le joueur
-    static async getItems(user: User, types: ItemType[]):Promise<PlayerItem[]> {
-        return await PlayerItem.findAll({where: {user_id: user.id, type: {[Op.in]: types}}, order: [['type', 'ASC'], ['name', 'ASC']]});
+    static async getItems(user: User, types: ItemType[], guild: Guild): Promise<PlayerItem[]> {
+        return await PlayerItem.findAll({
+            where: {
+                userId: user.id,
+                type: {[Op.in]: types},
+                guildId: guild.id
+            },
+            order: [['type', 'ASC'], ['name', 'ASC']]
+        });
     }
 
-    static async addPlayerItem(user: User, name: string, type: ItemType, quantity: number = 1): Promise<void> {
+    static async addPlayerItem(user: User, name: string, type: ItemType, quantity: number = 1, guildId: string): Promise<void> {
         try {
             // Recherche d'un item existant pour ce joueur
             let playerItem = await PlayerItem.findOne({
                 where: {
-                    name: name, user_id: user.id,
+                    name: name,
+                    userId: user.id,
+                    guildId: guildId
                 },
             });
 
@@ -38,9 +47,21 @@ export class PlayerService {
                 playerItem.quantity += quantity;
                 await playerItem.save();
             } else {
+
+                console.log({
+                    name: name,
+                    userId: user.id,
+                    quantity: quantity,
+                    type: type,
+                    guild: guildId
+                })
                 // Sinon, on crée un nouvel item pour le joueur
                 await PlayerItem.create({
-                    name: name, user_id: user.id, quantity: quantity, type: type,
+                    name: name,
+                    userId: user.id,
+                    quantity: quantity,
+                    type: type,
+                    guildId: guildId,
                 });
             }
         } catch (error) {

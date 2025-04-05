@@ -92,7 +92,7 @@ module.exports = {
 
 		const potion = await Potion.create({
 			name: name,
-			user_id: userId,
+			userId: userId,
 			ingredient_1: ingredients[0],
 			ingredient_2: ingredients[1],
 			ingredient_3: ingredients[2],
@@ -101,7 +101,7 @@ module.exports = {
 		})
 
 		await interaction.reply({content: `Vous avez créé la potion **${potion.name}** ! :tada: :tada: :tada:`})
-		await PlayerService.addPlayerItem(interaction.user, `Potion : ${potion.name}`, ItemType.POTION)
+		await PlayerService.addPlayerItem(interaction.user, `Potion : ${potion.name}`, ItemType.POTION, 1, interaction.guild.id ?? 0)
 	}
 };
 
@@ -290,7 +290,13 @@ class MasterMindGame {
 		if (potion) {
 			// Si la potion existe, on dit qu'il a trouvé celle-ci
 			await interaction.reply({content: `Vous avez gagnez la potion **${potion.name}** ! :tada: :tada: :tada:`})
-			await PlayerService.addPlayerItem(interaction.user, `Potion : ${potion.name}`, ItemType.POTION)
+			await PlayerService.addPlayerItem(
+				interaction.user,
+				`Potion : ${potion.name}`,
+				ItemType.POTION,
+				1,
+				interaction.guild.id ?? 0
+			)
 		}
 		else {
 			savedPotions[interaction.user.id] = this.objectif;

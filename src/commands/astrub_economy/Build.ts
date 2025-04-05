@@ -19,6 +19,14 @@ class Build extends AbstractSubCommand {
             return;
         }
 
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
 
         const buildOption = interaction.options.getString('build');
         const ressource = interaction.options.getString('item');
@@ -37,13 +45,16 @@ class Build extends AbstractSubCommand {
         }
 
         let buildingGuild = await BuildingGuild.findOne({
-            where: {guildId: interaction.guild?.id ?? '0', name: building.name}
+            where: {
+                guildId: guildId,
+                name: building.name
+            }
         })
 
         if (!buildingGuild) {
             const emptyRecipe = jobUtil.getEmptyRecipe(building)
             buildingGuild = await BuildingGuild.create({
-                guildId: interaction.guild?.id ?? '0',
+                guildId: guildId,
                 name: building.name,
                 status: "in_progress",
                 resourcesContributed: emptyRecipe
@@ -56,7 +67,13 @@ class Build extends AbstractSubCommand {
         }
 
         // Check si le joueur a la quantité nécessaire
-        const playerItem = await PlayerItem.findOne({where: {user_id: interaction.user.id, name: ressource}})
+        const playerItem = await PlayerItem.findOne({
+            where: {
+                userId: interaction.user.id,
+                name: ressource,
+                guildId: guildId
+            }
+        })
 
         if (!playerItem || playerItem.get('quantity') < quantity) {
             await interaction.reply({
@@ -78,13 +95,16 @@ class Build extends AbstractSubCommand {
         const updatedResources = buildingGuild.resourcesContributed;
         updatedResources[ressource] = contributionActuelle + quantity
 
-        await BuildingGuild.update(
-            {resourcesContributed: updatedResources},
-            {where: {guildId: interaction.guild?.id ?? '0', name: building.name}
+        await BuildingGuild.update({
+            resourcesContributed: updatedResources
+        }, {
+            where: {
+                guildId: guildId,
+                name: building.name
+            }
         })
 
-//        buildingGuild.set('resourcesContributed', updatedResources);
-        await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, -finalQuantity)
+        await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, -finalQuantity, guildId)
         await buildingGuild.save();
 
         const user = interaction.user;
@@ -109,6 +129,11 @@ class Build extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
         const options = interaction.options
         const focused = options.getFocused(true)
 
@@ -118,7 +143,7 @@ class Build extends AbstractSubCommand {
                 retour = await this.getBuildsAutocomplete(interaction)
                 break;
             case 'item':
-                retour = await this.getBuildingItemsAvailable(interaction)
+                retour = await this.getBuildingItemsAvailable(interaction, guildId)
                 break;
         }
 
@@ -165,7 +190,7 @@ class Build extends AbstractSubCommand {
         return retour;
     }
 
-    private async getBuildingItemsAvailable(interaction: AutocompleteInteraction): Promise<ApplicationCommandOptionChoiceData[]> {
+    private async getBuildingItemsAvailable(interaction: AutocompleteInteraction, guildId: string): Promise<ApplicationCommandOptionChoiceData[]> {
         const options = interaction.options
         const focused = options.getFocused(true)
         const search = focused.value
@@ -183,12 +208,15 @@ class Build extends AbstractSubCommand {
         for (const [ingredient, quantity] of Object.entries(building.recipe)) {
 
             let buildingGuild = await BuildingGuild.findOne({
-                where: {guildId: interaction.guild?.id ?? '0', name: building.name}
+                where: {
+                    guildId: guildId, name:
+                    building.name
+                }
             })
 
             let contributionActuelle = 0
             if (buildingGuild) {
-                 contributionActuelle = buildingGuild.resourcesContributed[ingredient] ?? 0
+                contributionActuelle = buildingGuild.resourcesContributed[ingredient] ?? 0
             }
 
             if (retour.length >= 20) {

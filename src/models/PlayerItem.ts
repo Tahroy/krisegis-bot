@@ -1,15 +1,24 @@
-import {DataTypes, Model, Optional} from 'sequelize';
+import {
+    DataTypes,
+    Model,
+    Optional,
+    BelongsToGetAssociationMixin,
+    BelongsToSetAssociationMixin,
+    BelongsToCreateAssociationMixin,
+    Association
+} from 'sequelize';
 import sequelize from '../utils/database';
+import Player from "./astrub_economy/Player";
 
 
 // Interface pour les attributs de PlayerItem
 interface PlayerItemAttributes {
     id: number;       // ID de l'item
     name: string;     // Nom de l'item
-    user_id: string;  // ID de l'utilisateur
+    userId: string;
     quantity: number; // Quantité
     type: string;     // Type d'item
-//    guild_id?: string | null;
+    guildId: string;
 }
 
 // Interface pour la création (exclut `id` car il est auto-incrémenté)
@@ -19,12 +28,21 @@ type PlayerItemCreationAttributes = Optional<PlayerItemAttributes, 'id'>;
 class PlayerItem extends Model<PlayerItemAttributes, PlayerItemCreationAttributes> implements PlayerItemAttributes {
     public id!: number;
     public name!: string;
-    public user_id!: string;
+    public userId!: string;
     public quantity!: number;
     public type!: string;
- //   public guild_id!: string | null;
+    public guildId!: string;
 
-    // Timestamps (créés automatiquement si activé dans les options du modèle)
+    public getPlayer!: BelongsToGetAssociationMixin<Player>;
+    public setPlayer!: BelongsToSetAssociationMixin<Player, number>;
+    public createPlayer!: BelongsToCreateAssociationMixin<Player>;
+
+    public readonly player?: Player;
+
+    public static associations: {
+        player: Association<PlayerItem, Player>;
+    };
+
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 }
@@ -41,9 +59,9 @@ PlayerItem.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        user_id: {
+        userId: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: false
         },
         quantity: {
             type: DataTypes.INTEGER,
@@ -53,19 +71,23 @@ PlayerItem.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        /*
-        guild_id: {
+        guildId: {
             type: DataTypes.STRING,
-            allowNull: true,
+            allowNull: false,
         },
-
-         */
 
     },
     {
         sequelize, // Instance Sequelize
         modelName: 'PlayerItem', // Nom du modèle
+        tableName: 'player_items',
         timestamps: true, // Ajoute automatiquement createdAt et updatedAt
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId', 'guildId', 'name']
+            }
+        ]
     }
 );
 

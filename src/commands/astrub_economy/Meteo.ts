@@ -1,8 +1,6 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, MessageFlags} from "discord.js";
 import JobUtil from "./JobUtil";
-import KrisegisClient from "../../models/KrisegisClient";
-import AbstractCommand from "../../utils/AbstractCommand";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 
 class Meteo extends AbstractSubCommand {
@@ -10,7 +8,16 @@ class Meteo extends AbstractSubCommand {
     name: string = "meteo";
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        const meteoName = await JobUtil.chargerMeteo();
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
+
+        const meteoName = await JobUtil.chargerMeteo(guildId);
 
         if (!meteoName) {
             await interaction.reply({content: 'Aucune météo actuellement', flags: MessageFlags.Ephemeral})
@@ -25,6 +32,7 @@ class Meteo extends AbstractSubCommand {
         }
         await interaction.reply({content: meteo?.getText()})
     }
+
 }
 
 export default Meteo

@@ -1,5 +1,5 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
-import {AutocompleteInteraction, CommandInteraction, CommandInteractionOptionResolver} from "discord.js";
+import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "./JobUtil";
 import PlayerItem from "../../models/PlayerItem";
@@ -12,40 +12,61 @@ class Craft extends AbstractSubCommand {
     name: string = 'craft';
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
-        const options: CommandInteractionOptionResolver = interaction.options;
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
+
+        const options = interaction.options;
 
         const itemName: string | null = options.getString('name');
         const craftQuantity = options.getInteger('quantity');
 
         if (!itemName || !craftQuantity) {
-            await interaction.reply({content: "Commande incorrecte", ephemeral: true})
+            await interaction.reply({
+                content: "Commande incorrecte",
+                flags: MessageFlags.Ephemeral
+            })
             return;
         }
 
         const item = JobUtil.getItem(itemName);
 
         if (!item) {
-            await interaction.reply({content: "Cet objet ne peut pas être fabriqué", ephemeral: true})
+            await interaction.reply({
+                content: "Cet objet ne peut pas être fabriqué",
+                flags: MessageFlags.Ephemeral
+            })
             return
         }
 
         if (typeof item.recipe !== 'object' || item.recipe === null) {
-            await interaction.reply({content: "Commande incorrecte", ephemeral: true})
+            await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
             return;
         }
 
         // Check des ingrédients
         for (let [ingredient, quantity] of Object.entries(item.recipe)) {
-            const playerItem = await PlayerItem.findOne({where: {user_id: interaction.user.id, name: ingredient}})
+            const playerItem = await PlayerItem.findOne({
+                where: {
+                    userId: interaction.user.id,
+                    name: ingredient,
+                    guildId: guildId
+                }
+            })
 
             if (!playerItem || playerItem.quantity < (quantity * craftQuantity)) {
                 await interaction.reply({
                     content: `Vous n'avez pas la quantité de ${ingredient} nécessaire pour fabriquer ${itemName}`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
                 return
             }
@@ -55,13 +76,16 @@ class Craft extends AbstractSubCommand {
         if (item.tool) {
             const playerTool = await PlayerItem.findOne({
                 where: {
-                    user_id: interaction.user.id, name: item.tool
+                    userId: interaction.user.id,
+                    name: item.tool,
+                    guildId: guildId
                 }
             })
+
             if (!playerTool || playerTool.quantity < 1) {
                 await interaction.reply({
                     content: `Vous devez avoir un ${item.tool} pour fabriquer ${itemName}`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 })
                 return
             }
@@ -72,7 +96,7 @@ class Craft extends AbstractSubCommand {
             for (let building of item.buildings) {
                 const buildingGuild = await BuildingGuild.findOne({
                     where: {
-                        guildId: interaction.guild?.id ?? '0',
+                        guildId: guildId,
                         name: building,
                         status: "completed"
                     }
@@ -80,7 +104,7 @@ class Craft extends AbstractSubCommand {
                 if (!buildingGuild) {
                     await interaction.reply({
                         content: `Vous devez avoir ${building} pour fabriquer ${itemName}`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     })
                     return
                 }
@@ -89,12 +113,11 @@ class Craft extends AbstractSubCommand {
 
         // Retrait des ingrédients
         for (let [ingredient, quantity] of Object.entries(item.recipe)) {
-            await PlayerService.addPlayerItem(interaction.user, ingredient, ItemType.RESSOURCE, -quantity * craftQuantity)
+            await PlayerService.addPlayerItem(interaction.user, ingredient, ItemType.RESSOURCE, -quantity * craftQuantity, guildId)
         }
 
         // Ajout de l'item
-        await PlayerService.addPlayerItem(interaction.user, itemName, ItemType.OUTIL, craftQuantity)
-
+        await PlayerService.addPlayerItem(interaction.user, itemName, item.type, craftQuantity, guildId)
 
         const user = interaction.user;
         const guild = interaction.guild
@@ -107,9 +130,16 @@ class Craft extends AbstractSubCommand {
             const experience = item.experience / item.jobs.length * craftQuantity;
 
             for (let job of item.jobs) {
-                let myJob = await Job.findOne({where: {name: job, user_id: interaction.user.id}})
+                let myJob = await Job.findOne({
+                    where: {
+                        name: job,
+                        userId: interaction.user.id,
+                        guildId: guildId
+                    }
+                })
+
                 if (!myJob) {
-                    myJob = await Job.create({name: job, user_id: interaction.user.id, level: 1, experience: 0})
+                    myJob = await Job.create({name: job, userId: interaction.user.id, level: 1, experience: 0, guildId: guildId})
                     continue
                 }
 
@@ -138,6 +168,11 @@ class Craft extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
         const options = interaction.options;
         const focused = options.getFocused(true);
         const search = focused.value;
