@@ -14,6 +14,15 @@ class Pray extends AbstractCommand {
             return
         }
 
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
+
         const prayer = interaction.options.getString('prayer')
 
         if (prayer !== 'meteo') {
@@ -29,7 +38,8 @@ class Pray extends AbstractCommand {
         const kamas = await PlayerItem.findOne({
             where: {
                 name: 'Kamas',
-                user_id: user.id
+                userId: user.id,
+                guildId: guildId
             }
         })
 
@@ -45,7 +55,8 @@ class Pray extends AbstractCommand {
         await PlayerItem.update({quantity: kamas.quantity - 500}, {
             where: {
                 name: 'Kamas',
-                user_id: user.id
+                userId: user.id,
+                guildId: guildId
             }
         })
 
@@ -55,10 +66,10 @@ class Pray extends AbstractCommand {
         })
 
         // On recharge la météo
-        await JobUtil.updateMeteo()
+        await JobUtil.updateMeteo(guildId)
 
         if (interaction?.channel?.isSendable()) {
-            const meteoName = await JobUtil.chargerMeteo();
+            const meteoName = await JobUtil.chargerMeteo(guildId);
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
 
             await interaction.channel.send({

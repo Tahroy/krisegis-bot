@@ -3,7 +3,7 @@ import sequelize from '../../utils/database';
 
 interface PlayerHouseAttributes {
     type: string;
-    user_id: string;
+    userId: string;
     level: number;
 }
 
@@ -11,7 +11,7 @@ type PlayerHouseCreationAttributes = Partial<PlayerHouseAttributes>
 
 class PlayerHouse extends Model<PlayerHouseAttributes, PlayerHouseCreationAttributes> implements PlayerHouseAttributes {
     public type!: string;
-    public user_id!: string;
+    public userId!: string;
     public level!: number;
 }
 
@@ -21,7 +21,7 @@ PlayerHouse.init(
             type: DataTypes.STRING,
             allowNull: false
         },
-        user_id: {
+        userId: {
             type: DataTypes.STRING,
             allowNull: false
         },
