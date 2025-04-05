@@ -92,7 +92,7 @@ module.exports = {
 
 		const potion = await Potion.create({
 			name: name,
-			user_id: userId,
+			userId: userId,
 			ingredient_1: ingredients[0],
 			ingredient_2: ingredients[1],
 			ingredient_3: ingredients[2],

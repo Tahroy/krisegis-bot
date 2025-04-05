@@ -23,7 +23,7 @@ export class PlayerService {
     static async getItems(user: User, types: ItemType[], guild: Guild): Promise<PlayerItem[]> {
         return await PlayerItem.findAll({
             where: {
-                user_id: user.id,
+                userId: user.id,
                 type: {[Op.in]: types},
                 guildId: guild.id
             },
@@ -37,7 +37,7 @@ export class PlayerService {
             let playerItem = await PlayerItem.findOne({
                 where: {
                     name: name,
-                    user_id: user.id,
+                    userId: user.id,
                     guildId: guildId
                 },
             });
@@ -47,13 +47,21 @@ export class PlayerService {
                 playerItem.quantity += quantity;
                 await playerItem.save();
             } else {
+
+                console.log({
+                    name: name,
+                    userId: user.id,
+                    quantity: quantity,
+                    type: type,
+                    guild: guildId
+                })
                 // Sinon, on crée un nouvel item pour le joueur
                 await PlayerItem.create({
                     name: name,
-                    user_id: user.id,
+                    userId: user.id,
                     quantity: quantity,
                     type: type,
-                    guildId: guildId
+                    guildId: guildId,
                 });
             }
         } catch (error) {

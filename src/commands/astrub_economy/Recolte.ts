@@ -127,7 +127,7 @@ class Recolte extends AbstractSubCommand {
             if (ressource.level > 1) {
                 const job = await Job.findOne({
                     where: {
-                        user_id: interaction.user.id,
+                        userId: interaction.user.id,
                         name: ressource.name,
                         guildId: guildId
                     }

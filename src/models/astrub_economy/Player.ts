@@ -8,7 +8,6 @@ import {
     HasManyHasAssociationMixin,
     HasManyCountAssociationsMixin,
     HasManyCreateAssociationMixin,
-    ForeignKey
 } from "sequelize";
 import sequelize from '../../utils/database';
 import Job from "./Job";
@@ -46,7 +45,7 @@ class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implement
         const myJob = await Job.findOne({
             where: {
                 name: jobName,
-                user_id: this.userId,
+                userId: this.userId,
                 guildId: this.guildId
             }
         });
@@ -57,7 +56,7 @@ class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implement
 
         return await Job.create({
             name: jobName,
-            user_id: this.userId,
+            userId: this.userId,
             guildId: this.guildId,
             level: 1,
             experience: 0
@@ -97,11 +96,5 @@ Player.init(
         ]
     }
 );
-
-Player.hasMany(Job, {
-    foreignKey: 'user_id',
-    as: 'jobs',
-    onDelete: 'CASCADE'
-});
 
 export default Player;
