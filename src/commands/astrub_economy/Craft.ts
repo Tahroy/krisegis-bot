@@ -57,7 +57,7 @@ class Craft extends AbstractSubCommand {
         for (let [ingredient, quantity] of Object.entries(item.recipe)) {
             const playerItem = await PlayerItem.findOne({
                 where: {
-                    user_id: interaction.user.id,
+                    userId: interaction.user.id,
                     name: ingredient,
                     guildId: guildId
                 }
@@ -76,7 +76,7 @@ class Craft extends AbstractSubCommand {
         if (item.tool) {
             const playerTool = await PlayerItem.findOne({
                 where: {
-                    user_id: interaction.user.id,
+                    userId: interaction.user.id,
                     name: item.tool,
                     guildId: guildId
                 }
@@ -133,13 +133,13 @@ class Craft extends AbstractSubCommand {
                 let myJob = await Job.findOne({
                     where: {
                         name: job,
-                        user_id: interaction.user.id,
+                        userId: interaction.user.id,
                         guildId: guildId
                     }
                 })
 
                 if (!myJob) {
-                    myJob = await Job.create({name: job, user_id: interaction.user.id, level: 1, experience: 0, guildId: guildId})
+                    myJob = await Job.create({name: job, userId: interaction.user.id, level: 1, experience: 0, guildId: guildId})
                     continue
                 }
 

@@ -69,7 +69,7 @@ class Build extends AbstractSubCommand {
         // Check si le joueur a la quantité nécessaire
         const playerItem = await PlayerItem.findOne({
             where: {
-                user_id: interaction.user.id,
+                userId: interaction.user.id,
                 name: ressource,
                 guildId: guildId
             }

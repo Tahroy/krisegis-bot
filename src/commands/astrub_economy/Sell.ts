@@ -44,7 +44,7 @@ class Sell extends AbstractSubCommand {
         const user = interaction.user;
 
         // On vérifie si la personne a le bon nombre d'objets
-        let playerItem = await PlayerItem.findOne({where: {name: item, user_id: user.id, guildId: guildId}});
+        let playerItem = await PlayerItem.findOne({where: {name: item, userId: user.id, guildId: guildId}});
 
         if (!playerItem || playerItem.get('quantity') < quantity) {
             await interaction.reply({content: "Vous n'avez pas la quantité nécessaire pour vendre", flags: MessageFlags.Ephemeral})
@@ -137,7 +137,7 @@ class Sell extends AbstractSubCommand {
 
         return await PlayerItem.findAll({
             where: {
-                user_id: user.id,
+                userId: user.id,
                 name: {[Op.in]: sellablesItems,},
                 guildId: guildId
             }
