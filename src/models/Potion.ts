@@ -5,7 +5,7 @@ import sequelize from '../utils/database';
 interface PotionAttributes {
     id: number;
     name: string;
-    user_id: string;
+    userId: string;
     ingredient_1: string;
     ingredient_2: string;
     ingredient_3: string;
@@ -21,7 +21,7 @@ interface PotionCreationAttributes extends Optional<PotionAttributes, 'id'> {
 class Potion extends Model<PotionAttributes, PotionCreationAttributes> implements PotionAttributes {
     public id!: number;
     public name!: string;
-    public user_id!: string;
+    public userId!: string;
     public ingredient_1!: string;
     public ingredient_2!: string;
     public ingredient_3!: string;
@@ -39,7 +39,7 @@ Potion.init({
         type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true,
     }, name: {
         type: DataTypes.STRING, allowNull: false,
-    }, user_id: {
+    }, userId: {
         type: DataTypes.STRING, allowNull: false,
     }, ingredient_1: {
         type: DataTypes.STRING, allowNull: false,

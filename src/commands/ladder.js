@@ -38,7 +38,7 @@ module.exports = {
             let userName = ''
 
             try {
-                let user = await interaction.guild.members.fetch(score.user_id ?? score.catchUserId)
+                let user = await interaction.guild.members.fetch(score.userId ?? score.catchUserId)
                 userName = user.displayName
             } catch (error) {
                 userName = 'Anonymous'
@@ -73,10 +73,10 @@ module.exports = {
         }
 
         return await PlayerItem.findAll({
-                                            attributes: ['user_id',   // Garder l'user_id dans la sélection
+                                            attributes: ['userId',   // Garder l'userId dans la sélection
                                                 [Sequelize.fn('SUM', Sequelize.col('quantity')), 'total_quantity']  // Calculer la somme de 'quantity'
                                             ], where: whereClause,  // Ajouter le where conditionnel
-                                            group: ['user_id'],  // Groupement par user_id
+                                            group: ['userId'],  // Groupement par userId
                                             order: [[Sequelize.fn('SUM', Sequelize.col('quantity')), 'DESC']],  // Tri par somme décroissante
                                             limit: 3  // Récupérer uniquement le meilleur score
                                         })
