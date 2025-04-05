@@ -38,7 +38,7 @@ class Pray extends AbstractCommand {
         const kamas = await PlayerItem.findOne({
             where: {
                 name: 'Kamas',
-                user_id: user.id,
+                userId: user.id,
                 guildId: guildId
             }
         })
@@ -55,7 +55,7 @@ class Pray extends AbstractCommand {
         await PlayerItem.update({quantity: kamas.quantity - 500}, {
             where: {
                 name: 'Kamas',
-                user_id: user.id,
+                userId: user.id,
                 guildId: guildId
             }
         })
