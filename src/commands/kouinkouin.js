@@ -98,7 +98,7 @@ module.exports = {
 
                     delete games[key]
 
-                }, 1200)
+                }, 1500)
 
             } else {
                 // Sinon on continue de décrémenter le timer

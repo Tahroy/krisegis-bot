@@ -9,7 +9,7 @@ class Profil extends AbstractSubCommand {
     async execute(interaction: CommandInteraction): Promise<void> {
         const jobs = await Job.findAll({
             where: {
-                user_id: interaction.user.id,
+                userId: interaction.user.id,
                 guildId: interaction.guild?.id
             },
             order: [['experience', 'DESC']]

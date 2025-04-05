@@ -40,7 +40,7 @@ class Give extends AbstractSubCommand {
             return;
         }
 
-        let playerItem = await PlayerItem.findOne({where: {name: itemName, user_id: user.id, guildId: guildId}});
+        let playerItem = await PlayerItem.findOne({where: {name: itemName, userId: user.id, guildId: guildId}});
 
         if (!playerItem || playerItem.get('quantity') < quantity) {
             await interaction.reply({content: "Vous n'avez pas la quantité nécessaire", flags: MessageFlags.Ephemeral})
@@ -148,7 +148,7 @@ class Give extends AbstractSubCommand {
 
         return await PlayerItem.findAll({
             where: {
-                user_id: user.id,
+                userId: user.id,
                 name: {[Op.in]: sellablesItems,},
                 guildId: guildId
             }

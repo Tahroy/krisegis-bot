@@ -37,7 +37,7 @@ class Sale extends AbstractSubCommand {
         let playerItem = await PlayerItem.findOne({
             where: {
                 name: 'Kamas',
-                user_id: user.id,
+                userId: user.id,
                 guildId: guildId
             }
         });
