@@ -86,7 +86,18 @@ class Recolte extends AbstractSubCommand {
 
 
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity, guildId)
-        await player.update({lastHarvest: new Date()})
+
+
+        await Player.update({
+                lastHarvest: new Date()
+            },
+            {
+                where: {
+                    userId: interaction.user.id,
+                    guildId: guildId
+                }
+            })
+
         const user = interaction.user;
 
         const guild = interaction.guild
@@ -143,6 +154,7 @@ class Recolte extends AbstractSubCommand {
 
         await interaction.respond(responses)
     }
+
     getRandomInt(min: number, max: number) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
