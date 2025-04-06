@@ -108,9 +108,50 @@ module.exports = async function (client) {
     }
 
     async function listGuilds() {
+        console.log("--------------------------------------------------");
+        console.log("Serveurs où le bot est présent:");
         for (const guild of client.guilds.cache.values()) {
-            console.log(`- ${guild.name} (ID: ${guild.id})`)
+            console.log(`- ${guild.name} (ID: ${guild.id})`);
+
+            // Fetch all members of the guild
+            try {
+                await guild.members.fetch();
+            } catch (error) {
+                console.error(`Error fetching members for guild ${guild.name} (ID: ${guild.id}):`, error);
+                continue; // Skip to the next guild if there's an error
+            }
+
+            // Find the owner of the guild
+            try {
+                const owner = await guild.fetchOwner();
+                console.log(`    - Propriétaire: ${owner.user.tag} (ID: ${owner.id})`);
+            } catch (error) {
+                console.error(`Error fetching owner for guild ${guild.name} (ID: ${guild.id}):`, error);
+            }
+
+            // Find administrators
+            const administrators = guild.members.cache.filter(member => member.permissions.has('Administrator'));
+            if (administrators.size > 0) {
+                console.log(`    - Administrateurs:`);
+                for (const admin of administrators.values()) {
+                    console.log(`        - ${admin.user.tag} (ID: ${admin.id})`);
+                }
+            }
+
+            // Find moderators (members with Manage Messages, Kick Members, or Ban Members permissions)
+            const moderators = guild.members.cache.filter(member =>
+                member.permissions.has('ManageMessages') ||
+                member.permissions.has('KickMembers') ||
+                member.permissions.has('BanMembers')
+            );
+            if (moderators.size > 0) {
+                console.log(`    - Modérateurs:`);
+                for (const moderator of moderators.values()) {
+                    console.log(`        - ${moderator.user.tag} (ID: ${moderator.id})`);
+                }
+            }
         }
+        console.log("--------------------------------------------------");
     }
 
     client.once('ready', async () => {

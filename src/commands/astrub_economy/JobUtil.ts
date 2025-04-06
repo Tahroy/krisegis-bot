@@ -195,7 +195,9 @@ class JobUtil {
             return;
         }
 
-        const channel = guild.channels.cache.find(channel => channel.name === 'Astrub Économie');
+        // Astrub Économie ou astrub_economie
+
+        const channel = guild.channels.cache.find(channel => (channel.name === 'astrub_economie') || (channel.name === 'astrub-economie'));
 
         if (channel && channel.isTextBased()) {
             await channel.send({content: meteo.getText()});
