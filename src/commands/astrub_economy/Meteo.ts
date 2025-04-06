@@ -17,7 +17,12 @@ class Meteo extends AbstractSubCommand {
             return;
         }
 
-        const meteoName = await JobUtil.chargerMeteo(guildId);
+        let meteoName = await JobUtil.chargerMeteo(guildId);
+
+        if (!meteoName) {
+            await JobUtil.updateMeteo(guildId);
+            meteoName = await JobUtil.chargerMeteo(guildId);
+        }
 
         if (!meteoName) {
             await interaction.reply({content: 'Aucune météo actuellement', flags: MessageFlags.Ephemeral})
