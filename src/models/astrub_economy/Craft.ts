@@ -117,8 +117,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         jobs: [JobEnum.MINEUR],
         buildings: [BuildingEnum.FONDERIE]
     },
-    [CraftEnum.POTION_MINI_SOIN_SUPERIEURE]: {
-        name: CraftEnum.POTION_MINI_SOIN_SUPERIEURE,
+    [CraftEnum.POTION_RAPPEL]: {
+        name: CraftEnum.POTION_RAPPEL,
         recipe: {[RessourcesEnum.SAUGE]: 20},
         sell: 20 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.SIMPLE_CRAFT,
         buy: 20 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.SIMPLE_CRAFT,
