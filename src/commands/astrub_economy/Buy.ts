@@ -43,31 +43,33 @@ class Sale extends AbstractSubCommand {
         });
 
         const baseItem = JobUtil.getItem(item);
-        const price = baseItem?.buy ?? 0
-
+        const price = Math.floor(baseItem?.buy ?? 0);
+        
         if (!price || !baseItem) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
             return
         }
-
-        if (!playerItem || playerItem.get('quantity') < quantity * price) {
+        
+        const totalPrice = price * quantity;
+        
+        if (!playerItem || playerItem.get('quantity') < totalPrice) {
             await interaction.reply({
                 content: "Vous n'avez pas la quantité nécessaire de kamas pour acheter",
                 flags: MessageFlags.Ephemeral
             })
             return;
         }
-
+        
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
-
+        
         await interaction.reply({
-            content: `${userName} a acheté ${quantity} x ${item} pour ${price * quantity} kamas`
+            content: `${userName} a acheté ${quantity} x ${item} pour ${totalPrice} kamas`
         })
-
+        
         await PlayerService.addPlayerItem(interaction.user, item, baseItem.type, quantity, guildId)
-        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, -price * quantity, guildId)
+        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, -totalPrice, guildId)
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
@@ -109,18 +111,18 @@ class Sale extends AbstractSubCommand {
                     if (ressource.buy === 0) continue;
                     if (ressource.name.toLowerCase().includes(search.toLowerCase()) || !search) {
                         retour.push({
-                            name: `${ressource.name} (${ressource.buy} kamas)`,
+                            name: `${ressource.name} (${Math.floor(ressource.buy)} kamas)`,
                             value: ressource.name
                         })
                     }
                 }
-
+                
                 for (let tool of tools) {
                     if (retour.length >= 20) break;
                     if (tool.buy === 0) continue;
                     if (tool.name.toLowerCase().includes(search.toLowerCase()) || !search) {
                         retour.push({
-                            name: `${tool.name} (${tool.buy} kamas)`,
+                            name: `${tool.name} (${Math.floor(tool.buy)} kamas)`,
                             value: tool.name
                         })
                     }
