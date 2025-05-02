@@ -18,7 +18,7 @@ class Meteo {
         text += `\n ${this.description}\n`
         this.effects.forEach(effect => {
             if (effect.description.length > 0) {
-                text += `\n* ${effect.description}`
+                text += `\n* ${effect.description} (${effect.value} %)`
             }
         })
 
