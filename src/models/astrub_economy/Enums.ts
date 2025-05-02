@@ -75,13 +75,13 @@ export {ToolsEnum};
 
 
 enum SellEnum {
-    RESSOURCE_1= 1,
-    RESSOURCE_10 = 4,
+    RESSOURCE_1= 2,
+    RESSOURCE_10 = 6,
 }
 
 enum BuyEnum {
     RESSOURCE_1 = 5,
-    RESSOURCE_10 = 10,
+    RESSOURCE_10 = 15,
 }
 
 enum XpEnum {
