@@ -269,17 +269,12 @@ class Build extends AbstractSubCommand {
                     return
                 }
 
-                const image = join(__dirname, '..', '..', '..', 'assets', 'buildings', `${build?.image}`)
 
                 const embed = new EmbedBuilder()
                     .setTitle(`La construction de ${building.name} est terminée, bravo à vous !`)
                     .setColor("#0099ff")
-                    .setImage(`attachment://${build.image}`)
 
-                await myChannel.send({
-                    embeds: [embed],
-                    files: [image]
-                })
+                await myChannel.send({embeds: [embed],})
             }
         }
     }

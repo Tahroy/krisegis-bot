@@ -55,11 +55,14 @@ class Recolte extends AbstractSubCommand {
             const pluralM = minutes <= 1 ? '' : 's'
             const pluralS = seconds <= 1 ? '' : 's'
 
+            /*
             await interaction.reply({
                 content: `Vous pourrez récolter dans ${minutes} minute${pluralM} et ${seconds} seconde${pluralS}.`,
                 flags: MessageFlags.Ephemeral
             })
             return;
+
+             */
         }
 
         const ressource = ressourceChoice;
@@ -73,7 +76,7 @@ class Recolte extends AbstractSubCommand {
         }
 
         const quantity: number = await this.getQuantity(job, item?.level ?? 1, guildId);
-        const xp: number = await this.getExperience(job, item?.level ?? 1, guildId);
+        const xp: number = await this.getExperience(job, item, guildId);
 
         job.experience += xp;
 
@@ -156,38 +159,43 @@ class Recolte extends AbstractSubCommand {
      * Voir tableur du jeu
      */
     private async getQuantity(job: Job, itemLevel: number, guildId: string): Promise<number> {
-
         let percent = 100;
-
+    
         const jobLevel = job.level;
         const meteoName = await JobUtil.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {
                 const effect = meteo.effects.find(e => e.job === job.name) ?? null
-
+    
                 if (effect !== null) {
                     percent += effect.value
                 }
             }
         }
-
-        const randomBase = this.getRandomInt(1, 3);
-        const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel);
-        const quantityBase = randomBase + randomLevel - itemLevel
-        const quantity = Math.ceil(quantityBase * (percent / 100));
-
-        console.log(quantity, quantityBase)
-        return Math.max(quantity, 0);
+    
+        // On prend la base : job.level - ressource.level
+        const baseAmount = Math.ceil((jobLevel - itemLevel) / 2 + 1);
+        
+        // 5% de chance de jackpot (x2)
+        if (Math.random() < 0.05) {
+            const jackpot = baseAmount * 2;
+            const final = Math.ceil(jackpot * (percent / 100));
+            return Math.max(final, 1);
+        }
+        
+        const minValue = Math.max(1, Math.floor(baseAmount * 0.7) - itemLevel);
+        const maxValue = Math.ceil(baseAmount * 1.5 - itemLevel);
+        
+        const quantity = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+        const final = Math.ceil(quantity * (percent / 100));
+        
+        return Math.max(final, 1);
     }
 
-    private async getExperience(job: Job, number: number, guildId: string) {
-
-        return Math.ceil(10 + job.level / 1.5 - 1);
-        /*
+    private async getExperience(job: Job, item: Ressource, guildId: string) {
         let percent = 100;
 
-        const jobLevel = job.level;
         const meteoName = await JobUtil.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
@@ -203,9 +211,12 @@ class Recolte extends AbstractSubCommand {
         const experienceBase = 10;
         const experience = Math.ceil(experienceBase * (percent / 100));
 
-        return Math.max(experience * number, 0);
+        let multiplicator = 1;
+        if (item.level === 10) {
+            multiplicator = 4;
+        }
 
-         */
+        return Math.max(experience * multiplicator, 0);
     }
 }
 
