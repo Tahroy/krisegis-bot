@@ -54,9 +54,9 @@ const Buildings: Record<BuildingEnum, Building> = {
         name: BuildingEnum.BRASSERIE,
         description: "La bière d'Astrub n'attend qu'à être connue du Monde des Dix ! Cette brasserie accueille de nombreux travailleurs, prêts à faire de nouvelles découvertes aromatiques et surtout tester leurs propres produits.",
         recipe: {
-            [RessourcesEnum.PIERRE]: 3000,
-            [CraftEnum.PLANCHE_CHATAIGNIER]: 1000,
-            [CraftEnum.LINGOT_CUIVRE]: 1000,
+            [RessourcesEnum.PIERRE]: 2500,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 200,
+            [CraftEnum.LINGOT_CUIVRE]: 200,
             [RessourcesEnum.KAMAS]: 15000
         },
         image: 'brasserie.png'
@@ -66,10 +66,8 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "Atelier de menuiserie où les artisans transforment le bois en objets utiles comme des boucliers, des meubles et des armes. On y remarque même quelques statuettes en hommage aux dieux.",
         recipe: {
             [RessourcesEnum.PIERRE]: 2500,
-            [CraftEnum.PLANCHE_FRENE]: 500,
-            [CraftEnum.PLANCHE_CHATAIGNIER]: 500,
-            [CraftEnum.LINGOT_FER]: 250,
-            [CraftEnum.LINGOT_CUIVRE]: 250,
+            [CraftEnum.LINGOT_CUIVRE]: 150,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 250,
             [RessourcesEnum.KAMAS]: 15000
         },
         image: 'menuiserie.png'
@@ -79,10 +77,8 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "Forge imposante avec plusieurs enclumes où les forgerons travaillent le métal. On y fabrique des objets métalliques précieux, des talismans, des bijoux et des armes. Chaque matin, les enfants viennent admirer les marteaux frappant le métal..",
         recipe: {
             [RessourcesEnum.PIERRE]: 2500,
-            [CraftEnum.LINGOT_FER]: 500,
-            [CraftEnum.LINGOT_CUIVRE]: 500,
-            [CraftEnum.PLANCHE_FRENE]: 250,
-            [CraftEnum.PLANCHE_CHATAIGNIER]: 250,
+            [CraftEnum.LINGOT_CUIVRE]: 250,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 150,
             [RessourcesEnum.KAMAS]: 15000
         },
         image: 'forge.png'
