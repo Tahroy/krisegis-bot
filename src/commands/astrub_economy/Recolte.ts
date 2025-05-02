@@ -62,14 +62,7 @@ class Recolte extends AbstractSubCommand {
             return;
         }
 
-        const ressource = job.getRessource()
-        if (!ressource) {
-            await interaction.reply({
-                content: 'Aucune ressource disponible',
-                flags: MessageFlags.Ephemeral
-            })
-            return;
-        }
+        const ressource = ressourceChoice;
 
         if (item && item.level > job.level) {
             await interaction.reply({
@@ -79,24 +72,16 @@ class Recolte extends AbstractSubCommand {
             return
         }
 
-        const quantity: number = await this.getQuantity(job, item?.level ?? 1, guildId);
-        const xp: number = await this.getExperience(job, item?.level ?? 1, guildId);
+        const {quantity, isJackpot} = await this.getQuantity(job, item?.level ?? 1, guildId);
+        const xp: number = await this.getExperience(job, item, guildId);
 
         job.experience += xp;
 
-
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity, guildId)
 
-
-        await Player.update({
-                lastHarvest: new Date()
-            },
-            {
-                where: {
-                    userId: interaction.user.id,
-                    guildId: guildId
-                }
-            })
+        await Player.update({lastHarvest: new Date()}, {
+            where: {userId: interaction.user.id, guildId: guildId}
+        })
 
         const user = interaction.user;
 
@@ -106,6 +91,11 @@ class Recolte extends AbstractSubCommand {
         const level = JobUtil.getLevelFromXP(job.experience)
 
         let text = `**${userName}** a récolté ${quantity} x ${emoji ? emoji : ressource} !`;
+
+        if (isJackpot) {
+            text += `\n 🎉 Dégoulinant.e de sueur, **${userName}** revient avec une récolte exceptionnelle ! :tada:`;
+        }
+
         if (level != job.level) {
             text += `\n**${userName}** passe ${job.name} niveau ${level} !`
         }
@@ -139,7 +129,7 @@ class Recolte extends AbstractSubCommand {
                 const job = await Job.findOne({
                     where: {
                         userId: interaction.user.id,
-                        name: ressource.name,
+                        name: ressource.job,
                         guildId: guildId
                     }
                 })
@@ -160,10 +150,12 @@ class Recolte extends AbstractSubCommand {
     }
 
     /**
-     * Voir tableur du jeu
+     * Calcule la quantité de ressources récoltées
      */
-    private async getQuantity(job: Job, itemLevel: number, guildId: string): Promise<number> {
-
+    private async getQuantity(job: Job, itemLevel: number, guildId: string): Promise<{
+        quantity: number,
+        isJackpot: boolean
+    }> {
         let percent = 100;
 
         const jobLevel = job.level;
@@ -179,22 +171,39 @@ class Recolte extends AbstractSubCommand {
             }
         }
 
-        const randomBase = this.getRandomInt(1, 3);
-        const randomLevel = this.getRandomInt(Math.ceil(jobLevel / 2), jobLevel);
-        const quantityBase = randomBase + randomLevel - itemLevel
-        const quantity = Math.ceil(quantityBase * (percent / 100));
+        // On prend la base : job.level - ressource.level
+        const baseAmount = Math.ceil((jobLevel - itemLevel) / 2);
 
-        console.log(quantity, quantityBase)
-        return Math.max(quantity, 0);
+        // 5% de chance de jackpot (x2)
+        if (Math.random() < 0.05) {
+            const jackpot = Math.floor(baseAmount * 2);
+            const final = Math.ceil(jackpot * (percent / 100));
+            return {
+                quantity: Math.max(final, 1),
+                isJackpot: true
+            };
+        }
+
+        const minValue = 0.7
+        const maxValue = 1.4;
+
+        const random = Math.random() * (maxValue - minValue) + minValue
+
+        const quantity = Math.floor(baseAmount * random);
+        const final = Math.ceil(quantity * (percent / 100));
+
+        return {
+            quantity: Math.max(final, 1),
+            isJackpot: false
+        };
     }
 
-    private async getExperience(job: Job, number: number, guildId: string) {
-
-        return Math.ceil(10 + job.level / 1.5 - 1);
-        /*
+    /**
+     * Calcule l'expérience gagnée pour une récolte
+     */
+    private async getExperience(job: Job, item: Ressource, guildId: string) {
         let percent = 100;
 
-        const jobLevel = job.level;
         const meteoName = await JobUtil.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
@@ -207,12 +216,9 @@ class Recolte extends AbstractSubCommand {
             }
         }
 
-        const experienceBase = 10;
-        const experience = Math.ceil(experienceBase * (percent / 100));
+        const experienceBase = item.level === 10 ? 40 : 10;
 
-        return Math.max(experience * number, 0);
-
-         */
+        return Math.ceil(experienceBase * (percent / 100));
     }
 }
 
