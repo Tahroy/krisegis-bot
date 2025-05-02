@@ -62,14 +62,7 @@ class Recolte extends AbstractSubCommand {
             return;
         }
 
-        const ressource = job.getRessource()
-        if (!ressource) {
-            await interaction.reply({
-                content: 'Aucune ressource disponible',
-                flags: MessageFlags.Ephemeral
-            })
-            return;
-        }
+        const ressource = ressourceChoice;
 
         if (item && item.level > job.level) {
             await interaction.reply({
@@ -139,7 +132,7 @@ class Recolte extends AbstractSubCommand {
                 const job = await Job.findOne({
                     where: {
                         userId: interaction.user.id,
-                        name: ressource.name,
+                        name: ressource.job,
                         guildId: guildId
                     }
                 })

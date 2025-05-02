@@ -5,6 +5,14 @@ enum RessourcesEnum {
     GOUJON = "Goujon",
     ORTIE = "Ortie",
 
+    // Ressoures niveau 10
+    CHATAIGNIER = "Châtaignier",
+    CUIVRE = "Cuivre",
+    SAUGE = "Sauge",
+    ORGE = "Orge",
+    GREUVETTE = "Greuvette",
+    TRUITE = "Truite",
+
     KAMAS = "Kamas",
 
     PIERRE = "Pierre",
