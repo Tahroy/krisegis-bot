@@ -189,7 +189,7 @@ class Recolte extends AbstractSubCommand {
 
         const random = Math.random() * (maxValue - minValue) + minValue
 
-        const quantity = Math.floor(baseAmount * random);
+        const quantity = Math.ceil(Math.floor(baseAmount * random));
         const final = Math.ceil(quantity * (percent / 100));
 
         return {
