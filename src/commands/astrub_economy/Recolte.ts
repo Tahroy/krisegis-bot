@@ -80,13 +80,9 @@ class Recolte extends AbstractSubCommand {
 
         job.experience += xp;
 
-
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity, guildId)
 
-
-        await Player.update({
-                lastHarvest: new Date()
-            },
+        await Player.update({lastHarvest: new Date()},
             {
                 where: {
                     userId: interaction.user.id,
@@ -160,36 +156,38 @@ class Recolte extends AbstractSubCommand {
      */
     private async getQuantity(job: Job, itemLevel: number, guildId: string): Promise<number> {
         let percent = 100;
-    
+
         const jobLevel = job.level;
         const meteoName = await JobUtil.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {
                 const effect = meteo.effects.find(e => e.job === job.name) ?? null
-    
+
                 if (effect !== null) {
                     percent += effect.value
                 }
             }
         }
-    
+
         // On prend la base : job.level - ressource.level
-        const baseAmount = Math.ceil((jobLevel - itemLevel) / 2 + 1);
-        
+        const baseAmount = Math.ceil((jobLevel - itemLevel) / 2);
+
         // 5% de chance de jackpot (x2)
         if (Math.random() < 0.05) {
             const jackpot = baseAmount * 2;
             const final = Math.ceil(jackpot * (percent / 100));
             return Math.max(final, 1);
         }
-        
-        const minValue = Math.max(1, Math.floor(baseAmount * 0.7) - itemLevel);
-        const maxValue = Math.ceil(baseAmount * 1.5 - itemLevel);
-        
-        const quantity = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+
+        const minValue = 0.7
+        const maxValue = 1.4;
+
+        const random = Math.random() * (maxValue - minValue) + minValue
+
+        const quantity = Math.floor(baseAmount * random);
         const final = Math.ceil(quantity * (percent / 100));
-        
+
         return Math.max(final, 1);
     }
 
