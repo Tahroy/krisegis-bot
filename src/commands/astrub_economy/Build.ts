@@ -159,6 +159,7 @@ class Build extends AbstractSubCommand {
         const search = focused.value
 
         const buildings = Object.values(Buildings)
+        console.log(buildings)
 
         const alreadyBuilt = await JobUtil.getBuildingsGuild(interaction.guild)
 
@@ -174,14 +175,16 @@ class Build extends AbstractSubCommand {
             }
 
             if (building.name.toLowerCase().startsWith(search.toLowerCase()) || !search) {
-                let recipe = "";
+                let recipe = [];
 
                 for (const [ingredient, quantity] of Object.entries(building.recipe)) {
-                    recipe += `${ingredient} x ${quantity} `;
+                    recipe.push(`${ingredient} x ${quantity}`);
                 }
 
+                const label = `${building.name} (${recipe.join(' / ')})`
+                console.log(label, label.length)
                 retour.push({
-                    name: `${building.name} (${recipe})`,
+                    name: label,
                     value: building.name,
                 });
             }

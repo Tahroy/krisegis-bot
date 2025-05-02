@@ -39,7 +39,7 @@ enum CraftEnum {
     // Niveau 10
     PLANCHE_CHATAIGNIER = "Planche de châtaignier",
     LINGOT_CUIVRE = "Lingot de cuivre",
-    POTION_MINI_SOIN_SUPERIEURE = "Potion de mini soin supérieure",
+    POTION_RAPPEL = "Potion de rappel",
     FOUGASSE = "Fougasse",
     BEIGNET_GREUVETTE = "Beignet de greuvette",
     TRUITE_EN_TRANCHE = "Truite en tranche",

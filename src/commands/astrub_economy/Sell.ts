@@ -62,13 +62,15 @@ class Sell extends AbstractSubCommand {
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
 
+        const totalPrice = Math.floor(price * quantity);
+        
         await interaction.reply({
-            content: `${userName} a vendu ${quantity} x ${item} pour ${price * quantity} kamas`,
+            content: `${userName} a vendu ${quantity} x ${item} pour ${totalPrice} kamas`,
             flags: MessageFlags.Ephemeral
         })
-
+        
         await PlayerService.addPlayerItem(interaction.user, item, itemBase.type, -quantity, guildId)
-        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, price * quantity, guildId)
+        await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, totalPrice, guildId)
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
@@ -104,7 +106,7 @@ class Sell extends AbstractSubCommand {
                 const items = (await this.getUserItems(interaction.user, search, guildId)).sort((a, b) => a.name.localeCompare(b.name));
 
                 for (let item of items) {
-                    const price = JobUtil.getItem(item.name)?.sell ?? 0;
+                    const price = Math.floor(JobUtil.getItem(item.name)?.sell ?? 0);
                     if (price === 0) continue;
                     if (retour.length >= 20) {
                         break;
