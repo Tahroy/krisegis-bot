@@ -222,6 +222,10 @@ class Build extends AbstractSubCommand {
                 contributionActuelle = buildingGuild.resourcesContributed[ingredient] ?? 0
             }
 
+            if (contributionActuelle >= quantity) {
+                continue;
+            }
+
             if (retour.length >= 20) {
                 break;
             }
