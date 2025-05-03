@@ -25,21 +25,21 @@ class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttr
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
 
-    getRessource(): string | undefined {
-        switch (this.name) {
-            case JobEnum.MINEUR:
-                return RessourcesEnum.FER;
-            case JobEnum.BUCHERON:
-                return RessourcesEnum.FRENE
-            case JobEnum.PAYSAN:
-                return RessourcesEnum.BLE
+    static getEmoji(job: string): string {
+        switch (job) {
             case JobEnum.ALCHIMISTE:
-                return RessourcesEnum.ORTIE
+                return "🧪";
+            case JobEnum.BUCHERON:
+                return "🪓";
+            case JobEnum.MINEUR:
+                return "⛏️";
+            case JobEnum.PAYSAN:
+                return "🌾";
             case JobEnum.PECHEUR:
-                return RessourcesEnum.GOUJON
+                return "🎣";
+            default:
+                return "❓";
         }
-
-        return undefined
     }
 }
 
