@@ -193,7 +193,7 @@ class Craft extends AbstractSubCommand {
                     continue;
                 }
                 retour.push({
-                    name: `${item.name} (${recipe})`,
+                    name: `${item.name} (${recipe}) - ${item.experience} xp`,
                     value: item.name
                 })
             }
