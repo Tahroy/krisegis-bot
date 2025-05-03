@@ -1,4 +1,6 @@
 import {JobEnum} from "./Enums";
+import Job from "./Job";
+import job from "./Job";
 
 class Meteo {
     name: string;
@@ -17,8 +19,14 @@ class Meteo {
         let text = `**Météo du jour** : ${this.name}`;
         text += `\n ${this.description}\n`
         this.effects.forEach(effect => {
-            if (effect.description.length > 0) {
-                text += `\n* ${effect.description} (${effect.value} %)`
+            if (effect.description.length > 0 || effect.value != 0) {
+                const jobName = `${Job.getEmoji(effect.job)} **${effect.job}**`;
+                if (effect.description.length > 0) {
+                    text += `\n* ${jobName} : ${effect.description} (${effect.value} %)`
+                }
+                else {
+                    text += `\n* ${jobName} : ${effect.value} %`
+                }
             }
         })
 
@@ -42,6 +50,7 @@ enum MeteosEnum {
     SILVOSSE = "🪓 Cycle de Silvosse",
     ULGRUDE = "⚡ Tonnerre grondant d'Ulgrude",
     REVERDIE_SILOUATE = "🌬️ Reverdie de Silouate",
+    CROISSANCE_ROSAL = "🌱 Croissance de Rosal",
 }
 
 const Meteos: Record<MeteosEnum, Meteo> = {
@@ -260,7 +269,36 @@ const Meteos: Record<MeteosEnum, Meteo> = {
                 job: JobEnum.BUCHERON,
                 value: 20
             },
-        ])
+        ], false),
+    [MeteosEnum.CROISSANCE_ROSAL]: new Meteo(MeteosEnum.CROISSANCE_ROSAL,
+        "L'influence du Protecteur de Maisial invite au réveil la faune et la flore, pour le plus grand bonheur de certains récolteurs.",
+        [
+            {
+                description: "",
+                job: JobEnum.ALCHIMISTE,
+                value: 50
+            },
+            {
+                description: "",
+                job: JobEnum.PECHEUR,
+                value: 50
+            },
+            {
+                description: "",
+                job: JobEnum.BUCHERON,
+                value: 15
+            },
+            {
+                description: "",
+                job: JobEnum.MINEUR,
+                value: 0
+            },
+            {
+                description: "",
+                job: JobEnum.PAYSAN,
+                value: 0
+            },
+        ]),
 }
 
 export default Meteo;
