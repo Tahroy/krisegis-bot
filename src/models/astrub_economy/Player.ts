@@ -58,7 +58,7 @@ class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implement
             name: jobName,
             userId: this.userId,
             guildId: this.guildId,
-            level: 1,
+            level: 0,
             experience: 0
         });
     }
