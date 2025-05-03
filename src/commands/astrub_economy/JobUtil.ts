@@ -13,19 +13,52 @@ import Tool, {Tools} from "../../models/astrub_economy/Tool";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
-        // Initialisation des variables
         let level = 0;
         let xpForNextLevel = baseXP;
 
-        // Boucle pour trouver le niveau en fonction de l'XP actuelle
+        // On recalcule chaque niveau !
         while (currentXP >= xpForNextLevel) {
-            currentXP -= xpForNextLevel; // On retire l'XP requise pour le niveau actuel
-            level++; // Augmente le niveau
-            xpForNextLevel = baseXP * (level + 1) ** 2; // Calcule l'XP requise pour le prochain niveau
+            currentXP -= xpForNextLevel;
+            level++;
+            xpForNextLevel = baseXP * (level + 1) ** 2;
         }
 
         return level;
     }
+
+    /**
+     * Calcule le niveau et l'XP restante pour passer au niveau suivant à partir de l'XP totale
+     */
+    static getLevelAndRemainingXP(currentXP: number, baseXP: number = 10): { level: number, remainingXP: number } {
+        const level = this.getLevelFromXP(currentXP, baseXP);
+
+        let xpForCurrentLevel = 0;
+        for (let i = 1; i <= level; i++) {
+            xpForCurrentLevel += baseXP * i ** 2;
+        }
+
+        const remainingXP = baseXP * (level + 1) ** 2 - (currentXP - xpForCurrentLevel);
+
+        return {level, remainingXP};
+    }
+
+    /**
+     * Calcule l'XP déjà obtenue sur le niveau actuel et l'XP totale nécessaire pour le niveau suivant
+     */
+    static getCurrentLevelXP(totalXP: number, baseXP: number = 10): { currentLevelXP: number, nextLevelXP: number} {
+        const level = this.getLevelFromXP(totalXP, baseXP);
+
+        let xpForCurrentLevel = 0;
+        for (let i = 1; i <= level; i++) {
+            xpForCurrentLevel += baseXP * i ** 2;
+        }
+
+        const currentLevelXP = totalXP - xpForCurrentLevel;
+        const nextLevelXP = baseXP * (level + 1) ** 2;
+
+        return {currentLevelXP, nextLevelXP};
+    }
+
 
     static isLessThanXMinutesAgo(date: Date, minutes: number): boolean {
         return (Date.now() - date.getTime()) < minutes * 60 * 1000;
@@ -34,12 +67,6 @@ class JobUtil {
     static getTimeBeforeNextHarvest(lastHarvest: Date, minutes: number): number {
         const nextHarvest = new Date(lastHarvest.getTime() + minutes * 60 * 1000);
         return Math.floor((nextHarvest.getTime() - Date.now()));
-    }
-
-    static getLevelAndRemainingXP(currentXP: number, baseXP: number = 10): { level: number, remainingXP: number } {
-        const level = this.getLevelFromXP(currentXP, baseXP);
-        const remainingXP = baseXP * (level + 1) ** 2 - currentXP;
-        return {level, remainingXP};
     }
 
     static getRessource(ressource: string): Ressource | null {
