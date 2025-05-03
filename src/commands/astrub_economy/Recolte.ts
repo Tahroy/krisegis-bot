@@ -74,7 +74,6 @@ class Recolte extends AbstractSubCommand {
 
         const {quantity, isJackpot} = await this.getQuantity(job, item?.level ?? 1, guildId);
         const xp: number = await this.getExperience(job, item, guildId);
-
         job.experience += xp;
 
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity, guildId)
@@ -93,7 +92,7 @@ class Recolte extends AbstractSubCommand {
         let text = `**${userName}** a récolté ${quantity} x ${emoji ? emoji : ressource} !`;
 
         if (isJackpot) {
-            text += `\n 🎉 Dégoulinant.e de sueur, **${userName}** revient avec une récolte exceptionnelle ! :tada:`;
+            text += `\n 🎉 Dégoulinant.e de sueur, **${userName}** revient avec une récolte exceptionnelle !`;
         }
 
         if (level != job.level) {
@@ -172,12 +171,12 @@ class Recolte extends AbstractSubCommand {
         }
 
         // On prend la base : job.level - ressource.level
-        const baseAmount = Math.ceil((jobLevel - itemLevel) / 2);
+        const baseAmount = jobLevel - itemLevel + 1;
 
         // 5% de chance de jackpot (x2)
         if (Math.random() < 0.05) {
-            const jackpot = Math.floor(baseAmount * 2);
-            const final = Math.ceil(jackpot * (percent / 100));
+            const jackpot = baseAmount * 2;
+            const final = Math.floor(jackpot * (percent / 100));
             return {
                 quantity: Math.max(final, 1),
                 isJackpot: true
@@ -189,8 +188,8 @@ class Recolte extends AbstractSubCommand {
 
         const random = Math.random() * (maxValue - minValue) + minValue
 
-        const quantity = Math.ceil(Math.floor(baseAmount * random));
-        const final = Math.ceil(quantity * (percent / 100));
+        const quantity = baseAmount * random;
+        const final = Math.floor(quantity * (percent / 100));
 
         return {
             quantity: Math.max(final, 1),
@@ -218,7 +217,7 @@ class Recolte extends AbstractSubCommand {
 
         const experienceBase = item.level === 10 ? 40 : 10;
 
-        return Math.ceil(experienceBase * (percent / 100));
+        return Math.floor(experienceBase * (percent / 100));
     }
 }
 
