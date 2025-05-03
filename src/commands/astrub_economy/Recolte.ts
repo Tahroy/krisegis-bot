@@ -123,29 +123,23 @@ class Recolte extends AbstractSubCommand {
             if (!ressource.job) {
                 continue;
             }
-            // Si au-dessus du level 1, on vérifie
-            if (ressource.level > 1) {
-                const job = await Job.findOne({
-                    where: {
-                        userId: interaction.user.id,
-                        name: ressource.job,
-                        guildId: guildId
-                    }
-                })
 
+            const player: Player = await JobUtil.getPlayer(interaction.user, guildId);
+            const job: Job = await player.getJob(ressource.job ?? '');
+
+            // Si au-dessus du level 1, on vérifie
+            if (ressource.level > 0) {
                 if (!job || job.level < ressource.level) {
                     continue
                 }
             }
 
-            responses.push({name: ressource.name, value: ressource.name})
+            const xp = await this.getExperience(job, ressource, interaction.guildId ?? '')
+
+            responses.push({name: `${Job.getEmoji(ressource.job)} ${ressource.name} - ${xp} xp`, value: ressource.name})
         }
 
         await interaction.respond(responses)
-    }
-
-    getRandomInt(min: number, max: number) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     /**
@@ -200,7 +194,7 @@ class Recolte extends AbstractSubCommand {
     /**
      * Calcule l'expérience gagnée pour une récolte
      */
-    private async getExperience(job: Job, item: Ressource, guildId: string) {
+    private async getExperience(job: Job, item: Ressource, guildId: string): Promise<number> {
         let percent = 100;
 
         const meteoName = await JobUtil.chargerMeteo(guildId);
