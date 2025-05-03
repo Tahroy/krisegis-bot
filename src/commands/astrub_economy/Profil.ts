@@ -19,25 +19,23 @@ class Profil extends AbstractSubCommand {
         const separator = `|------------|--------|------------|-----------------|`;
     
         const rows = jobs.map(job => {
-            const { level} = JobUtil.getLevelAndRemainingXP(job.experience);
-
-            const nextLevelXP = (level + 1) ** 2 * 10;
-            const actualLevelXP = (level) ** 2 * 10;
-            const currentLevelXP = job.experience - actualLevelXP;
-
-            const progressPercentage = Math.floor((currentLevelXP / nextLevelXP) * 100);
+            const { level } = JobUtil.getLevelAndRemainingXP(job.experience);
+            const { currentLevelXP, nextLevelXP } = JobUtil.getCurrentLevelXP(job.experience);
             
-            const emptyLength = Math.floor((100 - progressPercentage) / 10)
-            const filledLength = 10 - emptyLength;
-
+            const progressPercentage = Math.max(0, Math.min(100, Math.floor((currentLevelXP / nextLevelXP) * 100)));
+            
+            const progressBarLength = 10;
+            const filledLength = Math.max(0, Math.min(progressBarLength, Math.floor((progressPercentage / 100) * progressBarLength)));
+            const emptyLength = progressBarLength - filledLength;
+            
             const filled = filledLength > 0 ? '█'.repeat(filledLength) : '';
             const empty = emptyLength > 0 ? '░'.repeat(emptyLength) : '';
             const progressBar = filled + empty;
             
             const xpDisplayColumn = `${currentLevelXP}/${nextLevelXP}`;
-            const lastCol = `${progressBar} ${progressPercentage} %`.padEnd(15)
+            const lastCol = `${progressBar} ${progressPercentage}%`.padEnd(15);
             
-            return `| ${job.name.padEnd(10)} | ${job.level.toString().padStart(6)} | ${xpDisplayColumn.padStart(10)} | ${lastCol} |`;
+            return `| ${job.name.padEnd(10)} | ${level.toString().padStart(6)} | ${xpDisplayColumn.padStart(10)} | ${lastCol} |`;
         })
 
         const table = `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``
