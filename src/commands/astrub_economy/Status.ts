@@ -24,8 +24,7 @@ class Status extends AbstractSubCommand {
             const building = JobUtil.getBuilding(buildingName);
             if (!building) return '';
 
-            // Limiter la description à une longueur raisonnable pour le tableau
-            const shortDescription = building.description.length > 45 
+            const shortDescription = building.description.length > 45
                 ? building.description.substring(0, 42) + '...' 
                 : building.description.padEnd(45);
 
