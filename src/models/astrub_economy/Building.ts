@@ -3,8 +3,9 @@ import {CraftEnum, RessourcesEnum} from "./Enums";
 interface Building {
     name: string
     description: string
+    shortDescription: string
     recipe: Record<string, number>,
-    image: string
+    image: string,
 }
 
 enum BuildingEnum {
@@ -20,6 +21,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.SCIERIE]: {
         name: BuildingEnum.SCIERIE,
         description: "Scierie fabriquée en bois avec une scie en fer. Les bûcherons peuvent y découper leur bois pour créer des planches.",
+        shortDescription: "Débloque les planches",
         recipe: {
             [RessourcesEnum.FRENE]: 5000,
             [RessourcesEnum.FER]: 2500,
@@ -31,6 +33,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.FONDERIE]: {
         name: BuildingEnum.FONDERIE,
         description: "Une magnifique fonderie où les animaux ont tendance à se rapprocher en période de gel. Les mineurs y viennent afin de raffiner les minerais bruts.",
+        shortDescription: "Débloque les lingots",
         recipe: {
             [RessourcesEnum.FRENE]: 2500,
             [RessourcesEnum.FER]: 5000,
@@ -42,6 +45,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.SANCTUAIRE]: {
         name: BuildingEnum.SANCTUAIRE,
         description: "Petit sanctuaire fait de pierre et de bois disposé au centre du marché. Les habitants peuvent y déposer une offrande dans la coupe sacrée pour espérer que les Dix leur répondent.",
+        shortDescription: "Débloque les prières",
         recipe: {
             [RessourcesEnum.PIERRE]: 3500,
             [CraftEnum.PLANCHE_FRENE]: 1000,
@@ -53,6 +57,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.BRASSERIE]: {
         name: BuildingEnum.BRASSERIE,
         description: "La bière d'Astrub n'attend qu'à être connue du Monde des Dix ! Cette brasserie accueille de nombreux travailleurs, prêts à faire de nouvelles découvertes aromatiques et surtout tester leurs propres produits.",
+        shortDescription: "Débloque la bière",
         recipe: {
             [RessourcesEnum.PIERRE]: 2500,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 200,
@@ -64,6 +69,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.MENUISERIE]: {
         name: BuildingEnum.MENUISERIE,
         description: "Atelier de menuiserie où les artisans transforment le bois en objets utiles comme des boucliers, des meubles et des armes. On y remarque même quelques statuettes en hommage aux dieux.",
+        shortDescription: "Débloque le travail du bois",
         recipe: {
             [RessourcesEnum.PIERRE]: 2500,
             [CraftEnum.LINGOT_CUIVRE]: 150,
@@ -75,6 +81,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.FORGE]: {
         name: BuildingEnum.FORGE,
         description: "Forge imposante avec plusieurs enclumes où les forgerons travaillent le métal. On y fabrique des objets métalliques précieux, des talismans, des bijoux et des armes. Chaque matin, les enfants viennent admirer les marteaux frappant le métal..",
+        shortDescription: "Débloque le travail du métal",
         recipe: {
             [RessourcesEnum.PIERRE]: 2500,
             [CraftEnum.LINGOT_CUIVRE]: 250,
