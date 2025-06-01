@@ -30,7 +30,7 @@ module.exports = {
         // Retirer les espaces en début et en fin de chaîne
         str = plainText.trim()
 
-        str = str.replace('\n', ' ')
+        str = str.replace(/\n/g, ' ')
         return str
     },
 
