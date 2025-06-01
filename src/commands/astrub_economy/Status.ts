@@ -17,18 +17,18 @@ class Status extends AbstractSubCommand {
             return;
         }
 
-        const header    = `| Nom           | Description                                       |`;
-        const separator = `|---------------|---------------------------------------------------|`;
+        const header    = `| Nom        | Description                             |`;
+        const separator = `|------------|-----------------------------------------|`;
 
         const rows = buildingsGuild.map(buildingName => {
             const building = JobUtil.getBuilding(buildingName);
             if (!building) return '';
 
-            const shortDescription = building.description.length > 45
-                ? building.description.substring(0, 42) + '...' 
-                : building.description.padEnd(45);
+            const shortDescription = building.shortDescription.length > 39
+                ? building.shortDescription.substring(0, 36) + '...'
+                : building.shortDescription.padEnd(39);
 
-            return `| ${building.name.padEnd(13)} | ${shortDescription} |`;
+            return `| ${building.name.padEnd(10)} | ${shortDescription} |`;
         }).filter(row => row !== '');
 
         const table = `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``
