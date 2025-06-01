@@ -34,8 +34,8 @@ class Inventory extends AbstractSubCommand {
     }
 
     private async getInventoryTable(user: User, guild: Guild): Promise<string> {
-        const header = `| Nom                 | Quantité |`;
-        const separator = `|---------------------|----------|`;
+        const header    = `| Nom                    | Quantité |`;
+        const separator = `|------------------------|----------|`;
 
         const items: PlayerItem[] = await PlayerService.getItems(
             user,
@@ -44,7 +44,7 @@ class Inventory extends AbstractSubCommand {
         );
 
         const rows = items.map(item => {
-            return `| ${item.name.padEnd(19)} | ${item.quantity.toString().padStart(8)} |`;
+            return `| ${item.name.padEnd(22)} | ${item.quantity.toString().padStart(8)} |`;
         });
 
         return `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``
