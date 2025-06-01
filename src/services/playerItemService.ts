@@ -25,7 +25,8 @@ export class PlayerService {
             where: {
                 userId: user.id,
                 type: {[Op.in]: types},
-                guildId: guild.id
+                guildId: guild.id,
+                quantity: {[Op.gt]: 0}
             },
             order: [['type', 'ASC'], ['name', 'ASC']]
         });
