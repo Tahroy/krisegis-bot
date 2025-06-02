@@ -51,6 +51,7 @@ enum MeteosEnum {
     ULGRUDE = "⚡ Tonnerre grondant d'Ulgrude",
     REVERDIE_SILOUATE = "🌬️ Reverdie de Silouate",
     CROISSANCE_ROSAL = "🌱 Croissance de Rosal",
+    OPULENCE_SUMENS = "💎 Opulence de Sumens"
 }
 
 const Meteos: Record<MeteosEnum, Meteo> = {
@@ -298,7 +299,12 @@ const Meteos: Record<MeteosEnum, Meteo> = {
                 job: JobEnum.PAYSAN,
                 value: 0
             },
-        ]),
+        ], false),
+    [MeteosEnum.OPULENCE_SUMENS]: new Meteo(MeteosEnum.OPULENCE_SUMENS,
+        "Sous le patronnage poussif du Protecteur de Juinssidor, les mineurs parviennent à murmurer à l'oreille de leurs filons.",
+        [{description: "", job: JobEnum.MINEUR, value:50},],
+        true
+    )
 }
 
 export default Meteo;
