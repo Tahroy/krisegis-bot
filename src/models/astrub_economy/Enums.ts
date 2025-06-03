@@ -28,7 +28,7 @@ enum CraftEnum {
     PAIN_INCARNAM = "Pain d’Incarnam",
     POTION_MINI_SOIN = "Potion de mini soin",
     GOUJON_EN_TRANCHE = "Goujon en tranche",
-    PLANCHE_FRENE = "Planche",
+    PLANCHE_FRENE = "Planche frêne",
     LINGOT_FER = "Lingot de fer",
 
     // Niveau 1 - Complexes
@@ -37,11 +37,11 @@ enum CraftEnum {
     SANDWICH_AU_GOUJON = "Sandwich au goujon",
 
     // Niveau 10
-    PLANCHE_CHATAIGNIER = "Planche de châtaignier",
+    PLANCHE_CHATAIGNIER = "Planche châtaignier",
     LINGOT_CUIVRE = "Lingot de cuivre",
     POTION_RAPPEL = "Potion de rappel",
     FOUGASSE = "Fougasse",
-    BEIGNET_GREUVETTE = "Beignet de greuvette",
+    BEIGNET_GREUVETTE = "Beignet greuvette",
     TRUITE_EN_TRANCHE = "Truite en tranche",
 
     // Niveau 10 - Complexe
@@ -50,7 +50,7 @@ enum CraftEnum {
     PAIN_SAUGE = "Pain à la sauge",
     GREUVETTE_HERBES = "Pâté de greuvette",
     TALISMAN_PAYSAN = "Talisman en cuivre",
-    BOUCLIER_BOIS = "Bouclier en châtaignier"
+    BOUCLIER_BOIS = "Bouclier châtaignier"
 }
 
 export {CraftEnum};
