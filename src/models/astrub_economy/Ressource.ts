@@ -33,7 +33,9 @@ const Ressources: Record<RessourcesEnum, Ressource> = {
     [RessourcesEnum.PIERRE]: {name: RessourcesEnum.PIERRE, job:undefined, level:0, sell:0, buy: 3, type: ItemType.RESSOURCE, emoji: "pierre"},
     [RessourcesEnum.LAINE_DE_BOUFTOU]: {name: RessourcesEnum.LAINE_DE_BOUFTOU, job:undefined, level:0, sell:0, buy: 0, type: ItemType.RESSOURCE, emoji: "laine"},
     [RessourcesEnum.CUIR]: {name: RessourcesEnum.CUIR, job:undefined, level:0, sell:0, buy: 15, type: ItemType.RESSOURCE, emoji: "cuir"},
-    [RessourcesEnum.TISSU]: {name: RessourcesEnum.TISSU, job:undefined, level:0, sell:0, buy: 15, type: ItemType.RESSOURCE, emoji: "tissu"}
+    [RessourcesEnum.TISSU]: {name: RessourcesEnum.TISSU, job:undefined, level:0, sell:0, buy: 15, type: ItemType.RESSOURCE, emoji: "tissu"},
+    [RessourcesEnum.OEUF]: {name: RessourcesEnum.OEUF, job:undefined, level:0, sell:0, buy: 5, type: ItemType.RESSOURCE}
+
 };
 
 export default Ressource;

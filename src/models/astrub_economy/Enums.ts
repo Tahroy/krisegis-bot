@@ -18,13 +18,15 @@ enum RessourcesEnum {
     PIERRE = "Pierre",
     LAINE_DE_BOUFTOU = "Laine de bouftou",
     CUIR = "Cuir", 
-    TISSU = "Tissu"
+    TISSU = "Tissu",
+    OEUF = "Oeuf",
 }
 
 export {RessourcesEnum};
 
 enum CraftEnum {
     // Niveau 1
+    SUCRE_ORGE = "Sucre d'orge",
     PAIN_INCARNAM = "Pain d’Incarnam",
     POTION_MINI_SOIN = "Potion de mini soin",
     GOUJON_EN_TRANCHE = "Goujon en tranche",
@@ -50,7 +52,7 @@ enum CraftEnum {
     PAIN_SAUGE = "Pain à la sauge",
     GREUVETTE_HERBES = "Pâté de greuvette",
     TALISMAN_PAYSAN = "Talisman en cuivre",
-    BOUCLIER_BOIS = "Bouclier châtaignier"
+    BOUCLIER_BOIS = "Bouclier châtaignier",
 }
 
 export {CraftEnum};

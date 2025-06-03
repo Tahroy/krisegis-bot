@@ -165,6 +165,17 @@ const Crafts: Record<CraftEnum, Craft> = {
         buy: (20 * BuyEnum.RESSOURCE_10 + 20 * BuyEnum.RESSOURCE_1) * MultiplicatorEnum.COMPLEXE_CRAFT,
         type: ItemType.FABRICATION,
         experience: 20 * XpEnum.RESSOURCE_10 + 20 * XpEnum.RESSOURCE_1,
+        jobs: [JobEnum.PAYSAN],
+        buildings: [BuildingEnum.BRASSERIE]
+    },
+
+    [CraftEnum.SUCRE_ORGE]: {
+        name: CraftEnum.SUCRE_ORGE,
+        recipe: {[RessourcesEnum.ORGE]: 10, [RessourcesEnum.ORTIE]: 20},
+        sell: (10 * SellEnum.RESSOURCE_10 + 20 * SellEnum.RESSOURCE_1) * MultiplicatorEnum.COMPLEXE_CRAFT,
+        buy: (10 * BuyEnum.RESSOURCE_10 + 20 * BuyEnum.RESSOURCE_1) * MultiplicatorEnum.COMPLEXE_CRAFT,
+        type: ItemType.FABRICATION,
+        experience: 10 * XpEnum.RESSOURCE_10 + 20 * XpEnum.RESSOURCE_1,
         jobs: [JobEnum.PAYSAN, JobEnum.ALCHIMISTE],
         buildings: [BuildingEnum.BRASSERIE]
     },
