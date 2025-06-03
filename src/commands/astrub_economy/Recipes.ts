@@ -13,8 +13,8 @@ class Recipes extends AbstractSubCommand {
         }
 
         // En-tête du tableau
-        const header    = `| Objet               | Ingrédients              |`;
-        const separator = `|---------------------|--------------------------|`;
+        const header    = `| Objet                | Ingrédients               |`;
+        const separator = `|----------------------|---------------------------|`;
 
         // Construction des lignes du tableau
         const rows = Object.values(JobUtil.getAllItems())
@@ -27,7 +27,7 @@ class Recipes extends AbstractSubCommand {
                 });
 
                 const formattedIngredients = ingredients.join(', ');
-                const nameColumn = ressource.name.padEnd(19);
+                const nameColumn = ressource.name.padEnd(20);
                 const maxLineLength = 50;
 
                 // Découpe des lignes si nécessaire
@@ -37,7 +37,7 @@ class Recipes extends AbstractSubCommand {
                     if ((currentLine + ingredient).length > maxLineLength) {
                         // Ajout de la ligne actuelle et préparation d'une nouvelle
                         lines.push(currentLine.padEnd(maxLineLength - 1) + '|');
-                        currentLine = `| ${' '.repeat(19)} | ${ingredient}`;
+                        currentLine = `| ${' '.repeat(20)} | ${ingredient}`;
                     } else {
                         // Ajout de l'ingrédient à la ligne actuelle
                         currentLine += (currentLine.endsWith('| ') ? '' : ', ') + ingredient;
