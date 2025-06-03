@@ -2,7 +2,7 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {
     AutocompleteInteraction,
     CommandInteraction,
-    CommandInteractionOptionResolver,
+    CommandInteractionOptionResolver, Guild,
     MessageFlags,
     User
 } from "discord.js";
@@ -103,16 +103,16 @@ class Sell extends AbstractSubCommand {
         const retour = [];
         switch (focused.name) {
             case 'item':
-                const items = (await this.getUserItems(interaction.user, search, guildId)).sort((a, b) => a.name.localeCompare(b.name));
+                const items = await this.getUserItems(interaction.user, search, interaction.guild)
+                items.sort((a, b) => a.name.localeCompare(b.name));
 
                 for (let item of items) {
                     const price = Math.floor(JobUtil.getItem(item.name)?.sell ?? 0);
-                    if (price === 0) continue;
                     if (retour.length >= 20) {
                         break;
                     }
                     retour.push({
-                        name: `${item.name} (${price} kamas)`,
+                        name: `${item.name} x ${item.quantity} (${price} kamas)`,
                         value: item.name
                     })
                 }
@@ -123,10 +123,10 @@ class Sell extends AbstractSubCommand {
         await interaction.respond(retour)
     }
 
-    private async getUserItems(user: User, search: string, guildId: string): Promise<PlayerItem[]> {
+    private async getUserItems(user: User, search: string, guild: Guild): Promise<PlayerItem[]> {
         const items = JobUtil.getAllItems();
 
-        let sellablesItems: string [] = []
+        const sellablesItems: string [] = []
 
         for (let item of items) {
             if (!item.sell) {
@@ -137,13 +137,9 @@ class Sell extends AbstractSubCommand {
             }
         }
 
-        return await PlayerItem.findAll({
-            where: {
-                userId: user.id,
-                name: {[Op.in]: sellablesItems,},
-                guildId: guildId
-            }
-        });
+        const playerItems = await PlayerService.getItems(user, [ItemType.RESSOURCE, ItemType.OUTIL, ItemType.FABRICATION], guild);
+
+        return playerItems.filter(item => sellablesItems.includes(item.name))
     }
 }
 
