@@ -72,14 +72,7 @@ module.exports = {
         const command = commands[subCommand] || commands.default
         await command()
     }, async executeButton(interaction, buttonName) {
-        const rolesRP = [
-            'horskrosmoz',
-            'hrp',
-            'event_server',
-            'event_all',
-            'rp_server',
-            'rp_all'
-        ];
+        const rolesRP = ['horskrosmoz', 'hrp', 'event_server', 'event_all', 'rp_server', 'rp_all', 'international'];
         if (rolesRP.includes(buttonName)) {
             await this.addRemoveRP(interaction, buttonName)
             return;
@@ -311,8 +304,7 @@ module.exports = {
             .setStyle(ButtonStyle.Primary))
 
         await interaction.channel.send({
-            content: '**S\'inscrire à l\'alerte évènements**',
-            components: [rowAjouter]
+            content: '**S\'inscrire à l\'alerte évènements**', components: [rowAjouter]
         })
 
         // Rôle Play
@@ -356,10 +348,14 @@ module.exports = {
                 roleKey = 'role_horskrosmoz'
                 break
             }
+            case 'international': {
+                roleKey = 'role_international'
+                break
+            }
         }
 
         let roleID = await Variable.findOne({where: {name: roleKey}})
-        roleID = roleID.data ?? null
+        roleID = roleID?.data ?? null
 
         console.log("Role ID " + roleID)
 
@@ -397,15 +393,16 @@ module.exports = {
         // Rôle Play
         const rowAjouter = new ActionRowBuilder()
 
-        rowAjouter.addComponents(
-            new ButtonBuilder()
-             .setCustomId('server-hrp')
-             .setLabel("Accéder au canal HRP (discussions autour d'Ankama)")
-             .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-              .setCustomId('server-horskrosmoz')
-              .setLabel('Accéder au forum Hors Krosmoz (discussions générales)')
-              .setStyle(ButtonStyle.Primary))
+        rowAjouter.addComponents(new ButtonBuilder()
+            .setCustomId('server-hrp')
+            .setLabel("Accéder au canal HRP (discussions autour d'Ankama)")
+            .setStyle(ButtonStyle.Primary), new ButtonBuilder()
+            .setCustomId('server-horskrosmoz')
+            .setLabel('Accéder au forum Hors Krosmoz (discussions générales)')
+            .setStyle(ButtonStyle.Primary), new ButtonBuilder()
+            .setCustomId('server-international')
+            .setLabel('Access the INT. channel. EN/ES/PT/Other')
+            .setStyle(ButtonStyle.Primary))
 
         await interaction.channel.send({
             content: '**Rôles supplémentaires**', components: [rowAjouter]

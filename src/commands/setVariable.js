@@ -27,6 +27,7 @@ module.exports = {
                       {name: "Salon d'accueil", value: "welcomeChannel"},
                       {name: "Rôle HRP", value: "role_hrp"},
                       {name: "Rôle Hors Krosmoz", value: "role_horskrosmoz"},
+                      {name: "Rôle International", value: "role_international"},
                   )
         )
         .addStringOption(option =>
