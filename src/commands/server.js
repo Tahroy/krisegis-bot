@@ -247,7 +247,7 @@ module.exports = {
             rowAjouter.addComponents(new ButtonBuilder()
                 .setCustomId(`server-${server.id}`)
                 .setLabel(serverName)
-                .setStyle(ButtonStyle.Primary))
+                .setStyle(ButtonStyle.Secondary))
 
             if (count === 5) {
                 await interaction.channel.send({
@@ -298,10 +298,10 @@ module.exports = {
         rowAjouter.addComponents(new ButtonBuilder()
             .setCustomId('server-event_all')
             .setLabel('Tous les évènements')
-            .setStyle(ButtonStyle.Primary), new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
             .setCustomId('server-event_server')
             .setLabel('Uniquement ses serveurs')
-            .setStyle(ButtonStyle.Primary))
+            .setStyle(ButtonStyle.Secondary))
 
         await interaction.channel.send({
             content: '**S\'inscrire à l\'alerte évènements**', components: [rowAjouter]
@@ -313,10 +313,10 @@ module.exports = {
         rowAjouter.addComponents(new ButtonBuilder()
             .setCustomId('server-rp_all')
             .setLabel('Toutes les alertes RP')
-            .setStyle(ButtonStyle.Primary), new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
             .setCustomId('server-rp_server')
             .setLabel('Uniquement ses serveurs')
-            .setStyle(ButtonStyle.Primary))
+            .setStyle(ButtonStyle.Secondary))
 
         await interaction.channel.send({
             content: '**S\'inscrire à l\'alertes RP**', components: [rowAjouter]
@@ -396,13 +396,13 @@ module.exports = {
         rowAjouter.addComponents(new ButtonBuilder()
             .setCustomId('server-hrp')
             .setLabel("Accéder au canal HRP (discussions autour d'Ankama)")
-            .setStyle(ButtonStyle.Primary), new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
             .setCustomId('server-horskrosmoz')
             .setLabel('Accéder au forum Hors Krosmoz (discussions générales)')
-            .setStyle(ButtonStyle.Primary), new ButtonBuilder()
+            .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
             .setCustomId('server-international')
             .setLabel('Access the INT. channel. EN/ES/PT/Other')
-            .setStyle(ButtonStyle.Primary))
+            .setStyle(ButtonStyle.Secondary))
 
         await interaction.channel.send({
             content: '**Rôles supplémentaires**', components: [rowAjouter]
