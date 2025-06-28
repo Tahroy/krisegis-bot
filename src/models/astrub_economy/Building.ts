@@ -15,6 +15,7 @@ enum BuildingEnum {
     BRASSERIE = "Brasserie",
     MENUISERIE = "Menuiserie",
     FORGE = "Forge",
+    RESERVE = "Réserve"
 }
 
 const Buildings: Record<BuildingEnum, Building> = {
@@ -90,6 +91,22 @@ const Buildings: Record<BuildingEnum, Building> = {
         },
         image: 'forge.png'
     },
+    [BuildingEnum.RESERVE]: {
+        name: BuildingEnum.RESERVE,
+        description: "Grande réserve d'Astrub. Ce bâtiment permet de mettre en commun des ressources entre les différents artisans et habitants du village. Certains disent que c'est une insulte à Enutrof, d'autres qu'Eniripsa veille sur le village.",
+        shortDescription: "Débloque la réserve",
+        recipe: {
+            [RessourcesEnum.PIERRE]: 2000,
+            [CraftEnum.BIERE_ASTRUB]: 100,
+            [CraftEnum.LINGOT_FER]: 1000,
+            [CraftEnum.PLANCHE_FRENE]: 1000,
+            [CraftEnum.GOUJON_EN_TRANCHE]: 1000,
+            [CraftEnum.POTION_MINI_SOIN]: 1000,
+            [CraftEnum.PAIN_INCARNAM]: 1000,
+            [RessourcesEnum.KAMAS]: 15000
+        },
+        image: 'reserve.png'
+    }
 }
 
 export {BuildingEnum, Buildings, Building}
