@@ -256,7 +256,7 @@ module.exports = {
                 .setLabel(serverName)
                 .setStyle(ButtonStyle.Primary))
 
-            if (count === 10) {
+            if (count === 5) {
                 await interaction.channel.send({
                     content: `**Serveurs ${name} :**`, components: [rowAjouter]
                 })
@@ -311,7 +311,8 @@ module.exports = {
             .setStyle(ButtonStyle.Primary))
 
         await interaction.channel.send({
-            content: '**S\'inscrire à l\'alerte évènements**', components: [rowAjouter]
+            content: '**S\'inscrire à l\'alerte évènements**',
+            components: [rowAjouter]
         })
 
         // Rôle Play
@@ -399,11 +400,11 @@ module.exports = {
         rowAjouter.addComponents(
             new ButtonBuilder()
              .setCustomId('server-hrp')
-             .setLabel('Accéder au canal HRP')
+             .setLabel("Accéder au canal HRP (discussions autour d'Ankama)")
              .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
               .setCustomId('server-horskrosmoz')
-              .setLabel('Accéder au forum Hors Krosmoz')
+              .setLabel('Accéder au forum Hors Krosmoz (discussions générales)')
               .setStyle(ButtonStyle.Primary))
 
         await interaction.channel.send({
