@@ -21,6 +21,6 @@ Larve.init({
         type: DataTypes.INTEGER
     }
 }, {
-    sequelize, modelName: 'larve', timestamps: false
+    sequelize, modelName: 'larve', timestamps: true
 });
 export default Larve

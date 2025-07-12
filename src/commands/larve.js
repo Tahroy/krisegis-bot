@@ -4,36 +4,25 @@ const { PlayerService, ItemType } = require('../services/playerItemService')
 const Larve = require('../models/Larve').default
 
 const LARVES = {
-    'larve_bleue': {
-        'name': 'Larve bleue', 'id': '1265760235977441365'
-    }, 'larve_doree': {
-        'name': 'Larve dorée', 'id': '1265760228947922986'
-    }, 'larve_orange': {
-        'name': 'Larve orange', 'id': '1265760504731668520'
-    }, 'larve_verte': {
-        'name': 'Larve verte', 'id': '1265760497907794010'
-    }, 'larve_violette': {
-        'name': 'Larve violette', 'id': '1265760402965397599'
-    }, 'larve_rose': {
-        'name': 'Larve rose', 'id': '1265753280534020226'
-    }, 'larve_grise': {
-        'name': 'Larve grise', 'id': '1265760658063102058'
-    }, 'britalarve': {
-        'name': 'Britalarve',
-        'id': '1338228518861144077'
-    },
-    'larve_rushu': {
-        'name': 'Larve de Rushu',
-        'id': null
-    }
+    'larve_bleue': {'name': 'Larve bleue', 'id': '1265760235977441365'},
+    'larve_doree': {'name': 'Larve dorée', 'id': '1265760228947922986'},
+    'larve_orange': {'name': 'Larve orange', 'id': '1265760504731668520'},
+    'larve_verte': {'name': 'Larve verte', 'id': '1265760497907794010'},
+    'larve_violette': {'name': 'Larve violette', 'id': '1265760402965397599'},
+    'larve_rose': {'name': 'Larve rose', 'id': '1265753280534020226'},
+    'larve_grise': {'name': 'Larve grise', 'id': '1265760658063102058'},
+    'britalarve': {'name': 'Britalarve', 'id': '1338228518861144077'},
+    'larve_rushu': {'name': 'Larve de Rushu', 'id': null},
+    "lzrvzbz": {'name': 'Lzrvzbz', 'id': null},
+    'champetre': {'name' : 'Larve champêtre', 'id':null}
 }
 
 const GAME_CONSTANTS = {
-    MAX_SCORE: 30,
+    MAX_SCORE: 20,
     MAX_PLAYERS: 7,
     DEATH_CHANCE: 200,
     UPDATE_INTERVAL: 1000,
-    FLAG: ':checkered_flag:',
+    FLAG: '🏁',
     NEW_LINE: '\n'
 }
 
@@ -55,10 +44,10 @@ module.exports = {
         await this.displayLarvesButtons(interaction)
         /* TEST */
 
-        /*
+/*
         interaction.reply({ content: 'Termine !', ephemeral: true })
 
-        for (let i = 0; i < 10000; i++) {
+        for (let i = 0; i < 1000; i++) {
 
             partiesEnCours[i] = new Game(interaction.client)
             partiesEnCours[i].modeTest = true;
@@ -79,7 +68,7 @@ module.exports = {
                 }
             }
         }
-        */
+*/
 
     },
 
@@ -103,8 +92,8 @@ module.exports = {
         } catch (error) {
             console.error('Erreur lors de la récupération des boutons :', error)
         }
-    }, 
-    
+    },
+
     async executeButton (interaction, buttonName) {
 
         /**
@@ -218,18 +207,18 @@ class Game {
         }
 
         let game = this
-        let intervalId = null  
+        let intervalId = null
 
         intervalId = setInterval(async function () {
             try {
-                game.updateLarves()
+                game.updateLarves(interaction)
                 const plateau = await game.getPlateau();
                 await plateauMessage.edit(plateau)
 
                 await game.checkWinner()
 
                 if (game.status === 'ended') {
-                    clearInterval(intervalId)  
+                    clearInterval(intervalId)
                     await game.annoncerGagnant(interaction)
                 }
             } catch (error) {
@@ -271,7 +260,7 @@ class Game {
 
     async annoncerGagnant (interaction) {
         try {
-            if (this.winner === 'nobody') {
+            if (this.winner === 'nobody' && !this.modeTest) {
                 await this.channel.send({'content': 'Aucun gagnant !'})
                 return
             }
@@ -347,11 +336,11 @@ class Game {
         const larves = await Promise.all(
             Object.entries(this.plateau).map(([key]) => this.getLarve(key))
         )
-        
+
         return flagLine + larves.join(this.sautLigne) + this.sautLigne + flagLine
     }
 
-    updateLarves () {
+    updateLarves (interaction) {
         for (const [key] of Object.entries(this.plateau)) {
             this.rollDeath(key);
 
@@ -365,7 +354,7 @@ class Game {
             switch (key) {
                 case 'larve_violette':
                     value = value * 2
-                    if (Math.random() < 0.52) {
+                    if (Math.random() < 0.50) {
                         bonus -= 1.5
                     } else {
                         bonus += 3
@@ -373,17 +362,18 @@ class Game {
                     break
                 case 'larve_rose':
                     value = value * 2
-                    bonus += 1.05
+                    bonus += 1.03
                     break
                 case 'larve_grise':
                     value = value * 2
-                    if (Math.random() < 0.1) {
+                    if (Math.random() < 0.11) {
                         bonus += 7
                     }
                     break
                 case 'britalarve':
+                    value = value * 1.25
                     // Britalarve a un % de chance d'arriver à la même place que le premier
-                    if (Math.random() < 0.22) {
+                    if (Math.random() < 0.40) {
                         const maxPosition = Math.max(...Object.values(this.plateau))
                         if (maxPosition > this.plateau[key]) {
                             this.plateau[key] = maxPosition + value
@@ -393,7 +383,7 @@ class Game {
                     break
                 case 'larve_rushu': {
                     // La larve de rushu cible une autre larve. Si celle-ci est devant, elle échange de place avec elle
-                    value = value * 2.5
+                    value = value * 2.45
                     if (Math.random() < 0.3) {
                         const autresLarves = Object.keys(this.plateau).filter(otherKey =>
                             otherKey !== key && !this.deaths[otherKey]
@@ -411,8 +401,30 @@ class Game {
                         }
                     }
                     break;
-
                 }
+                case 'lzrvzbz':
+                    value = value * 2.80
+                    // Si une autre larve est à la même position que la lzrvzb
+                    // celle-ci a 50 % de chance d'exploser et de la tuer
+                    const autresLarves = Object.keys(this.plateau).filter(otherKey =>
+                        otherKey !== key && !this.deaths[otherKey] && this.plateau[otherKey] === this.plateau[key]
+                    )
+
+                    if (autresLarves.length > 0) {
+                        for (const autreLarve of autresLarves) {
+                            if (Math.random() < 0.15) {
+                                const larveName = LARVES[autreLarve].name
+                                this.deaths[autreLarve] = true
+
+                                if (!this.modeTest) {
+                                    this.channel.send(`La lzrvzbz fait exploser ${larveName} et la tue.`);
+                                } else {
+                                    console.log(`La lzrvzbz fait exploser ${larveName} et la tue.`);
+                                }
+                            }
+                        }
+                    }
+                    break;
                 default:
                     value = value * 2.90
             }
@@ -473,8 +485,12 @@ class Game {
         let retour = this.flag
 
         const larve = this.plateau[key]
-        for (let i = 0; i < larve; i++) {
-            retour += '-'
+
+        const emojiKey = key === 'champetre' ? 'champignons' : 'bave';
+        const emoji = await this.getEmoji(emojiKey)
+
+        for (let i = 0; i < larve/2; i++) {
+            retour += emoji;
         }
 
         if (this.deaths[key]) {
@@ -527,10 +543,14 @@ class Game {
         }
 
         // Prendre les 7 premiers éléments et reconvertir en objet
+        if (this.modeTest) {
+            return Object.fromEntries(larvesArray);
+        }
         return Object.fromEntries(larvesArray.slice(0, 7));
     }
 
     async getEmoji(search) {
+        // Use cached emoji if available
         if (emojis[search]) {
             return emojis[search]
         }
