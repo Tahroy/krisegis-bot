@@ -14,7 +14,7 @@ abstract class AbstractCommand {
     subCommands: Map<string, new () => AbstractSubCommand> = new Map();
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
             return;
         }
 
