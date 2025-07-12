@@ -15,7 +15,7 @@ import Meteo from "./Meteo";
 import Status from "./Status";
 import Reserve from "./Reserve";
 import {SlashCommandBuilder} from "discord.js";
-import {InteractionContextType} from "discord-api-types/v10";
+import {InteractionType} from "discord-api-types/v10";
 
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -41,7 +41,7 @@ class AstrubEconomy extends AbstractCommand {
     }
 
     protected addOptions(builder: SlashCommandBuilder) {
-        builder.setContexts(InteractionContextType.Guild)
+        builder.setContexts(0)
     }
 }
 
