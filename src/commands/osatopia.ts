@@ -94,7 +94,7 @@ module.exports = {
     ,
 
     async execute(interaction: CommandInteraction) {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
         // Vérifier que l'interaction contient des sous-commandes avant d'essayer de les récupérer
@@ -481,7 +481,7 @@ module.exports = {
 
         console.log("Synchro monstres")
 
-        let hasMonsters = false;
+        let hasMonsters = true;
         let total = 0;
         while (hasMonsters) {
             const conditionRequest = `?$skip=${skip}&$limit=${limit}`
