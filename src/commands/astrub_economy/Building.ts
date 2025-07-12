@@ -243,7 +243,7 @@ class Building extends AbstractSubCommand {
         const notStartedBuildings = buildings.filter(building => !completedBuildingNames.includes(building.name) && !buildingsInProgress.some(bg => bg.name === building.name));
 
         if (notStartedBuildings.length > 0) {
-            embed.addFields({name: 'Bâtiments non commencés', value: ""});
+            embed.addFields({name: 'Bâtiments à construire', value: ""});
 
             for (const building of notStartedBuildings) {
                 const buildingInfo = this.getBuildingInfos(building);
