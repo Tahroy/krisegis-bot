@@ -95,7 +95,7 @@ module.exports = (client: KrisegisClient) => {
         const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
 
         if (typedCommand) {
-            await typedCommand.automplete(interaction);
+            await typedCommand.autocomplete(interaction);
             return
         }
     };

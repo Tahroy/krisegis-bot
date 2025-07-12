@@ -31,11 +31,10 @@ abstract class AbstractCommand {
         await interaction.reply({content: 'Not implemented', ephemeral: true})
     };
 
-    async automplete(interaction: AutocompleteInteraction): Promise<void> {
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const command = interaction.options.getSubcommand();
 
         const subCommand = this.subCommands.get(command);
-     //   console.log(subCommand)
         if (subCommand) {
             const subCommandInstance = new subCommand();
             await subCommandInstance.autocomplete(interaction);
