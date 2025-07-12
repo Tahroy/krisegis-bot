@@ -97,7 +97,7 @@ class Reserve extends AbstractSubCommand {
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const guildId = interaction.guild?.id;
-        console.log(guildId)
+
         if (!guildId) {
             await interaction.respond([]);
             return;
@@ -237,7 +237,6 @@ class Reserve extends AbstractSubCommand {
 
         const playerItems = await PlayerService.getItems(user, [ItemType.RESSOURCE, ItemType.FABRICATION], interaction.guild)
 
-        console.log(playerItems);
         const choices: ApplicationCommandOptionChoiceData[] = [];
 
         for (const item of playerItems) {
