@@ -1,0 +1,283 @@
+import AbstractSubCommand from "../../utils/AbstractSubCommand";
+import {
+    AutocompleteInteraction,
+    CommandInteraction,
+    EmbedBuilder,
+    MessageFlags,
+    ApplicationCommandOptionChoiceData
+} from "discord.js";
+import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
+import {ItemType, PlayerService} from "../../services/playerItemService";
+import PlayerItem from "../../models/PlayerItem";
+import JobUtil from "./JobUtil";
+import {ReserveService} from "../../services/reserveService";
+import {BuildingEnum} from "../../models/astrub_economy/Building";
+
+
+
+class Reserve extends AbstractSubCommand {
+    name = 'reserve';
+    description = 'Gérer la réserve communautaire';
+
+    static readonly ACTION_VIEW = 'view';
+    static readonly  ACTION_DEPOSE = 'depose';
+    static readonly  ACTION_TAKE = 'take';
+    async execute(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
+        // Vérifier si le bâtiment Réserve est construit
+        const buildings = await JobUtil.getBuildingsGuild(interaction.guild);
+        if (!buildings.includes(BuildingEnum.RESERVE)) {
+            await interaction.reply({
+                content: "La réserve n'est pas encore construite.",
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const action = interaction.options.getString('action');
+        const itemName = interaction.options.getString('item');
+        const quantity = interaction.options.getInteger('quantity');
+
+        switch (action) {
+            case Reserve.ACTION_VIEW:
+                await this.viewReserve(interaction);
+                break;
+            case Reserve.ACTION_DEPOSE:
+                if (!itemName || !quantity) {
+                    await interaction.reply({
+                        content: 'Il faut un objet et une quantité !',
+                        flags: MessageFlags.Ephemeral
+                    });
+                    return;
+                }
+                await this.deposeToReserve(interaction, itemName, quantity);
+                break;
+            case Reserve.ACTION_TAKE:
+                if (!itemName || !quantity) {
+                    await interaction.reply({
+                        content: 'Il faut un objet et une quantité !',
+                        flags: MessageFlags.Ephemeral
+                    });
+                    return;
+                }
+                await this.takeFromReserve(interaction, itemName, quantity);
+                break;
+        }
+    }
+
+    protected addOptions(builder: SlashCommandSubcommandBuilder) {
+        builder.addStringOption(
+            option => option.setName('action')
+                .setDescription('Action à effectuer')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Voir le contenu de la réserve', value: Reserve.ACTION_VIEW },
+                    { name: 'Déposer des objets dans la réserve', value: Reserve.ACTION_DEPOSE },
+                    { name: 'Prendre des objets de la réserve', value: Reserve.ACTION_TAKE }
+                )
+        );
+
+        builder.addStringOption(
+            option => option.setName('item')
+                .setDescription('Objet à déposer ou prendre')
+                .setRequired(false)
+                .setAutocomplete(true)
+        );
+
+        builder.addIntegerOption(
+            option => option.setName('quantity')
+                .setDescription('Quantité à déposer ou prendre')
+                .setRequired(false)
+                .setMinValue(1)
+        );
+    }
+
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        console.log(guildId)
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
+
+        const options = interaction.options;
+        const focused = options.getFocused(true);
+        const action = options.getString('action');
+
+        if (focused.name !== 'item') {
+            await interaction.respond([]);
+            return;
+        }
+
+        let choices: ApplicationCommandOptionChoiceData[] = [];
+
+        if (action === Reserve.ACTION_DEPOSE) {
+            choices = await this.getPlayerItemsOpts(interaction, focused.value);
+        } else if (action === Reserve.ACTION_TAKE) {
+            choices = await this.getReserveItemsOpts(interaction, focused.value);
+        }
+
+        await interaction.respond(choices);
+    }
+
+    private async viewReserve(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.guild) {
+            return;
+        }
+
+        const reserveItems = await ReserveService.getReserveItems(interaction.guild);
+
+        if (reserveItems.length === 0) {
+            await interaction.reply({
+                content: 'La réserve est vide.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const table = this.formatReserveTable(reserveItems);
+
+        const embed = new EmbedBuilder()
+            .setTitle('Contenu de la Réserve Communautaire')
+            .setDescription(table)
+            .setColor('#0099ff')
+            .setTimestamp();
+
+        await interaction.reply({ embeds: [embed] });
+    }
+
+    private formatReserveTable(items: PlayerItem[]): string {
+        const header = `| Nom                    | Quantité |`;
+        const separator = `|------------------------|----------|`;
+
+        const rows = items.map(item => {
+            return `| ${item.name.padEnd(22)} | ${item.quantity.toString().padStart(8)} |`;
+        });
+
+        return `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``;
+    }
+
+    private async deposeToReserve(interaction: CommandInteraction, itemName: string, quantity: number): Promise<void> {
+        if (!interaction.guild) {
+            return;
+        }
+
+        const user = interaction.user;
+        const guildId = interaction.guild.id;
+
+        try {
+            const item = JobUtil.getItem(itemName);
+            if (!item) {
+                await interaction.reply({
+                    content: `L'objet ${itemName} n'existe pas.`,
+                    flags: MessageFlags.Ephemeral
+                });
+                return;
+            }
+
+            await ReserveService.deposeItem(user, itemName, item.type as ItemType, quantity, guildId);
+
+            const memberCatch = await interaction.guild.members.fetch(user.id);
+            const userName = memberCatch?.nickname ?? user.globalName ?? user.username;
+
+            await interaction.reply({
+                content: `${userName} a déposé ${quantity} x ${itemName} dans la réserve communautaire.`
+            });
+        } catch (error) {
+            await interaction.reply({
+                content: `Erreur: ${error instanceof Error ? error.message : 'Une erreur est survenue'}`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
+    }
+
+    private async takeFromReserve(interaction: CommandInteraction, itemName: string, quantity: number): Promise<void> {
+        if (!interaction.guild) {
+            return;
+        }
+
+        const user = interaction.user;
+        const guildId = interaction.guild.id;
+
+        try {
+            const item = JobUtil.getItem(itemName);
+            if (!item) {
+                await interaction.reply({
+                    content: `L'objet ${itemName} n'existe pas.`,
+                    flags: MessageFlags.Ephemeral
+                });
+                return;
+            }
+
+            await ReserveService.takeItem(user, itemName, item.type as ItemType, quantity, guildId);
+
+            const memberCatch = await interaction.guild.members.fetch(user.id);
+            const userName = memberCatch?.nickname ?? user.globalName ?? user.username;
+
+            await interaction.reply({
+                content: `${userName} a pris ${quantity} x ${itemName} de la réserve communautaire.`
+            });
+        } catch (error) {
+            await interaction.reply({
+                content: `Erreur: ${error instanceof Error ? error.message : 'Une erreur est survenue'}`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
+    }
+
+    private async getPlayerItemsOpts(interaction: AutocompleteInteraction, search: string): Promise<ApplicationCommandOptionChoiceData[]> {
+        const user = interaction.user;
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            return [];
+        }
+
+        const playerItems = await PlayerService.getItems(user, [ItemType.RESSOURCE, ItemType.FABRICATION], interaction.guild)
+
+        console.log(playerItems);
+        const choices: ApplicationCommandOptionChoiceData[] = [];
+
+        for (const item of playerItems) {
+            if (choices.length >= 25) break;
+
+            if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
+                choices.push({
+                    name: `${item.name} (${item.quantity})`,
+                    value: item.name
+                });
+            }
+        }
+
+        return choices;
+    }
+
+    private async getReserveItemsOpts(interaction: AutocompleteInteraction, search: string): Promise<ApplicationCommandOptionChoiceData[]> {
+        const guild = interaction.guild;
+        if (!guild) {
+            return [];
+        }
+
+        // Récupérer tous les items de la réserve
+        const reserveItems = await ReserveService.getReserveItems(guild);
+
+        const choices: ApplicationCommandOptionChoiceData[] = [];
+
+        for (const item of reserveItems) {
+            if (choices.length >= 25) break;
+
+            if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
+                choices.push({
+                    name: `${item.name} (${item.quantity})`,
+                    value: item.name
+                });
+            }
+        }
+
+        return choices;
+    }
+}
+
+export default Reserve;

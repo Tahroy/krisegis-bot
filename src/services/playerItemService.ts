@@ -1,6 +1,7 @@
 import PlayerItem from '../models/PlayerItem';
 import {Guild, User} from 'discord.js';
 import {Op} from "sequelize";
+import {ReserveService} from "./reserveService";
 
 export enum ItemType {
     KOUINKOUIN = 'kouinkouin',
@@ -32,13 +33,13 @@ export class PlayerService {
         });
     }
 
-    static async addPlayerItem(user: User, name: string, type: ItemType, quantity: number = 1, guildId: string): Promise<void> {
+    static async addPlayerItem(user: User | null, name: string, type: ItemType, quantity: number = 1, guildId: string): Promise<void> {
         try {
             // Recherche d'un item existant pour ce joueur
             let playerItem = await PlayerItem.findOne({
                 where: {
                     name: name,
-                    userId: user.id,
+                    userId: user?.id ?? ReserveService.RESERVE_USER_ID,
                     guildId: guildId
                 },
             });
@@ -48,18 +49,10 @@ export class PlayerService {
                 playerItem.quantity += quantity;
                 await playerItem.save();
             } else {
-
-                console.log({
-                    name: name,
-                    userId: user.id,
-                    quantity: quantity,
-                    type: type,
-                    guild: guildId
-                })
                 // Sinon, on crée un nouvel item pour le joueur
                 await PlayerItem.create({
                     name: name,
-                    userId: user.id,
+                    userId: user?.id ?? ReserveService.RESERVE_USER_ID,
                     quantity: quantity,
                     type: type,
                     guildId: guildId,
