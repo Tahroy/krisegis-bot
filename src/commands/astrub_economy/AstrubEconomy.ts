@@ -10,7 +10,7 @@ import Give from "./Give";
 import Recipes from "./Recipes";
 import Information from "./Information";
 import Housing from "./Housing";
-import Build from "./Build";
+import Building from "./Building";
 import Meteo from "./Meteo";
 import Status from "./Status";
 import Reserve from "./Reserve";
@@ -34,7 +34,7 @@ class AstrubEconomy extends AbstractCommand {
         this.subCommands.set('recipes', Recipes)
         this.subCommands.set('information', Information);
    //     this.subCommands.set('housing', Housing);
-        this.subCommands.set('build', Build)
+        this.subCommands.set('building', Building)
         this.subCommands.set('meteo', Meteo)
         this.subCommands.set('status', Status)
         this.subCommands.set('reserve', Reserve)

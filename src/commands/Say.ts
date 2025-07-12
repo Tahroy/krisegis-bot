@@ -8,7 +8,6 @@ import {
     TextChannel
 } from "discord.js";
 import {PermissionFlagsBits} from "discord-api-types/v8";
-import build from "./astrub_economy/Build";
 
 class Say extends AbstractCommand {
     description: string = "Faire parler Krisegis"
