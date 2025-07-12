@@ -1,6 +1,6 @@
 import {
     AutocompleteInteraction,
-    ButtonInteraction,
+    ButtonInteraction, ChatInputCommandInteraction,
     CommandInteraction,
     MessageFlags,
     ModalSubmitInteraction
@@ -11,7 +11,7 @@ abstract class AbstractSubCommand {
     abstract name: string;
     abstract description: string;
 
-    abstract execute(interaction: CommandInteraction): Promise<void>;
+    abstract execute(interaction: ChatInputCommandInteraction): Promise<void>;
 
     async executeButton(interaction: ButtonInteraction): Promise<void> {
         await interaction.reply({content: 'Not implemented', flags: MessageFlags.Ephemeral})
