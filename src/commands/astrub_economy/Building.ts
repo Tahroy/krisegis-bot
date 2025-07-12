@@ -209,7 +209,7 @@ class Building extends AbstractSubCommand {
             .setTimestamp();
 
         if (completedBuildingNames.length > 0) {
-            embed.addFields({name: 'Bâtiments construits', value: ""});
+            embed.addFields({name: 'Bâtiments', value: "construits"});
 
             for (const buildingName of completedBuildingNames) {
                 const building = JobUtil.getBuilding(buildingName);
@@ -229,7 +229,7 @@ class Building extends AbstractSubCommand {
         });
 
         if (buildingsInProgress.length > 0) {
-            embed.addFields({name: 'Bâtiments en construction', value: ''});
+            embed.addFields({name: 'Bâtiments', value: 'en construction'});
 
             for (const buildingGuild of buildingsInProgress) {
                 const building = JobUtil.getBuilding(buildingGuild.name);
@@ -243,7 +243,7 @@ class Building extends AbstractSubCommand {
         const notStartedBuildings = buildings.filter(building => !completedBuildingNames.includes(building.name) && !buildingsInProgress.some(bg => bg.name === building.name));
 
         if (notStartedBuildings.length > 0) {
-            embed.addFields({name: 'Bâtiments à construire', value: ""});
+            embed.addFields({name: 'Bâtiments', value: "à construire"});
 
             for (const building of notStartedBuildings) {
                 const buildingInfo = this.getBuildingInfos(building);
