@@ -24,7 +24,7 @@
     "moment": "^2.29.4",
     "mysql2": "^3.3.3",
     "node-cron": "^3.0.0",
-    "pm2": "^5.1.1",
+    "pm2": "^6.0.8",
     "sequelize": "^6.37.5",
     "sequelize-typescript": "^2.1.6",
     "sqlite3": "^5.1.7"
