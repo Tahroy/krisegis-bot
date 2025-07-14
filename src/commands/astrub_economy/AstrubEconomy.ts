@@ -9,13 +9,12 @@ import Inventory from "./Inventory";
 import Give from "./Give";
 import Recipes from "./Recipes";
 import Information from "./Information";
-import Housing from "./Housing";
 import Building from "./Building";
 import Meteo from "./Meteo";
 import Status from "./Status";
 import Reserve from "./Reserve";
+import Population from "./Population";
 import {SlashCommandBuilder} from "discord.js";
-import {InteractionType} from "discord-api-types/v10";
 
 class AstrubEconomy extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -38,6 +37,7 @@ class AstrubEconomy extends AbstractCommand {
         this.subCommands.set('meteo', Meteo)
         this.subCommands.set('status', Status)
         this.subCommands.set('reserve', Reserve)
+        this.subCommands.set('population', Population)
     }
 
     protected addOptions(builder: SlashCommandBuilder) {

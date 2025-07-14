@@ -14,6 +14,7 @@ import JobUtil from '../commands/astrub_economy/JobUtil';
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 import WeatherGuild from "../models/astrub_economy/WeatherGuild";
 import associate from "../models/associations";
+import Population from "../models/astrub_economy/Population";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -55,6 +56,7 @@ module.exports = async function (client) {
         await PlayerHouse.sync();
         await BuildingGuild.sync()
         await WeatherGuild.sync();
+        await Population.sync();
         associate();
         console.log('BDD Synchro !')
     }
