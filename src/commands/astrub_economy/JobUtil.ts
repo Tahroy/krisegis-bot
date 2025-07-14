@@ -10,6 +10,7 @@ import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 import {Building, Buildings} from "../../models/astrub_economy/Building";
 import WeatherGuild from "../../models/astrub_economy/WeatherGuild";
 import Tool, {Tools} from "../../models/astrub_economy/Tool";
+import {PopulationService} from "../../services/populationService";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -168,6 +169,8 @@ class JobUtil {
             for (const guild of client.guilds.cache.values()) {
                 await JobUtil.updateMeteo(guild.id);
                 await JobUtil.annoncerMeteo(client, guild.id)
+                await PopulationService.updatePopulation(guild.id)
+                await PopulationService.annoncePopulation(client, guild.id)
             }
         });
     }
