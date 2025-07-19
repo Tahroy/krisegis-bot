@@ -1,7 +1,7 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, MessageFlags} from "discord.js";
-import JobUtil from "./JobUtil";
 import {Meteos} from "../../models/astrub_economy/Meteo";
+import JobUtil from "../../services/JobUtil";
 
 class Meteo extends AbstractSubCommand {
     description: string = "Récupérer la météo actuelle";

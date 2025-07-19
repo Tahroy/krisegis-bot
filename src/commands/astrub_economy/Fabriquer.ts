@@ -1,15 +1,18 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import Job from "../../models/astrub_economy/Job";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 
-class Craft extends AbstractSubCommand {
+class Fabriquer extends AbstractSubCommand {
     description: string = 'Créer un object';
-    name: string = 'craft';
+    name: string = 'fabriquer';
+
+    OPTION_NAME = 'produit'
+    OPTION_QUANTITY = 'quantite';
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
@@ -27,8 +30,8 @@ class Craft extends AbstractSubCommand {
 
         const options = interaction.options;
 
-        const itemName: string | null = options.getString('name');
-        const craftQuantity = options.getInteger('quantity');
+        const itemName: string | null = options.getString(this.OPTION_NAME);
+        const craftQuantity = options.getInteger(this.OPTION_QUANTITY);
 
         if (!itemName || !craftQuantity) {
             await interaction.reply({
@@ -163,8 +166,8 @@ class Craft extends AbstractSubCommand {
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
-        builder.addStringOption(option => option.setName('name').setDescription("Objet").setRequired(true).setAutocomplete(true));
-        builder.addIntegerOption(option => option.setName('quantity').setDescription("Quantité").setRequired(true));
+        builder.addStringOption(option => option.setName(this.OPTION_NAME).setDescription("Objet").setRequired(true).setAutocomplete(true));
+        builder.addIntegerOption(option => option.setName(this.OPTION_QUANTITY).setDescription("Quantité").setRequired(true));
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -203,4 +206,4 @@ class Craft extends AbstractSubCommand {
     }
 }
 
-export default Craft;
+export default Fabriquer;

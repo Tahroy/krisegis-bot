@@ -1,10 +1,10 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder, Guild} from "discord.js";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 
-class Status extends AbstractSubCommand {
+class Statut extends AbstractSubCommand {
     description: string = "Statut d'Astrub";
-    name: string = "status";
+    name: string = "statut";
 
     async execute(interaction: CommandInteraction): Promise<void> {
         const guild: Guild|null = interaction.guild;
@@ -45,4 +45,4 @@ class Status extends AbstractSubCommand {
     }
 }
 
-export default Status;
+export default Statut;
