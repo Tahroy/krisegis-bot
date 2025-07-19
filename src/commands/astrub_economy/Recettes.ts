@@ -1,11 +1,11 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import Job from "../../models/astrub_economy/Job";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 
-class Recipes extends AbstractSubCommand {
+class Recettes extends AbstractSubCommand {
     description: string = 'Les recettes existantes';
-    name: string = 'recipes';
+    name: string = 'recettes';
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isCommand()) {
@@ -64,4 +64,4 @@ class Recipes extends AbstractSubCommand {
     }
 }
 
-export default Recipes;
+export default Recettes;

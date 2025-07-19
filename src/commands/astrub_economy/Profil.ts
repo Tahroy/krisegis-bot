@@ -1,7 +1,7 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import Job from "../../models/astrub_economy/Job";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 
 class Profil extends AbstractSubCommand {
     description: string = 'Vos métiers';

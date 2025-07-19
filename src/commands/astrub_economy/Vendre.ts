@@ -7,14 +7,17 @@ import {
     User
 } from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {Op} from "sequelize";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 
-class Sell extends AbstractSubCommand {
+class Vendre extends AbstractSubCommand {
     description: string = 'Vendre un objet';
-    name: string = 'sell';
+    name: string = 'vendre';
+
+    private static readonly OPTION_ITEM = 'objet'
+    private static readonly OPTION_QUANTITY = 'quantite'
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
@@ -33,8 +36,8 @@ class Sell extends AbstractSubCommand {
         const guildId = guild.id;
         const options = interaction.options;
 
-        const item: string = options.getString('item') ?? '';
-        const quantity: number = options.getInteger('quantity') ?? 0;
+        const item = options.getString(Vendre.OPTION_ITEM, true);
+        const quantity = options.getInteger(Vendre.OPTION_QUANTITY, true);
 
         if (!item || !quantity) {
             await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
@@ -63,12 +66,12 @@ class Sell extends AbstractSubCommand {
         const userName = memberCatch?.nickname ?? user.globalName
 
         const totalPrice = Math.floor(price * quantity);
-        
+
         await interaction.reply({
             content: `${userName} a vendu ${quantity} x ${item} pour ${totalPrice} kamas`,
             flags: MessageFlags.Ephemeral
         })
-        
+
         await PlayerService.addPlayerItem(interaction.user, item, itemBase.type, -quantity, guildId)
         await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, totalPrice, guildId)
     }
@@ -76,7 +79,7 @@ class Sell extends AbstractSubCommand {
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(
             option => option
-                .setName('item')
+                .setName(Vendre.OPTION_ITEM)
                 .setAutocomplete(true)
                 .setRequired(true)
                 .setDescription("Objet à vendre")
@@ -84,7 +87,7 @@ class Sell extends AbstractSubCommand {
 
         builder.addIntegerOption(
             option => option
-                .setName('quantity')
+                .setName(Vendre.OPTION_QUANTITY)
                 .setRequired(true)
                 .setDescription("Quantité")
         )
@@ -102,7 +105,7 @@ class Sell extends AbstractSubCommand {
 
         const retour = [];
         switch (focused.name) {
-            case 'item':
+            case Vendre.OPTION_ITEM:
                 const items = await this.getUserItems(interaction.user, search, interaction.guild)
                 items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -143,4 +146,4 @@ class Sell extends AbstractSubCommand {
     }
 }
 
-export default Sell;
+export default Vendre;

@@ -9,7 +9,7 @@ import {
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import PlayerItem from "../../models/PlayerItem";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 import {ReserveService} from "../../services/reserveService";
 import {BuildingEnum} from "../../models/astrub_economy/Building";
 
@@ -19,9 +19,13 @@ class Reserve extends AbstractSubCommand {
     name = 'reserve';
     description = 'Gérer la réserve communautaire';
 
-    static readonly ACTION_VIEW = 'view';
-    static readonly  ACTION_DEPOSE = 'depose';
-    static readonly  ACTION_TAKE = 'take';
+    static readonly OPTION_ACTION = 'action'
+    static readonly OPTION_ITEM = 'objet'
+    static readonly OPTION_QUANTITY = 'quantite'
+
+    static readonly ACTION_VIEW = 'voir';
+    static readonly  ACTION_DEPOSE = 'deposer';
+    static readonly  ACTION_TAKE = 'prendre';
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
             return;
@@ -37,9 +41,9 @@ class Reserve extends AbstractSubCommand {
             return;
         }
 
-        const action = interaction.options.getString('action');
-        const itemName = interaction.options.getString('item');
-        const quantity = interaction.options.getInteger('quantity');
+        const action = interaction.options.getString(Reserve.OPTION_ACTION, true);
+        const itemName = interaction.options.getString(Reserve.OPTION_ITEM);
+        const quantity = interaction.options.getInteger(Reserve.OPTION_QUANTITY);
 
         switch (action) {
             case Reserve.ACTION_VIEW:
@@ -70,7 +74,7 @@ class Reserve extends AbstractSubCommand {
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(
-            option => option.setName('action')
+            option => option.setName(Reserve.OPTION_ACTION)
                 .setDescription('Action à effectuer')
                 .setRequired(true)
                 .addChoices(
@@ -81,14 +85,14 @@ class Reserve extends AbstractSubCommand {
         );
 
         builder.addStringOption(
-            option => option.setName('item')
+            option => option.setName(Reserve.OPTION_ITEM)
                 .setDescription('Objet à déposer ou prendre')
                 .setRequired(false)
                 .setAutocomplete(true)
         );
 
         builder.addIntegerOption(
-            option => option.setName('quantity')
+            option => option.setName(Reserve.OPTION_QUANTITY)
                 .setDescription('Quantité à déposer ou prendre')
                 .setRequired(false)
                 .setMinValue(1)
@@ -105,9 +109,9 @@ class Reserve extends AbstractSubCommand {
 
         const options = interaction.options;
         const focused = options.getFocused(true);
-        const action = options.getString('action');
+        const action = options.getString(Reserve.OPTION_ACTION);
 
-        if (focused.name !== 'item') {
+        if (focused.name !== Reserve.OPTION_ITEM) {
             await interaction.respond([]);
             return;
         }

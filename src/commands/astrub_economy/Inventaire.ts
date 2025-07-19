@@ -3,9 +3,9 @@ import {CommandInteraction, EmbedBuilder, Guild, MessageFlags, User} from "disco
 import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 
-class Inventory extends AbstractSubCommand {
+class Inventaire extends AbstractSubCommand {
     description: string = 'Permet de consulter son inventaire'
-    name: string = 'inventory'
+    name: string = 'inventaire'
 
     async execute(interaction: CommandInteraction): Promise<void> {
         const user = interaction.user;
@@ -51,4 +51,4 @@ class Inventory extends AbstractSubCommand {
     }
 }
 
-export default Inventory;
+export default Inventaire;

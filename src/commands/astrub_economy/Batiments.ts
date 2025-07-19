@@ -9,19 +9,23 @@ import {
     TextChannel
 } from "discord.js";
 import {Building as BuildingModel, Buildings} from "../../models/astrub_economy/Building";
-import JobUtil from "./JobUtil";
-import jobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import PlayerItem from "../../models/PlayerItem";
+import jobUtil from "../../services/JobUtil";
 
-class Building extends AbstractSubCommand {
-    name = 'building';
+class Batiments extends AbstractSubCommand {
+    name = 'batiments';
     description = "Gérer les bâtiments d'Astrub";
 
-    static readonly ACTION_BUILD = 'build';
-    static readonly ACTION_VIEW = 'view';
+     readonly ACTION_BUILD = 'construire';
+     readonly ACTION_VIEW = 'voir';
+     readonly OPTION_ACTION = 'action'
+     readonly OPTION_BUILDING = 'batiment'
+     readonly OPTION_ITEM = 'objet'
+     readonly OPTION_QUANTITY = 'quantite'
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         const guildId = interaction.guild?.id;
@@ -35,10 +39,10 @@ class Building extends AbstractSubCommand {
         const action = interaction.options.getString('action');
 
         switch (action) {
-            case Building.ACTION_BUILD:
+            case this.ACTION_BUILD:
                 await this.executeBuild(interaction);
                 break;
-            case Building.ACTION_VIEW:
+            case this.ACTION_VIEW:
                 await this.executeView(interaction);
                 break;
             default:
@@ -49,25 +53,25 @@ class Building extends AbstractSubCommand {
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
-        builder.addStringOption(option => option.setName('action')
+        builder.addStringOption(option => option.setName(this.OPTION_ACTION)
             .setDescription('Action à effectuer')
             .setRequired(true)
-            .addChoices({name: 'Construire un bâtiment', value: Building.ACTION_BUILD}, {
-                name: 'Voir les bâtiments', value: Building.ACTION_VIEW
-            }));
+            .addChoices({name: 'Construire un bâtiment', value: this.ACTION_BUILD},
+                {name: 'Voir les bâtiments', value: this.ACTION_VIEW})
+        );
 
         // Options for build action
-        builder.addStringOption(option => option.setName('build')
+        builder.addStringOption(option => option.setName(this.OPTION_BUILDING)
             .setDescription("Bâtiment à construire")
             .setRequired(false)
             .setAutocomplete(true));
 
-        builder.addStringOption(option => option.setName('item')
+        builder.addStringOption(option => option.setName(this.OPTION_ITEM)
             .setDescription("Objet de construction")
             .setRequired(false)
             .setAutocomplete(true));
 
-        builder.addIntegerOption(option => option.setName('quantity')
+        builder.addIntegerOption(option => option.setName(this.OPTION_QUANTITY)
             .setDescription("Quantité")
             .setRequired(false));
     }
@@ -81,20 +85,20 @@ class Building extends AbstractSubCommand {
 
         const options = interaction.options;
         const focused = options.getFocused(true);
-        const action = options.getString('action');
+        const action = options.getString(this.OPTION_ACTION);
 
-        // Only provide autocomplete for build action
-        if (action !== Building.ACTION_BUILD) {
+        if (action !== this.ACTION_BUILD) {
             await interaction.respond([]);
             return;
         }
 
         let retour: ApplicationCommandOptionChoiceData[] = [];
+        console.log(focused.name, this.OPTION_ACTION, this.OPTION_ITEM)
         switch (focused.name) {
-            case 'build':
+            case this.OPTION_BUILDING:
                 retour = await this.getBuildsAutocomplete(interaction);
                 break;
-            case 'item':
+            case this.OPTION_ITEM:
                 retour = await this.getBuildingItemsAvailable(interaction, guildId);
                 break;
         }
@@ -108,9 +112,9 @@ class Building extends AbstractSubCommand {
             return;
         }
 
-        const buildOption = interaction.options.getString('build');
-        const ressource = interaction.options.getString('item');
-        const quantity = interaction.options.getInteger('quantity');
+        const buildOption = interaction.options.getString(this.OPTION_BUILDING);
+        const ressource = interaction.options.getString(this.OPTION_ITEM);
+        const quantity = interaction.options.getInteger(this.OPTION_QUANTITY);
 
         if (!buildOption || !ressource || !quantity) {
             await interaction.reply({
@@ -295,7 +299,7 @@ class Building extends AbstractSubCommand {
         const focused = options.getFocused(true);
         const search = focused.value;
 
-        const buildName = interaction.options.get('build');
+        const buildName = interaction.options.get(this.OPTION_BUILDING);
         const building = JobUtil.getBuilding(buildName?.value as string);
 
         if (!building) {
@@ -383,4 +387,4 @@ class Building extends AbstractSubCommand {
     }
 }
 
-export default Building;
+export default Batiments;
