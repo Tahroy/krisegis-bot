@@ -33,7 +33,6 @@ const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
 const numberOfRolls = 5
 
-const cooldowns = new Map<string, number>(); // Gérer les timestamps par utilisateur et commande
 
 const subCommandRoll = new SlashCommandSubcommandBuilder();
 subCommandRoll.setName('roll').setDescription('Roll des monstres');
@@ -142,21 +141,6 @@ module.exports = {
             const user = interaction.user;
             const guild = interaction.guild
             const timestamp: number = Date.now()
-
-            const currentTime = Date.now();
-            const key = `${user.id}:roll`;
-            const lastUsage = cooldowns.get(key);
-
-            /*
-            if (lastUsage && currentTime - lastUsage < 3000) {
-                const timeBeforeNextRoll = Math.floor(3 - (timestamp - lastUsage) / 1000)
-                const purial = timeBeforeNextRoll > 1 ? 's' : ''
-                throw new CommandCooldownError(
-                    `Vous ne pouvez faire qu'un roll toutes les 3s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
-            }
-
-             */
-            cooldowns.set(key, currentTime);
 
             const conditions = {
                 createdAt: {
