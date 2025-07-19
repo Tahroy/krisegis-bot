@@ -28,6 +28,9 @@ module.exports = function (client) {
      * @returns {Promise<void>}
      */
     async function annoncerEventGeneral (guildScheduledEvent, event) {
+        const eventId = guildScheduledEvent.id
+        console.log(`[ANNONCE GENERALE] Début annonce générale pour l'événement ${eventId}`)
+
         const name = guildScheduledEvent.name
         const dateDebut = Math.floor(guildScheduledEvent.scheduledStartTimestamp / 1000)
         const dateFin = Math.floor(guildScheduledEvent.scheduledEndTimestamp / 1000)
@@ -45,6 +48,7 @@ module.exports = function (client) {
         })
 
         if (!eventsChannelID || !roleAlerteEventGeneraleID) {
+            console.log(`[ANNONCE GENERALE] Annonce impossible pour l'événement ${eventId} - canal ou rôle non configuré`)
             return
         }
 
@@ -60,11 +64,16 @@ module.exports = function (client) {
 Un évènement **${name}** est prévu sur **${guildScheduledEvent.entityMetadata.location}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
 ${link}`
 
-        await eventChannelGeneral.send(message, {
-            allowedMentions: {
-                roles: [eventRoleGeneral.id]
-            }
-        })
+        try {
+            await eventChannelGeneral.send(message, {
+                allowedMentions: {
+                    roles: [eventRoleGeneral.id]
+                }
+            })
+            console.log(`[ANNONCE GENERALE] Annonce générale envoyée avec succès pour l'événement ${eventId}`)
+        } catch (error) {
+            console.error(`[ANNONCE GENERALE] Erreur lors de l'envoi de l'annonce générale pour l'événement ${eventId}:`, error)
+        }
 
     }
 
@@ -75,6 +84,9 @@ ${link}`
      * @returns {Promise<void>}
      */
     async function annoncerEventServeur (guildScheduledEvent, event) {
+        const eventId = guildScheduledEvent.id
+        console.log(`[ANNONCE SERVEUR] Début annonce serveur pour l'événement ${eventId}`)
+
         const name = guildScheduledEvent.name
         const dateDebut = Math.floor(guildScheduledEvent.scheduledStartTimestamp / 1000)
         const dateFin = Math.floor(guildScheduledEvent.scheduledEndTimestamp / 1000)
@@ -93,7 +105,7 @@ ${link}`
         const channelServeur = client.channels.cache.find(channel => channel.id === server.channel)
 
         if (!roleAlerteEventServeurID || !channelServeur) {
-            console.log('Il manque le rôle ou le channel serveur')
+            console.log(`[ANNONCE SERVEUR] Annonce impossible pour l'événement ${eventId} - rôle ou canal serveur non configuré`)
             return
         }
         const eventRoleServeur = guildScheduledEvent.guild.roles.cache.get(roleAlerteEventServeurID.data)
@@ -107,11 +119,16 @@ ${link}`
 Un évènement **${name}** est prévu sur **${guildScheduledEvent.entityMetadata.location}** le **${dateDebutFR}** jusqu'à **${dateFinFR}** !
 ${link}`
 
-        await channelServeur.send(message, {
-            allowedMentions: {
-                roles: [eventRoleServeur.id]
-            }
-        })
+        try {
+            await channelServeur.send(message, {
+                allowedMentions: {
+                    roles: [eventRoleServeur.id]
+                }
+            })
+            console.log(`[ANNONCE SERVEUR] Annonce serveur envoyée avec succès pour l'événement ${eventId}`)
+        } catch (error) {
+            console.error(`[ANNONCE SERVEUR] Erreur lors de l'envoi de l'annonce serveur pour l'événement ${eventId}:`, error)
+        }
     }
 
     async function ajouterEvent (guildScheduledEvent) {
@@ -152,22 +169,27 @@ ${link}`
     async function updateEvent (guildScheduledEvent) {
         let isNew = true
         const guild = guildScheduledEvent.guild
+        const eventId = guildScheduledEvent.id
 
-        // On vérifie qu'il n'est pas déjà dans derniersEvenements ou il y a plus de 5s
-        if (derniersEvenements[guildScheduledEvent.id]) {
-            if (moment().diff(derniersEvenements[guildScheduledEvent.id], 'seconds') < 5) {
-                console.log('on ignore');
+        console.log(`[UPDATE EVENT] Traitement de l'événement: ${guildScheduledEvent.name} (ID: ${eventId})`)
+
+        // On vérifie qu'il n'est pas déjà dans derniersEvenements ou il y a plus de 30s
+        if (derniersEvenements[eventId]) {
+            const secondsAgo = moment().diff(derniersEvenements[eventId], 'seconds')
+            if (secondsAgo < 30) {
+                console.log(`[UPDATE EVENT] Ignorer - événement ${eventId} traité il y a ${secondsAgo} secondes`);
                 return;
             }
+            console.log(`[UPDATE EVENT] Événement ${eventId} déjà traité il y a ${secondsAgo} secondes, mais on continue car > 30s`)
         }
-        guild.scheduledEvents.cache.clear();
-        const event = guild.scheduledEvents.cache.get(guildScheduledEvent.id);
 
         if (!guildScheduledEvent.name || !guildScheduledEvent.scheduledStartTimestamp || !guildScheduledEvent.scheduledEndTimestamp) {
+            console.log(`[UPDATE EVENT] Événement ${eventId} incomplet, ignoré`)
             return;
         }
 
-        derniersEvenements[guildScheduledEvent.id] = moment();
+        // On marque l'événement comme traité avant de continuer
+        derniersEvenements[eventId] = moment();
 
         // On cherche l'évènement en BDD
         await Event.findOne({
@@ -175,19 +197,23 @@ ${link}`
         }).then(async event => {
             if (event) {
                 isNew = false
+                console.log(`[UPDATE EVENT] Événement ${eventId} déjà existant en BDD, pas d'annonce nécessaire`)
             }
         })
 
         // Il n'y est pas, donc on l'ajoute en BDD
         // Si la création réussit, on l'annonce dans le canal
         if (isNew) {
-            console.log('Nouvel évènement')
-            console.log(guildScheduledEvent)
+            console.log(`[UPDATE EVENT] Nouvel événement ${eventId}, ajout en BDD et annonce`)
 
             const event = await ajouterEvent(guildScheduledEvent)
             if (event) {
+                console.log(`[UPDATE EVENT] Événement ${eventId} ajouté avec succès, envoi des annonces`)
                 await annoncerEventGeneral(guildScheduledEvent, event)
                 await annoncerEventServeur(guildScheduledEvent, event)
+                console.log(`[UPDATE EVENT] Annonces envoyées pour l'événement ${eventId}`)
+            } else {
+                console.log(`[UPDATE EVENT] Échec de l'ajout de l'événement ${eventId} en BDD`)
             }
         }
     }
@@ -196,7 +222,7 @@ ${link}`
      * Évènement créé
      */
     client.on('guildScheduledEventCreate', async (guildScheduledEvent) => {
-        console.log(guildScheduledEvent.name + ' creé')
+        console.log(`[EVENT CREATE] ${guildScheduledEvent.name} (ID: ${guildScheduledEvent.id})`)
         await updateEvent(guildScheduledEvent)
     })
 
@@ -204,8 +230,7 @@ ${link}`
      * Évènement mis à jour
      */
     client.on('guildScheduledEventUpdate', async (oldGuildScheduledEvent, newGuildScheduledEvent) => {
-        console.log(oldGuildScheduledEvent, newGuildScheduledEvent);
-        // console.log(oldGuildScheduledEvent.name + ' mis à jour')
+        console.log(`[EVENT UPDATE] ${newGuildScheduledEvent.name} (ID: ${newGuildScheduledEvent.id})`)
         await updateEvent(newGuildScheduledEvent)
     })
 
