@@ -1,14 +1,12 @@
 import { readdirSync } from 'fs';
 import path from 'path';
 import {Client, Collection, CommandInteraction} from 'discord.js';
-import AstrubEconomy from './../commands/astrub_economy/AstrubEconomy';
+import AstrubEconomie from '../commands/astrub_economy/AstrubEconomie';
 import Inventory from './../commands/Inventory';
 import AbstractCommand from "./AbstractCommand";
 import Command from "../models/OldCommand";
 import KrisegisClient from "../models/KrisegisClient";
 import Say from "../commands/Say";
-import Pray from "../commands/astrub_economy/Pray";
-import Meteo from '../commands/astrub_economy/Meteo';
 
 
 // Fonction pour charger les commandes
@@ -38,7 +36,7 @@ export default function loadCommands(client: KrisegisClient): void {
 
     const typedCommands: Collection<string, AbstractCommand> = new Collection();
 
-    const astrubEconomy = new AstrubEconomy();
+    const astrubEconomy = new AstrubEconomie();
     typedCommands.set(astrubEconomy.name, astrubEconomy)
 
     const inventory = new Inventory();
@@ -46,9 +44,6 @@ export default function loadCommands(client: KrisegisClient): void {
 
     const say = new Say();
     typedCommands.set(say.name, say)
-
-    const pray = new Pray();
-    typedCommands.set(pray.name, pray)
 
     client.typedCommands = typedCommands;
 }

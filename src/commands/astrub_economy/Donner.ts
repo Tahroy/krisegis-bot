@@ -7,14 +7,18 @@ import {
 } from "discord.js";
 import {Op} from "sequelize";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import JobUtil from "./JobUtil";
 import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
+import JobUtil from "../../services/JobUtil";
 
-class Give extends AbstractSubCommand {
+class Donner extends AbstractSubCommand {
     description: string = "Donner des ressources";
-    name: string = "give";
+    name: string = "donner";
+
+    OPTION_USER: string = 'joueur'
+    OPTION_ITEM: string = 'objet'
+    OPTION_QUANTITE: string = 'quantite'
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
@@ -31,9 +35,9 @@ class Give extends AbstractSubCommand {
         }
 
         const user = interaction.user
-        const cible = interaction.options.getUser('user')
-        const itemName = interaction.options.getString('item')
-        const quantity = interaction.options.getInteger('quantity')
+        const cible = interaction.options.getUser(this.OPTION_USER)
+        const itemName = interaction.options.getString(this.OPTION_ITEM)
+        const quantity = interaction.options.getInteger(this.OPTION_QUANTITE)
 
         if (!cible || !itemName || !quantity) {
             await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
@@ -52,12 +56,7 @@ class Give extends AbstractSubCommand {
             return
         }
 
-        let item: BaseItem | undefined = undefined;
-        if (itemName === 'Kamas') {
-            item = {name: 'Kamas', type: ItemType.RESSOURCE}
-        } else {
-            item = JobUtil.getItem(itemName);
-        }
+        let item: BaseItem | undefined = JobUtil.getItem(itemName);
 
         if (!item) {
             await interaction.reply({content: "Cet objet ne peut pas être donné", flags: MessageFlags.Ephemeral})
@@ -75,20 +74,27 @@ class Give extends AbstractSubCommand {
         const memberCible = await guild?.members.fetch(cible.id)
         const cibleName = memberCible?.nickname ? memberCible.nickname :(cible.globalName ? cible.globalName : cible.username)
 
-        await interaction.reply({content: `${userName} donné ${quantity} x ${item.name} à ${cibleName}`, flags: MessageFlags.Ephemeral})
+        await interaction.reply({content: `${userName} donné ${quantity} x ${item.name} à ${cibleName}`})
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addUserOption(
-            option => option.setName('user').setDescription("Utilisateur").setRequired(true)
+            option => option.setName(this.OPTION_USER)
+                .setDescription("Utilisateur")
+                .setRequired(true)
         )
 
         builder.addStringOption(
-            option => option.setName('item').setDescription("Objet").setRequired(true).setAutocomplete(true)
+            option => option.setName(this.OPTION_ITEM)
+                .setDescription("Objet")
+                .setRequired(true)
+                .setAutocomplete(true)
         )
 
         builder.addIntegerOption(
-            option => option.setName('quantity').setDescription("Quantité").setRequired(true)
+            option => option.setName(this.OPTION_QUANTITE)
+                .setDescription("Quantité")
+                .setRequired(true)
         )
     }
 
@@ -104,7 +110,7 @@ class Give extends AbstractSubCommand {
 
         const retour = [];
         switch (focused.name) {
-            case 'item':
+            case this.OPTION_ITEM:
                 const items = await this.getUserItems(interaction.user, search, guildId)
 
                 for (let item of items) {
@@ -156,4 +162,4 @@ class Give extends AbstractSubCommand {
     }
 }
 
-export default Give
+export default Donner

@@ -4,13 +4,14 @@ import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/playerItemService";
-import JobUtil from "./JobUtil";
 import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import {Meteos} from "../../models/astrub_economy/Meteo";
+import JobUtil from "../../services/JobUtil";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
     name: string = "recolte";
+    private static readonly OPTION_RESSOURCE = 'ressource';
 
     public async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
@@ -27,7 +28,7 @@ class Recolte extends AbstractSubCommand {
         }
 
         const options = interaction.options;
-        const ressourceChoice = options.getString('ressource');
+        const ressourceChoice = options.getString(Recolte.OPTION_RESSOURCE);
 
         if (!ressourceChoice) {
             await interaction.reply({content: "Vous devez choisir une ressource !", flags: MessageFlags.Ephemeral})
@@ -106,7 +107,7 @@ class Recolte extends AbstractSubCommand {
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(
-            option => option.setName("ressource").setRequired(true).setDescription("Ressource à récolter").setAutocomplete(true)
+            option => option.setName(Recolte.OPTION_RESSOURCE).setRequired(true).setDescription("Ressource à récolter").setAutocomplete(true)
         )
     }
 

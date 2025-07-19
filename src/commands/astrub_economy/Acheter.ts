@@ -1,15 +1,18 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import JobUtil from "./JobUtil";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {Ressources} from "../../models/astrub_economy/Ressource";
 import {Tools} from "../../models/astrub_economy/Tool";
+import JobUtil from "../../services/JobUtil";
 
-class Sale extends AbstractSubCommand {
+class Acheter extends AbstractSubCommand {
     description: string = 'Acheter un objet';
-    name: string = 'buy';
+    name: string = 'acheter';
+
+    OPTION_ITEM = 'objet'
+    OPTION_QUANTITY = 'quantity'
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {
@@ -24,11 +27,11 @@ class Sale extends AbstractSubCommand {
 
         const options = interaction.options;
 
-        const item: string | null = options.getString('item');
-        const quantity: number | null = options.getInteger('quantity');
+        const item: string | null = options.getString(this.OPTION_ITEM);
+        const quantity: number | null = options.getInteger(this.OPTION_QUANTITY);
 
         if (!item || !quantity) {
-            await interaction.reply({content: "Commande incorrecte", ephemeral: true})
+            await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
             return;
         }
         const user = interaction.user;
@@ -44,14 +47,14 @@ class Sale extends AbstractSubCommand {
 
         const baseItem = JobUtil.getItem(item);
         const price = Math.floor(baseItem?.buy ?? 0);
-        
+
         if (!price || !baseItem) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
             return
         }
-        
+
         const totalPrice = price * quantity;
-        
+
         if (!playerItem || playerItem.get('quantity') < totalPrice) {
             await interaction.reply({
                 content: "Vous n'avez pas la quantité nécessaire de kamas pour acheter",
@@ -59,15 +62,15 @@ class Sale extends AbstractSubCommand {
             })
             return;
         }
-        
+
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
-        
+
         await interaction.reply({
             content: `${userName} a acheté ${quantity} x ${item} pour ${totalPrice} kamas`
         })
-        
+
         await PlayerService.addPlayerItem(interaction.user, item, baseItem.type, quantity, guildId)
         await PlayerService.addPlayerItem(interaction.user, "Kamas", ItemType.RESSOURCE, -totalPrice, guildId)
     }
@@ -75,7 +78,7 @@ class Sale extends AbstractSubCommand {
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(
             option => option
-                .setName('item')
+                .setName(this.OPTION_ITEM)
                 .setAutocomplete(true)
                 .setRequired(true)
                 .setDescription("Objet à acheter")
@@ -83,7 +86,7 @@ class Sale extends AbstractSubCommand {
 
         builder.addIntegerOption(
             option => option
-                .setName('quantity')
+                .setName(this.OPTION_QUANTITY)
                 .setRequired(true)
                 .setDescription("Quantité")
         )
@@ -102,7 +105,7 @@ class Sale extends AbstractSubCommand {
         const retour = []
 
         switch (focused.name) {
-            case 'item':
+            case this.OPTION_ITEM:
                 const ressources = Object.values(Ressources);
                 const tools = Object.values(Tools)
 
@@ -116,7 +119,7 @@ class Sale extends AbstractSubCommand {
                         })
                     }
                 }
-                
+
                 for (let tool of tools) {
                     if (retour.length >= 20) break;
                     if (tool.buy === 0) continue;
@@ -133,4 +136,4 @@ class Sale extends AbstractSubCommand {
     }
 }
 
-export default Sale;
+export default Acheter;

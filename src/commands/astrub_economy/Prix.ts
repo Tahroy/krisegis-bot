@@ -1,11 +1,11 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import {Ressources} from "../../models/astrub_economy/Ressource";
-import JobUtil from "./JobUtil";
+import JobUtil from "../../services/JobUtil";
 
-class Prices extends AbstractSubCommand {
+class Prix extends AbstractSubCommand {
     description: string = "Voir le tableau des prix";
-    name: string = "prices";
+    name: string = "prix";
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isCommand()) {
@@ -45,4 +45,4 @@ class Prices extends AbstractSubCommand {
     }
 }
 
-export default Prices;
+export default Prix;

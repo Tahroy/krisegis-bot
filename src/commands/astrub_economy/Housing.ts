@@ -7,7 +7,7 @@ import {Houses, HousesEnum} from "../../models/astrub_economy/House";
 
 class Housing extends AbstractSubCommand {
     description: string = 'Votre maison'
-    name: string = 'housing'
+    name: string = 'logement'
 
     async execute(interaction: CommandInteraction): Promise<void> {
         const playerHouse = await PlayerHouse.findOne({
