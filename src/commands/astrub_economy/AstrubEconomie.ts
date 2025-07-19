@@ -10,7 +10,6 @@ import Recettes from "./Recettes";
 import Information from "./Information";
 import Batiments from "./Batiments";
 import Meteo from "./Meteo";
-import Statut from "./Statut";
 import Reserve from "./Reserve";
 import {SlashCommandBuilder} from "discord.js";
 import Acheter from "./Acheter";
@@ -35,7 +34,6 @@ class AstrubEconomie extends AbstractCommand {
    //     this.subCommands.set('logement', Housing);
         this.subCommands.set('batiments', Batiments)
         this.subCommands.set('meteo', Meteo)
-        this.subCommands.set('statut', Statut)
         this.subCommands.set('reserve', Reserve)
         this.subCommands.set('prier', Prier)
     }
