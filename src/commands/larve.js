@@ -337,7 +337,15 @@ class Game {
             Object.entries(this.plateau).map(([key]) => this.getLarve(key))
         )
 
-        return flagLine + larves.join(this.sautLigne) + this.sautLigne + flagLine
+        let message = flagLine + larves.join(this.sautLigne) + this.sautLigne + flagLine
+
+        console.log(message.length)
+        if (message.length > 1950) {
+            const bave = await this.getEmoji('bave');
+            message = message.replace(new RegExp(bave, 'g'), '💧')
+        }
+
+        return message;
     }
 
     updateLarves (interaction) {
@@ -489,7 +497,14 @@ class Game {
         const emojiKey = key === 'champetre' ? 'champignons' : 'bave';
         const emoji = await this.getEmoji(emojiKey)
 
-        for (let i = 0; i < larve/2; i++) {
+        // Dynamically adjust the maximum number of trail emojis based on the number of active larves
+        // This helps prevent exceeding Discord's 2000 character limit
+        const activeCount = Object.keys(this.plateau).filter(k => !this.deaths[k]).length;
+        // Calculate max emojis per larve: lower for more participants, higher for fewer
+        const maxTrailEmojis = Math.max(5, Math.min(15, Math.floor(100 / activeCount)));
+        const trailCount = Math.min(Math.floor(larve/2), maxTrailEmojis);
+
+        for (let i = 0; i < trailCount; i++) {
             retour += emoji;
         }
 
@@ -554,16 +569,16 @@ class Game {
         if (emojis[search]) {
             return emojis[search]
         }
-        
+
         try {
             const clientApplicationEmojis = await this.client.application.emojis.fetch()
             const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === search)
-            
+
             if (!searchEmoji) {
                 emojis[search] = ''
                 return ''
             }
-            
+
             const emoji = `<:${searchEmoji.name}:${searchEmoji.id}>`
             emojis[search] = emoji
             return emoji

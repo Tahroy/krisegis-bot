@@ -1,12 +1,12 @@
-import AbstractCommand from "../../utils/AbstractCommand";
-import {AutocompleteInteraction, CommandInteraction, MessageFlags, SlashCommandBuilder} from "discord.js";
+import {CommandInteraction, MessageFlags, SlashCommandBuilder} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import JobUtil from "./JobUtil";
-import KrisegisClient from "../../models/KrisegisClient";
+import JobUtil from "../../services/JobUtil";
 import {Meteos} from "../../models/astrub_economy/Meteo";
+import AbstractSubCommand from "../../utils/AbstractSubCommand";
+import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 
-class Pray extends AbstractCommand {
-    name = 'pray'
+export class Prier extends AbstractSubCommand {
+    name = 'prier'
     description = 'Prier les dieux au sanctuaire'
 
     async execute(interaction: CommandInteraction): Promise<void> {
@@ -78,7 +78,7 @@ class Pray extends AbstractCommand {
         }
     }
 
-    protected addOptions(builder: SlashCommandBuilder) {
+    protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(
             option => option
                 .setName('prayer')
@@ -89,5 +89,3 @@ class Pray extends AbstractCommand {
     }
 
 }
-
-export default Pray
