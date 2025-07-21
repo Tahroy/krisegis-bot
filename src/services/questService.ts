@@ -6,6 +6,9 @@ import {ItemType} from "./playerItemService";
 import {EmbedBuilder, User} from "discord.js";
 import KrisegisClient from "../models/KrisegisClient";
 import JobUtil from "./JobUtil";
+import {Ressources} from "../models/astrub_economy/Ressource";
+import {Crafts} from "../models/astrub_economy/Craft";
+import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
 
 export class QuestService {
     /**
@@ -81,15 +84,17 @@ export class QuestService {
             return;
         }
 
+        const rewardAmount = QuestService.calculReward(questTemplate);
+
         // Si la récompense est de la joie, l'ajouter à la population
         if (questTemplate.rewardType === 'happiness') {
-            await PopulationService.updateHappiness(guildId, questTemplate.rewardAmount);
+            await PopulationService.updateHappiness(guildId, rewardAmount);
             return;
         }
 
         // On boucle sur les participants et on distribue les kamas
         for (const [userId, contribution] of Object.entries(quest.participants)) {
-            const rewardShare = Math.floor((contribution / totalContributions) * questTemplate.rewardAmount);
+            const rewardShare = Math.floor((contribution / totalContributions) * rewardAmount);
 
             if (rewardShare <= 0) {
                 continue;
@@ -169,10 +174,13 @@ export class QuestService {
                 .map(([itemName, quantity]) => `- ${itemName}: ${quantity}`)
                 .join('\n');
 
+            const rewardAmount = QuestService.calculReward(questTemplate);
+            const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
+
             const embed = new EmbedBuilder()
                 .setTitle(`Nouvelle quête: ${quest.name} (ID: ${quest.id})`)
                 .setColor("#0099ff")
-                .setDescription(`${questTemplate.description}\n\n` + `**Objets requis:**\n${requiredItemsText}\n\n` + `**Récompense:** ${questTemplate.rewardAmount} ${questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie'}`)
+                .setDescription(`${questTemplate.description}\n\n` + `**Objets requis :**\n${requiredItemsText}\n\n` + `**Récompense :** ${rewardAmount} ${rewardType}`)
                 .setTimestamp();
 
             await channel.send({embeds: [embed]});
@@ -197,5 +205,24 @@ export class QuestService {
         }
 
         await PopulationService.updateHappiness(guildId, -happinessLost);
+    }
+
+    static calculReward(quest: QuestTemplate) {
+        let reward = 0;
+        for (const [itemName, quantity] of Object.entries(quest.requiredItems)) {
+            const item = Ressources[itemName as RessourcesEnum] || Crafts[itemName as CraftEnum];
+
+            if (item) {
+                reward += item.sell * quantity;
+            }
+        }
+
+        reward *= 1.25;
+
+        if (quest.rewardType === 'happiness') {
+            reward /= 1000
+        }
+
+        return Math.floor(reward);
     }
 }

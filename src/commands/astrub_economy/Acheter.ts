@@ -112,6 +112,7 @@ class Acheter extends AbstractSubCommand {
                 for (let ressource of ressources) {
                     if (retour.length >= 20) break;
                     if (ressource.buy === 0) continue;
+                    if (ressource.name === 'kamas') continue;
                     if (ressource.name.toLowerCase().includes(search.toLowerCase()) || !search) {
                         retour.push({
                             name: `${ressource.name} (${Math.floor(ressource.buy)} kamas)`,
