@@ -5,6 +5,7 @@ interface PopulationAttributes {
     id: number;
     guildId: string;
     population: number;
+    maxPopulation: number;
     happiness: number;
     lastUpdate: Date;
 }
@@ -15,6 +16,7 @@ class Population extends Model<PopulationAttributes, PopulationCreationAttribute
     public id!: number;
     public guildId!: string;
     public population!: number;
+    public maxPopulation!: number;
     public happiness!: number;
     public lastUpdate!: Date;
 }
@@ -34,6 +36,11 @@ Population.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 100
+    },
+    maxPopulation: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 200
     },
     happiness: {
         type: DataTypes.INTEGER,

@@ -14,6 +14,8 @@ import Reserve from "./Reserve";
 import {SlashCommandBuilder} from "discord.js";
 import Acheter from "./Acheter";
 import {Prier} from "./Prier";
+import Quetes from "./Quetes";
+import Statut from "./Statut";
 
 class AstrubEconomie extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -31,11 +33,12 @@ class AstrubEconomie extends AbstractCommand {
         this.subCommands.set('donner', Donner)
         this.subCommands.set('recettes', Recettes)
         this.subCommands.set('information', Information);
-   //     this.subCommands.set('logement', Housing);
         this.subCommands.set('batiments', Batiments)
         this.subCommands.set('meteo', Meteo)
         this.subCommands.set('reserve', Reserve)
         this.subCommands.set('prier', Prier)
+        this.subCommands.set('quetes', Quetes)
+        this.subCommands.set('statut', Statut)
     }
 
     protected addOptions(builder: SlashCommandBuilder) {

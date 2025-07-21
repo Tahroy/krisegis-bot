@@ -1,6 +1,7 @@
 import Population from "../models/astrub_economy/Population";
 import KrisegisClient from "../models/KrisegisClient";
 import {EmbedBuilder} from "discord.js";
+import JobUtil from "./JobUtil";
 
 export class PopulationService {
     public static async getOrCreatePopulation(guildId: string): Promise<Population> {
@@ -12,6 +13,7 @@ export class PopulationService {
             population = await Population.create({
                 guildId, 
                 population: 100,
+                maxPopulation: 200,
                 happiness: 50,
                 lastUpdate: new Date()
             });
@@ -23,33 +25,38 @@ export class PopulationService {
     /**
      *
      * Met à jour la population d'Astrub selon la joie dans la cité
+     * La joie est reset et la population augmente ou baisse selon la joie
+     * À 0 de joie: -15 / +5
+     * À 50 de joie: -10 / +10
+     * À 100 de joie: -5 / +15
      */
     public static async updatePopulation(guildId: string): Promise<void> {
         const population = await PopulationService.getOrCreatePopulation(guildId);
 
         const now = new Date();
 
+        // Calcul du changement de population basé sur le niveau de joie
         const happinessInfluence = (population.happiness - 50) / 100;
 
         // La joie permet à 0 d'aller de -15 à 5 et à 100 d'aller de -5 à 15
-        const min = -10 - (happinessInfluence * 10);
-        const max = 10 + (happinessInfluence * 10);
+        const min = -10 - (happinessInfluence * 5);
+        const max = 10 + (happinessInfluence * 5);
         const range = max - min;
 
         const change = Math.floor(Math.random() * range + min);
 
-        population.population += change;
+        // Mettre à jour la population en respectant la limite maximale
+        population.population = Math.min(population.maxPopulation, Math.max(0, population.population + change));
         population.lastUpdate = now;
+
+        // Reset de la joie à 50 (niveau neutre)
+       // population.happiness = 50;
+
         await population.save();
     }
 
     public static async annoncePopulation(client: KrisegisClient, guildId: string) {
-        const guild = client.guilds.cache.get(guildId);
-        if (!guild) {
-            return;
-        }
-
-        const channel = guild.channels.cache.find(channel => (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie'));
+        const channel = JobUtil.getChannel(client, guildId);
 
         if (channel && channel.isTextBased()) {
             const embed = await PopulationService.getEmbedPopulation(guildId);
@@ -65,6 +72,20 @@ export class PopulationService {
         const population = await PopulationService.getOrCreatePopulation(guildId);
 
         population.happiness = Math.max(0, Math.min(100, population.happiness + amount));
+        await population.save();
+
+        return population;
+    }
+
+    /**
+     * Augmente la population maximale d'un serveur Discord
+     * @param guildId ID du serveur Discord
+     * @param amount Montant d'augmentation de la population maximale
+     */
+    public static async increaseMaxPopulation(guildId: string, amount: number): Promise<Population> {
+        const population = await PopulationService.getOrCreatePopulation(guildId);
+
+        population.maxPopulation += amount;
         await population.save();
 
         return population;
@@ -115,10 +136,11 @@ export class PopulationService {
             .setTitle(`Population d'Astrub`)
             .setColor("#0099ff")
             .setDescription(
-                `La cité d'Astrub compte actuellement **${population.population}** habitants.\n\n` +
+                `La cité d'Astrub compte actuellement **${population.population}/${population.maxPopulation}** habitants.\n\n` +
                 `${populationDescription}\n\n` +
                 `**Niveau de joie:** ${population.happiness}/100\n` +
-                `${happinessDescription}`
+                `${happinessDescription}\n\n` +
+                `*Construisez des maisons pour augmenter la population maximale de la cité.*`
             )
             .setTimestamp();
     }
