@@ -10,11 +10,12 @@ const moment = require('moment/moment')
 const {readdirSync} = require("fs");
 const {join} = require("path");
 const Monster = require("../models/Monster").default;
-import JobUtil from '../commands/astrub_economy/JobUtil';
+import JobUtil from '../services/JobUtil';
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 import WeatherGuild from "../models/astrub_economy/WeatherGuild";
 import associate from "../models/associations";
 import Population from "../models/astrub_economy/Population";
+import Quest from "../models/astrub_economy/Quest";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -57,6 +58,7 @@ module.exports = async function (client) {
         await BuildingGuild.sync()
         await WeatherGuild.sync();
         await Population.sync();
+        await Quest.sync();
         associate();
         console.log('BDD Synchro !')
     }
@@ -168,7 +170,6 @@ module.exports = async function (client) {
         await checkEventReminders()
         const jobUtil = new JobUtil();
         await jobUtil.startReminder(client);
-
     })
 
     function checkEventReminders() {
@@ -182,7 +183,7 @@ module.exports = async function (client) {
                 if (!guild) {
                     continue;
                 }
-                
+
                 if (!guild.scheduledEvents) {
                     continue
                 }

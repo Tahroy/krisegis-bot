@@ -6,6 +6,7 @@ import {BuildingEnum} from "./Building";
 interface Craft extends BaseItem {
     recipe: object;
     sell: number;
+    buy: number;
     experience: number;
     jobs: JobEnum[];
     buildings?: BuildingEnum[];
@@ -95,6 +96,16 @@ const Crafts: Record<CraftEnum, Craft> = {
         experience: 30 * XpEnum.RESSOURCE_1,
         jobs: [JobEnum.PAYSAN, JobEnum.PECHEUR]
     },
+    [CraftEnum.EPEE_FER]: {
+        name: CraftEnum.EPEE_FER,
+        recipe: {[CraftEnum.LINGOT_FER]: 10, [CraftEnum.PLANCHE_FRENE]: 10},
+        sell: 200 * SellEnum.RESSOURCE_1 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        buy: 200 * BuyEnum.RESSOURCE_1 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        type: ItemType.FABRICATION,
+        experience: 200 * XpEnum.RESSOURCE_1,
+        jobs: [JobEnum.BUCHERON, JobEnum.MINEUR],
+        buildings: [BuildingEnum.FORGE]
+    },
 
     // Niveau 10
     [CraftEnum.PLANCHE_CHATAIGNIER]: {
@@ -160,7 +171,7 @@ const Crafts: Record<CraftEnum, Craft> = {
     // Niveau 1 + Niveau 10
     [CraftEnum.BIERE_ASTRUB]: {
         name: CraftEnum.BIERE_ASTRUB,
-        recipe: {[RessourcesEnum.BLE] : 20, [RessourcesEnum.ORGE]: 20},
+        recipe: {[RessourcesEnum.BLE]: 20, [RessourcesEnum.ORGE]: 20},
         sell: (20 * SellEnum.RESSOURCE_10 + 20 * SellEnum.RESSOURCE_1) * MultiplicatorEnum.COMPLEXE_CRAFT,
         buy: (20 * BuyEnum.RESSOURCE_10 + 20 * BuyEnum.RESSOURCE_1) * MultiplicatorEnum.COMPLEXE_CRAFT,
         type: ItemType.FABRICATION,
@@ -213,20 +224,20 @@ const Crafts: Record<CraftEnum, Craft> = {
     [CraftEnum.TALISMAN_PAYSAN]: {
         name: CraftEnum.TALISMAN_PAYSAN,
         recipe: {[CraftEnum.LINGOT_CUIVRE]: 10, [RessourcesEnum.SAUGE]: 50},
-        sell: 150 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
-        buy: 150 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        sell: 250 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        buy: 250 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
         type: ItemType.FABRICATION,
-        experience: 150 * XpEnum.RESSOURCE_10,
+        experience: 250 * XpEnum.RESSOURCE_10,
         jobs: [JobEnum.MINEUR, JobEnum.ALCHIMISTE],
         buildings: [BuildingEnum.FORGE]
     },
     [CraftEnum.BOUCLIER_BOIS]: {
         name: CraftEnum.BOUCLIER_BOIS,
         recipe: {[CraftEnum.PLANCHE_CHATAIGNIER]: 10, [CraftEnum.LINGOT_CUIVRE]: 5},
-        sell: 150 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
-        buy: 150 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        sell: 300 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        buy: 300 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
         type: ItemType.FABRICATION,
-        experience: 30,
+        experience: 300 * XpEnum.RESSOURCE_10,
         jobs: [JobEnum.BUCHERON, JobEnum.MINEUR],
         buildings: [BuildingEnum.MENUISERIE]
     }

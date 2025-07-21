@@ -1,21 +1,17 @@
 import Ressource, {Ressources} from "../models/astrub_economy/Ressource";
-import Tool, {Tools} from "../models/astrub_economy/Tool";
 import BaseItem, {Items} from "../models/astrub_economy/BaseItem";
 import {Crafts} from "../models/astrub_economy/Craft";
 import {Client, Guild, User} from "discord.js";
 import Player from "../models/astrub_economy/Player";
 import Meteo, {Meteos} from "../models/astrub_economy/Meteo";
+import cron from 'node-cron';
+import Tool, {Tools} from "../models/astrub_economy/Tool";
 import WeatherGuild from "../models/astrub_economy/WeatherGuild";
+import {PopulationService} from "./populationService";
 import KrisegisClient from "../models/KrisegisClient";
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 import {Building, Buildings} from "../models/astrub_economy/Building";
-import cron from 'node-cron';
-import KrisegisClient from "../../models/KrisegisClient";
-import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
-import {Building, Buildings} from "../../models/astrub_economy/Building";
-import WeatherGuild from "../../models/astrub_economy/WeatherGuild";
-import Tool, {Tools} from "../../models/astrub_economy/Tool";
-import {PopulationService} from "../../services/populationService";
+import {QuestService} from "./questService";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -167,15 +163,44 @@ class JobUtil {
         return weather ? weather.name : null;
     }
 
+    /**
+     * Génère une nouvelle quête pour un serveur et l'annonce
+     */
+    static async generateAndAnnounceQuest(client: KrisegisClient, guildId: string): Promise<void> {
+        await QuestService.deleteOldQuests(guildId);
+
+        // Une chance sur 6 de déclencher une quête
+        const random = Math.random() * 6 < 1
+        if (!random) {
+            return;
+        }
+
+        const quest = await QuestService.generateRandomQuest(guildId);
+        await QuestService.announceQuest(client, quest);
+    }
 
     async startReminder(client: KrisegisClient) {
         // Définir la tâche à exécuter chaque jour à 10h
-        cron.schedule('0 10 * * *', async () => {
+        cron.schedule('*/30 * * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
-                await JobUtil.updateMeteo(guild.id);
-                await JobUtil.annoncerMeteo(client, guild.id)
-                await PopulationService.updatePopulation(guild.id)
-                await PopulationService.annoncePopulation(client, guild.id)
+                try {
+                    await JobUtil.updateMeteo(guild.id);
+                    await JobUtil.annoncerMeteo(client, guild.id)
+                    await PopulationService.updatePopulation(guild.id)
+                    await PopulationService.annoncePopulation(client, guild.id)
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        });
+
+        cron.schedule('*/5 * * * *', async () => {
+            for (const guild of client.guilds.cache.values()) {
+                try {
+                    await JobUtil.generateAndAnnounceQuest(client, guild.id);
+                } catch (error) {
+                    console.error(error);
+                }
             }
         });
     }
@@ -225,18 +250,21 @@ class JobUtil {
             return
         }
 
-        const guild = client.guilds.cache.get(guildId);
-        if (!guild) {
-            return;
-        }
-
-        // Astrub Économie ou astrub_economie
-
-        const channel = guild.channels.cache.find(channel => (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie'));
+        const channel = JobUtil.getChannel(client, guildId);
 
         if (channel && channel.isTextBased()) {
             await channel.send({content: meteo.getText()});
         }
+    }
+
+    static getChannel(client : KrisegisClient, guildId: any) {
+        const guild = client.guilds.cache.get(guildId);
+        if (!guild) {
+            return;
+        }
+        return guild.channels.cache.find(channel =>
+            (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie')
+        )
     }
 }
 

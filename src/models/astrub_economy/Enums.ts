@@ -53,6 +53,7 @@ enum CraftEnum {
     GREUVETTE_HERBES = "Pâté de greuvette",
     TALISMAN_PAYSAN = "Talisman en cuivre",
     BOUCLIER_BOIS = "Bouclier châtaignier",
+    EPEE_FER = "Épée de boisaille",
 }
 
 export {CraftEnum};
