@@ -150,7 +150,8 @@ export default class Quetes extends AbstractSubCommand {
             quest.status = 'completed';
             await quest.save();
 
-            const reward = `${template.rewardAmount} ${template.rewardType === 'kamas' ? 'kamas' : 'joie'}`
+            const amount = QuestService.calculReward(template)
+            const reward = `${amount} ${template.rewardType === 'kamas' ? 'kamas' : 'joie'}`
 
             await interaction.reply({content: `🎉🎉 Vous avez fourni ${quantity} ${itemName} et complété la quête. Vous avez reçu ${reward} ! 🎉🎉`});
         } else {

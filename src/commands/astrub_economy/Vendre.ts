@@ -132,7 +132,7 @@ class Vendre extends AbstractSubCommand {
         const sellablesItems: string [] = []
 
         for (let item of items) {
-            if (!item.sell) {
+            if (!item.sell || item.name === 'kamas') {
                 continue
             }
             if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {

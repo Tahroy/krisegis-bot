@@ -28,7 +28,7 @@ const Ressources: Record<RessourcesEnum, Ressource> = {
     [RessourcesEnum.TRUITE]: {name: RessourcesEnum.TRUITE, job: JobEnum.PECHEUR, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "truite"},
 
     // Ressources neutres
-    [RessourcesEnum.KAMAS]: {name: RessourcesEnum.KAMAS, job: undefined, level: 0, sell: 0, buy: 0, type: ItemType.RESSOURCE, emoji: "kamas"},
+    [RessourcesEnum.KAMAS]: {name: RessourcesEnum.KAMAS, job: undefined, level: 1, sell: 1, buy: 0, type: ItemType.RESSOURCE, emoji: "kamas"},
 
     [RessourcesEnum.PIERRE]: {name: RessourcesEnum.PIERRE, job:undefined, level:0, sell:0, buy: 3, type: ItemType.RESSOURCE, emoji: "pierre"},
     [RessourcesEnum.LAINE_DE_BOUFTOU]: {name: RessourcesEnum.LAINE_DE_BOUFTOU, job:undefined, level:0, sell:0, buy: 0, type: ItemType.RESSOURCE, emoji: "laine"},

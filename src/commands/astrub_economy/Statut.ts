@@ -11,6 +11,7 @@ import JobUtil from "../../services/JobUtil";
 import {Buildings} from "../../models/astrub_economy/Building";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 import {ReserveService} from "../../services/reserveService";
+import {PopulationService} from "../../services/populationService";
 
 export default class Statut extends AbstractSubCommand {
     name: string = 'statut';
@@ -20,6 +21,7 @@ export default class Statut extends AbstractSubCommand {
     readonly TYPE_QUESTS = 'quetes';
     readonly TYPE_BUILDINGS = 'batiments';
     readonly TYPE_RESERVE = 'reserve';
+    readonly TYPE_POPULATION = 'population'
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(option => option
@@ -30,6 +32,7 @@ export default class Statut extends AbstractSubCommand {
                 {name: 'Quêtes en cours', value: this.TYPE_QUESTS},
                 {name: 'Bâtiments', value: this.TYPE_BUILDINGS},
                 {name: 'Réserve communautaire', value: this.TYPE_RESERVE},
+                {name: 'Population', value: this.TYPE_POPULATION}
             ));
     }
 
@@ -45,6 +48,9 @@ export default class Statut extends AbstractSubCommand {
                 break;
             case this.TYPE_RESERVE:
                 await this.showReserve(interaction);
+                break;
+            case this.TYPE_POPULATION:
+                await this.showPopulation(interaction);
                 break;
             default:
                 await interaction.reply({
@@ -86,9 +92,12 @@ export default class Statut extends AbstractSubCommand {
                 })
                 .join('\n');
 
+            const rewardAmount = QuestService.calculReward(questTemplate)
+            const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
+
             embed.addFields({
                 name: `${quest.name} (ID: ${quest.id})`,
-                value: `${questTemplate.description}\n\n**Objets requis : **\n${requiredItemsText}\n\n**Récompense : ** ${questTemplate.rewardAmount} ${questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie'}`
+                value: `${questTemplate.description}\n\n**Objets requis : **\n${requiredItemsText}\n\n**Récompense : ** ${rewardAmount} ${rewardType}`
             });
         }
 
@@ -199,5 +208,20 @@ export default class Statut extends AbstractSubCommand {
         });
 
         return `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``;
+    }
+
+    private async showPopulation(interaction: ChatInputCommandInteraction) {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const embed = await PopulationService.getEmbedPopulation(guildId);
+
+        await interaction.reply({embeds: [embed]});
     }
 }
