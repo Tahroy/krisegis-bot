@@ -244,7 +244,7 @@ class Reserve extends AbstractSubCommand {
         const choices: ApplicationCommandOptionChoiceData[] = [];
 
         for (const item of playerItems) {
-            if (choices.length >= 25) break;
+            if (choices.length >= 20) break;
 
             if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
                 choices.push({
@@ -269,7 +269,7 @@ class Reserve extends AbstractSubCommand {
         const choices: ApplicationCommandOptionChoiceData[] = [];
 
         for (const item of reserveItems) {
-            if (choices.length >= 25) break;
+            if (choices.length >= 20) break;
 
             if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
                 choices.push({

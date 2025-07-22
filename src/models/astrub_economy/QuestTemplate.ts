@@ -10,27 +10,27 @@ interface QuestTemplate {
 }
 
 enum QuestEnum {
-    MALADIE_CITE = "Maladie dans la cité",
-    FAMINE_ASTRUB = "Famine à Astrub",
-    BESOIN_MATERIAUX = "Besoin de matériaux",
-    MENACE_MONSTRES = "Menace de monstres",
+    MALADIE_CITE = "Pourquoi tu es tout vert ?",
+    FAMINE_ASTRUB = "On a faim, on a faim !",
+    BESOIN_MATERIAUX = "Il me faut deux clous et une planche",
+    MENACE_MONSTRES = "Alerte ! Alerte !",
     FESTIVAL_ASTRUB = "Festival d'Astrub",
-    REPARATION_BATIMENTS = "Réparation des bâtiments",
-    MANIFESTATION_MINIERE = "Manifestivation minière", //CHASSE_GIBIER = "Chasse au gibier",
-    RECOLTE_PLANTES = "Récolte de plantes médicinales",
-    APPROVISIONNEMENT_FORGE = "Approvisionnement de la forge",
-    FOND_ORPHELINAT = "Des fonds pour l'orphelinat",
-    APPROVISIONNER_TAVERNE = "Approvisionner la taverne",
-    ENTRAINEMENT_MILICE = "Entraînement de la milice"
+    REPARATION_BATIMENTS = "Il était là ce trou ?",
+    MANIFESTATION_MINIERE = "On creuse le jour, on boit la nuit !",
+    RECOLTE_PLANTES = "Tu as essayé cette plante ?",
+    APPROVISIONNEMENT_FORGE = "Il y en a encore un qui s'est brûlé...",
+    FOND_ORPHELINAT = "Personne ne pense aux enfants ?!",
+    APPROVISIONNER_TAVERNE = "Il fait soif ici !",
+    ENTRAINEMENT_MILICE = "J'ai pris une flèche dans le genou",
+    POISSON_FRAIS = "Il n'est pas frais mon poisson ?!",
+    CELEBRATION_SANCTUAIRE = "Célébration au sanctuaire",
 }
 
 const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     [QuestEnum.MALADIE_CITE]: {
         name: QuestEnum.MALADIE_CITE,
         description: "Une maladie touche la cité d'Astrub, les habitants se cachent chez eux et accusent les rats qui apparaissent depuis peu dans les égoûts. Un prêtre ordonne leur mise à mort, tandis que les Eniripsas cherchent des aventuriers pour enquêter. En attendant, ils ont besoin de potions de soin.",
-        requiredItems: {
-            [CraftEnum.POTION_MINI_SOIN]: 50
-        },
+        requiredItems: {[CraftEnum.POTION_MINI_SOIN]: 50},
         rewardType: 'happiness',
     }, [QuestEnum.FAMINE_ASTRUB]: {
         name: QuestEnum.FAMINE_ASTRUB,
@@ -45,18 +45,18 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     }, [QuestEnum.MENACE_MONSTRES]: {
         name: QuestEnum.MENACE_MONSTRES,
         description: "L'alerte est sonnée au village d'Astrub. De nombreux monstres se rapprochent de la cité. Les mercenaires s'arment et ordonnent aux habitants de rentrer chez eux. De nombreux volontaires se présentent pour défendre leurs foyers, mais ils vont avoir besoin d'équipement.",
-        requiredItems: {[CraftEnum.EPEE_FER]: 3, [CraftEnum.BOUCLIER_BOIS]: 1},
+        requiredItems: {[CraftEnum.EPEE_BOISAILLE]: 3, [CraftEnum.BOUCLIER_BOIS]: 1},
         rewardType: 'kamas',
         buildings: [BuildingEnum.FORGE, BuildingEnum.MENUISERIE]
     }, [QuestEnum.FESTIVAL_ASTRUB]: {
         name: QuestEnum.FESTIVAL_ASTRUB,
         description: "Avec autant de catastrophe, les habitants d'Astrub ont besoin d'organiser une grande fête ! Sortez la bière, sortez la nourriture ! Les petits et les grands préparent dans la joie cette belle journée, en espérant qu'il y en aura pour tout le monde.",
         requiredItems: {
-            [CraftEnum.BIERE_ASTRUB]: 25,
+            [CraftEnum.BIERE_ASTRUB]: 20,
             [CraftEnum.SUCRE_ORGE]: 5,
-            [CraftEnum.SANDWICH_AU_GOUJON]: 10,
-            [CraftEnum.PAIN_ORTIES]: 10,
-            [CraftEnum.GREUVETTE_HERBES]: 5,
+            [CraftEnum.SANDWICH_AU_GOUJON]: 5,
+            [CraftEnum.PAIN_ORTIES]: 5,
+            [CraftEnum.PATE_GREUVETTES]: 5,
             [CraftEnum.TRUITE_HERBES]: 5
         },
         rewardType: 'happiness',
@@ -70,17 +70,7 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         description: "Les Enutrofs protestent ! Ils refusent d'aller miner tant qu'ils n'ont pas du pain et de la bière. L'un d'entre eux avance qu'il faut 48 Enutrofs pour creuser leur tunnel et qu'ils ne sont que 45.",
         requiredItems: {[CraftEnum.BIERE_ASTRUB]: 48, [CraftEnum.PAIN_INCARNAM]: 48},
         rewardType: 'kamas',
-    }, /*
-    [QuestEnum.CHASSE_GIBIER]: {
-        name: QuestEnum.CHASSE_GIBIER,
-        description: "",
-        requiredItems: {
-        //    [CraftEnum.ARC_BOIS]: 5,
-        //    [CraftEnum.FLECHE]: 100
-        },
-        rewardType: 'happiness',
     },
-    */
     [QuestEnum.RECOLTE_PLANTES]: {
         name: QuestEnum.RECOLTE_PLANTES,
         description: "Les Eniripsas s'embrouillent sur la place publique. Certains veulent que les efforts soient mis dans les poisons pour défendre le village, d'autres que la recherche sur les soins avance. Ce n'est pas votre problème, mais vous pouvez gagner quelques kamas en répondant aux deux.",
@@ -110,7 +100,28 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         requiredItems: {[CraftEnum.SANDWICH_AU_GOUJON]: 20, [CraftEnum.POTION_MINI_SOIN]: 20},
         rewardType: 'happiness',
         buildings: [BuildingEnum.MILICE]
-    }
+    },
+    [QuestEnum.POISSON_FRAIS]: {
+        name: QuestEnum.POISSON_FRAIS,
+        description: "« Les mouches, c'est offert. » Le poissonnier d'Astrub n'a pas toujours le poisson le plus frais des environs. Le Conseil d'Astrub offre un supplément si vous renouvelez son stock avec une meilleure qualité.",
+        requiredItems: {
+            [RessourcesEnum.GOUJON]: 100,
+            [RessourcesEnum.TRUITE]: 50,
+            [RessourcesEnum.GREUVETTE]: 50
+        },
+        rewardType: 'kamas'
+    },
+    [QuestEnum.CELEBRATION_SANCTUAIRE]: {
+        name: QuestEnum.CELEBRATION_SANCTUAIRE,
+        description: "Les prêtres organisent une cérémonie en hommage aux dieux. Ils souhaitent que les paysans, alchimistes et pêcheurs proposent une offrande pour obtenir la bénédiction des Dix..",
+        requiredItems: {
+            [RessourcesEnum.BLE]: 150,
+            [RessourcesEnum.ORTIE]: 150,
+            [RessourcesEnum.GOUJON]: 150,
+        },
+        rewardType: 'happiness',
+        buildings: [BuildingEnum.SANCTUAIRE]
+    },
 };
 
 export {QuestEnum, QuestTemplates, QuestTemplate};

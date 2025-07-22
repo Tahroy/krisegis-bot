@@ -74,7 +74,6 @@ export default class Statut extends AbstractSubCommand {
         const embed = new EmbedBuilder()
             .setTitle('Quêtes disponibles')
             .setColor('#0099ff')
-            .setDescription('Voici les quêtes actuellement disponibles à Astrub:');
 
         for (const quest of quests) {
             const questTemplate = QuestTemplates[quest.name as QuestEnum];
@@ -83,12 +82,12 @@ export default class Statut extends AbstractSubCommand {
                 continue;
             }
 
-            // Construire la liste des objets requis avec progression
+            // Construire la liste des objets requis avec pourcentage
             const requiredItemsText = Object.entries(questTemplate.requiredItems)
                 .map(([itemName, requiredQuantity]) => {
                     const providedQuantity = quest.itemsProvided[itemName] || 0;
                     const progressPercent = Math.min(100, Math.round((providedQuantity / requiredQuantity) * 100));
-                    return `- ${itemName}: ${providedQuantity}/${requiredQuantity} (${progressPercent} %)`;
+                    return `- ${itemName} : ${providedQuantity}/${requiredQuantity} (${progressPercent} %)`;
                 })
                 .join('\n');
 
@@ -96,7 +95,7 @@ export default class Statut extends AbstractSubCommand {
             const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
 
             embed.addFields({
-                name: `${quest.name} (ID: ${quest.id})`,
+                name: `${quest.name}`,
                 value: `${questTemplate.description}\n\n**Objets requis : **\n${requiredItemsText}\n\n**Récompense : ** ${rewardAmount} ${rewardType}`
             });
         }
@@ -119,7 +118,7 @@ export default class Statut extends AbstractSubCommand {
             .setTimestamp();
 
         if (completedBuildingNames.length > 0) {
-            embed.addFields({name: 'Bâtiments', value: "construits"});
+            embed.addFields({name: 'Bâtiments constuits', value: `${completedBuildingNames.length}`});
 
             for (const buildingName of completedBuildingNames) {
                 const building = JobUtil.getBuilding(buildingName);
@@ -130,8 +129,6 @@ export default class Statut extends AbstractSubCommand {
                     });
                 }
             }
-        } else {
-            embed.addFields({name: 'Bâtiments construits', value: "Aucun bâtiment n'a encore été construit."});
         }
 
         const buildingsInProgress = await BuildingGuild.findAll({
@@ -141,7 +138,7 @@ export default class Statut extends AbstractSubCommand {
         });
 
         if (buildingsInProgress.length > 0) {
-            embed.addFields({name: 'Bâtiments', value: 'en construction'});
+            embed.addFields({name: 'Bâtiments en construction', value: `${buildingsInProgress.length}`});
 
             for (const buildingGuild of buildingsInProgress) {
                 const building = JobUtil.getBuilding(buildingGuild.name);
@@ -160,7 +157,7 @@ export default class Statut extends AbstractSubCommand {
         );
 
         if (notStartedBuildings.length > 0) {
-            embed.addFields({name: 'Bâtiments', value: "à construire"});
+            embed.addFields({name: 'Bâtiments à construire', value: `${notStartedBuildings.length}`});
 
             for (const building of notStartedBuildings) {
                 embed.addFields({

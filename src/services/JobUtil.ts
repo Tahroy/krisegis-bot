@@ -12,6 +12,8 @@ import KrisegisClient from "../models/KrisegisClient";
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 import {Building, Buildings} from "../models/astrub_economy/Building";
 import {QuestService} from "./questService";
+import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import {Op} from "sequelize";
 
 class JobUtil {
     static getLevelFromXP(currentXP: number, baseXP: number = 10): number {
@@ -167,12 +169,21 @@ class JobUtil {
      * Génère une nouvelle quête pour un serveur et l'annonce
      */
     static async generateAndAnnounceQuest(client: KrisegisClient, guildId: string): Promise<void> {
-        await QuestService.deleteOldQuests(guildId);
+        await QuestService.deleteOldQuests(client, guildId);
 
         // Une chance sur 6 de déclencher une quête
         const random = Math.random() * 6 < 1
+        console.log("Quête ? " + (random ? "Oui" : "Non"))
         if (!random) {
-           // return;
+            return;
+        }
+
+        // Pas plus de quêtes que de joueurs actifs
+        const nbPlayers = await JobUtil.getNbActivesPlayers(guildId)
+        const activesQuests = await QuestService.getActiveQuests(guildId);
+
+        if (activesQuests.length >= nbPlayers) {
+            return;
         }
 
         const quest = await QuestService.generateRandomQuest(guildId);
@@ -183,7 +194,7 @@ class JobUtil {
 
     async startReminder(client: KrisegisClient) {
         // Définir la tâche à exécuter chaque jour à 10h
-        cron.schedule('*/30 * * * *', async () => {
+        cron.schedule('* 10 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await JobUtil.updateMeteo(guild.id);
@@ -196,7 +207,7 @@ class JobUtil {
             }
         });
 
-        cron.schedule('* * * * *', async () => {
+        cron.schedule('0 * * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await JobUtil.generateAndAnnounceQuest(client, guild.id);
@@ -278,6 +289,43 @@ class JobUtil {
             }
         });
         return buildingGuild !== null
+    }
+
+    public static calculSell(item: BaseItem) {
+        if (!item.recipe) {
+            return Math.floor(item.sell || 0);
+        }
+
+        let sell = 0;
+        for (const [recipeItemName, quantity] of Object.entries(item.recipe)) {
+            const recipeItem = JobUtil.getItem(recipeItemName as RessourcesEnum | CraftEnum);
+            if (!recipeItem) {
+                continue;
+            }
+
+            const recipeSell = JobUtil.calculSell(recipeItem);
+            sell += recipeSell * quantity;
+        }
+
+        return Math.floor(sell * 1.1);
+    }
+
+    static calculBuy(ressource: BaseItem) {
+        return Math.floor(JobUtil.calculSell(ressource) * 2.5);
+    }
+
+    /**
+     * Retourne le nombre de joueurs actifs ces trois derniers jours
+     */
+    private static async getNbActivesPlayers(guildId: string) {
+        return await Player.count({
+            where: {
+                guildId: guildId,
+                lastHarvest: {
+                    [Op.gt]: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3)
+                }
+            }
+        });
     }
 }
 

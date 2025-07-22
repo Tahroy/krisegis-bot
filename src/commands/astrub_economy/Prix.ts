@@ -2,6 +2,7 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import {Ressources} from "../../models/astrub_economy/Ressource";
 import JobUtil from "../../services/JobUtil";
+import {RessourcesEnum} from "../../models/astrub_economy/Enums";
 
 class Prix extends AbstractSubCommand {
     description: string = "Voir le tableau des prix";
@@ -18,17 +19,17 @@ class Prix extends AbstractSubCommand {
 
         // Construction des lignes du tableau
         const rows = Object.values(JobUtil.getAllItems()).map(ressource => {
-            if (!ressource.sell && !ressource.buy) {
+
+            if (!ressource.name.includes('Pâté')) {
                 return '';
             }
-
             if (!ressource.name) {
                 return ''
             }
 
             const name = ressource.name;
-            const sell = String(Math.floor(ressource.sell ?? 0));
-            const buy = String(Math.floor(ressource.buy ?? 0));
+            const sell = String(JobUtil.calculSell(ressource));
+            const buy = String(JobUtil.calculBuy(ressource))
 
             return `${name.padEnd(23)} | ${sell.padStart(13)} | ${buy.padStart(12)}`;}).filter(row => row !== '');
 

@@ -9,7 +9,6 @@ import JobUtil from "./JobUtil";
 import {Ressources} from "../models/astrub_economy/Ressource";
 import {Crafts} from "../models/astrub_economy/Craft";
 import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
-import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 
 export class QuestService {
     /**
@@ -226,7 +225,7 @@ export class QuestService {
         }
     }
 
-    static async deleteOldQuests(guildId: string) {
+    static async deleteOldQuests(client: KrisegisClient, guildId: string) {
         const allQuests = await this.getActiveQuests(guildId);
 
         let happinessLost = 0;
@@ -235,10 +234,25 @@ export class QuestService {
             const maxTime = 24 * 60 * 60 * 1000; // Prod
             //const maxTime = 2 * 60 * 1000; // debug
             if (Date.now() - quest.createdAt.getTime() > maxTime) {
+
                 // On supprime la quête
                 quest.status = 'failed'
                 await quest.save();
-                happinessLost += 5;
+
+                const reward = Math.floor(QuestService.calculReward(QuestTemplates[quest.name as QuestEnum]) / 2);
+                happinessLost += reward;
+
+                const channel = JobUtil.getChannel(client, guildId);
+
+                if (channel && channel.isTextBased()) {
+                    const embed = new EmbedBuilder()
+                        .setTitle(`La quête ${quest.name} a échoué !`)
+                        .setColor("#ff3333")
+                        .setDescription(`La joie diminue de ${reward} dans le village`)
+                        .setTimestamp();
+
+                    await channel.send({embeds: [embed]});
+                }
                 console.log(`${quest.name} échouée`)
             }
         }
@@ -252,7 +266,7 @@ export class QuestService {
             const item = Ressources[itemName as RessourcesEnum] || Crafts[itemName as CraftEnum];
 
             if (item) {
-                reward += item.sell * quantity;
+                reward += JobUtil.calculSell(item) * quantity;
             }
         }
 
