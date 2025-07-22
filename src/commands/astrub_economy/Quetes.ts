@@ -144,6 +144,11 @@ export default class Quetes extends AbstractSubCommand {
 
         const isCompleted = await QuestService.checkQuestCompletion(quest)
 
+        const guild = interaction.guild
+        const user = interaction.user
+        const memberCatch = await guild?.members.fetch(user.id)
+        const userName = memberCatch?.nickname ?? user.globalName
+
         if (isCompleted) {
             const template = QuestTemplates[quest.name as QuestEnum];
             await QuestService.distributeRewards(quest, template, interaction.guildId);
@@ -153,9 +158,9 @@ export default class Quetes extends AbstractSubCommand {
             const amount = QuestService.calculReward(template)
             const reward = `${amount} ${template.rewardType === 'kamas' ? 'kamas' : 'joie'}`
 
-            await interaction.reply({content: `🎉🎉 Vous avez fourni ${quantity} ${itemName} et complété la quête. Vous avez reçu ${reward} ! 🎉🎉`});
+            await interaction.reply({content: `🎉🎉 ${userName} a fourni ${quantity} ${itemName} et complété la quête. Les participants ont reçu reçu ${reward} ! 🎉🎉`});
         } else {
-            await interaction.reply({content: `Vous avez fourni ${quantity} ${itemName} pour la quête. Continuez à contribuer pour la compléter !`});
+            await interaction.reply({content: `${userName} a fourni ${quantity} ${itemName} pour la quête. Continuez à contribuer pour la compléter !`});
         }
     }
 }
