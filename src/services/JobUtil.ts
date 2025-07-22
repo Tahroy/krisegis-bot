@@ -178,15 +178,8 @@ class JobUtil {
             return;
         }
 
-        // Pas plus de quêtes que de joueurs actifs
-        const nbPlayers = await JobUtil.getNbActivesPlayers(guildId)
-        const activesQuests = await QuestService.getActiveQuests(guildId);
-
-        if (activesQuests.length >= nbPlayers) {
-            return;
-        }
-
         const quest = await QuestService.generateRandomQuest(guildId);
+
         if (quest) {
             await QuestService.announceQuest(client, quest);
         }
@@ -311,13 +304,14 @@ class JobUtil {
     }
 
     static calculBuy(ressource: BaseItem) {
-        return Math.floor(JobUtil.calculSell(ressource) * 2.5);
+        const sell = JobUtil.calculSell(ressource);
+        return Math.ceil(sell * 2.5) ;
     }
 
     /**
      * Retourne le nombre de joueurs actifs ces trois derniers jours
      */
-    private static async getNbActivesPlayers(guildId: string) {
+    static async getNbActivesPlayers(guildId: string) {
         return await Player.count({
             where: {
                 guildId: guildId,

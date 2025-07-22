@@ -158,6 +158,14 @@ export class QuestService {
     }
 
     public static async generateRandomQuest(guildId: string): Promise<Quest|null> {
+        // Pas plus de quêtes que de joueurs actifs
+        const nbPlayers = await JobUtil.getNbActivesPlayers(guildId)
+        const activesQuests = await QuestService.getActiveQuests(guildId);
+
+        if (activesQuests.length >= nbPlayers) {
+            return null;
+        }
+
         const allQuestNames = Object.values(QuestEnum);
         const availableQuests: QuestEnum[] = [];
 
@@ -181,7 +189,7 @@ export class QuestService {
             for (const buildingName of questTemplate.buildings) {
                 const isConstructed = await JobUtil.isBuildingConstructed(guildId, buildingName);
                 if (!isConstructed) {
-              //      allBuildingsConstructed = false;
+                    allBuildingsConstructed = false;
                     break;
                 }
             }
@@ -216,7 +224,7 @@ export class QuestService {
             const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
 
             const embed = new EmbedBuilder()
-                .setTitle(`Nouvelle quête: ${quest.name} (ID: ${quest.id})`)
+                .setTitle(`Nouvelle quête: ${quest.name}`)
                 .setColor("#0099ff")
                 .setDescription(`${questTemplate.description}\n\n` + `**Objets requis :**\n${requiredItemsText}\n\n` + `**Récompense :** ${rewardAmount} ${rewardType}`)
                 .setTimestamp();
