@@ -9,6 +9,7 @@ import JobUtil from "./JobUtil";
 import {Ressources} from "../models/astrub_economy/Ressource";
 import {Crafts} from "../models/astrub_economy/Craft";
 import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 
 export class QuestService {
     /**
@@ -129,7 +130,9 @@ export class QuestService {
     public static async getQuestByName(guildId: string, questName: string): Promise<Quest | null> {
         return await Quest.findOne({
             where: {
-                guildId, name: questName
+                guildId:guildId,
+                name: questName,
+                status: 'active'
             }
         });
     }
@@ -155,9 +158,45 @@ export class QuestService {
         return true;
     }
 
-    public static async generateRandomQuest(guildId: string): Promise<Quest> {
+    public static async generateRandomQuest(guildId: string): Promise<Quest|null> {
         const allQuestNames = Object.values(QuestEnum);
-        const randomQuestName = allQuestNames[Math.floor(Math.random() * allQuestNames.length)];
+        const availableQuests: QuestEnum[] = [];
+
+        // Récupération des quêtes valides
+        for (const questName of allQuestNames) {
+            const questTemplate = QuestTemplates[questName];
+
+            // On vérifie que la quête n'est pas déjà en cours sur le serveur
+            const existingQuest = await this.getQuestByName(guildId, questName);
+            if (existingQuest) {
+                continue;
+            }
+
+            if (!questTemplate.buildings || questTemplate.buildings.length === 0) {
+                availableQuests.push(questName);
+                continue;
+            }
+
+            // On vérifie que tous les bâtiments nécessaires sont construits
+            let allBuildingsConstructed = true;
+            for (const buildingName of questTemplate.buildings) {
+                const isConstructed = await JobUtil.isBuildingConstructed(guildId, buildingName);
+                if (!isConstructed) {
+              //      allBuildingsConstructed = false;
+                    break;
+                }
+            }
+
+            if (allBuildingsConstructed) {
+                availableQuests.push(questName);
+            }
+        }
+
+        if (!availableQuests.length) {
+            return null;
+        }
+        // On fait une quête au hasard parmi les disponibles
+        const randomQuestName = availableQuests[Math.floor(Math.random() * availableQuests.length)];
         return await this.createQuest(guildId, randomQuestName);
     }
 
@@ -217,10 +256,10 @@ export class QuestService {
             }
         }
 
-        reward *= 1.25;
+        reward *= 1.2;
 
         if (quest.rewardType === 'happiness') {
-            reward /= 1000
+            reward /= 200
         }
 
         return Math.floor(reward);

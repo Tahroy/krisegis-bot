@@ -2,6 +2,7 @@ import Population from "../models/astrub_economy/Population";
 import KrisegisClient from "../models/KrisegisClient";
 import {EmbedBuilder} from "discord.js";
 import JobUtil from "./JobUtil";
+import Player from "../models/astrub_economy/Player";
 
 export class PopulationService {
     public static async getOrCreatePopulation(guildId: string): Promise<Population> {
@@ -31,9 +32,30 @@ export class PopulationService {
      * À 100 de joie: -5 / +15
      */
     public static async updatePopulation(guildId: string): Promise<void> {
-        const population = await PopulationService.getOrCreatePopulation(guildId);
-
+        // Uniquement si on a des récoltes sur le serveur ces dernières 24h
         const now = new Date();
+
+        // On récupère le dernier joueur pour récupérer sa dernière récolte
+        const lastUpdate = await Player.findOne({
+            where: {
+                guildId
+            },
+            order: [['lastHarvest', 'DESC']]
+        })
+
+        if (!lastUpdate || !lastUpdate.lastHarvest) {
+            return;
+        }
+
+        const lastHarvest = lastUpdate.lastHarvest;
+        const timeSinceLastHarvest = now.getTime() - lastHarvest.getTime();
+
+        if (timeSinceLastHarvest < 24 * 60 * 60 * 1000) {
+            return;
+        }
+
+        // On récupère ou on crée la population actuelle
+        const population = await PopulationService.getOrCreatePopulation(guildId);
 
         // Calcul du changement de population basé sur le niveau de joie
         const happinessInfluence = (population.happiness - 50) / 100;
@@ -48,9 +70,6 @@ export class PopulationService {
         // Mettre à jour la population en respectant la limite maximale
         population.population = Math.min(population.maxPopulation, Math.max(0, population.population + change));
         population.lastUpdate = now;
-
-        // Reset de la joie à 50 (niveau neutre)
-       // population.happiness = 50;
 
         await population.save();
     }
@@ -91,36 +110,19 @@ export class PopulationService {
         return population;
     }
 
-    public static getPopulationDescription(population: number): string {
-        let description = '';
-
-        if (population < 50) {
-            description = '📉 La cité est presque déserte. Les commerces ferment et les bâtiments se dégradent.';
-        } else if (population < 100) {
-            description = '📉 La population diminue. Certains habitants quittent la cité pour chercher fortune ailleurs.';
-        } else if (population < 150) {
-            description = '📊 La population est stable. La vie à Astrub suit son cours normal.';
-        } else if (population < 200) {
-            description = '📈 La population augmente. De nouveaux habitants s\'installent, attirés par les opportunités.';
-        } else {
-            description = '📈 La cité est florissante ! Les rues sont animées et l\'économie prospère.';
-        }
-        return description;
-    }
-
     public static getHappinessDescription(happiness: number): string {
         let description = '';
 
         if (happiness < 20) {
-            description = '😡 Les habitants sont mécontents et en colère. Des manifestations éclatent régulièrement.';
+            description = "😡 L'ambiance est au point mort à Astrub. Les habitants rentrent chez eux le soir, la taverne se vide, les aires de jeux pour enfants n'accueillent plus personne. Astrub a connu de meilleurs jours !";
         } else if (happiness < 40) {
-            description = '😔 Le moral est bas. Les habitants sont moroses et peu enclins à participer à la vie de la cité.';
+            description = "😔 Astrub est morose aujourd'hui. Le marché est boudé de la population et les habitants se contentent de se rendre à la taverne pour espérer que demain soit meilleur.";
         } else if (happiness < 60) {
-            description = '😐 L\'ambiance est neutre. Les habitants vaquent à leurs occupations sans enthousiasme particulier.';
+            description = "😐 . Les habitants d'Astrub vaguent à leurs occupations habituels. La vie suit son cours, qu'elle soit belle ou triste !";
         } else if (happiness < 80) {
-            description = '🙂 Les habitants sont plutôt satisfaits. On entend des rires dans les rues d\'Astrub.';
+            description = "🙂 Les enfants sortent dans les rues pour s'amuser, quelle que soit la météo. Les cris de joie se font entendre à la taverne et le marché est rempli de curieux et de commerçants.";
         } else {
-            description = '😄 La joie règne dans la cité ! Les habitants sont enthousiastes et organisent régulièrement des festivités.';
+            description = "😄 La joie règne dans le village d'Astrub ! Les habitants chantent, dansent, organisent des distributions gratuites de nourriture... Tout va bien dans le plus beau des Monde des Dix. ";
         }
 
         return description;
@@ -128,7 +130,6 @@ export class PopulationService {
 
     public static async getEmbedPopulation(guildId: string): Promise<EmbedBuilder> {
         const population = await PopulationService.getOrCreatePopulation(guildId);
-        const populationDescription = PopulationService.getPopulationDescription(population.population);
         const happinessDescription = PopulationService.getHappinessDescription(population.happiness);
 
 
@@ -137,10 +138,8 @@ export class PopulationService {
             .setColor("#0099ff")
             .setDescription(
                 `La cité d'Astrub compte actuellement **${population.population}/${population.maxPopulation}** habitants.\n\n` +
-                `${populationDescription}\n\n` +
                 `**Niveau de joie:** ${population.happiness}/100\n` +
-                `${happinessDescription}\n\n` +
-                `*Construisez des maisons pour augmenter la population maximale de la cité.*`
+                `${happinessDescription}\n\n`
             )
             .setTimestamp();
     }

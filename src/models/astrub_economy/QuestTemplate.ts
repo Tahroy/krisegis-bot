@@ -1,13 +1,12 @@
-import {CraftEnum, RessourcesEnum, SellEnum} from "./Enums";
-import {QuestService} from "../../services/questService";
-import {Ressources} from "./Ressource";
-import {Crafts} from "./Craft";
+import {CraftEnum, RessourcesEnum} from "./Enums";
+import {BuildingEnum} from "./Building";
 
 interface QuestTemplate {
     name: string;
     description: string;
     requiredItems: Record<string, number>;
     rewardType: 'kamas' | 'happiness';
+    buildings?: BuildingEnum[];
 }
 
 enum QuestEnum {
@@ -17,10 +16,12 @@ enum QuestEnum {
     MENACE_MONSTRES = "Menace de monstres",
     FESTIVAL_ASTRUB = "Festival d'Astrub",
     REPARATION_BATIMENTS = "Réparation des bâtiments",
-    EXPEDITION_MINIERE = "Expédition minière", //CHASSE_GIBIER = "Chasse au gibier",
+    MANIFESTATION_MINIERE = "Manifestivation minière", //CHASSE_GIBIER = "Chasse au gibier",
     RECOLTE_PLANTES = "Récolte de plantes médicinales",
     APPROVISIONNEMENT_FORGE = "Approvisionnement de la forge",
-    FOND_ORPHELINAT = "Des fonds pour l'orphelinat"
+    FOND_ORPHELINAT = "Des fonds pour l'orphelinat",
+    APPROVISIONNER_TAVERNE = "Approvisionner la taverne",
+    ENTRAINEMENT_MILICE = "Entraînement de la milice"
 }
 
 const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
@@ -34,26 +35,19 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     }, [QuestEnum.FAMINE_ASTRUB]: {
         name: QuestEnum.FAMINE_ASTRUB,
         description: "Un drame touche la ville d'Astrub : les récoltes ont été faibles et la grange principale a brûlé. Les habitants ont faim et les enfants mendient auprès des marchands venus d'ailleurs. Une cargaison arrive, mais en attendant, vous avez des bouches à nourrir !",
-        requiredItems: {
-            [CraftEnum.PAIN_INCARNAM]: 100
-        },
+        requiredItems: {[CraftEnum.PAIN_INCARNAM]: 100},
         rewardType: 'happiness',
     }, [QuestEnum.BESOIN_MATERIAUX]: {
         name: QuestEnum.BESOIN_MATERIAUX,
         description: "Le village en pleine expansion et Perle la bâtisseuse fait face à des pénuries de matériaux. Elle promet un meilleur paiement que celui proposé au marché d'Astrub.",
-        requiredItems: {
-            [RessourcesEnum.FRENE]: 250,
-            [RessourcesEnum.FER]: 250
-        },
+        requiredItems: {[RessourcesEnum.FRENE]: 250, [RessourcesEnum.FER]: 250},
         rewardType: 'kamas',
     }, [QuestEnum.MENACE_MONSTRES]: {
         name: QuestEnum.MENACE_MONSTRES,
         description: "L'alerte est sonnée au village d'Astrub. De nombreux monstres se rapprochent de la cité. Les mercenaires s'arment et ordonnent aux habitants de rentrer chez eux. De nombreux volontaires se présentent pour défendre leurs foyers, mais ils vont avoir besoin d'équipement.",
-        requiredItems: {
-            [CraftEnum.EPEE_FER]: 3,
-            [CraftEnum.BOUCLIER_BOIS]: 3
-        },
+        requiredItems: {[CraftEnum.EPEE_FER]: 3, [CraftEnum.BOUCLIER_BOIS]: 1},
         rewardType: 'kamas',
+        buildings: [BuildingEnum.FORGE, BuildingEnum.MENUISERIE]
     }, [QuestEnum.FESTIVAL_ASTRUB]: {
         name: QuestEnum.FESTIVAL_ASTRUB,
         description: "Avec autant de catastrophe, les habitants d'Astrub ont besoin d'organiser une grande fête ! Sortez la bière, sortez la nourriture ! Les petits et les grands préparent dans la joie cette belle journée, en espérant qu'il y en aura pour tout le monde.",
@@ -69,18 +63,12 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     }, [QuestEnum.REPARATION_BATIMENTS]: {
         name: QuestEnum.REPARATION_BATIMENTS,
         description: "La dernière tempête a abîmé le toit de la milice du village. Perle a besoin de matériau d'urgence et de qualité. Pour la sécurité des habitants, les mercenaires mettent les moyens (et surtout pour éviter les fuites...).",
-        requiredItems: {
-            [CraftEnum.PLANCHE_FRENE]: 50,
-            [CraftEnum.PLANCHE_CHATAIGNIER]: 10
-        },
+        requiredItems: {[CraftEnum.PLANCHE_FRENE]: 50, [CraftEnum.PLANCHE_CHATAIGNIER]: 10},
         rewardType: 'kamas',
-    }, [QuestEnum.EXPEDITION_MINIERE]: {
-        name: QuestEnum.EXPEDITION_MINIERE,
+    }, [QuestEnum.MANIFESTATION_MINIERE]: {
+        name: QuestEnum.MANIFESTATION_MINIERE,
         description: "Les Enutrofs protestent ! Ils refusent d'aller miner tant qu'ils n'ont pas du pain et de la bière. L'un d'entre eux avance qu'il faut 48 Enutrofs pour creuser leur tunnel et qu'ils ne sont que 45.",
-        requiredItems: {
-            [CraftEnum.BIERE_ASTRUB]: 48,
-            [CraftEnum.PAIN_INCARNAM]: 48
-        },
+        requiredItems: {[CraftEnum.BIERE_ASTRUB]: 48, [CraftEnum.PAIN_INCARNAM]: 48},
         rewardType: 'kamas',
     }, /*
     [QuestEnum.CHASSE_GIBIER]: {
@@ -96,24 +84,32 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     [QuestEnum.RECOLTE_PLANTES]: {
         name: QuestEnum.RECOLTE_PLANTES,
         description: "Les Eniripsas s'embrouillent sur la place publique. Certains veulent que les efforts soient mis dans les poisons pour défendre le village, d'autres que la recherche sur les soins avance. Ce n'est pas votre problème, mais vous pouvez gagner quelques kamas en répondant aux deux.",
-        requiredItems: {
-            [RessourcesEnum.ORTIE]: 100, [RessourcesEnum.SAUGE]: 50
-        },
+        requiredItems: {[RessourcesEnum.ORTIE]: 100, [RessourcesEnum.SAUGE]: 50},
         rewardType: 'happiness',
     }, [QuestEnum.APPROVISIONNEMENT_FORGE]: {
         name: QuestEnum.APPROVISIONNEMENT_FORGE,
         description: "Depuis peu, un maître forgeron a commencé à donner des cours à de jeunes apprentis et les stocks de minerais s'épuisent à une vitesse folle. Le marché ne se remplit pas assez vite, voici une occasion de revendre vos minerais...",
-        requiredItems: {
-            [RessourcesEnum.FER]: 150, [RessourcesEnum.CUIVRE]: 100
-        },
+        requiredItems: {[RessourcesEnum.FER]: 150, [RessourcesEnum.CUIVRE]: 100},
         rewardType: 'kamas',
+        buildings: [BuildingEnum.FORGE]
     }, [QuestEnum.FOND_ORPHELINAT]: {
         name: QuestEnum.FOND_ORPHELINAT,
-        description: "Malheureusement, tous les aventuriers ne rentrent pas. Tous les mercenaires ne survivent pas et tous les malades ne guérissent pas. Un orphelinat a commencé à apparaître à Astrub et celui-ci a besoin de fonds.",
-        requiredItems: {
-            [RessourcesEnum.KAMAS]: 5000,
-        },
+        description: "La gérante de l'orphelinat dépose une note au centre du village. Les caisses sont presque vides, les enfants ont besoin de vêtements, de draps, de repas chauds et de nouvelles bougies. Elle appelle à la charité de chacun.",
+        requiredItems: {[RessourcesEnum.KAMAS]: 5000,},
         rewardType: 'happiness',
+        buildings: [BuildingEnum.ORPHELINAT]
+    }, [QuestEnum.APPROVISIONNER_TAVERNE]: {
+        name: QuestEnum.APPROVISIONNER_TAVERNE,
+        description: "Un groupe de mercenaires a passé la soirée à la taverne hier soir. Le tavernier a besoin de provisions d'urgence et il est prêt à payer le prix fort !",
+        requiredItems: {[CraftEnum.BIERE_ASTRUB]: 30, [CraftEnum.PAIN_SAUGE]: 15},
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.BRASSERIE, BuildingEnum.TAVERNE]
+    }, [QuestEnum.ENTRAINEMENT_MILICE]: {
+        name: QuestEnum.ENTRAINEMENT_MILICE,
+        description: "La nouvelle milice du village forme de jeunes recrues. Les mercenaires ont tendance à se blesser ou à se perdre dans les bois aux alentours. Ils auraient bien besoin de repas et de potions de soin.",
+        requiredItems: {[CraftEnum.SANDWICH_AU_GOUJON]: 20, [CraftEnum.POTION_MINI_SOIN]: 20},
+        rewardType: 'happiness',
+        buildings: [BuildingEnum.MILICE]
     }
 };
 

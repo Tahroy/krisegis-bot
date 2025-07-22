@@ -1,4 +1,5 @@
 import {CraftEnum, RessourcesEnum} from "./Enums";
+import Craft from "./Craft";
 
 interface Building {
     name: string
@@ -15,7 +16,10 @@ enum BuildingEnum {
     BRASSERIE = "Brasserie",
     MENUISERIE = "Menuiserie",
     FORGE = "Forge",
-    RESERVE = "Réserve"
+    RESERVE = "Réserve",
+    ORPHELINAT = "Orphelinat",
+    TAVERNE = "Taverne",
+    MILICE = "Milice",
 }
 
 const Buildings: Record<BuildingEnum, Building> = {
@@ -106,6 +110,47 @@ const Buildings: Record<BuildingEnum, Building> = {
             [RessourcesEnum.KAMAS]: 15000
         },
         image: 'reserve.png'
+    },
+    [BuildingEnum.ORPHELINAT]: {
+        name: BuildingEnum.ORPHELINAT,
+        description: "Malheureusement, tous les aventuriers ne rentrent pas. Tous les mercenaires ne survivent pas et tous les malades ne guérissent pas. L'orphelinat s'occupe de tous ceux qui ont perdu leurs parents et permet de retrouver un peu de joie.",
+        shortDescription: "Débloque de nouvelles quêtes",
+        recipe: {
+            [RessourcesEnum.KAMAS]: 5000,
+            [RessourcesEnum.BLE]: 500,
+            [RessourcesEnum.PIERRE]: 500,
+            [CraftEnum.LINGOT_FER]: 200,
+            [CraftEnum.PLANCHE_FRENE]: 500,
+        },
+        image: 'orphelinat.png'
+    },
+    [BuildingEnum.TAVERNE]: {
+        name: BuildingEnum.TAVERNE,
+        description: "La taverne d'Astrub est devenu LE lieu le plus important du village. Paysans, commerçants, mercenaires, nobles, pauvres... Tout le monde s'y retrouve pour fêter ou oublier sa journée.",
+        shortDescription: "Débloque de nouvelles quêtes",
+        recipe: {
+            [RessourcesEnum.KAMAS]:5000,
+            [RessourcesEnum.PIERRE]: 500,
+            [CraftEnum.PLANCHE_FRENE]: 200,
+            [CraftEnum.LINGOT_FER]: 75,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 50,
+            [CraftEnum.LINGOT_CUIVRE]: 25,
+        },
+        image: 'taverne.png'
+    },
+    [BuildingEnum.MILICE]: {
+        name: BuildingEnum.MILICE,
+        description: "Dans un besoin de protéger les habitants des monstres et des bandits, des habitants ont pris les armes pour former une milice, en collaboration avec les mercenaires.",
+        shortDescription: "Débloque de nouvelles quêtes",
+        recipe: {
+            [RessourcesEnum.KAMAS]: 5000,
+            [RessourcesEnum.PIERRE]: 500,
+            [CraftEnum.LINGOT_FER]: 75,
+            [CraftEnum.PLANCHE_FRENE]: 75,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 50,
+            [CraftEnum.LINGOT_CUIVRE]: 50,
+        },
+        image: 'milice.png'
     }
 }
 

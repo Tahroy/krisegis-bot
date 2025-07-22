@@ -5,7 +5,6 @@ import JobUtil from "../../services/JobUtil";
 import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/playerItemService";
 import Job from "../../models/astrub_economy/Job";
-import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 
 class Fabriquer extends AbstractSubCommand {
     description: string = 'Créer un object';
@@ -97,14 +96,8 @@ class Fabriquer extends AbstractSubCommand {
         // S'il y a un bâtiment nécessaire, on vérifie que la guilde le possède
         if (item.buildings) {
             for (let building of item.buildings) {
-                const buildingGuild = await BuildingGuild.findOne({
-                    where: {
-                        guildId: guildId,
-                        name: building,
-                        status: "completed"
-                    }
-                })
-                if (!buildingGuild) {
+                const constructed = await JobUtil.isBuildingConstructed(guildId, building)
+                if (!constructed) {
                     await interaction.reply({
                         content: `Vous devez avoir ${building} pour fabriquer ${itemName}`,
                         flags: MessageFlags.Ephemeral

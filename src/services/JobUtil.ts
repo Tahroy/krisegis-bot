@@ -172,11 +172,13 @@ class JobUtil {
         // Une chance sur 6 de déclencher une quête
         const random = Math.random() * 6 < 1
         if (!random) {
-            return;
+           // return;
         }
 
         const quest = await QuestService.generateRandomQuest(guildId);
-        await QuestService.announceQuest(client, quest);
+        if (quest) {
+            await QuestService.announceQuest(client, quest);
+        }
     }
 
     async startReminder(client: KrisegisClient) {
@@ -194,7 +196,7 @@ class JobUtil {
             }
         });
 
-        cron.schedule('*/5 * * * *', async () => {
+        cron.schedule('* * * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await JobUtil.generateAndAnnounceQuest(client, guild.id);
@@ -265,6 +267,17 @@ class JobUtil {
         return guild.channels.cache.find(channel =>
             (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie')
         )
+    }
+
+    public static async isBuildingConstructed(guildId: string, buildingName: string): Promise<boolean> {
+        const buildingGuild = await BuildingGuild.findOne({
+            where: {
+                guildId: guildId,
+                name: buildingName,
+                status: "completed"
+            }
+        });
+        return buildingGuild !== null
     }
 }
 
