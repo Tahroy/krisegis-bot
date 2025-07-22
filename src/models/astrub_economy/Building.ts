@@ -30,7 +30,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         recipe: {
             [RessourcesEnum.FRENE]: 5000,
             [RessourcesEnum.FER]: 2500,
-            [RessourcesEnum.PIERRE]: 1500,
+            [RessourcesEnum.PIERRE]: 2500,
             [RessourcesEnum.KAMAS]: 10000
         },
         image: 'scierie.png'
@@ -42,7 +42,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         recipe: {
             [RessourcesEnum.FRENE]: 2500,
             [RessourcesEnum.FER]: 5000,
-            [RessourcesEnum.PIERRE]: 1500,
+            [RessourcesEnum.PIERRE]: 2500,
             [RessourcesEnum.KAMAS]: 10000
         },
         image: 'fonderie.png'
@@ -52,7 +52,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "Petit sanctuaire fait de pierre et de bois disposé au centre du marché. Les habitants peuvent y déposer une offrande dans la coupe sacrée pour espérer que les Dix leur répondent.",
         shortDescription: "Débloque les prières",
         recipe: {
-            [RessourcesEnum.PIERRE]: 2000,
+            [RessourcesEnum.PIERRE]: 3500,
             [CraftEnum.PLANCHE_FRENE]: 1000,
             [CraftEnum.LINGOT_FER]: 1000,
             [RessourcesEnum.KAMAS]: 10000
@@ -64,7 +64,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "La bière d'Astrub n'attend qu'à être connue du Monde des Dix ! Cette brasserie accueille de nombreux travailleurs, prêts à faire de nouvelles découvertes aromatiques et surtout tester leurs propres produits.",
         shortDescription: "Débloque la bière",
         recipe: {
-            [RessourcesEnum.PIERRE]: 1500,
+            [RessourcesEnum.PIERRE]: 2500,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 200,
             [CraftEnum.LINGOT_CUIVRE]: 200,
             [RessourcesEnum.KAMAS]: 15000
@@ -76,7 +76,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "Atelier de menuiserie où les artisans transforment le bois en objets utiles comme des boucliers, des meubles et des armes. On y remarque même quelques statuettes en hommage aux dieux.",
         shortDescription: "Débloque le travail du bois",
         recipe: {
-            [RessourcesEnum.PIERRE]: 1500,
+            [RessourcesEnum.PIERRE]: 2500,
             [CraftEnum.LINGOT_CUIVRE]: 150,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 250,
             [RessourcesEnum.KAMAS]: 15000
@@ -88,7 +88,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "Forge imposante avec plusieurs enclumes où les forgerons travaillent le métal. On y fabrique des objets métalliques précieux, des talismans, des bijoux et des armes. Chaque matin, les enfants viennent admirer les marteaux frappant le métal..",
         shortDescription: "Débloque le travail du métal",
         recipe: {
-            [RessourcesEnum.PIERRE]: 1500,
+            [RessourcesEnum.PIERRE]: 2500,
             [CraftEnum.LINGOT_CUIVRE]: 250,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 150,
             [RessourcesEnum.KAMAS]: 15000
@@ -100,7 +100,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         description: "Grande réserve d'Astrub. Ce bâtiment permet de mettre en commun des ressources entre les différents artisans et habitants du village. Certains disent que c'est une insulte à Enutrof, d'autres qu'Eniripsa veille sur le village.",
         shortDescription: "Débloque la réserve",
         recipe: {
-            [RessourcesEnum.PIERRE]: 1200,
+            [RessourcesEnum.PIERRE]: 2000,
             [CraftEnum.BIERE_ASTRUB]: 100,
             [CraftEnum.LINGOT_FER]: 1000,
             [CraftEnum.PLANCHE_FRENE]: 1000,
@@ -118,7 +118,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         recipe: {
             [RessourcesEnum.KAMAS]: 5000,
             [RessourcesEnum.BLE]: 500,
-            [RessourcesEnum.PIERRE]: 300,
+            [RessourcesEnum.PIERRE]: 600,
             [CraftEnum.LINGOT_FER]: 200,
             [CraftEnum.PLANCHE_FRENE]: 500,
         },
@@ -130,7 +130,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         shortDescription: "Débloque de nouvelles quêtes",
         recipe: {
             [RessourcesEnum.KAMAS]:5000,
-            [RessourcesEnum.PIERRE]: 300,
+            [RessourcesEnum.PIERRE]: 600,
             [CraftEnum.PLANCHE_FRENE]: 200,
             [CraftEnum.LINGOT_FER]: 75,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 50,
@@ -144,7 +144,7 @@ const Buildings: Record<BuildingEnum, Building> = {
         shortDescription: "Débloque de nouvelles quêtes",
         recipe: {
             [RessourcesEnum.KAMAS]: 5000,
-            [RessourcesEnum.PIERRE]: 300,
+            [RessourcesEnum.PIERRE]: 600,
             [CraftEnum.LINGOT_FER]: 75,
             [CraftEnum.PLANCHE_FRENE]: 75,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 50,
