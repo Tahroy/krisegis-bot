@@ -19,10 +19,6 @@ class Prix extends AbstractSubCommand {
 
         // Construction des lignes du tableau
         const rows = Object.values(JobUtil.getAllItems()).map(ressource => {
-
-            if (!ressource.name.includes('Pâté')) {
-                return '';
-            }
             if (!ressource.name) {
                 return ''
             }
