@@ -114,21 +114,12 @@ class Donner extends AbstractSubCommand {
                 const items = await this.getUserItems(interaction.user, search, guildId)
 
                 for (let item of items) {
-                    const price = JobUtil.getItem(item.name)?.sell ?? 0;
-                    if (price === 0) continue;
-                    if (retour.length >= 19) {
+                    if (retour.length >= 20) {
                         break;
                     }
                     retour.push({
                         name: `${item.name}`,
                         value: item.name
-                    })
-                }
-
-                if (!search || "Kamas".includes(search)) {
-                    retour.push({
-                        name: "Kamas",
-                        value: "Kamas"
                     })
                 }
 
@@ -144,9 +135,6 @@ class Donner extends AbstractSubCommand {
         let sellablesItems: string [] = []
 
         for (let item of items) {
-            if (!item.sell) {
-                continue
-            }
             if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
                 sellablesItems.push(item.name)
             }

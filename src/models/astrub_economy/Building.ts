@@ -126,7 +126,7 @@ const Buildings: Record<BuildingEnum, Building> = {
     },
     [BuildingEnum.TAVERNE]: {
         name: BuildingEnum.TAVERNE,
-        description: "La taverne d'Astrub est devenu LE lieu le plus important du village. Paysans, commerçants, mercenaires, nobles, pauvres... Tout le monde s'y retrouve pour fêter ou oublier sa journée.",
+        description: "La taverne d'Astrub est LE lieu le plus important du village. Paysans, commerçants, mercenaires, nobles, pauvres... Tout le monde s'y retrouve pour fêter ou oublier sa journée.",
         shortDescription: "Débloque de nouvelles quêtes",
         recipe: {
             [RessourcesEnum.KAMAS]:5000,

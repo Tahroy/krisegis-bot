@@ -9,8 +9,8 @@ import {
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {Op} from "sequelize";
 import {ItemType, PlayerService} from "../../services/playerItemService";
+import BaseItem from "../../models/astrub_economy/BaseItem";
 
 class Vendre extends AbstractSubCommand {
     description: string = 'Vendre un objet';
@@ -55,9 +55,14 @@ class Vendre extends AbstractSubCommand {
         }
 
         const itemBase = JobUtil.getItem(item);
-        const price = itemBase?.sell ?? 0
+        if (!itemBase) {
+            await interaction.reply({content: "Cet objet ne peut pas être vendu", flags: MessageFlags.Ephemeral})
+            return
+        }
 
-        if (!price || !itemBase) {
+        const price = JobUtil.calculSell(itemBase)
+
+        if (!price) {
             await interaction.reply({content: "Cet objet ne peut pas être vendu", flags: MessageFlags.Ephemeral})
             return
         }
@@ -110,7 +115,8 @@ class Vendre extends AbstractSubCommand {
                 items.sort((a, b) => a.name.localeCompare(b.name));
 
                 for (let item of items) {
-                    const price = Math.floor(JobUtil.getItem(item.name)?.sell ?? 0);
+                    const price = JobUtil.calculSell(JobUtil.getItem(item.name) as BaseItem)
+
                     if (retour.length >= 20) {
                         break;
                     }
@@ -132,9 +138,15 @@ class Vendre extends AbstractSubCommand {
         const sellablesItems: string [] = []
 
         for (let item of items) {
-            if (!item.sell || item.name === 'kamas') {
+            if (item.name === 'kamas') {
                 continue
             }
+
+            const price = JobUtil.calculSell(item);
+            if (!price) {
+                continue;
+            }
+
             if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
                 sellablesItems.push(item.name)
             }

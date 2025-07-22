@@ -50,10 +50,10 @@ enum CraftEnum {
     BIERE_ASTRUB = "Bière d'Astrub",
     TRUITE_HERBES = "Truite aux herbes",
     PAIN_SAUGE = "Pain à la sauge",
-    GREUVETTE_HERBES = "Pâté de greuvette",
-    TALISMAN_PAYSAN = "Talisman en cuivre",
+    PATE_GREUVETTES = "Pâté de greuvettes",
+    TALISMAN_CUIVRE = "Talisman en cuivre",
     BOUCLIER_BOIS = "Bouclier châtaignier",
-    EPEE_FER = "Épée de boisaille",
+    EPEE_BOISAILLE = "Épée de boisaille",
 }
 
 export {CraftEnum};

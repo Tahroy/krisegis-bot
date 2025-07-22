@@ -96,8 +96,8 @@ const Crafts: Record<CraftEnum, Craft> = {
         type: ItemType.FABRICATION,
         experience: 30 * XpEnum.RESSOURCE_1,
         jobs: [JobEnum.PAYSAN, JobEnum.PECHEUR]
-    }, [CraftEnum.EPEE_FER]: {
-        name: CraftEnum.EPEE_FER,
+    }, [CraftEnum.EPEE_BOISAILLE]: {
+        name: CraftEnum.EPEE_BOISAILLE,
         recipe: {[CraftEnum.LINGOT_FER]: 15, [CraftEnum.PLANCHE_FRENE]: 5},
         sell: 200 * SellEnum.RESSOURCE_1 * MultiplicatorEnum.COMPLEXE_CRAFT,
         buy: 200 * BuyEnum.RESSOURCE_1 * MultiplicatorEnum.COMPLEXE_CRAFT,
@@ -205,16 +205,16 @@ const Crafts: Record<CraftEnum, Craft> = {
         type: ItemType.FABRICATION,
         experience: 30 * XpEnum.RESSOURCE_10,
         jobs: [JobEnum.PAYSAN, JobEnum.ALCHIMISTE]
-    }, [CraftEnum.GREUVETTE_HERBES]: {
-        name: CraftEnum.GREUVETTE_HERBES,
-        recipe: {[CraftEnum.PAIN_SAUGE]: 1, [CraftEnum.BEIGNET_GREUVETTE]: 2},
-        sell: 30 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
-        buy: 30 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
+    }, [CraftEnum.PATE_GREUVETTES]: {
+        name: CraftEnum.PATE_GREUVETTES,
+        recipe: {[RessourcesEnum.GREUVETTE]: 20},
+        sell: 20 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
+        buy: 20 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
         type: ItemType.FABRICATION,
-        experience: 30 * XpEnum.RESSOURCE_10,
+        experience: 20 * XpEnum.RESSOURCE_10,
         jobs: [JobEnum.PAYSAN, JobEnum.PECHEUR]
-    }, [CraftEnum.TALISMAN_PAYSAN]: {
-        name: CraftEnum.TALISMAN_PAYSAN,
+    }, [CraftEnum.TALISMAN_CUIVRE]: {
+        name: CraftEnum.TALISMAN_CUIVRE,
         recipe: {[CraftEnum.LINGOT_CUIVRE]: 5, [RessourcesEnum.SAUGE]: 50},
         sell: 150 * SellEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,
         buy: 150 * BuyEnum.RESSOURCE_10 * MultiplicatorEnum.COMPLEXE_CRAFT,

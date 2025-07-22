@@ -46,9 +46,15 @@ class Acheter extends AbstractSubCommand {
         });
 
         const baseItem = JobUtil.getItem(item);
-        const price = Math.floor(baseItem?.buy ?? 0);
 
-        if (!price || !baseItem) {
+        if (!baseItem) {
+            await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
+            return
+        }
+
+        const price = JobUtil.calculBuy(baseItem)
+
+        if (!price) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
             return
         }
@@ -68,7 +74,8 @@ class Acheter extends AbstractSubCommand {
         const userName = memberCatch?.nickname ?? user.globalName
 
         await interaction.reply({
-            content: `${userName} a acheté ${quantity} x ${item} pour ${totalPrice} kamas`
+            content: `${userName} a acheté ${quantity} x ${item} pour ${totalPrice} kamas`,
+            flags: MessageFlags.Ephemeral
         })
 
         await PlayerService.addPlayerItem(interaction.user, item, baseItem.type, quantity, guildId)
@@ -106,28 +113,23 @@ class Acheter extends AbstractSubCommand {
 
         switch (focused.name) {
             case this.OPTION_ITEM:
-                const ressources = Object.values(Ressources);
-                const tools = Object.values(Tools)
+                const items = JobUtil.getAllItems()
 
-                for (let ressource of ressources) {
+                for (let item of items) {
                     if (retour.length >= 20) break;
-                    if (ressource.buy === 0) continue;
-                    if (ressource.name === 'kamas') continue;
-                    if (ressource.name.toLowerCase().includes(search.toLowerCase()) || !search) {
-                        retour.push({
-                            name: `${ressource.name} (${Math.floor(ressource.buy)} kamas)`,
-                            value: ressource.name
-                        })
+                    if (item.name === 'kamas') {
+                        continue;
                     }
-                }
+                    if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
+                        const price = JobUtil.calculBuy(item);
 
-                for (let tool of tools) {
-                    if (retour.length >= 20) break;
-                    if (tool.buy === 0) continue;
-                    if (tool.name.toLowerCase().includes(search.toLowerCase()) || !search) {
+                        if (!price) {
+                            continue;
+                        }
+
                         retour.push({
-                            name: `${tool.name} (${Math.floor(tool.buy)} kamas)`,
-                            value: tool.name
+                            name: `${item.name} (${price} kamas)`,
+                            value: item.name
                         })
                     }
                 }
