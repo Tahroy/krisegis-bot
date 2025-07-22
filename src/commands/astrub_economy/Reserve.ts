@@ -23,7 +23,6 @@ class Reserve extends AbstractSubCommand {
     static readonly OPTION_ITEM = 'objet'
     static readonly OPTION_QUANTITY = 'quantite'
 
-    static readonly ACTION_VIEW = 'voir';
     static readonly  ACTION_DEPOSE = 'deposer';
     static readonly  ACTION_TAKE = 'prendre';
     async execute(interaction: CommandInteraction): Promise<void> {
@@ -46,9 +45,6 @@ class Reserve extends AbstractSubCommand {
         const quantity = interaction.options.getInteger(Reserve.OPTION_QUANTITY);
 
         switch (action) {
-            case Reserve.ACTION_VIEW:
-                await this.viewReserve(interaction);
-                break;
             case Reserve.ACTION_DEPOSE:
                 if (!itemName || !quantity) {
                     await interaction.reply({
@@ -78,7 +74,6 @@ class Reserve extends AbstractSubCommand {
                 .setDescription('Action à effectuer')
                 .setRequired(true)
                 .addChoices(
-                    { name: 'Voir le contenu de la réserve', value: Reserve.ACTION_VIEW },
                     { name: 'Déposer des objets dans la réserve', value: Reserve.ACTION_DEPOSE },
                     { name: 'Prendre des objets de la réserve', value: Reserve.ACTION_TAKE }
                 )
@@ -87,14 +82,14 @@ class Reserve extends AbstractSubCommand {
         builder.addStringOption(
             option => option.setName(Reserve.OPTION_ITEM)
                 .setDescription('Objet à déposer ou prendre')
-                .setRequired(false)
+                .setRequired(true)
                 .setAutocomplete(true)
         );
 
         builder.addIntegerOption(
             option => option.setName(Reserve.OPTION_QUANTITY)
                 .setDescription('Quantité à déposer ou prendre')
-                .setRequired(false)
+                .setRequired(true)
                 .setMinValue(1)
         );
     }
