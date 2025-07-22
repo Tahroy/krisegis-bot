@@ -20,9 +20,6 @@ class Batiments extends AbstractSubCommand {
     name = 'batiments';
     description = "Gérer les bâtiments d'Astrub";
 
-     readonly ACTION_BUILD = 'construire';
-     readonly ACTION_VIEW = 'voir';
-     readonly OPTION_ACTION = 'action'
      readonly OPTION_BUILDING = 'batiment'
      readonly OPTION_ITEM = 'objet'
      readonly OPTION_QUANTITY = 'quantite'
@@ -36,44 +33,24 @@ class Batiments extends AbstractSubCommand {
             return;
         }
 
-        const action = interaction.options.getString('action');
-
-        switch (action) {
-            case this.ACTION_BUILD:
-                await this.executeBuild(interaction);
-                break;
-            case this.ACTION_VIEW:
-                await this.executeView(interaction);
-                break;
-            default:
-                await interaction.reply({
-                    content: 'Action non reconnue', flags: MessageFlags.Ephemeral
-                });
-        }
+        await this.executeBuild(interaction);
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
-        builder.addStringOption(option => option.setName(this.OPTION_ACTION)
-            .setDescription('Action à effectuer')
-            .setRequired(true)
-            .addChoices({name: 'Construire un bâtiment', value: this.ACTION_BUILD},
-                {name: 'Voir les bâtiments', value: this.ACTION_VIEW})
-        );
 
-        // Options for build action
-        builder.addStringOption(option => option.setName(this.OPTION_BUILDING)
+         builder.addStringOption(option => option.setName(this.OPTION_BUILDING)
             .setDescription("Bâtiment à construire")
-            .setRequired(false)
+            .setRequired(true)
             .setAutocomplete(true));
 
         builder.addStringOption(option => option.setName(this.OPTION_ITEM)
             .setDescription("Objet de construction")
-            .setRequired(false)
+            .setRequired(true)
             .setAutocomplete(true));
 
         builder.addIntegerOption(option => option.setName(this.OPTION_QUANTITY)
             .setDescription("Quantité")
-            .setRequired(false));
+            .setRequired(true));
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -85,15 +62,9 @@ class Batiments extends AbstractSubCommand {
 
         const options = interaction.options;
         const focused = options.getFocused(true);
-        const action = options.getString(this.OPTION_ACTION);
-
-        if (action !== this.ACTION_BUILD) {
-            await interaction.respond([]);
-            return;
-        }
 
         let retour: ApplicationCommandOptionChoiceData[] = [];
-        console.log(focused.name, this.OPTION_ACTION, this.OPTION_ITEM)
+
         switch (focused.name) {
             case this.OPTION_BUILDING:
                 retour = await this.getBuildsAutocomplete(interaction);
@@ -196,66 +167,6 @@ class Batiments extends AbstractSubCommand {
         });
 
         await this.checkBuildingGuild(buildingGuild, interaction);
-    }
-
-    private async executeView(interaction: CommandInteraction): Promise<void> {
-        const guildId = interaction.guild?.id;
-        if (!guildId) {
-            return;
-        }
-
-        const buildings = Object.values(Buildings);
-        const completedBuildingNames = await JobUtil.getBuildingsGuild(interaction.guild);
-
-        const embed = new EmbedBuilder()
-            .setTitle('Bâtiments d\'Astrub')
-            .setColor("#0099ff")
-            .setTimestamp();
-
-        if (completedBuildingNames.length > 0) {
-            embed.addFields({name: 'Bâtiments', value: "construits"});
-
-            for (const buildingName of completedBuildingNames) {
-                const building = JobUtil.getBuilding(buildingName);
-                if (building) {
-                    const buildingInfo = this.getBuildingInfos(building);
-                    embed.addFields({name: '\u200B', value: buildingInfo});
-                }
-            }
-        } else {
-            embed.addFields({name: 'Bâtiments construits', value: "Aucun bâtiment n'a encore été construit."});
-        }
-
-        const buildingsInProgress = await BuildingGuild.findAll({
-            where: {
-                guildId: guildId, status: "in_progress"
-            }
-        });
-
-        if (buildingsInProgress.length > 0) {
-            embed.addFields({name: 'Bâtiments', value: 'en construction'});
-
-            for (const buildingGuild of buildingsInProgress) {
-                const building = JobUtil.getBuilding(buildingGuild.name);
-                if (building) {
-                    const buildingInfo = this.getBuildingInfos(building);
-                    embed.addFields({name: '\u200B', value: buildingInfo});
-                }
-            }
-        }
-
-        const notStartedBuildings = buildings.filter(building => !completedBuildingNames.includes(building.name) && !buildingsInProgress.some(bg => bg.name === building.name));
-
-        if (notStartedBuildings.length > 0) {
-            embed.addFields({name: 'Bâtiments', value: "à construire"});
-
-            for (const building of notStartedBuildings) {
-                const buildingInfo = this.getBuildingInfos(building);
-                embed.addFields({name: '\u200B', value: buildingInfo});
-            }
-        }
-
-        await interaction.reply({embeds: [embed]});
     }
 
     private async getBuildsAutocomplete(interaction: AutocompleteInteraction): Promise<ApplicationCommandOptionChoiceData[]> {
