@@ -1,12 +1,10 @@
 import {
     AutocompleteInteraction,
-    ButtonInteraction, Collection,
-    CommandInteraction, CommandInteractionOptionResolver,
+    ButtonInteraction, CommandInteraction, CommandInteractionOptionResolver,
     ModalSubmitInteraction,
     SlashCommandBuilder
 } from "discord.js";
 import AbstractSubCommand from "./AbstractSubCommand";
-import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 
 abstract class AbstractCommand {
     abstract name: string;

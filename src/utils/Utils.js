@@ -94,7 +94,6 @@ module.exports = {
         console.log(debugMessage)
 
         if (!guild) {
-            console.log('guild non trouvé')
             return
         }
 
@@ -105,7 +104,6 @@ module.exports = {
             }
         }).then(async (debugChannel) => {
             if (!debugChannel) {
-                console.log('debugChannel non trouvé')
                 return
             }
 
