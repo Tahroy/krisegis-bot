@@ -11,6 +11,7 @@ export class Prier extends AbstractSubCommand {
     name = 'prier'
     description = 'Prier les dieux au sanctuaire'
     private static readonly OPTION_PRIERE = 'priere';
+    private static QUEST_PRICE = 100;
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         const guildId = interaction.guild?.id;
@@ -48,7 +49,7 @@ export class Prier extends AbstractSubCommand {
                 .setRequired(true)
                 .setChoices(
                     {name: 'Changement de météo (500 kamas)', value: 'meteo'},
-                    {name: 'Déclenche une quête (500 kamas)', value: 'quete'}
+                    {name: `Déclenche une quête (${Prier.QUEST_PRICE} kamas)`, value: 'quete'}
                 )
         )
     }
@@ -111,7 +112,7 @@ export class Prier extends AbstractSubCommand {
             }
         })
 
-        if (!kamas || kamas.quantity < 500) {
+        if (!kamas || kamas.quantity < Prier.QUEST_PRICE) {
             await interaction.reply({
                 content: "Vous n'avez pas assez de kamas",
                 flags: MessageFlags.Ephemeral
@@ -132,7 +133,7 @@ export class Prier extends AbstractSubCommand {
         await QuestService.announceQuest(interaction.client as KrisegisClient, quest);
 
         // On retire les kamas
-        await PlayerItem.update({quantity: kamas.quantity - 500}, {
+        await PlayerItem.update({quantity: kamas.quantity - Prier.QUEST_PRICE}, {
             where: {
                 name: 'Kamas',
                 userId: user.id,
