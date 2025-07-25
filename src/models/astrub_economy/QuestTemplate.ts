@@ -113,7 +113,7 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     },
     [QuestEnum.CELEBRATION_SANCTUAIRE]: {
         name: QuestEnum.CELEBRATION_SANCTUAIRE,
-        description: "Les prêtres organisent une cérémonie en hommage aux dieux. Ils souhaitent que les paysans, alchimistes et pêcheurs proposent une offrande pour obtenir la bénédiction des Dix..",
+        description: "Les prêtres organisent une cérémonie en hommage aux dieux. Ils souhaitent que les paysans, alchimistes et pêcheurs proposent une offrande pour obtenir la bénédiction des Dix.",
         requiredItems: {
             [RessourcesEnum.BLE]: 150,
             [RessourcesEnum.ORTIE]: 150,
