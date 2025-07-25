@@ -164,3 +164,4 @@ export default class Quetes extends AbstractSubCommand {
         }
     }
 }
+
