@@ -50,7 +50,7 @@ export class PopulationService {
         const lastHarvest = lastUpdate.lastHarvest;
         const timeSinceLastHarvest = now.getTime() - lastHarvest.getTime();
 
-        if (timeSinceLastHarvest < 24 * 60 * 60 * 1000) {
+        if (timeSinceLastHarvest > 24 * 60 * 60 * 1000) {
             return;
         }
 
