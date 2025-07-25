@@ -122,7 +122,7 @@ export class PopulationService {
         } else if (happiness < 80) {
             description = "🙂 Les enfants sortent dans les rues pour s'amuser, quelle que soit la météo. Les cris de joie se font entendre à la taverne et le marché est rempli de curieux et de commerçants.";
         } else {
-            description = "😄 La joie règne dans le village d'Astrub ! Les habitants chantent, dansent, organisent des distributions gratuites de nourriture... Tout va bien dans le plus beau des Monde des Dix. ";
+            description = "😄 La joie règne dans le village d'Astrub ! Les habitants chantent, dansent, organisent des distributions gratuites de nourriture... Tout va bien dans le Monde des Dix. ";
         }
 
         return description;
