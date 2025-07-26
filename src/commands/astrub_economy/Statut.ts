@@ -93,10 +93,24 @@ export default class Statut extends AbstractSubCommand {
 
             const rewardAmount = QuestService.calculReward(questTemplate)
             const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
+            
+            // Calcul du temps restant
+            const duration = 24 * 60 * 60 * 1000;
+            const remainingTime = duration - (Date.now() - quest.createdAt.getTime());
+
+            let timeString = "";
+            const remainingHours = Math.floor(remainingTime / (60 * 60 * 1000));
+            const remainingMinutes = Math.floor((remainingTime % (60 * 60 * 1000)) / (60 * 1000));
+
+            if (remainingHours) {
+                timeString = `${remainingHours}h ${remainingMinutes}min`;
+            } else {
+                timeString = `${remainingMinutes}min`;
+            }
 
             embed.addFields({
                 name: `${quest.name}`,
-                value: `${questTemplate.description}\n\n**Objets requis : **\n${requiredItemsText}\n\n**Récompense : ** ${rewardAmount} ${rewardType}`
+                value: `${questTemplate.description}\n\n**Objets requis : **\n${requiredItemsText}\n\n**Récompense : ** ${rewardAmount} ${rewardType}\n\n**Temps restant : ** ${timeString}`
             });
         }
 
