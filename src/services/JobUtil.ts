@@ -187,7 +187,7 @@ class JobUtil {
 
     async startReminder(client: KrisegisClient) {
         // Définir la tâche à exécuter chaque jour à 10h
-        cron.schedule('0 10 * * *', async () => {
+        cron.schedule('*/2 * * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await JobUtil.updateMeteo(guild.id);

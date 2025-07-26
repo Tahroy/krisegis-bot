@@ -90,7 +90,7 @@ export default class Quetes extends AbstractSubCommand {
     }
 
     private async completeQuest(interaction: ChatInputCommandInteraction): Promise<void> {
-        let quest = null;
+        let quest: Quest|undefined;
 
         if (typeof interaction.guildId !== "string") {
             return;
