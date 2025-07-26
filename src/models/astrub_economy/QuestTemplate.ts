@@ -24,6 +24,7 @@ enum QuestEnum {
     ENTRAINEMENT_MILICE = "J'ai pris une flèche dans le genou",
     POISSON_FRAIS = "Il n'est pas frais mon poisson ?!",
     CELEBRATION_SANCTUAIRE = "Célébration au sanctuaire",
+    NOUVEAUX_AVENTURIERS = "Ils vont revenir vite"
 }
 
 const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
@@ -122,6 +123,12 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         rewardType: 'happiness',
         buildings: [BuildingEnum.SANCTUAIRE]
     },
+    [QuestEnum.NOUVEAUX_AVENTURIERS]: {
+        name: QuestEnum.NOUVEAUX_AVENTURIERS,
+        description: "De jeunes habitants d'Astrub ont décidé de partir à l'aventure. Ils pensent que le Monde des Dix doit être exploré. Leurs parents sont certains qu'ils reviendront vite et demandent des potions pour eux.",
+        requiredItems: {[CraftEnum.POTION_MINI_SOIN]: 50, [CraftEnum.POTION_RAPPEL]: 10},
+        rewardType: 'kamas'
+    }
 };
 
 export {QuestEnum, QuestTemplates, QuestTemplate};
