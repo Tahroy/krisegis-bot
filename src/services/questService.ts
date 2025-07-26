@@ -248,13 +248,13 @@ export class QuestService {
                 await quest.save();
 
                 const template = QuestTemplates[quest.name as QuestEnum];
-                let reward = Math.floor(QuestService.calculReward(template) / 2);
+                let reward = QuestService.calculReward(template) / 2;
 
                 if (template.rewardType === 'kamas') {
                     reward /= 200;
                 }
 
-                happinessLost += reward;
+                happinessLost += Math.floor(reward);
 
                 const channel = JobUtil.getChannel(client, guildId);
 
