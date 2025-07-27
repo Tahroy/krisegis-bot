@@ -93,8 +93,8 @@ class JobUtil {
     static async generateAndAnnounceQuest(client: KrisegisClient, guildId: string): Promise<void> {
         await QuestService.deleteOldQuests(client, guildId);
 
-        // Une chance sur 6 de déclencher une quête
-        const random = Math.random() * 6 < 1
+        // Une chance sur 12 de déclencher une quête
+        const random = Math.random() * 12 < 1
         console.log("Quête ? " + (random ? "Oui" : "Non"))
         if (!random) {
             return;

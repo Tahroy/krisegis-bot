@@ -164,7 +164,7 @@ export class QuestService {
         const nbPlayers = await JobUtil.getNbActivesPlayers(guildId)
         const activesQuests = await QuestService.getActiveQuests(guildId);
 
-        if (activesQuests.length >= nbPlayers) {
+        if (activesQuests.length >= (nbPlayers / 2)) {
             return null;
         }
 
