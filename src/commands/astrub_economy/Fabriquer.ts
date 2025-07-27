@@ -173,29 +173,68 @@ class Fabriquer extends AbstractSubCommand {
         const focused = options.getFocused(true);
         const search = focused.value;
 
-        const items = JobUtil.getAllItems()
-
+        const items = JobUtil.getAllItems();
         const retour = [];
+
+        const playerItems = await PlayerItem.findAll({
+            where: {
+                userId: interaction.user.id,
+                guildId: guildId,
+                type: [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL]
+            }
+        });
+
+        const playerItemsMap = new Map();
+        for (const playerItem of playerItems) {
+            playerItemsMap.set(playerItem.name, playerItem.quantity);
+        }
 
         for (let item of items) {
             if (retour.length >= 20) break;
             if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
-                let recipe = "";
-                if (typeof item.recipe === 'object' && item.recipe !== null) {
-                    for (let [ingredient, quantity] of Object.entries(item.recipe)) {
-                        recipe += `${ingredient} x ${quantity} `
-                    }
-                } else {
+                if (typeof item.recipe !== 'object' || item.recipe === null) {
                     continue;
                 }
-                retour.push({
-                    name: `${item.name} (${recipe}) - ${item.experience} xp`,
-                    value: item.name
-                })
+
+                let canCraft = true;
+                let recipe = "";
+
+                for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+                    recipe += `${ingredient} x ${quantity} `;
+                    const playerQuantity = playerItemsMap.get(ingredient) || 0;
+                    if (playerQuantity < quantity) {
+                        canCraft = false;
+                        break;
+                    }
+                }
+
+                if (canCraft && item.tool) {
+                    const playerToolQuantity = playerItemsMap.get(item.tool) || 0;
+                    if (playerToolQuantity < 1) {
+                        canCraft = false;
+                    }
+                }
+
+                if (canCraft && item.buildings) {
+                    for (let building of item.buildings) {
+                        const constructed = await JobUtil.isBuildingConstructed(guildId, building);
+                        if (!constructed) {
+                            canCraft = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (canCraft) {
+                    retour.push({
+                        name: `${item.name} (${recipe}) - ${item.experience} xp`,
+                        value: item.name
+                    });
+                }
             }
         }
 
-        await interaction.respond(retour)
+        await interaction.respond(retour);
     }
 }
 
