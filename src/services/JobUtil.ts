@@ -321,6 +321,11 @@ class JobUtil {
             }
         });
     }
+
+    static async getUsername(playerId: string, guild: Guild) {
+        const member = await guild.members.fetch(playerId);
+        return member.displayName;
+    }
 }
 
 export default JobUtil;

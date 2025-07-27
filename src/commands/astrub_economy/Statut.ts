@@ -1,8 +1,9 @@
 import {
     ChatInputCommandInteraction,
-    EmbedBuilder,
-    MessageFlags,
-    SlashCommandSubcommandBuilder
+    EmbedBuilder, Guild,
+    MessageFlags, SendableChannels,
+    SlashCommandSubcommandBuilder,
+    TextBasedChannel
 } from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {QuestService} from "../../services/questService";
@@ -12,6 +13,9 @@ import {Buildings} from "../../models/astrub_economy/Building";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
 import {ReserveService} from "../../services/reserveService";
 import {PopulationService} from "../../services/populationService";
+import Job from "../../models/astrub_economy/Job";
+import {Op} from "sequelize";
+import {JobEnum} from "../../models/astrub_economy/Enums";
 
 export default class Statut extends AbstractSubCommand {
     name: string = 'statut';
@@ -22,6 +26,7 @@ export default class Statut extends AbstractSubCommand {
     readonly TYPE_BUILDINGS = 'batiments';
     readonly TYPE_RESERVE = 'reserve';
     readonly TYPE_POPULATION = 'population'
+    readonly TYPE_RECOLTEURS = 'recolteurs';
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(option => option
@@ -32,7 +37,8 @@ export default class Statut extends AbstractSubCommand {
                 {name: 'Quêtes en cours', value: this.TYPE_QUESTS},
                 {name: 'Bâtiments', value: this.TYPE_BUILDINGS},
                 {name: 'Réserve communautaire', value: this.TYPE_RESERVE},
-                {name: 'Population', value: this.TYPE_POPULATION}
+                {name: 'Population', value: this.TYPE_POPULATION},
+                {name: 'Récolteurs', value: this.TYPE_RECOLTEURS}
             ));
     }
 
@@ -51,6 +57,9 @@ export default class Statut extends AbstractSubCommand {
                 break;
             case this.TYPE_POPULATION:
                 await this.showPopulation(interaction);
+                break;
+            case this.TYPE_RECOLTEURS:
+                await this.showRecolteurs(interaction);
                 break;
             default:
                 await interaction.reply({
@@ -234,5 +243,55 @@ export default class Statut extends AbstractSubCommand {
         const embed = await PopulationService.getEmbedPopulation(guildId);
 
         await interaction.reply({embeds: [embed]});
+    }
+
+    private async showRecolteurs(interaction: ChatInputCommandInteraction) {
+
+        await interaction.reply({content: "Voici les récolteurs !", flags: MessageFlags.Ephemeral});
+
+        // Actifs depuis 72 heures
+        for (const [key, jobName] of Object.entries(JobEnum)) {
+            const jobs = await Job.findAll({
+                where: {
+                    guildId: interaction.guild?.id,
+                    name: jobName,
+                    updatedAt: {
+                        [Op.gte]: new Date(Date.now() - 72 * 60 * 60 * 1000)
+                    }
+                },
+                order: [['experience', 'DESC']]
+            });
+
+            console.log(jobName, jobs)
+
+
+            if (!jobs.length) {
+                continue
+            }
+
+            const textJob = []
+            for (const index in jobs) {
+                const playerId = jobs[index].userId;
+                const username = await JobUtil.getUsername(playerId, interaction.guild as Guild);
+
+                let first = ''
+                if (index === '0') {
+                    first = '👑 '
+                }
+
+                textJob.push(`**${first}${username}** - Niveau ${jobs[index].level}`);
+            }
+
+            const emoji = Job.getEmoji(jobName);
+
+            const embed = new EmbedBuilder()
+                .setTitle(`${emoji} ${jobName}`)
+                .setDescription(textJob.join(`\n`))
+                .setColor('#0099ff')
+                .setTimestamp();
+
+            const channel: SendableChannels = interaction.channel as SendableChannels;
+            await channel.send({embeds: [embed]});
+        }
     }
 }

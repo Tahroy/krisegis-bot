@@ -10,9 +10,11 @@ interface JobAttributes {
     guildId: string;
     level: number;
     experience: number;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
-type JobCreationAttributes = Optional<JobAttributes, 'id' | 'experience'>
+type JobCreationAttributes = Optional<JobAttributes, 'id' | 'experience' | 'createdAt' | 'updatedAt'>
 
 class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttributes {
     public id!: number;
@@ -67,6 +69,16 @@ Job.init(
         },
         experience: {
             type: DataTypes.INTEGER,
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW
+        },
+        updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW
         }
     },
     {

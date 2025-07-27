@@ -52,7 +52,10 @@ enum MeteosEnum {
     REVERDIE_SILOUATE = "🌬️ Reverdie de Silouate",
     CROISSANCE_ROSAL = "🌱 Croissance de Rosal",
     OPULENCE_SUMENS = "💎 Opulence de Sumens",
-    VOYEURISME_HECATE = "👀 Voyeurisme d'Hécate"
+    VOYEURISME_HECATE = "👀 Voyeurisme d'Hécate",
+    MATURATION_POUCHECOT = "🍒 Maturation de Pouchecot",
+    MANIFESTATION_RAVAL = "💀 Manifestation de Raval",
+    QUIETUDE_MAIMANE = "🧘‍♂️ Quiétude de Maïmane"
 }
 
 const Meteos: Record<MeteosEnum, Meteo> = {
@@ -316,6 +319,30 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {description: "", job: JobEnum.PAYSAN, value: -5}
         ],
         true
+    ),
+    [MeteosEnum.MATURATION_POUCHECOT]: new Meteo(MeteosEnum.MATURATION_POUCHECOT,
+        "Le Protecteur de Fraouctor aurait été aperçu en train de se promener dans les champs. Comment expliquer, sinon, le développement soudain des plantes y poussant ?",
+        [
+            {description: "", job: JobEnum.PAYSAN, value: 50}
+        ],
+        false
+    ),
+    [MeteosEnum.MANIFESTATION_RAVAL]: new Meteo(MeteosEnum.MANIFESTATION_RAVAL,
+        "Fidèle à sa tâche — aussi morbide soit-elle, le Protecteur de Septange soutire le fluide vital de tout ce qui croît.",
+        [
+            {description: "", job: JobEnum.PECHEUR, value: -20},
+            {description: "", job: JobEnum.BUCHERON, value: -20},
+            {description: "", job: JobEnum.ALCHIMISTE, value: -20},
+            {description: "", job: JobEnum.PAYSAN, value: -20}
+        ],
+        false
+    ),
+    [MeteosEnum.QUIETUDE_MAIMANE]: new Meteo(MeteosEnum.QUIETUDE_MAIMANE,
+        "Les frimas de l'hiver poussent les bûcherons à redoubler d'ardeur. A moins qu'il ne s'agisse de fournir la matière première nécessaire à la sculpture des totems rituels ?",
+        [
+            {description: "", job: JobEnum.BUCHERON, value: 60}
+        ],
+        false
     )
 }
 
