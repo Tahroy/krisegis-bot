@@ -7,10 +7,10 @@ import {
     ApplicationCommandOptionChoiceData
 } from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "../../services/JobUtil";
-import {ReserveService} from "../../services/reserveService";
+import {ReserveService} from "../../services/ReserveService";
 import {BuildingEnum} from "../../models/astrub_economy/Building";
 
 

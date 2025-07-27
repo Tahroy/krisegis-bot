@@ -246,7 +246,7 @@ module.exports = {
 
     /**
      * @deprecated
-     * @use PlayerItemService.addPlayerItem
+     * @use PlayerService.addPlayerItem
      * @param user
      * @param name
      * @param type

@@ -3,7 +3,7 @@ const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const Question = require('../models/Question').default
 const { createEmbed } = require('../utils/embed')
-const { PlayerService, ItemType } = require('../services/playerItemService')
+const { PlayerService, ItemType } = require('../services/PlayerService')
 
 // Utilisez un objet pour stocker les scores des participants par canal
 const channelScores = new Map()

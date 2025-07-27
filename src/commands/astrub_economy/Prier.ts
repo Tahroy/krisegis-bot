@@ -4,8 +4,9 @@ import JobUtil from "../../services/JobUtil";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {QuestService} from "../../services/questService";
+import {QuestService} from "../../services/QuestService";
 import KrisegisClient from "../../models/KrisegisClient";
+import {MeteoService} from "../../services/MeteoService";
 
 export class Prier extends AbstractSubCommand {
     name = 'prier'
@@ -89,10 +90,10 @@ export class Prier extends AbstractSubCommand {
         })
 
         // On recharge la météo
-        await JobUtil.updateMeteo(guildId)
+        await MeteoService.updateMeteo(guildId)
 
         if (interaction?.channel?.isSendable()) {
-            const meteoName = await JobUtil.chargerMeteo(guildId);
+            const meteoName = await MeteoService.chargerMeteo(guildId);
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
 
             await interaction.channel.send({

@@ -12,7 +12,7 @@ import {Building as BuildingModel, Buildings} from "../../models/astrub_economy/
 import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import PlayerItem from "../../models/PlayerItem";
 import jobUtil from "../../services/JobUtil";
 

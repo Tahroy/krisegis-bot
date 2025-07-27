@@ -1,7 +1,7 @@
 const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, TextInputBuilder, ModalBuilder } = require("discord.js");
 const {ButtonStyle, TextInputStyle } = require("discord-api-types/v8");
 const embedData = require("../utils/embed");
-const { PlayerService, ItemType } = require('../services/playerItemService')
+const { PlayerService, ItemType } = require('../services/PlayerService')
 const Potion = require('../models/Potion').default
 
 const NOMBRE = 5;

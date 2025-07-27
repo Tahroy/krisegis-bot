@@ -126,7 +126,7 @@ export class PopulationService {
         } else if (happiness < 40) {
             description = "😔 Astrub est morose aujourd'hui. Le marché est boudé de la population et les habitants se contentent de se rendre à la taverne pour espérer que demain soit meilleur.";
         } else if (happiness < 60) {
-            description = "😐 . Les habitants d'Astrub vaguent à leurs occupations habituelles. La vie suit son cours, qu'elle soit belle ou triste !";
+            description = "😐 Les habitants d'Astrub vaquent à leurs occupations habituelles. La vie suit son cours, qu'elle soit belle ou triste !";
         } else if (happiness < 80) {
             description = "🙂 Les enfants sortent dans les rues pour s'amuser, quelle que soit la météo. Les cris de joie se font entendre à la taverne et le marché est rempli de curieux et de commerçants.";
         } else {

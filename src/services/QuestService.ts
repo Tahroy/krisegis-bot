@@ -1,14 +1,16 @@
 import Quest from "../models/astrub_economy/Quest";
 import {QuestEnum, QuestTemplate, QuestTemplates} from "../models/astrub_economy/QuestTemplate";
-import {PopulationService} from "./populationService";
+import {PopulationService} from "./PopulationService";
 import PlayerItem from "../models/PlayerItem";
-import {ItemType} from "./playerItemService";
+import {ItemType} from "./PlayerService";
 import {EmbedBuilder, User} from "discord.js";
 import KrisegisClient from "../models/KrisegisClient";
 import JobUtil from "./JobUtil";
 import {Ressources} from "../models/astrub_economy/Ressource";
 import {Crafts} from "../models/astrub_economy/Craft";
 import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import {MeteoService} from "./MeteoService";
+import {MeteosEnum} from "../models/astrub_economy/Meteo";
 
 export class QuestService {
     /**
@@ -166,19 +168,35 @@ export class QuestService {
             return null;
         }
 
+        // Récupérer la météo actuelle
+        const currentWeather: string|null = await MeteoService.chargerMeteo(guildId);
+
         const allQuestNames = Object.values(QuestEnum);
         const availableQuests: QuestEnum[] = [];
 
         // Récupération des quêtes valides
         for (const questName of allQuestNames) {
             const questTemplate = QuestTemplates[questName];
+            
+            // Vérifier si la quête est définie
+            if (!questTemplate) {
+                continue;
+            }
 
             // On vérifie que la quête n'est pas déjà en cours sur le serveur
             const existingQuest = await this.getQuestByName(guildId, questName);
             if (existingQuest) {
                 continue;
             }
+            
+            // On vérifie s'il y a une condition de météo
+            if (questTemplate.weather && questTemplate.weather.length > 0) {
+                if (!currentWeather || !questTemplate.weather.includes(currentWeather as MeteosEnum)) {
+                    continue;
+                }
+            }
 
+            // Vérifier les bâtiments requis
             if (!questTemplate.buildings || questTemplate.buildings.length === 0) {
                 availableQuests.push(questName);
                 continue;
@@ -217,14 +235,14 @@ export class QuestService {
 
         if (channel && channel.isTextBased()) {
             const requiredItemsText = Object.entries(questTemplate.requiredItems)
-                .map(([itemName, quantity]) => `- ${itemName}: ${quantity}`)
+                .map(([itemName, quantity]) => `- ${itemName} : ${quantity}`)
                 .join('\n');
 
             const rewardAmount = QuestService.calculReward(questTemplate);
             const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
 
             const embed = new EmbedBuilder()
-                .setTitle(`Nouvelle quête: ${quest.name}`)
+                .setTitle(`Nouvelle quête : ${quest.name}`)
                 .setColor("#0099ff")
                 .setDescription(`${questTemplate.description}\n\n` + `**Objets requis :**\n${requiredItemsText}\n\n` + `**Récompense :** ${rewardAmount} ${rewardType}`)
                 .setTimestamp();

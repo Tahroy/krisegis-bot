@@ -8,7 +8,7 @@ import {
 import {Op} from "sequelize";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
 import JobUtil from "../../services/JobUtil";
 

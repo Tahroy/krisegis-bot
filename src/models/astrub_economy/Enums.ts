@@ -54,6 +54,7 @@ enum CraftEnum {
     TALISMAN_CUIVRE = "Talisman en cuivre",
     BOUCLIER_BOIS = "Bouclier châtaignier",
     EPEE_BOISAILLE = "Épée de boisaille",
+    LANTERNE = "Lanterne"
 }
 
 export {CraftEnum};

@@ -1,5 +1,5 @@
 import Craft from "./Craft";
-import {ItemType} from "../../services/playerItemService";
+import {ItemType} from "../../services/PlayerService";
 import {CraftEnum, JobEnum, RessourcesEnum, ToolsEnum, XpEnum} from "./Enums";
 
 export enum ConsumablesEnum {

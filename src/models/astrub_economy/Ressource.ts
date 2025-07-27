@@ -1,5 +1,5 @@
 import BaseItem from "./BaseItem";
-import {ItemType} from "../../services/playerItemService";
+import {ItemType} from "../../services/PlayerService";
 import {BuyEnum, JobEnum, RessourcesEnum, SellEnum} from "./Enums";
 
 interface Ressource extends BaseItem{

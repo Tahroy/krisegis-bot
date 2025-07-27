@@ -1,5 +1,5 @@
 import BaseItem from "./BaseItem";
-import {ItemType} from "../../services/playerItemService";
+import {ItemType} from "../../services/PlayerService";
 import {ToolsEnum} from "./Enums";
 import {RessourcesEnum} from "./Enums";
 

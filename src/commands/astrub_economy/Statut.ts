@@ -6,13 +6,13 @@ import {
     TextBasedChannel
 } from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
-import {QuestService} from "../../services/questService";
+import {QuestService} from "../../services/QuestService";
 import {QuestEnum, QuestTemplates} from "../../models/astrub_economy/QuestTemplate";
 import JobUtil from "../../services/JobUtil";
 import {Buildings} from "../../models/astrub_economy/Building";
 import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
-import {ReserveService} from "../../services/reserveService";
-import {PopulationService} from "../../services/populationService";
+import {ReserveService} from "../../services/ReserveService";
+import {PopulationService} from "../../services/PopulationService";
 import Job from "../../models/astrub_economy/Job";
 import {Op} from "sequelize";
 import {JobEnum} from "../../models/astrub_economy/Enums";

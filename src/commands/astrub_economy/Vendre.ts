@@ -9,7 +9,7 @@ import {
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
 
 class Vendre extends AbstractSubCommand {

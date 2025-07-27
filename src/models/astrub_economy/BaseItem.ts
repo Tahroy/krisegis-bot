@@ -1,7 +1,7 @@
 import {Ressources} from "./Ressource";
 import {Tools} from "./Tool";
 import {Crafts} from "./Craft";
-import {ItemType} from "../../services/playerItemService";
+import {ItemType} from "../../services/PlayerService";
 import {JobEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
 

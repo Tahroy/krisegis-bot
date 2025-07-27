@@ -2,6 +2,7 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import Job from "../../models/astrub_economy/Job";
 import JobUtil from "../../services/JobUtil";
+import {PlayerService} from "../../services/PlayerService";
 
 class Profil extends AbstractSubCommand {
     description: string = 'Vos métiers';
@@ -19,8 +20,8 @@ class Profil extends AbstractSubCommand {
         const separator = `|------------|--------|------------|-----------------|`;
     
         const rows = jobs.map(job => {
-            const { level } = JobUtil.getLevelAndRemainingXP(job.experience);
-            const { currentLevelXP, nextLevelXP } = JobUtil.getCurrentLevelXP(job.experience);
+            const { level } = PlayerService.getLevelAndRemainingXP(job.experience);
+            const { currentLevelXP, nextLevelXP } = PlayerService.getCurrentLevelXP(job.experience);
             
             const progressPercentage = Math.max(0, Math.min(100, Math.floor((currentLevelXP / nextLevelXP) * 100)));
             

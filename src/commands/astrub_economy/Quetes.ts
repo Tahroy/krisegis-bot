@@ -5,7 +5,7 @@ import {
     SlashCommandSubcommandBuilder
 } from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
-import {QuestService} from "../../services/questService";
+import {QuestService} from "../../services/QuestService";
 import JobUtil from "../../services/JobUtil";
 import {QuestEnum, QuestTemplates} from "../../models/astrub_economy/QuestTemplate";
 import Quest from "../../models/astrub_economy/Quest";

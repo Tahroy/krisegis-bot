@@ -3,7 +3,7 @@ import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "../../services/JobUtil";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import Job from "../../models/astrub_economy/Job";
 
 class Fabriquer extends AbstractSubCommand {
@@ -141,7 +141,7 @@ class Fabriquer extends AbstractSubCommand {
 
                 myJob.experience += experience
 
-                const level = JobUtil.getLevelFromXP(myJob.experience)
+                const level = PlayerService.getLevelFromXP(myJob.experience)
 
                 if (level != myJob.level) {
                     textUp += `\n**${userName}** passe ${myJob.name} niveau ${level} !`

@@ -1,5 +1,5 @@
 import BaseItem from "./BaseItem";
-import {ItemType} from "../../services/playerItemService";
+import {ItemType} from "../../services/PlayerService";
 import {BuyEnum, CraftEnum, JobEnum, MultiplicatorEnum, RessourcesEnum, SellEnum, ToolsEnum, XpEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
 
@@ -173,6 +173,16 @@ const Crafts: Record<CraftEnum, Craft> = {
         experience: 5 * XpEnum.RESSOURCE_10,
         jobs: [JobEnum.PAYSAN],
         buildings: [BuildingEnum.BRASSERIE]
+    },
+    [CraftEnum.LANTERNE]: {
+        name: CraftEnum.LANTERNE,
+        recipe: {[CraftEnum.LINGOT_FER]: 5, [CraftEnum.LINGOT_CUIVRE]: 1},
+        sell: 0,
+        buy: 0,
+        type: ItemType.FABRICATION,
+        experience: 50 * XpEnum.RESSOURCE_1 + 20 * XpEnum.RESSOURCE_10,
+        jobs: [JobEnum.MINEUR],
+        buildings: [BuildingEnum.FORGE]
     },
 
     [CraftEnum.SUCRE_ORGE]: {

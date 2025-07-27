@@ -1,7 +1,7 @@
 import PlayerItem from '../models/PlayerItem';
 import {Guild, User} from 'discord.js';
 import {Op} from "sequelize";
-import {ItemType, PlayerService} from "./playerItemService";
+import {ItemType, PlayerService} from "./PlayerService";
 
 export class ReserveService {
     static readonly RESERVE_USER_ID = 'reserve';

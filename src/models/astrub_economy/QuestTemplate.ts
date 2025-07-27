@@ -1,5 +1,6 @@
 import {CraftEnum, RessourcesEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
+import {MeteosEnum} from "./Meteo";
 
 interface QuestTemplate {
     name: string;
@@ -7,6 +8,7 @@ interface QuestTemplate {
     requiredItems: Record<string, number>;
     rewardType: 'kamas' | 'happiness';
     buildings?: BuildingEnum[];
+    weather?: MeteosEnum[];
 }
 
 enum QuestEnum {
@@ -24,7 +26,16 @@ enum QuestEnum {
     ENTRAINEMENT_MILICE = "J'ai pris une flèche dans le genou",
     POISSON_FRAIS = "Il n'est pas frais mon poisson ?!",
     CELEBRATION_SANCTUAIRE = "Célébration au sanctuaire",
-    NOUVEAUX_AVENTURIERS = "Ils vont revenir vite"
+    NOUVEAUX_AVENTURIERS = "Ils vont revenir vite",
+    
+    // Quêtes liées à la météo
+    COLLECTE_EAU_PLUIE = "Moi je fais tout à l'eau de pluie",
+    REPAS_CHAUD = "Ça fait du bien par où ça passe !",
+    RAFRAICHISSEMENTS = "Une p'tite bière ?",
+    LANTERNES_BRUME = "Michel t'es où ?... T'es là ?... Michel ?!",
+    ABRIS_VENT = "Le mulou souffle fort aujourd'hui !",
+    ENGELURES = "J'ai mal quand j'appuie sur mon coude ou sur ma tête",
+    BOIS_POUR_FEU = "Une bonne cheminée et un bon livre",
 }
 
 const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
@@ -128,6 +139,72 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         description: "De jeunes habitants d'Astrub ont décidé de partir à l'aventure. Ils pensent que le Monde des Dix doit être exploré. Leurs parents sont certains qu'ils reviendront vite et demandent des potions pour eux.",
         requiredItems: {[CraftEnum.POTION_MINI_SOIN]: 50, [CraftEnum.POTION_RAPPEL]: 10},
         rewardType: 'kamas'
+    },
+    [QuestEnum.COLLECTE_EAU_PLUIE]: {
+        name: QuestEnum.COLLECTE_EAU_PLUIE,
+        description: "La pluie tombe sans interruption sur Astrub. Le Conseil des Dix a décidé de renforcer le système de récupération d'eau, afin de palier aux périodes de sécheresse.",
+        requiredItems: {
+            [CraftEnum.PLANCHE_FRENE]: 30,
+            [CraftEnum.LINGOT_CUIVRE]: 5
+        },
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.FORGE],
+        weather: [MeteosEnum.PLUIE]
+    },
+    [QuestEnum.REPAS_CHAUD]: {
+        name: QuestEnum.REPAS_CHAUD,
+        description: "Le froid entre dans les vêtements et les maisons d'Astrub. Les récolteurs ont du mal à travailler dans ces conditions et un repas chaud leur ferait le plus grand bien.",
+        requiredItems: {
+            [CraftEnum.PAIN_INCARNAM]: 40,
+            [CraftEnum.GOUJON_EN_TRANCHE]: 40
+        },
+        rewardType: 'happiness',
+        weather: [MeteosEnum.GEL]
+    },
+    [QuestEnum.ENGELURES]: {
+        name: QuestEnum.ENGELURES,
+        description: "Le gel est violent aujourd'hui et les récolteurs d'Astrub se bousculent chez le médecin du village pour guérir et prévenir des engelures. Il risque de manquer de potions de soin...",
+        requiredItems: {[CraftEnum.POTION_MINI_SOIN]: 50},
+        rewardType: 'kamas',
+        weather: [MeteosEnum.GEL]
+    },
+    [QuestEnum.BOIS_POUR_FEU]: {
+        name: QuestEnum.BOIS_POUR_FEU,
+        description: "Les cheminées fument à Astrub aujourd'hui. Tous les habitants brûlent ce qu'ils peuvent pour se protéger du froid et espérer avoir une belle journée en intérieur. Ils auraient bien besoin de bois supplémentaire.",
+        requiredItems: {
+            [RessourcesEnum.FRENE]: 150,
+            [RessourcesEnum.CHATAIGNIER]: 100
+        },
+        rewardType: 'happiness',
+        weather: [MeteosEnum.GEL]
+    },
+    [QuestEnum.RAFRAICHISSEMENTS]: {
+        name: QuestEnum.RAFRAICHISSEMENTS,
+        description: "La chaleur est forte à Astrub et les habitants se rejoignent près du lac. Le tavernier a ouvert une terrasse près de l'eau où tout le monde vient chercher un peu de fraîcheur. Il aurait bien besoin de provisions pour tenir tous ces Diziens.",
+        requiredItems: {[CraftEnum.BIERE_ASTRUB]: 25,},
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.TAVERNE, BuildingEnum.BRASSERIE],
+        weather: [MeteosEnum.CANICULE]
+    },
+    [QuestEnum.LANTERNES_BRUME]: {
+        name: QuestEnum.LANTERNES_BRUME,
+        description: "BONK ! Un milicien s'est encore pris la tête dans un mur. C'est qu'on n'y voit rien du tout aujourd'hui ! La milice achète d'urgence des lanterne pour aider ses hommes.",
+        requiredItems: {[CraftEnum.LANTERNE]: 10},
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.FORGE],
+        weather: [MeteosEnum.BRUME_EPAISSE]
+    },
+    [QuestEnum.ABRIS_VENT]: {
+        name: QuestEnum.ABRIS_VENT,
+        description: "Les vents violents ont détruit certaines habitations et les habitants d'Astrub préparent la reconstruction. Ils en appellent à la charité des récolteurs du village.",
+        requiredItems: {
+            [CraftEnum.PLANCHE_FRENE]: 50,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 10,
+            [RessourcesEnum.PIERRE]: 50
+        },
+        rewardType: 'happiness',
+        buildings: [BuildingEnum.MENUISERIE],
+        weather: [MeteosEnum.VENT_FORT]
     }
 };
 

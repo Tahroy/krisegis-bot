@@ -2,6 +2,7 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, MessageFlags} from "discord.js";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import JobUtil from "../../services/JobUtil";
+import {MeteoService} from "../../services/MeteoService";
 
 class Meteo extends AbstractSubCommand {
     description: string = "Récupérer la météo actuelle";
@@ -17,11 +18,11 @@ class Meteo extends AbstractSubCommand {
             return;
         }
 
-        let meteoName = await JobUtil.chargerMeteo(guildId);
+        let meteoName = await MeteoService.chargerMeteo(guildId);
 
         if (!meteoName) {
-            await JobUtil.updateMeteo(guildId);
-            meteoName = await JobUtil.chargerMeteo(guildId);
+            await MeteoService.updateMeteo(guildId);
+            meteoName = await MeteoService.chargerMeteo(guildId);
         }
 
         if (!meteoName) {

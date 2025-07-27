@@ -1,10 +1,8 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {Ressources} from "../../models/astrub_economy/Ressource";
-import {Tools} from "../../models/astrub_economy/Tool";
 import JobUtil from "../../services/JobUtil";
 
 class Acheter extends AbstractSubCommand {

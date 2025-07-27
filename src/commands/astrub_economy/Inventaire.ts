@@ -1,7 +1,7 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder, Guild, MessageFlags, User} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 
 class Inventaire extends AbstractSubCommand {
     description: string = 'Permet de consulter son inventaire'

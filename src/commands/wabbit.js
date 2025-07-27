@@ -3,7 +3,7 @@ const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const fs = require('fs')
 const path = require('path')
-const { PlayerService, ItemType } = require('../services/playerItemService')
+const { PlayerService, ItemType } = require('../services/PlayerService')
 
 
 const WABBITS_NAMES = {

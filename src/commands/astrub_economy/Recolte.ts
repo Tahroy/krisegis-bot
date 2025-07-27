@@ -3,10 +3,11 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
-import {ItemType, PlayerService} from "../../services/playerItemService";
+import {ItemType, PlayerService} from "../../services/PlayerService";
 import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import JobUtil from "../../services/JobUtil";
+import {MeteoService} from "../../services/MeteoService";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
@@ -88,7 +89,7 @@ class Recolte extends AbstractSubCommand {
         const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
-        const level = JobUtil.getLevelFromXP(job.experience)
+        const level = PlayerService.getLevelFromXP(job.experience)
 
         let text = `**${userName}** a récolté ${quantity} x ${emoji ? emoji : ressource} !`;
 
@@ -153,7 +154,7 @@ class Recolte extends AbstractSubCommand {
         let percent = 100;
 
         const jobLevel = job.level;
-        const meteoName = await JobUtil.chargerMeteo(guildId);
+        const meteoName = await MeteoService.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {
@@ -198,7 +199,7 @@ class Recolte extends AbstractSubCommand {
     private async getExperience(job: Job, item: Ressource, guildId: string): Promise<number> {
         let percent = 100;
 
-        const meteoName = await JobUtil.chargerMeteo(guildId);
+        const meteoName = await MeteoService.chargerMeteo(guildId);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {
