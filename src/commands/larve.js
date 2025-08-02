@@ -211,7 +211,7 @@ class Game {
 
         intervalId = setInterval(async function () {
             try {
-                game.updateLarves(interaction)
+                game.updateLarves()
                 const plateau = await game.getPlateau();
                 await plateauMessage.edit(plateau)
 
@@ -348,7 +348,7 @@ class Game {
         return message;
     }
 
-    updateLarves (interaction) {
+    updateLarves () {
         for (const [key] of Object.entries(this.plateau)) {
             this.rollDeath(key);
 
@@ -438,7 +438,15 @@ class Game {
             }
 
             value = Math.floor(bonus + value)
-            this.plateau[key] += value
+            const newScore = this.plateau[key] += value
+
+            if (newScore >= GAME_CONSTANTS.MAX_SCORE) {
+                this.plateau[key] = GAME_CONSTANTS.MAX_SCORE
+                break
+            }
+            else {
+                this.plateau[key] = newScore
+            }
         }
     }
 
