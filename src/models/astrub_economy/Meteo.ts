@@ -318,14 +318,14 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {description: "", job: JobEnum.MINEUR, value: -5},
             {description: "", job: JobEnum.PAYSAN, value: -5}
         ],
-        true
+        false
     ),
     [MeteosEnum.MATURATION_POUCHECOT]: new Meteo(MeteosEnum.MATURATION_POUCHECOT,
         "Le Protecteur de Fraouctor aurait été aperçu en train de se promener dans les champs. Comment expliquer, sinon, le développement soudain des plantes y poussant ?",
         [
             {description: "", job: JobEnum.PAYSAN, value: 50}
         ],
-        false
+        true
     ),
     [MeteosEnum.MANIFESTATION_RAVAL]: new Meteo(MeteosEnum.MANIFESTATION_RAVAL,
         "Fidèle à sa tâche — aussi morbide soit-elle, le Protecteur de Septange soutire le fluide vital de tout ce qui croît.",
