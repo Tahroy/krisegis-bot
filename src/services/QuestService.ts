@@ -2,7 +2,7 @@ import Quest from "../models/astrub_economy/Quest";
 import {QuestEnum, QuestTemplate, QuestTemplates} from "../models/astrub_economy/QuestTemplate";
 import {PopulationService} from "./PopulationService";
 import PlayerItem from "../models/PlayerItem";
-import {ItemType} from "./PlayerService";
+import {ItemType, PlayerService} from "./PlayerService";
 import {EmbedBuilder, User} from "discord.js";
 import KrisegisClient from "../models/KrisegisClient";
 import JobUtil from "./JobUtil";
@@ -102,7 +102,9 @@ export class QuestService {
                 continue;
             }
 
-            await PlayerItem.upsert({userId, guildId, name: 'Kamas', type: ItemType.RESSOURCE, quantity: rewardShare});
+            const user = {id: userId} as User;
+
+            await PlayerService.addPlayerItem(user, 'Kamas', ItemType.RESSOURCE, rewardShare, guildId);
         }
     }
 
