@@ -67,13 +67,12 @@ class Vendre extends AbstractSubCommand {
             return
         }
 
-        const memberCatch = await guild?.members.fetch(user.id)
-        const userName = memberCatch?.nickname ?? user.globalName
+        const userName = JobUtil.getUsername(user.id, guild)
 
         const totalPrice = Math.floor(price * quantity);
 
         await interaction.reply({
-            content: `${userName} a vendu ${quantity} x ${item} pour ${totalPrice} kamas`,
+            content: `**${userName}** a vendu ${quantity} x ${item} pour ${totalPrice} kamas`,
             flags: MessageFlags.Ephemeral
         })
 
@@ -121,7 +120,7 @@ class Vendre extends AbstractSubCommand {
                         break;
                     }
                     retour.push({
-                        name: `${item.name} x ${item.quantity} (${price} kamas)`,
+                        name: `${item.name} - ${price} kamas (${item.quantity} maximum)`,
                         value: item.name
                     })
                 }

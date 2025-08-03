@@ -179,11 +179,11 @@ class Reserve extends AbstractSubCommand {
 
             await ReserveService.deposeItem(user, itemName, item.type as ItemType, quantity, guildId);
 
-            const memberCatch = await interaction.guild.members.fetch(user.id);
-            const userName = memberCatch?.nickname ?? user.globalName ?? user.username;
+            const guild = interaction.guild
+            const userName = await JobUtil.getUsername(user.id, guild)
 
             await interaction.reply({
-                content: `${userName} a déposé ${quantity} x ${itemName} dans la réserve communautaire.`
+                content: `🫶 La porte de la réserve se referme derrière **${userName}** qui vient d'y déposer ${quantity} x ${itemName}. 🫶`
             });
         } catch (error) {
             await interaction.reply({
@@ -214,10 +214,10 @@ class Reserve extends AbstractSubCommand {
             await ReserveService.takeItem(user, itemName, item.type as ItemType, quantity, guildId);
 
             const memberCatch = await interaction.guild.members.fetch(user.id);
-            const userName = memberCatch?.nickname ?? user.globalName ?? user.username;
+            const userName = await JobUtil.getUsername(user.id, interaction.guild)
 
             await interaction.reply({
-                content: `${userName} a pris ${quantity} x ${itemName} de la réserve communautaire.`
+                content: `🫣 **${userName}** vient de se faufiler dans la réserve et y a pris ${quantity} x ${itemName}. 🫣`
             });
         } catch (error) {
             await interaction.reply({
@@ -243,7 +243,7 @@ class Reserve extends AbstractSubCommand {
 
             if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
                 choices.push({
-                    name: `${item.name} (${item.quantity})`,
+                    name: `${item.name} (${item.quantity} maximum)`,
                     value: item.name
                 });
             }
@@ -268,7 +268,7 @@ class Reserve extends AbstractSubCommand {
 
             if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
                 choices.push({
-                    name: `${item.name} (${item.quantity})`,
+                    name: `${item.name} (${item.quantity} maximum)`,
                     value: item.name
                 });
             }

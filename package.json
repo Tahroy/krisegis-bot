@@ -6,6 +6,7 @@
   "scripts": {
     "lancement": "node dist/index.js",
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "start": "node dist/index.js"
   },
   "author": "Tahroy",

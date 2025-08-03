@@ -68,11 +68,10 @@ class Acheter extends AbstractSubCommand {
         }
 
         const guild = interaction.guild
-        const memberCatch = await guild?.members.fetch(user.id)
-        const userName = memberCatch?.nickname ?? user.globalName
+        const userName = JobUtil.getUsername(user.id, guild)
 
         await interaction.reply({
-            content: `${userName} a acheté ${quantity} x ${item} pour ${totalPrice} kamas`,
+            content: `**${userName}** a acheté ${quantity} x ${item} pour ${totalPrice} kamas`,
             flags: MessageFlags.Ephemeral
         })
 
@@ -98,16 +97,20 @@ class Acheter extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
-        const guildId = interaction.guild?.id;
-        if (!guildId) {
-            await interaction.respond([]);
-            return;
-        }
         const options = interaction.options
         const focused = options.getFocused(true)
         const search = focused.value
 
+        const guild = interaction.guild
+        if (!guild) {
+            await interaction.respond([]);
+            return;
+        }
+
         const retour = []
+
+        const kamasItem = await PlayerService.getItem(interaction.user, 'Kamas', guild);
+        const KamasQuantity = kamasItem?.quantity || 0
 
         switch (focused.name) {
             case this.OPTION_ITEM:
@@ -125,8 +128,10 @@ class Acheter extends AbstractSubCommand {
                             continue;
                         }
 
+                        const max = Math.floor(KamasQuantity/price);
+
                         retour.push({
-                            name: `${item.name} (${price} kamas)`,
+                            name: `${item.name} - ${price} kamas (${max} maximum)`,
                             value: item.name
                         })
                     }

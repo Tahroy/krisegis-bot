@@ -67,14 +67,9 @@ class Donner extends AbstractSubCommand {
         await PlayerService.addPlayerItem(cible, itemName, item.type, quantity, guildId)
 
         const guild = interaction.guild
-        const memberCatch = await guild?.members.fetch(user.id)
-        const userName = memberCatch?.nickname ?? (user.globalName ? user.globalName : user.username)
-
-
-        const memberCible = await guild?.members.fetch(cible.id)
-        const cibleName = memberCible?.nickname ? memberCible.nickname :(cible.globalName ? cible.globalName : cible.username)
-
-        await interaction.reply({content: `${userName} donné ${quantity} x ${item.name} à ${cibleName}`})
+        const userName = await JobUtil.getUsername(user.id, guild)
+        const cibleName = await JobUtil.getUsername(cible.id, guild)
+        await interaction.reply({content: `**${userName}** donné ${quantity} x ${item.name} à **${cibleName}**`})
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
@@ -99,12 +94,14 @@ class Donner extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
-        const guildId = interaction.guild?.id;
-        if (!guildId) {
+        const options = interaction.options
+        const guild = interaction.guild;
+        if (!guild) {
             await interaction.respond([]);
             return;
         }
-        const options = interaction.options
+
+        const guildId = interaction.guild?.id;
         const focused = options.getFocused(true)
         const search = focused.value
 
@@ -114,11 +111,15 @@ class Donner extends AbstractSubCommand {
                 const items = await this.getUserItems(interaction.user, search, guildId)
 
                 for (let item of items) {
+                    if (item.quantity < 1) {
+                        continue;
+                    }
                     if (retour.length >= 20) {
                         break;
                     }
+
                     retour.push({
-                        name: `${item.name}`,
+                        name: `${item.name} (${item.quantity} maximum)`,
                         value: item.name
                     })
                 }
