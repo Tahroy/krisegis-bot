@@ -2,6 +2,7 @@ import PlayerItem from '../models/PlayerItem';
 import {Guild, User} from 'discord.js';
 import {Op} from "sequelize";
 import {ReserveService} from "./ReserveService";
+import Player from "../models/astrub_economy/Player";
 
 export enum ItemType {
     KOUINKOUIN = 'kouinkouin',
@@ -30,6 +31,16 @@ export class PlayerService {
                 quantity: {[Op.gt]: 0}
             },
             order: [['type', 'ASC'], ['name', 'ASC']]
+        });
+    }
+
+    public static async getItem(user: User, name: string, guild: Guild): Promise<PlayerItem | null> {
+        return await PlayerItem.findOne({
+            where: {
+                userId: user.id,
+                guildId: guild.id,
+                name: name,
+            },
         });
     }
 

@@ -9,6 +9,8 @@ import {QuestService} from "../../services/QuestService";
 import JobUtil from "../../services/JobUtil";
 import {QuestEnum, QuestTemplates} from "../../models/astrub_economy/QuestTemplate";
 import Quest from "../../models/astrub_economy/Quest";
+import PlayerItem from "../../models/PlayerItem";
+import {PlayerService} from "../../services/PlayerService";
 
 export default class Quetes extends AbstractSubCommand {
     name: string = 'quetes';
@@ -20,6 +22,14 @@ export default class Quetes extends AbstractSubCommand {
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const focusedOption = interaction.options.getFocused(true);
+
+        const user = interaction.user;
+        const guild = interaction.guild
+
+        if (!guild) {
+            await interaction.respond([]);
+            return;
+        }
 
         if (focusedOption.name === this.OPTION_ITEM) {
             const questName = interaction.options.getString(this.OPTION_QUEST);
@@ -38,13 +48,21 @@ export default class Quetes extends AbstractSubCommand {
                 .filter(itemName => itemName.toLowerCase().includes(value))
                 .slice(0, 25);
 
-            await interaction.respond(filteredItems.map(itemName => {
+            const tab = [];
+
+            for (const itemName of filteredItems) {
                 const requiredQuantity = questTemplate.requiredItems[itemName];
                 const providedQuantity = quest.itemsProvided[itemName] || 0;
-                return {
-                    name: `${itemName} (${providedQuantity}/${requiredQuantity})`, value: itemName
-                };
-            }));
+                const playerItem = await PlayerService.getItem(interaction.user, itemName, guild)
+                const playerQuantity = playerItem?.quantity || 0
+                const pluriel = playerQuantity > 1 ? "s" : ""
+                tab.push({
+                    name: `${itemName} - ${providedQuantity}/${requiredQuantity} (${playerQuantity} possédé${pluriel})`, value: itemName
+                });
+
+            }
+
+            await interaction.respond(tab);
             return;
         }
 

@@ -226,8 +226,19 @@ class Fabriquer extends AbstractSubCommand {
                 }
 
                 if (canCraft) {
+                    // On regarde combien on peut créer
+                    let quantite = null
+                    for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+                        const playerQuantity = playerItemsMap.get(ingredient) || 0
+                        if (quantite === null) {
+                            quantite = Math.floor(playerQuantity / quantity)
+                        } else {
+                            quantite = Math.floor(Math.min(quantite, playerQuantity / quantity))
+                        }
+                    }
+
                     retour.push({
-                        name: `${item.name} (${recipe}) - ${item.experience} xp`,
+                        name: `${item.name} (${recipe}) - ${item.experience} xp (${quantite} maximum)`,
                         value: item.name
                     });
                 }
