@@ -80,7 +80,9 @@ module.exports = (client: KrisegisClient) => {
 
     const gererBouton = async (interaction: ButtonInteraction) => {
         const customID = interaction.customId;
-        const [commandName, buttonName] = customID.split('-', 2);
+        let [commandName, buttonName] = customID.split('-', 2);
+
+        [commandName] = commandName.split('|');
 
         const userName = interaction.user.tag;
         const command = client.commands?.get(commandName);

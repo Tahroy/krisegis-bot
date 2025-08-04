@@ -151,7 +151,7 @@ class Vendre extends AbstractSubCommand {
             }
         }
 
-        const playerItems = await PlayerService.getItems(user, [ItemType.RESSOURCE, ItemType.OUTIL, ItemType.FABRICATION], guild);
+        const playerItems = await PlayerService.getItems(user, [ItemType.RESSOURCE, ItemType.FABRICATION], guild);
 
         return playerItems.filter(item => sellablesItems.includes(item.name))
     }

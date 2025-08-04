@@ -25,6 +25,10 @@ enum RessourcesEnum {
 export {RessourcesEnum};
 
 enum CraftEnum {
+    ATELIER_A_POISSON = "Atelier à poisson",
+    FOUR_A_PAIN = "Four à pain",
+    MARMITE = "Marmite",
+
     // Niveau 1
     SUCRE_ORGE = "Sucre d'orge",
     PAIN_INCARNAM = "Pain d’Incarnam",
@@ -54,7 +58,8 @@ enum CraftEnum {
     TALISMAN_CUIVRE = "Talisman en cuivre",
     BOUCLIER_BOIS = "Bouclier châtaignier",
     EPEE_BOISAILLE = "Épée de boisaille",
-    LANTERNE = "Lanterne"
+    LANTERNE = "Lanterne",
+
 }
 
 export {CraftEnum};
@@ -68,15 +73,6 @@ enum JobEnum {
 }
 
 export {JobEnum};
-
-enum ToolsEnum {
-    ATELIER_A_POISSON = "Atelier à poisson",
-    FOUR_A_PAIN = "Four à pain",
-    MARMITE = "Marmite"
-}
-
-export {ToolsEnum};
-
 
 enum SellEnum {
     RESSOURCE_1= 2,

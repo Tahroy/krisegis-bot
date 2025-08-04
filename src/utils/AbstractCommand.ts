@@ -26,6 +26,18 @@ abstract class AbstractCommand {
     }
 
     async executeButton(interaction: ButtonInteraction): Promise<void> {
+        const customID = interaction.customId;
+        const split = customID.split('-');
+        const subCommandName = split[0].split('|')[1] ?? null
+
+        if (subCommandName) {
+            const subCommand = this.subCommands.get(subCommandName);
+            if (subCommand) {
+                const subCommandInstance = new subCommand();
+                await subCommandInstance.executeButton(interaction);
+                return;
+            }
+        }
         await interaction.reply({content: 'Not implemented', ephemeral: true})
     };
 

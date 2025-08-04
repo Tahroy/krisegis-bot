@@ -1,6 +1,6 @@
 import Craft from "./Craft";
 import {ItemType} from "../../services/PlayerService";
-import {CraftEnum, JobEnum, RessourcesEnum, ToolsEnum, XpEnum} from "./Enums";
+import {CraftEnum, JobEnum, RessourcesEnum} from "./Enums";
 
 export enum ConsumablesEnum {
     PAIN_SUCRE = "Pain sucré",
@@ -23,7 +23,7 @@ const Consumables: Record<ConsumablesEnum, Consumable> = {
         type: ItemType.FABRICATION,
         experience: 0,
         jobs: [JobEnum.PAYSAN, JobEnum.ALCHIMISTE],
-        tool: ToolsEnum.FOUR_A_PAIN,
+        tool: CraftEnum.FOUR_A_PAIN,
         effects: [],
         duration: 1440
     }, [ConsumablesEnum.FOUGASSE_BIERE]: {
@@ -34,7 +34,7 @@ const Consumables: Record<ConsumablesEnum, Consumable> = {
         type: ItemType.FABRICATION,
         experience: 0,
         jobs: [],
-        tool: ToolsEnum.FOUR_A_PAIN,
+        tool: CraftEnum.FOUR_A_PAIN,
         effects: [],
         duration: 1440
     }, [ConsumablesEnum.GALETTE_INCARNAM]: {
@@ -45,7 +45,7 @@ const Consumables: Record<ConsumablesEnum, Consumable> = {
         type: ItemType.FABRICATION,
         experience: 0,
         jobs: [],
-        tool: ToolsEnum.FOUR_A_PAIN,
+        tool: CraftEnum.FOUR_A_PAIN,
         effects: [],
         duration: 1440
     }

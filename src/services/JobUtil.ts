@@ -4,7 +4,6 @@ import {Crafts} from "../models/astrub_economy/Craft";
 import {Client, Guild, User} from "discord.js";
 import Player from "../models/astrub_economy/Player";
 import cron from 'node-cron';
-import Tool, {Tools} from "../models/astrub_economy/Tool";
 import {PopulationService} from "./PopulationService";
 import KrisegisClient from "../models/KrisegisClient";
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
@@ -13,7 +12,6 @@ import {QuestService} from "./QuestService";
 import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
 import {Op} from "sequelize";
 import {MeteoService} from "./MeteoService";
-import {PlayerService} from "./PlayerService";
 
 class JobUtil {
 
@@ -30,16 +28,12 @@ class JobUtil {
         return Object.values(Ressources).find(r => r.name === ressource) ?? null
     }
 
-    static getTool(tool: string): Tool | null {
-        return Object.values(Tools).find(t => t.name === tool) ?? null
-    }
-
     static getCraft(craft: string): BaseItem | null {
         return Object.values(Crafts).find(c => c.name === craft) ?? null
     }
 
     static getItem(name: string): BaseItem | undefined {
-        return Object.values({...Ressources, ...Tools, ...Crafts}).find(item => item.name === name);
+        return Object.values({...Ressources, ...Crafts}).find(item => item.name === name);
     }
 
     static getAllItems(): BaseItem[] {

@@ -39,7 +39,7 @@ class Inventaire extends AbstractSubCommand {
 
         const items: PlayerItem[] = await PlayerService.getItems(
             user,
-            [ItemType.RESSOURCE, ItemType.OUTIL, ItemType.FABRICATION],
+            [ItemType.RESSOURCE, ItemType.FABRICATION],
             guild
         );
 

@@ -180,7 +180,7 @@ class Fabriquer extends AbstractSubCommand {
             where: {
                 userId: interaction.user.id,
                 guildId: guildId,
-                type: [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL]
+                type: [ItemType.RESSOURCE, ItemType.FABRICATION]
             }
         });
 

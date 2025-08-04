@@ -1,5 +1,4 @@
 import {Ressources} from "./Ressource";
-import {Tools} from "./Tool";
 import {Crafts} from "./Craft";
 import {ItemType} from "../../services/PlayerService";
 import {JobEnum} from "./Enums";
@@ -22,7 +21,6 @@ interface BaseItem {
 
 const Items: Record<string, Record<string, BaseItem>> = {
     ressources: Ressources,
-    tools: Tools,
     crafts: Crafts
 }
 
