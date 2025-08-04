@@ -69,23 +69,23 @@ const Crafts: Record<CraftEnum, Craft> = {
     },
     [CraftEnum.FOUR_A_PAIN]: {
         name: CraftEnum.FOUR_A_PAIN,
-        recipe: {[RessourcesEnum.FER]: 25, [RessourcesEnum.FRENE]: 25},
+        recipe: {[RessourcesEnum.FER]: 50, [RessourcesEnum.FRENE]: 50},
         type: ItemType.FABRICATION,
-        experience: 50 * XpEnum.RESSOURCE_1,
+        experience: 100 * XpEnum.RESSOURCE_1,
         jobs: [JobEnum.MINEUR, JobEnum.BUCHERON]
     },
     [CraftEnum.ATELIER_A_POISSON]: {
         name: CraftEnum.ATELIER_A_POISSON,
-        recipe: {[RessourcesEnum.FRENE]: 50},
+        recipe: {[RessourcesEnum.FRENE]: 100},
         type: ItemType.FABRICATION,
-        experience: 50 * XpEnum.RESSOURCE_1,
+        experience: 100 * XpEnum.RESSOURCE_1,
         jobs: [JobEnum.BUCHERON]
     },
     [CraftEnum.MARMITE]: {
         name: CraftEnum.MARMITE,
-        recipe: {[RessourcesEnum.FER]: 50},
+        recipe: {[RessourcesEnum.FER]: 100},
         type: ItemType.FABRICATION,
-        experience: 50 * XpEnum.RESSOURCE_1,
+        experience: 100 * XpEnum.RESSOURCE_1,
         jobs: [JobEnum.MINEUR]
     },
 
