@@ -73,10 +73,10 @@ export class PopulationService {
 
         // On tend vers 50 à coup de +/- 10
         if (population.happiness > 50) {
-            population.happiness = Math.max(50, population.happiness - 10);
+            population.happiness = Math.max(50, population.happiness - 5);
         }
         if (population.happiness < 50) {
-            population.happiness = Math.min(50, population.happiness + 10);
+            population.happiness = Math.min(50, population.happiness + 5);
         }
 
         await population.save();
