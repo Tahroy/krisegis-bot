@@ -114,7 +114,7 @@ export {JobEnum};
 enum SellEnum {
     RESSOURCE_1= 2,
     RESSOURCE_10 = 6,
-    RESSOURCE_20 = 18,
+    RESSOURCE_20 = 10,
 }
 
 enum BuyEnum {
