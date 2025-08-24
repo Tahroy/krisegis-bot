@@ -2,8 +2,10 @@ const { SlashCommandBuilder } = require('discord.js')
 const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
 const { debugMessage } = require('../utils/Utils')
+const Constantes = require("../utils/Constantes");
 
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     opts: {},
     data: new SlashCommandBuilder()
         .setName('roleplay')

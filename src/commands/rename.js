@@ -1,7 +1,9 @@
 const {SlashCommandBuilder, PermissionsBitField} = require("discord.js");
 const {PermissionFlagsBits} = require("discord-api-types/v8");
 const { checkTags } = require('../utils/Utils')
+const Constantes = require("../utils/Constantes");
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     data: new SlashCommandBuilder()
         .setName('rename')
         .setDescription('Permet de se renommer')

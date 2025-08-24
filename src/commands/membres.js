@@ -1,5 +1,6 @@
 const {SlashCommandBuilder} = require("discord.js");
 const axios = require('axios');
+const Constantes = require("../utils/Constantes");
 const config = {
     method: 'get',
     url: 'https://krisegis.fr/wp-json/krisegis/v1/membres',
@@ -7,6 +8,7 @@ const config = {
 };
 
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     opts: {},
     data: new SlashCommandBuilder()
         .setName('membres')

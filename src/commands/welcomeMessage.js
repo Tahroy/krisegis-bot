@@ -1,8 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js')
 const WelcomeMessage = require('../models/WelcomeMessage').default
 const { PermissionFlagsBits } = require('discord-api-types/v8')
+const Constantes = require("../utils/Constantes");
 
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     opts: {
         admin: true
     },

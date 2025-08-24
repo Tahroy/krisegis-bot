@@ -64,31 +64,75 @@ module.exports = async function (client) {
     }
 
     async function synchroCommands(rest) {
-        let slashCommands = []
+        let globalSlashCommands = []
+        const guildCommandMap = new Map()
 
-        // Commandes générales
+        // Vieilles commandes JS
         for (const command of client.commands) {
             const commandData = command[1]
 
             if (!commandData.description) {
                 commandData.description = '- Sans description'
             }
-            let slashCommand = commandData.data
-            slashCommands.push(slashCommand)
+            const slashCommand = commandData.data
+            const allowedGuildIds = commandData.allowedGuildIds ?? []
+
+            if (allowedGuildIds.length > 0) {
+                for (const guildId of allowedGuildIds) {
+                    const list = guildCommandMap.get(guildId) || []
+                    list.push(slashCommand)
+                    guildCommandMap.set(guildId, list)
+                }
+            } else {
+                globalSlashCommands.push(slashCommand)
+            }
         }
 
+        // Nouvelles commandes
         for (const command of client.typedCommands) {
-            const commandData = command[1]
+            const commandInstance = command[1]
+            const slashCommand = commandInstance.getSlashCommandBuild()
+            const allowedGuildIds = commandInstance.allowedGuildIds ?? []
 
-            let slashCommand = commandData.getSlashCommandBuild()
-            slashCommands.push(slashCommand)
+            if (allowedGuildIds.length > 0) {
+                for (const guildId of allowedGuildIds) {
+                    const list = guildCommandMap.get(guildId) || []
+                    list.push(slashCommand)
+                    guildCommandMap.set(guildId, list)
+                }
+            } else {
+                globalSlashCommands.push(slashCommand)
+            }
         }
 
-        slashCommands = slashCommands.map(command => command.toJSON())
+        // Conversion en JSON
+        globalSlashCommands = globalSlashCommands.map(command => command.toJSON())
+        for (const [guildId, commands] of guildCommandMap.entries()) {
+            const jsonCommands = commands.map(command => command.toJSON())
+            guildCommandMap.set(guildId, jsonCommands)
+        }
 
-        await rest.put(Routes.applicationCommands(client_id), {body: slashCommands},)
-            .then(() => console.log('Successfully registered application commands.'))
-            .catch(console.error)
+        // Enregistrement global
+        if (globalSlashCommands.length > 0) {
+            await rest.put(Routes.applicationCommands(client_id), {body: globalSlashCommands})
+                .then(() => console.log('Successfully registered global application commands.'))
+                .catch(console.error)
+        }
+
+        // Enregistrement par guilde
+        for (const [guildId, commands] of guildCommandMap.entries()) {
+            // Ne tenter l'enregistrement que si le bot est présent dans la guilde
+            if (!client.guilds.cache.has(guildId)) {
+                console.warn(`Accès interdit pour le serveur ${guildId}.`)
+                continue;
+            }
+
+            await rest.put(Routes.applicationGuildCommands(client_id, guildId), {body: commands})
+                .then(() => console.log(`Commandes sauvegardées pour le serveur ${guildId}.`))
+                .catch((err) => {
+                    console.error(err)
+                })
+        }
     }
 
     async function synchroEmojis(client) {
@@ -173,7 +217,7 @@ module.exports = async function (client) {
     })
 
     function checkEventReminders() {
-        const a = setInterval(async () => {
+        setInterval(async () => {
             const scheduledEvents = await getScheduledEventsFromDatabase()
 
             const now = Date.now()

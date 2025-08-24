@@ -2,11 +2,16 @@ import { readdirSync } from 'fs';
 import path from 'path';
 import {Client, Collection, CommandInteraction} from 'discord.js';
 import AstrubEconomie from '../commands/astrub_economy/AstrubEconomie';
-import Inventory from './../commands/Inventory';
+import Inventaire from './../commands/Inventaire';
 import AbstractCommand from "./AbstractCommand";
 import Command from "../models/OldCommand";
 import KrisegisClient from "../models/KrisegisClient";
-import Say from "../commands/Say";
+import Dire from "../commands/Dire";
+import Article from "../commands/Article";
+import Document from "../commands/Document";
+import Objet from "../commands/Objet";
+import Pnj from "../commands/Pnj";
+import Wiki from "../commands/Wiki";
 
 
 // Fonction pour charger les commandes
@@ -36,14 +41,20 @@ export default function loadCommands(client: KrisegisClient): void {
 
     const typedCommands: Collection<string, AbstractCommand> = new Collection();
 
-    const astrubEconomy = new AstrubEconomie();
-    typedCommands.set(astrubEconomy.name, astrubEconomy)
+    const commands = [
+        new AstrubEconomie(),
+        new Inventaire(),
+        new Dire(),
+        new Article(),
+        new Document(),
+        new Objet(),
+        new Pnj(),
+        new Wiki(),
+    ];
 
-    const inventory = new Inventory();
-    typedCommands.set(inventory.name, inventory)
-
-    const say = new Say();
-    typedCommands.set(say.name, say)
+    for (const command of commands) {
+        typedCommands.set(command.name, command);
+    }
 
     client.typedCommands = typedCommands;
 }

@@ -1,5 +1,5 @@
-// Nous importons les classes SlashCommandBuilder, ActionRowBuilder et ButtonBuilder de 'discord.js'
-// ainsi que ButtonStyle de 'discord-api-types/v8'.
+import Constantes from "../utils/Constantes";
+
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const { readdirSync } = require('node:fs')
@@ -28,6 +28,7 @@ let games = []
  */
 module.exports = {
     // Définition de la commande slash avec son nom et sa description
+    allowedGuildIds: Constantes.allowedGuildIds,
     data: new SlashCommandBuilder()
         .setName('kouinkouin')
         .setDescription('Permet de pêcher un kouinkouin')

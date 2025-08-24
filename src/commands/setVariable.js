@@ -1,11 +1,11 @@
 const {SlashCommandBuilder} = require("discord.js");
 const Variable = require('../models/Variable').default
 const {PermissionFlagsBits} = require("discord-api-types/v8");
+const Constantes = require("../utils/Constantes");
 
 module.exports = {
-    opts: {
-        admin: true
-    },
+    allowedGuildIds: Constantes.allowedGuildIds,
+    opts: {admin: true},
     data: new SlashCommandBuilder()
         .setName('setvariable')
         .setDescription('Met en place une variable - Discord RP')

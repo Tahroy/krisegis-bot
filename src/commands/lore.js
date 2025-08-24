@@ -5,6 +5,7 @@ const { ButtonStyle } = require('discord-api-types/v8')
 const { escapeHTML, substringContent } = require('../utils/Utils')
 const embedData = require('../utils/embed')
 const { Op } = require('sequelize')
+const Constantes = require("../utils/Constantes");
 const LoreElement = require('../models/LoreElement').default
 
 const WIKI_RP = 'https://dofus-rp.fandom.com/fr/'
@@ -16,6 +17,7 @@ const NOMS = {
 }
 
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     opts: {}, data: new SlashCommandBuilder()
         .setName('lore')
         .setDescription('Cherche des objets, articles ou dialogues de PNJ')

@@ -1,9 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js')
 const PlayerItem = require('../models/PlayerItem').default
 const { Op, Sequelize } = require('sequelize')
+const Constantes = require("../utils/Constantes");
 const Capture = require('../models/Capture').default
 
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     opts: {}, data: new SlashCommandBuilder()
         .setName('ladder')
         .setDescription('Affiche le ladder')

@@ -2,10 +2,12 @@ import AbstractCommand from "../utils/AbstractCommand";
 import {ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction} from "discord.js";
 import playerItem from "../models/PlayerItem";
 import embedData from "../utils/embed";
+import Constantes from "../utils/Constantes";
 
-class Inventory extends AbstractCommand {
+class Inventaire extends AbstractCommand {
     description: string = 'Permet de consulter son inventaire';
-    name: string = 'inventory';
+    name: string = 'inventaire';
+    allowedGuildIds: string[] = Constantes.ALLOWED_GUILD_IDS;
 
     private limit = 20;
 
@@ -25,8 +27,8 @@ class Inventory extends AbstractCommand {
             return
         }
 
-        let items = [];
-        let typeActuel = null;
+        let items = [] as string[];
+        let typeActuel: any = null;
         let count = 0;
         for (const playerItem of playerItems) {
             if (count === this.limit) {
@@ -83,7 +85,7 @@ class Inventory extends AbstractCommand {
 
         const guild = interaction.guild;
         const member = await guild?.members.fetch(userId)
-        const memberName = member?.nickname ?? member?.user.globalName
+        const memberName = member?.nickname ?? (member?.user as any).globalName
 
         const playerItems = await playerItem.findAll({
             where: {userId: userId},
@@ -93,8 +95,8 @@ class Inventory extends AbstractCommand {
         const page = parseInt(pageIndex);
         const counter = page - 1
 
-        const items = [];
-        let typeActuel = null;
+        const items: string[] = [];
+        let typeActuel: any = null;
         let count = 0
         for (const [index, playerItem] of playerItems.entries()) {
             if (index < counter * this.limit) continue;
@@ -115,7 +117,7 @@ class Inventory extends AbstractCommand {
             description: items.join('\n')
         })
 
-        const message = interaction.message;
+        const message = interaction.message as any;
 
         const pagePrevious = page - 1;
         const pageNext = page + 1;
@@ -150,4 +152,4 @@ class Inventory extends AbstractCommand {
 
 }
 
-export default Inventory;
+export default Inventaire;

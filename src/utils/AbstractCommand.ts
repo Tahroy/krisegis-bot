@@ -9,6 +9,7 @@ import AbstractSubCommand from "./AbstractSubCommand";
 abstract class AbstractCommand {
     abstract name: string;
     abstract description: string;
+    allowedGuildIds?: string[];
     subCommands: Map<string, new () => AbstractSubCommand> = new Map();
 
     async execute(interaction: CommandInteraction): Promise<void> {
@@ -38,7 +39,7 @@ abstract class AbstractCommand {
                 return;
             }
         }
-        await interaction.reply({content: 'Not implemented', ephemeral: true})
+        await interaction.reply({content: 'Non implémenté', ephemeral: true})
     };
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -52,7 +53,7 @@ abstract class AbstractCommand {
     };
 
     async gererModal(interaction: ModalSubmitInteraction): Promise<void> {
-        await interaction.reply({content: `Not implemented`})
+        await interaction.reply({content: `Non implémenté`})
     }
 
     addSubCommands(builder: SlashCommandBuilder): void {

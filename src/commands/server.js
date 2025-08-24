@@ -2,12 +2,14 @@ const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.
 const {ButtonStyle} = require('discord-api-types/v10')
 const {PermissionFlagsBits} = require('discord-api-types/v8')
 const {debugMessage, checkTags} = require('../utils/Utils')
+const Constantes = require("../utils/Constantes");
 
 const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
 const WelcomeMessage = require('../models/WelcomeMessage').default
 
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     opts: {}, data: new SlashCommandBuilder()
         .setName('server')
         .setDescription('Choisir son serveur - Discord RP')

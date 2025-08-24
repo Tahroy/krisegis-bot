@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js')
 const embedData = require('../utils/embed')
+const Constantes = require("../utils/Constantes");
 module.exports = {
+    allowedGuildIds: Constantes.allowedGuildIds,
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('L\'aide pour utiliser le bot')
