@@ -19,11 +19,11 @@ const adminsIds = [
 module.exports = {
     opts: {},
     data: new SlashCommandBuilder()
-        .setName('quizz')
-        .setDescription('Lance un quizz !')
+        .setName('quiz')
+        .setDescription('Lance un quiz !')
         .addSubcommand(subcommmand => subcommmand
             .setName('start')
-            .setDescription('Lance le quizz')
+            .setDescription('Lance le quiz')
             .addIntegerOption(
                 option => option
                     .setName('nb_questions')
@@ -105,7 +105,7 @@ module.exports = {
     },
 
     async executeButton (interaction, buttonName) {
-        const selectedAnswer = buttonName.replace('quizz-', '')
+        const selectedAnswer = buttonName.replace('quiz-', '')
         const currentChannelData = channelScores.get(interaction.channelId)
 
         if (!currentChannelData) {
@@ -138,7 +138,7 @@ module.exports = {
             currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
             await PlayerService.addPlayerItem(
                 interaction.user,
-                'point quizz',
+                'point quiz',
                 ItemType.QUESTION,
                 1,
                 interaction.guild.id ?? 0
@@ -173,7 +173,7 @@ module.exports = {
         }
 
         sendQuestion(interaction)
-        interaction.reply({ 'content': 'Le quizz a commencé !', 'ephemeral': true })
+        interaction.reply({ 'content': 'Le quiz a commencé !', 'ephemeral': true })
     },
     addQuestion (interaction) {
         if (!adminsIds.includes(interaction.user.id)) {
@@ -327,7 +327,7 @@ function sendQuestion (interaction) {
 
     const buttons = finalAnswers.map((answer) => {
         return new ButtonBuilder()
-            .setCustomId(`quizz-${answer}`)
+            .setCustomId(`quiz-${answer}`)
             .setLabel(answer)
             .setStyle(ButtonStyle.Primary)
     })

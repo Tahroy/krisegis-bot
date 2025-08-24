@@ -15,7 +15,7 @@ public: false,
             .setChoices({
                             name: 'Larves', value: 'larve'
                         }, {
-                            name: 'Quizz', value: 'question'
+                            name: 'quiz', value: 'question'
                         }, {
                             name: 'Potions', value: 'potion'
                         }, {
