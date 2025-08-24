@@ -16,6 +16,7 @@ import WeatherGuild from "../models/astrub_economy/WeatherGuild";
 import associate from "../models/associations";
 import Population from "../models/astrub_economy/Population";
 import Quest from "../models/astrub_economy/Quest";
+import Constantes from "../utils/Constantes";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -67,6 +68,12 @@ module.exports = async function (client) {
         let globalSlashCommands = []
         const guildCommandMap = new Map()
 
+        const allowedGuildIds = [
+            '185464480346537984',   // Discord RP
+            '1113468001379962880',  // Discord test
+            '641999599099445279'    // Discord Nellonia
+        ];
+
         // Vieilles commandes JS
         for (const command of client.commands) {
             const commandData = command[1]
@@ -75,10 +82,9 @@ module.exports = async function (client) {
                 commandData.description = '- Sans description'
             }
             const slashCommand = commandData.data
-            const allowedGuildIds = commandData.allowedGuildIds ?? []
 
             console.log(commandData)
-            if (allowedGuildIds.length > 0) {
+            if (commandData.public === false) {
                 for (const guildId of allowedGuildIds) {
                     const list = guildCommandMap.get(guildId) || []
                     list.push(slashCommand)
@@ -93,9 +99,8 @@ module.exports = async function (client) {
         for (const command of client.typedCommands) {
             const commandInstance = command[1]
             const slashCommand = commandInstance.getSlashCommandBuild()
-            const allowedGuildIds = commandInstance.allowedGuildIds ?? []
 
-            if (allowedGuildIds.length > 0) {
+            if (commandInstance.public === false) {
                 for (const guildId of allowedGuildIds) {
                     const list = guildCommandMap.get(guildId) || []
                     list.push(slashCommand)
