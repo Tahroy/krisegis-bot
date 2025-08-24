@@ -4,6 +4,8 @@ import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/PlayerService";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "../../services/JobUtil";
+import ItemService from "../../services/ItemService";
+import EconomyService from "../../services/EconomyService";
 
 class Acheter extends AbstractSubCommand {
     description: string = 'Acheter un objet';
@@ -43,14 +45,14 @@ class Acheter extends AbstractSubCommand {
             }
         });
 
-        const baseItem = JobUtil.getItem(item);
+        const baseItem = ItemService.getItem(item);
 
         if (!baseItem) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
             return
         }
 
-        const price = JobUtil.calculBuy(baseItem)
+        const price = EconomyService.calculBuy(baseItem)
 
         if (!price) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
@@ -114,7 +116,7 @@ class Acheter extends AbstractSubCommand {
 
         switch (focused.name) {
             case this.OPTION_ITEM:
-                const items = JobUtil.getAllItems()
+                const items = ItemService.getAllItems()
 
                 for (let item of items) {
                     if (retour.length >= 20) break;
@@ -122,7 +124,7 @@ class Acheter extends AbstractSubCommand {
                         continue;
                     }
                     if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
-                        const price = JobUtil.calculBuy(item);
+                        const price = EconomyService.calculBuy(item);
 
                         if (!price) {
                             continue;

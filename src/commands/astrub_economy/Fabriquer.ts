@@ -5,6 +5,7 @@ import JobUtil from "../../services/JobUtil";
 import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/PlayerService";
 import Job from "../../models/astrub_economy/Job";
+import ItemService from "../../services/ItemService";
 
 class Fabriquer extends AbstractSubCommand {
     description: string = 'Créer un object';
@@ -40,7 +41,7 @@ class Fabriquer extends AbstractSubCommand {
             return;
         }
 
-        const item = JobUtil.getItem(itemName);
+        const item = ItemService.getItem(itemName);
 
         if (!item) {
             await interaction.reply({
@@ -173,7 +174,7 @@ class Fabriquer extends AbstractSubCommand {
         const focused = options.getFocused(true);
         const search = focused.value;
 
-        const items = JobUtil.getAllItems();
+        const items = ItemService.getAllItems();
         const retour = [];
 
         const playerItems = await PlayerItem.findAll({

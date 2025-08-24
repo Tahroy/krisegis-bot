@@ -11,6 +11,7 @@ import PlayerItem from "../../models/PlayerItem";
 import {ItemType, PlayerService} from "../../services/PlayerService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
 import JobUtil from "../../services/JobUtil";
+import ItemService from "../../services/ItemService";
 
 class Donner extends AbstractSubCommand {
     description: string = "Donner des ressources";
@@ -56,7 +57,7 @@ class Donner extends AbstractSubCommand {
             return
         }
 
-        let item: BaseItem | undefined = JobUtil.getItem(itemName);
+        let item: BaseItem | undefined = ItemService.getItem(itemName);
 
         if (!item) {
             await interaction.reply({content: "Cet objet ne peut pas être donné", flags: MessageFlags.Ephemeral})
@@ -131,7 +132,7 @@ class Donner extends AbstractSubCommand {
     }
 
     private async getUserItems(user: User, search: string, guildId: string): Promise<PlayerItem[]> {
-        const items = JobUtil.getAllItems()
+        const items = ItemService.getAllItems()
 
         let sellablesItems: string [] = []
 

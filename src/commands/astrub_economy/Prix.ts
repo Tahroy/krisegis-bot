@@ -8,6 +8,8 @@ import {
     EmbedBuilder, MessageEditOptions
 } from "discord.js";
 import JobUtil from "../../services/JobUtil";
+import ItemService from "../../services/ItemService";
+import EconomyService from "../../services/EconomyService";
 
 class Prix extends AbstractSubCommand {
     description: string = "Voir le tableau des prix";
@@ -42,15 +44,15 @@ class Prix extends AbstractSubCommand {
     }
 
     private getAllRows() {
-        return Object.values(JobUtil.getAllItems())
+        return Object.values(ItemService.getAllItems())
             .map(ressource => {
                 if (!ressource.name) {
                     return ''
                 }
 
                 const name = ressource.name;
-                const sell = String(JobUtil.calculSell(ressource));
-                const buy = String(JobUtil.calculBuy(ressource))
+                const sell = String(EconomyService.calculSell(ressource));
+                const buy = String(EconomyService.calculBuy(ressource))
 
                 return `${name.padEnd(23)} | ${sell.padStart(13)} | ${buy.padStart(12)}`;
             })

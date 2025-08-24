@@ -11,6 +11,7 @@ import {QuestEnum, QuestTemplates} from "../../models/astrub_economy/QuestTempla
 import Quest from "../../models/astrub_economy/Quest";
 import PlayerItem from "../../models/PlayerItem";
 import {PlayerService} from "../../services/PlayerService";
+import ItemService from "../../services/ItemService";
 
 export default class Quetes extends AbstractSubCommand {
     name: string = 'quetes';
@@ -143,7 +144,7 @@ export default class Quetes extends AbstractSubCommand {
             return;
         }
 
-        const item = JobUtil.getItem(itemName);
+        const item = ItemService.getItem(itemName);
         if (!item) {
             await interaction.reply({content: `L'objet "${itemName}" n'existe pas.`, flags: MessageFlags.Ephemeral});
             return;

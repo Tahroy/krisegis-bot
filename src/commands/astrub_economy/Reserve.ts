@@ -12,6 +12,7 @@ import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "../../services/JobUtil";
 import {ReserveService} from "../../services/ReserveService";
 import {BuildingEnum} from "../../models/astrub_economy/Building";
+import ItemService from "../../services/ItemService";
 
 
 
@@ -168,7 +169,7 @@ class Reserve extends AbstractSubCommand {
         const guildId = interaction.guild.id;
 
         try {
-            const item = JobUtil.getItem(itemName);
+            const item = ItemService.getItem(itemName);
             if (!item) {
                 await interaction.reply({
                     content: `L'objet ${itemName} n'existe pas.`,
@@ -202,7 +203,7 @@ class Reserve extends AbstractSubCommand {
         const guildId = interaction.guild.id;
 
         try {
-            const item = JobUtil.getItem(itemName);
+            const item = ItemService.getItem(itemName);
             if (!item) {
                 await interaction.reply({
                     content: `L'objet ${itemName} n'existe pas.`,

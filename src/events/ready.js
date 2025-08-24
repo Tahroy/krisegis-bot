@@ -17,6 +17,7 @@ import associate from "../models/associations";
 import Population from "../models/astrub_economy/Population";
 import Quest from "../models/astrub_economy/Quest";
 import Constantes from "../utils/Constantes";
+import NotificationService from "../services/NotificationService";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -217,8 +218,7 @@ module.exports = async function (client) {
         await synchroEmojis(client);
         await listGuilds()
         await checkEventReminders()
-        const jobUtil = new JobUtil();
-        await jobUtil.startReminder(client);
+        await NotificationService.startSchedulers(client);
     })
 
     function checkEventReminders() {

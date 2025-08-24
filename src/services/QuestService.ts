@@ -11,6 +11,8 @@ import {Crafts} from "../models/astrub_economy/Craft";
 import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
 import {MeteoService} from "./MeteoService";
 import {MeteosEnum} from "../models/astrub_economy/Meteo";
+import cron from "node-cron";
+import EconomyService from "./EconomyService";
 
 export class QuestService {
     /**
@@ -300,7 +302,7 @@ export class QuestService {
             const item = Ressources[itemName as RessourcesEnum] || Crafts[itemName as CraftEnum];
 
             if (item) {
-                reward += JobUtil.calculSell(item) * quantity;
+                reward += EconomyService.calculSell(item) * quantity;
             }
         }
 
@@ -311,5 +313,25 @@ export class QuestService {
         }
 
         return Math.floor(reward);
+    }
+
+    /**
+     * Génère une nouvelle quête pour un serveur et l'annonce
+     */
+    static async generateAndAnnounceQuest(client: KrisegisClient, guildId: string): Promise<void> {
+        await QuestService.deleteOldQuests(client, guildId);
+
+        // Une chance sur 12 de déclencher une quête
+        const random = Math.random() * 8 < 1
+
+        if (!random) {
+            return;
+        }
+
+        const quest = await QuestService.generateRandomQuest(guildId);
+
+        if (quest) {
+            await QuestService.announceQuest(client, quest);
+        }
     }
 }

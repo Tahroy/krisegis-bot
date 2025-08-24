@@ -8,6 +8,7 @@ import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import JobUtil from "../../services/JobUtil";
 import {MeteoService} from "../../services/MeteoService";
+import ItemService from "../../services/ItemService";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
@@ -36,7 +37,7 @@ class Recolte extends AbstractSubCommand {
             return;
         }
 
-        const item = JobUtil.getRessource(ressourceChoice);
+        const item = ItemService.getResource(ressourceChoice);
         if (!item) {
             await interaction.reply({content: "Cette ressource n'existe pas !", flags: MessageFlags.Ephemeral})
             return

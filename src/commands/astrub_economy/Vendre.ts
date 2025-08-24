@@ -11,6 +11,8 @@ import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {ItemType, PlayerService} from "../../services/PlayerService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
+import ItemService from "../../services/ItemService";
+import EconomyService from "../../services/EconomyService";
 
 class Vendre extends AbstractSubCommand {
     description: string = 'Vendre un objet';
@@ -54,13 +56,13 @@ class Vendre extends AbstractSubCommand {
             return;
         }
 
-        const itemBase = JobUtil.getItem(item);
+        const itemBase = ItemService.getItem(item);
         if (!itemBase) {
             await interaction.reply({content: "Cet objet ne peut pas être vendu", flags: MessageFlags.Ephemeral})
             return
         }
 
-        const price = JobUtil.calculSell(itemBase)
+        const price = EconomyService.calculSell(itemBase)
 
         if (!price) {
             await interaction.reply({content: "Cet objet ne peut pas être vendu", flags: MessageFlags.Ephemeral})
@@ -114,7 +116,7 @@ class Vendre extends AbstractSubCommand {
                 items.sort((a, b) => a.name.localeCompare(b.name));
 
                 for (let item of items) {
-                    const price = JobUtil.calculSell(JobUtil.getItem(item.name) as BaseItem)
+                    const price = EconomyService.calculSell(ItemService.getItem(item.name) as BaseItem)
 
                     if (retour.length >= 20) {
                         break;
@@ -132,7 +134,7 @@ class Vendre extends AbstractSubCommand {
     }
 
     private async getUserItems(user: User, search: string, guild: Guild): Promise<PlayerItem[]> {
-        const items = JobUtil.getAllItems();
+        const items = ItemService.getAllItems();
 
         const sellablesItems: string [] = []
 
@@ -141,7 +143,7 @@ class Vendre extends AbstractSubCommand {
                 continue
             }
 
-            const price = JobUtil.calculSell(item);
+            const price = EconomyService.calculSell(item);
             if (!price) {
                 continue;
             }

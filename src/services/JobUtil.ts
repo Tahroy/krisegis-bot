@@ -1,17 +1,11 @@
-import Ressource, {Ressources} from "../models/astrub_economy/Ressource";
-import BaseItem, {Items} from "../models/astrub_economy/BaseItem";
-import {Crafts} from "../models/astrub_economy/Craft";
+import BaseItem from "../models/astrub_economy/BaseItem";
 import {Client, Guild, User} from "discord.js";
 import Player from "../models/astrub_economy/Player";
-import cron from 'node-cron';
-import {PopulationService} from "./PopulationService";
 import KrisegisClient from "../models/KrisegisClient";
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 import {Building, Buildings} from "../models/astrub_economy/Building";
-import {QuestService} from "./QuestService";
-import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import {LevelEnum} from "../models/astrub_economy/Enums";
 import {Op} from "sequelize";
-import {MeteoService} from "./MeteoService";
 
 class JobUtil {
 
@@ -22,26 +16,6 @@ class JobUtil {
     static getTimeBeforeNextHarvest(lastHarvest: Date, minutes: number): number {
         const nextHarvest = new Date(lastHarvest.getTime() + minutes * 60 * 1000);
         return Math.floor((nextHarvest.getTime() - Date.now()));
-    }
-
-    static getRessource(ressource: string): Ressource | null {
-        return Object.values(Ressources).find(r => r.name === ressource) ?? null
-    }
-
-    static getCraft(craft: string): BaseItem | null {
-        return Object.values(Crafts).find(c => c.name === craft) ?? null
-    }
-
-    static getItem(name: string): BaseItem | undefined {
-        return Object.values({...Ressources, ...Crafts}).find(item => item.name === name);
-    }
-
-    static getAllItems(): BaseItem[] {
-        const items: BaseItem[] = [];
-        for (const category of Object.values(Items)) {
-            items.push(...Object.values(category));
-        }
-        return items;
     }
 
     static async getPlayer(user: User, guildId: string): Promise<Player> {
@@ -78,52 +52,6 @@ class JobUtil {
         }
         return `<:${searchEmoji.name}:${searchEmoji.id}>`
 
-    }
-
-    /**
-     * Génère une nouvelle quête pour un serveur et l'annonce
-     */
-    static async generateAndAnnounceQuest(client: KrisegisClient, guildId: string): Promise<void> {
-        await QuestService.deleteOldQuests(client, guildId);
-
-        // Une chance sur 12 de déclencher une quête
-        const random = Math.random() * 8 < 1
-        console.log("Quête ? " + (random ? "Oui" : "Non"))
-        if (!random) {
-            return;
-        }
-
-        const quest = await QuestService.generateRandomQuest(guildId);
-
-        if (quest) {
-            await QuestService.announceQuest(client, quest);
-        }
-    }
-
-    async startReminder(client: KrisegisClient) {
-        // Définir la tâche à exécuter chaque jour à 10h
-        cron.schedule('0 10 * * *', async () => {
-            for (const guild of client.guilds.cache.values()) {
-                try {
-                    await MeteoService.updateMeteo(guild.id);
-                    await MeteoService.annoncerMeteo(client, guild.id)
-                    await PopulationService.updatePopulation(guild.id)
-                    await PopulationService.annoncePopulation(client, guild.id)
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        });
-
-        cron.schedule('0 * * * *', async () => {
-            for (const guild of client.guilds.cache.values()) {
-                try {
-                    await JobUtil.generateAndAnnounceQuest(client, guild.id);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        });
     }
 
     static async getBuildingsGuild(guild: Guild | null): Promise<string[]> {
@@ -181,30 +109,6 @@ class JobUtil {
         return buildingGuild !== null
     }
 
-    public static calculSell(item: BaseItem) {
-        if (!item.recipe) {
-            return Math.floor(item.sell || 0);
-        }
-
-        let sell = 0;
-        for (const [recipeItemName, quantity] of Object.entries(item.recipe)) {
-            const recipeItem = JobUtil.getItem(recipeItemName as RessourcesEnum | CraftEnum);
-            if (!recipeItem) {
-                continue;
-            }
-
-            const recipeSell = JobUtil.calculSell(recipeItem);
-            sell += recipeSell * quantity;
-        }
-
-        return Math.floor(sell * 1.1);
-    }
-
-    static calculBuy(ressource: BaseItem) {
-        const sell = JobUtil.calculSell(ressource);
-        return Math.ceil(sell * 2.5);
-    }
-
     /**
      * Retourne le nombre de joueurs actifs ces trois derniers jours
      */
@@ -224,13 +128,13 @@ class JobUtil {
         return member.displayName;
     }
 
-    static getExperienceByLevel(level: number) {
+    static getExperienceByLevel(level: LevelEnum) {
         switch (level) {
-            case 0:
+            case LevelEnum.LEVEL_0:
                 return 10;
-            case 10:
+            case LevelEnum.LEVEL_10:
                 return 40;
-            case 20:
+            case LevelEnum.LEVEL_20:
                 return 90;
             default:
                 return 10;

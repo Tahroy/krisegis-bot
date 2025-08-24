@@ -2,6 +2,7 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import Job from "../../models/astrub_economy/Job";
 import JobUtil from "../../services/JobUtil";
+import ItemService from "../../services/ItemService";
 
 class Recettes extends AbstractSubCommand {
     description: string = 'Les recettes existantes';
@@ -17,7 +18,7 @@ class Recettes extends AbstractSubCommand {
         const separator = `|----------------------|---------------------------|`;
 
         // Construction des lignes du tableau
-        const rows = Object.values(JobUtil.getAllItems())
+        const rows = ItemService.getAllItems()
             .map(ressource => {
                 if (!ressource.recipe) return '';
 
