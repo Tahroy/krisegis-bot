@@ -2,7 +2,7 @@ import PlayerItem from '../models/PlayerItem';
 import {Guild, User} from 'discord.js';
 import {Op} from "sequelize";
 import {ReserveService} from "./ReserveService";
-import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import {CraftEnum, ResourceEnum} from "../models/astrub_economy/Enums";
 
 export enum ItemType {
     KOUINKOUIN = 'kouinkouin',
@@ -34,7 +34,7 @@ export class PlayerService {
         });
     }
 
-    public static async getItem(user: User, name: RessourcesEnum | CraftEnum | string, guild: Guild): Promise<PlayerItem | null> {
+    public static async getItem(user: User, name: ResourceEnum | CraftEnum | string, guild: Guild): Promise<PlayerItem | null> {
         return await PlayerItem.findOne({
             where: {
                 userId: user.id,

@@ -1,4 +1,4 @@
-enum RessourcesEnum {
+enum ResourceEnum {
     BLE = "Blé",
     FER = "Fer",
     FRENE = "Frêne",
@@ -13,6 +13,14 @@ enum RessourcesEnum {
     GREUVETTE = "Greuvette",
     TRUITE = "Truite",
 
+    // Ressources niveau 20
+    NOYER = "Noyer",
+    BRONZE = "Bronze",
+    TREFLE_CINQ_FEUILLES = "Trèfle à cinq feuilles",
+    AVOINE = "Avoine",
+    CRABE_SOURIMI = "Crabe sourimi",
+    POISSON_CHATON = "Poisson chaton",
+
     KAMAS = "Kamas",
 
     PIERRE = "Pierre",
@@ -22,7 +30,7 @@ enum RessourcesEnum {
     OEUF = "Oeuf",
 }
 
-export {RessourcesEnum};
+export {ResourceEnum};
 
 enum CraftEnum {
     ATELIER_A_POISSON = "Atelier à poisson",
@@ -60,6 +68,35 @@ enum CraftEnum {
     EPEE_BOISAILLE = "Épée de boisaille",
     LANTERNE = "Lanterne",
 
+
+    // Niveau 20
+    PLANCHE_NOYER = "Planche noyer",
+    LINGOT_BRONZE = "Lingot de bronze",
+    POTION_SOIN = "Potion de soin",
+    PAIN_FLOCONS_AVOINE = "Pain flocons d'avoine",
+    BATON_CRABE = "Bâton de crabe",
+    POISSON_CHATON_FUME = "Poisson chaton fumé",
+
+    // OUTILS — Niveau 1 / 10 / 20 (simples)
+    HACHE_FRENE = "Hache en frêne",
+    HACHE_CHATAIGNIER = "Hache en châtaignier",
+    HACHE_NOYER = "Hache en noyer",
+
+    PIOCHE_FER = "Pioche en fer",
+    PIOCHE_CUIVRE = "Pioche en cuivre",
+    PIOCHE_BRONZE = "Pioche en bronze",
+
+    SERPE_A_ORTIE = "Serpe à ortie",
+    SERPE_A_SAUGE = "Serpe à sauge",
+    SERPE_A_TREFLE = "Serpe à trèfle",
+
+    FAUX_BLE = "Faux à blé",
+    FAUX_ORGE = "Faux à orge",
+    FAUX_AVOINE = "Faux à avoine",
+
+    CANNE_GOUJON = "Canne à goujon",
+    CANNE_GREUVETTE = "Canne à greuvette",
+    CANNE_POISSON_CHATON = "Canne à poisson chaton",
 }
 
 export {CraftEnum};
@@ -77,16 +114,19 @@ export {JobEnum};
 enum SellEnum {
     RESSOURCE_1= 2,
     RESSOURCE_10 = 6,
+    RESSOURCE_20 = 18,
 }
 
 enum BuyEnum {
     RESSOURCE_1 = 5,
     RESSOURCE_10 = 15,
+    RESSOURCE_20 = 25,
 }
 
 enum XpEnum {
     RESSOURCE_1 = 1,
-    RESSOURCE_10 = 2
+    RESSOURCE_10 = 2,
+    RESSOURCE_20 = 3
 }
 
 enum MultiplicatorEnum {

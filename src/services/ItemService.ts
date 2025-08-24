@@ -1,4 +1,4 @@
-import Ressource, {Ressources} from "../models/astrub_economy/Ressource";
+import Resource, {Ressources} from "../models/astrub_economy/Resource";
 import BaseItem, {Items} from "../models/astrub_economy/BaseItem";
 import {Crafts} from "../models/astrub_economy/Craft";
 
@@ -7,7 +7,7 @@ import {Crafts} from "../models/astrub_economy/Craft";
  * - Récupération d'objets
  */
 export class ItemService {
-    static getResource(name: string): Ressource | null {
+    static getResource(name: string): Resource | null {
         return Object.values(Ressources).find(r => r.name === name) ?? null;
     }
 

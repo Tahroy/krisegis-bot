@@ -1,9 +1,10 @@
 import {
     ChatInputCommandInteraction,
-    EmbedBuilder, Guild,
-    MessageFlags, SendableChannels,
-    SlashCommandSubcommandBuilder,
-    TextBasedChannel
+    EmbedBuilder,
+    Guild,
+    MessageFlags,
+    SendableChannels,
+    SlashCommandSubcommandBuilder
 } from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {QuestService} from "../../services/QuestService";
@@ -16,6 +17,10 @@ import {PopulationService} from "../../services/PopulationService";
 import Job from "../../models/astrub_economy/Job";
 import {Op} from "sequelize";
 import {JobEnum} from "../../models/astrub_economy/Enums";
+import {Meteos} from "../../models/astrub_economy/Meteo";
+import {MeteoService} from "../../services/MeteoService";
+import {PlayerService} from "../../services/PlayerService";
+import Player from "../../models/astrub_economy/Player";
 
 export default class Statut extends AbstractSubCommand {
     name: string = 'statut';
@@ -27,19 +32,20 @@ export default class Statut extends AbstractSubCommand {
     readonly TYPE_RESERVE = 'reserve';
     readonly TYPE_POPULATION = 'population'
     readonly TYPE_RECOLTEURS = 'recolteurs';
+    readonly TYPE_METEO = 'meteo';
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(option => option
             .setName(this.OPTION_TYPE)
             .setDescription('Type d\'information à afficher')
             .setRequired(true)
-            .addChoices(
-                {name: 'Quêtes en cours', value: this.TYPE_QUESTS},
-                {name: 'Bâtiments', value: this.TYPE_BUILDINGS},
-                {name: 'Réserve communautaire', value: this.TYPE_RESERVE},
-                {name: 'Population', value: this.TYPE_POPULATION},
-                {name: 'Récolteurs', value: this.TYPE_RECOLTEURS}
-            ));
+            .addChoices({name: 'Quêtes en cours', value: this.TYPE_QUESTS}, {
+                name: 'Bâtiments',
+                value: this.TYPE_BUILDINGS
+            }, {name: 'Réserve communautaire', value: this.TYPE_RESERVE}, {
+                name: 'Population',
+                value: this.TYPE_POPULATION
+            }, {name: 'Récolteurs', value: this.TYPE_RECOLTEURS}, {name: 'Météo', value: this.TYPE_METEO}));
     }
 
     public async execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -61,10 +67,12 @@ export default class Statut extends AbstractSubCommand {
             case this.TYPE_RECOLTEURS:
                 await this.showRecolteurs(interaction);
                 break;
+            case this.TYPE_METEO:
+                await this.showMeteo(interaction);
+                break;
             default:
                 await interaction.reply({
-                    content: 'Type d\'information non reconnu.',
-                    flags: MessageFlags.Ephemeral
+                    content: 'Type d\'information non reconnu.', flags: MessageFlags.Ephemeral
                 });
         }
     }
@@ -74,8 +82,7 @@ export default class Statut extends AbstractSubCommand {
 
         if (quests.length === 0) {
             await interaction.reply({
-                content: 'Aucune quête disponible actuellement.',
-                flags: MessageFlags.Ephemeral
+                content: 'Aucune quête disponible actuellement.', flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -102,7 +109,7 @@ export default class Statut extends AbstractSubCommand {
 
             const rewardAmount = QuestService.calculReward(questTemplate)
             const rewardType = questTemplate.rewardType === 'kamas' ? 'kamas' : 'joie';
-            
+
             // Calcul du temps restant
             const duration = 24 * 60 * 60 * 1000;
             const remainingTime = duration - (Date.now() - quest.createdAt.getTime());
@@ -147,8 +154,7 @@ export default class Statut extends AbstractSubCommand {
                 const building = JobUtil.getBuilding(buildingName);
                 if (building) {
                     embed.addFields({
-                        name: building.name,
-                        value: building.description
+                        name: building.name, value: building.description
                     });
                 }
             }
@@ -167,25 +173,20 @@ export default class Statut extends AbstractSubCommand {
                 const building = JobUtil.getBuilding(buildingGuild.name);
                 if (building) {
                     embed.addFields({
-                        name: building.name,
-                        value: building.description
+                        name: building.name, value: building.description
                     });
                 }
             }
         }
 
-        const notStartedBuildings = buildings.filter(building => 
-            !completedBuildingNames.includes(building.name) && 
-            !buildingsInProgress.some(bg => bg.name === building.name)
-        );
+        const notStartedBuildings = buildings.filter(building => !completedBuildingNames.includes(building.name) && !buildingsInProgress.some(bg => bg.name === building.name));
 
         if (notStartedBuildings.length > 0) {
             embed.addFields({name: 'Bâtiments à construire', value: `${notStartedBuildings.length}`});
 
             for (const building of notStartedBuildings) {
                 embed.addFields({
-                    name: building.name,
-                    value: building.description
+                    name: building.name, value: building.description
                 });
             }
         }
@@ -202,8 +203,7 @@ export default class Statut extends AbstractSubCommand {
 
         if (reserveItems.length === 0) {
             await interaction.reply({
-                content: 'La réserve est vide.',
-                flags: MessageFlags.Ephemeral
+                content: 'La réserve est vide.', flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -216,7 +216,7 @@ export default class Statut extends AbstractSubCommand {
             .setColor('#0099ff')
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({embeds: [embed]});
     }
 
     private formatReserveTable(items: any[]): string {
@@ -234,8 +234,7 @@ export default class Statut extends AbstractSubCommand {
         const guildId = interaction.guild?.id;
         if (!guildId) {
             await interaction.reply({
-                content: 'Cette commande ne peut être utilisée que dans un serveur',
-                flags: MessageFlags.Ephemeral
+                content: 'Cette commande ne peut être utilisée que dans un serveur', flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -253,17 +252,9 @@ export default class Statut extends AbstractSubCommand {
         for (const [key, jobName] of Object.entries(JobEnum)) {
             const jobs = await Job.findAll({
                 where: {
-                    guildId: interaction.guild?.id,
-                    name: jobName,
-                    updatedAt: {
-                        [Op.gte]: new Date(Date.now() - 72 * 60 * 60 * 1000)
-                    }
-                },
-                order: [['experience', 'DESC']]
+                    guildId: interaction.guild?.id, name: jobName,
+                }, order: [['experience', 'DESC']]
             });
-
-            console.log(jobName, jobs)
-
 
             if (!jobs.length) {
                 continue
@@ -272,6 +263,19 @@ export default class Statut extends AbstractSubCommand {
             const textJob = []
             for (const index in jobs) {
                 const playerId = jobs[index].userId;
+
+                const player = await Player.findOne({
+                    where: {
+                        id: playerId, guildId: interaction.guild?.id, lastHarvest: {
+                            [Op.gte]: new Date(Date.now() - 72 * 60 * 60 * 1000)
+                        }
+                    }
+                })
+
+                if (!player) {
+                    continue
+                }
+
                 const username = await JobUtil.getUsername(playerId, interaction.guild as Guild);
 
                 let first = ''
@@ -293,5 +297,36 @@ export default class Statut extends AbstractSubCommand {
             const channel: SendableChannels = interaction.channel as SendableChannels;
             await channel.send({embeds: [embed]});
         }
+    }
+
+    private async showMeteo(interaction: ChatInputCommandInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur', flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        let meteoName = await MeteoService.chargerMeteo(guildId);
+
+        if (!meteoName) {
+            await MeteoService.updateMeteo(guildId);
+            meteoName = await MeteoService.chargerMeteo(guildId);
+        }
+
+        if (!meteoName) {
+            await interaction.reply({content: 'Aucune météo actuellement', flags: MessageFlags.Ephemeral});
+            return;
+        }
+
+        const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null;
+
+        if (!meteo) {
+            await interaction.reply({content: 'Aucune météo actuellement', flags: MessageFlags.Ephemeral});
+            return;
+        }
+
+        await interaction.reply({content: meteo.getText()});
     }
 }

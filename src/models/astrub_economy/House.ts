@@ -1,4 +1,4 @@
-import {RessourcesEnum} from "./Enums";
+import {ResourceEnum} from "./Enums";
 
 class House {
     public type!: string
@@ -17,9 +17,9 @@ const Houses: Record<HousesEnum, House> = {
         type: HousesEnum.ASTRUB,
         levels: [
             {
-                [RessourcesEnum.FRENE]: 500,
-                [RessourcesEnum.FER]: 500,
-                [RessourcesEnum.KAMAS]: 1000
+                [ResourceEnum.FRENE]: 500,
+                [ResourceEnum.FER]: 500,
+                [ResourceEnum.KAMAS]: 1000
             },
         ]
     },
@@ -27,9 +27,9 @@ const Houses: Record<HousesEnum, House> = {
         type: HousesEnum.AMAKNA,
         levels: [
             {
-                [RessourcesEnum.FRENE]: 750,
-                [RessourcesEnum.FER]: 250,
-                [RessourcesEnum.KAMAS]: 2000
+                [ResourceEnum.FRENE]: 750,
+                [ResourceEnum.FER]: 250,
+                [ResourceEnum.KAMAS]: 2000
             },
         ]
     },

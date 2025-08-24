@@ -1,7 +1,7 @@
 import {DataTypes, Model, Optional} from "sequelize";
 import sequelize from '../../utils/database';
 
-import {JobEnum, RessourcesEnum} from "./Enums";
+import {JobEnum} from "./Enums";
 
 interface JobAttributes {
     id: number;

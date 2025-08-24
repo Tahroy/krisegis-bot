@@ -1,5 +1,5 @@
 import BaseItem from "../models/astrub_economy/BaseItem";
-import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import {CraftEnum, ResourceEnum} from "../models/astrub_economy/Enums";
 import {ItemService} from "./ItemService";
 
 /**
@@ -20,7 +20,7 @@ export class EconomyService {
 
         let sell = 0;
         for (const [recipeItemName, quantity] of Object.entries(item.recipe)) {
-            const recipeItem = ItemService.getItem(recipeItemName as RessourcesEnum | CraftEnum);
+            const recipeItem = ItemService.getItem(recipeItemName as ResourceEnum | CraftEnum);
             if (!recipeItem) {
                 continue;
             }

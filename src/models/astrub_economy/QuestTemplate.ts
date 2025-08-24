@@ -1,4 +1,4 @@
-import {CraftEnum, RessourcesEnum} from "./Enums";
+import {CraftEnum, ResourceEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
 import {MeteosEnum} from "./Meteo";
 
@@ -52,7 +52,7 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     }, [QuestEnum.BESOIN_MATERIAUX]: {
         name: QuestEnum.BESOIN_MATERIAUX,
         description: "Le village en pleine expansion et Perle la bâtisseuse fait face à des pénuries de matériaux. Elle promet un meilleur paiement que celui proposé au marché d'Astrub.",
-        requiredItems: {[RessourcesEnum.FRENE]: 250, [RessourcesEnum.FER]: 250},
+        requiredItems: {[ResourceEnum.FRENE]: 250, [ResourceEnum.FER]: 250},
         rewardType: 'kamas',
     }, [QuestEnum.MENACE_MONSTRES]: {
         name: QuestEnum.MENACE_MONSTRES,
@@ -86,18 +86,18 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
     [QuestEnum.RECOLTE_PLANTES]: {
         name: QuestEnum.RECOLTE_PLANTES,
         description: "Les Eniripsas s'embrouillent sur la place publique. Certains veulent que les efforts soient mis dans les poisons pour défendre le village, d'autres que la recherche sur les soins avance. Ce n'est pas votre problème, mais vous pouvez gagner quelques kamas en répondant aux deux.",
-        requiredItems: {[RessourcesEnum.ORTIE]: 100, [RessourcesEnum.SAUGE]: 50},
+        requiredItems: {[ResourceEnum.ORTIE]: 100, [ResourceEnum.SAUGE]: 50},
         rewardType: 'happiness',
     }, [QuestEnum.APPROVISIONNEMENT_FORGE]: {
         name: QuestEnum.APPROVISIONNEMENT_FORGE,
         description: "Depuis peu, un maître forgeron a commencé à donner des cours à de jeunes apprentis et les stocks de minerais s'épuisent à une vitesse folle. Le marché ne se remplit pas assez vite, voici une occasion de revendre vos minerais...",
-        requiredItems: {[RessourcesEnum.FER]: 150, [RessourcesEnum.CUIVRE]: 100},
+        requiredItems: {[ResourceEnum.FER]: 150, [ResourceEnum.CUIVRE]: 100},
         rewardType: 'kamas',
         buildings: [BuildingEnum.FORGE]
     }, [QuestEnum.FOND_ORPHELINAT]: {
         name: QuestEnum.FOND_ORPHELINAT,
         description: "La gérante de l'orphelinat dépose une note au centre du village. Les caisses sont presque vides, les enfants ont besoin de vêtements, de draps, de repas chauds et de nouvelles bougies. Elle appelle à la charité de chacun.",
-        requiredItems: {[RessourcesEnum.KAMAS]: 5000,},
+        requiredItems: {[ResourceEnum.KAMAS]: 5000,},
         rewardType: 'happiness',
         buildings: [BuildingEnum.ORPHELINAT]
     }, [QuestEnum.APPROVISIONNER_TAVERNE]: {
@@ -117,9 +117,9 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         name: QuestEnum.POISSON_FRAIS,
         description: "« Les mouches, c'est offert. » Le poissonnier d'Astrub n'a pas toujours le poisson le plus frais des environs. Le Conseil d'Astrub offre un supplément si vous renouvelez son stock avec une meilleure qualité.",
         requiredItems: {
-            [RessourcesEnum.GOUJON]: 100,
-            [RessourcesEnum.TRUITE]: 50,
-            [RessourcesEnum.GREUVETTE]: 50
+            [ResourceEnum.GOUJON]: 100,
+            [ResourceEnum.TRUITE]: 50,
+            [ResourceEnum.GREUVETTE]: 50
         },
         rewardType: 'kamas'
     },
@@ -127,9 +127,9 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         name: QuestEnum.CELEBRATION_SANCTUAIRE,
         description: "Les prêtres organisent une cérémonie en hommage aux dieux. Ils souhaitent que les paysans, alchimistes et pêcheurs proposent une offrande pour obtenir la bénédiction des Dix.",
         requiredItems: {
-            [RessourcesEnum.BLE]: 150,
-            [RessourcesEnum.ORTIE]: 150,
-            [RessourcesEnum.GOUJON]: 150,
+            [ResourceEnum.BLE]: 150,
+            [ResourceEnum.ORTIE]: 150,
+            [ResourceEnum.GOUJON]: 150,
         },
         rewardType: 'happiness',
         buildings: [BuildingEnum.SANCTUAIRE]
@@ -172,8 +172,8 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         name: QuestEnum.BOIS_POUR_FEU,
         description: "Les cheminées fument à Astrub aujourd'hui. Tous les habitants brûlent ce qu'ils peuvent pour se protéger du froid et espérer avoir une belle journée en intérieur. Ils auraient bien besoin de bois supplémentaire.",
         requiredItems: {
-            [RessourcesEnum.FRENE]: 150,
-            [RessourcesEnum.CHATAIGNIER]: 100
+            [ResourceEnum.FRENE]: 150,
+            [ResourceEnum.CHATAIGNIER]: 100
         },
         rewardType: 'happiness',
         weather: [MeteosEnum.GEL]
@@ -200,7 +200,7 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         requiredItems: {
             [CraftEnum.PLANCHE_FRENE]: 50,
             [CraftEnum.PLANCHE_CHATAIGNIER]: 10,
-            [RessourcesEnum.PIERRE]: 50
+            [ResourceEnum.PIERRE]: 50
         },
         rewardType: 'happiness',
         buildings: [BuildingEnum.MENUISERIE],

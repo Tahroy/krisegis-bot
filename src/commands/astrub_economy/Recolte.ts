@@ -1,14 +1,15 @@
-import {AutocompleteInteraction, CommandInteraction, MessageFlags, User} from "discord.js";
+import {AutocompleteInteraction, CommandInteraction, Guild, MessageFlags, User} from "discord.js";
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
 import {ItemType, PlayerService} from "../../services/PlayerService";
-import Ressource, {Ressources} from "../../models/astrub_economy/Ressource";
+import Resource, {Ressources} from "../../models/astrub_economy/Resource";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import JobUtil from "../../services/JobUtil";
 import {MeteoService} from "../../services/MeteoService";
 import ItemService from "../../services/ItemService";
+import {LevelEnum} from "../../models/astrub_economy/Enums";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
@@ -23,8 +24,7 @@ class Recolte extends AbstractSubCommand {
         const guildId = interaction.guild?.id;
         if (!guildId) {
             await interaction.reply({
-                content: 'Cette commande ne peut être utilisée que dans un serveur',
-                flags: MessageFlags.Ephemeral
+                content: 'Cette commande ne peut être utilisée que dans un serveur', flags: MessageFlags.Ephemeral
             })
             return;
         }
@@ -75,7 +75,10 @@ class Recolte extends AbstractSubCommand {
             return
         }
 
-        const {quantity, isJackpot} = await this.getQuantity(job, item?.level ?? 1, guildId);
+        const user = interaction.user;
+        const guild = interaction.guild
+
+        const {quantity, isJackpot} = await this.getQuantity(job, item?.level ?? 1, user, guild);
         const xp: number = await this.getExperience(job, item, guildId);
         job.experience += xp;
 
@@ -85,9 +88,6 @@ class Recolte extends AbstractSubCommand {
             where: {userId: interaction.user.id, guildId: guildId}
         })
 
-        const user = interaction.user;
-
-        const guild = interaction.guild
         const memberCatch = await guild?.members.fetch(user.id)
         const userName = memberCatch?.nickname ?? user.globalName
         const level = PlayerService.getLevelFromXP(job.experience)
@@ -108,9 +108,7 @@ class Recolte extends AbstractSubCommand {
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
-        builder.addStringOption(
-            option => option.setName(Recolte.OPTION_RESSOURCE).setRequired(true).setDescription("Ressource à récolter").setAutocomplete(true)
-        )
+        builder.addStringOption(option => option.setName(Recolte.OPTION_RESSOURCE).setRequired(true).setDescription("Ressource à récolter").setAutocomplete(true))
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -119,7 +117,7 @@ class Recolte extends AbstractSubCommand {
             await interaction.respond([]);
             return;
         }
-        const ressources: Ressource[] = Object.values(Ressources).sort((a, b) => a.name.localeCompare(b.name))
+        const ressources: Resource[] = Object.values(Ressources).sort((a, b) => a.name.localeCompare(b.name))
 
         const responses = [];
         for (const ressource of ressources) {
@@ -148,14 +146,13 @@ class Recolte extends AbstractSubCommand {
     /**
      * Calcule la quantité de ressources récoltées
      */
-    private async getQuantity(job: Job, itemLevel: number, guildId: string): Promise<{
-        quantity: number,
-        isJackpot: boolean
+    private async getQuantity(job: Job, itemLevel: number, user: User, guild: Guild): Promise<{
+        quantity: number, isJackpot: boolean
     }> {
         let percent = 100;
 
         const jobLevel = job.level;
-        const meteoName = await MeteoService.chargerMeteo(guildId);
+        const meteoName = await MeteoService.chargerMeteo(guild.id);
         if (meteoName) {
             const meteo = Object.values(Meteos).find(r => r.name === meteoName) ?? null
             if (meteo !== null) {
@@ -173,10 +170,11 @@ class Recolte extends AbstractSubCommand {
         // 5% de chance de jackpot (x2)
         if (Math.random() < 0.05) {
             const jackpot = baseAmount * 2;
+            const extra = await this.getToolBonus(job.name, user, guild);
             const final = Math.floor(jackpot * (percent / 100));
+
             return {
-                quantity: Math.max(final, 1),
-                isJackpot: true
+                quantity: Math.max(final + extra, 1), isJackpot: true
             };
         }
 
@@ -186,18 +184,54 @@ class Recolte extends AbstractSubCommand {
         const random = Math.random() * (maxValue - minValue) + minValue
 
         const quantity = baseAmount * random;
+        const extra = await this.getToolBonus(job.name, user, guild);
         const final = Math.floor(quantity * (percent / 100));
 
         return {
-            quantity: Math.max(final, 1),
-            isJackpot: false
+            quantity: Math.max(final + extra, 1), isJackpot: false
         };
+    }
+
+    private async getToolBonus(jobName: string, user: User, guild: Guild): Promise<number> {
+        try {
+            const tools = await PlayerService.getItems(user, [ItemType.OUTIL], guild);
+            if (tools.length === 0) {
+                return 0;
+            }
+
+            let bestLevel = -1;
+            for (const item of tools) {
+                const craft = ItemService.getCraft(item.name);
+                if (!craft) {
+                    continue;
+                }
+                const targetsJob = (craft.jobs || []).some(j => j === jobName);
+                if (!targetsJob) {
+                    continue;
+                }
+                const lvl = craft.level ?? 0;
+                if (lvl > bestLevel) {
+                    bestLevel = lvl;
+                }
+            }
+
+            switch (bestLevel) {
+                case LevelEnum.LEVEL_0:
+                    return 1;
+                case LevelEnum.LEVEL_10:
+                    return 1 + (Math.random() < 0.25 ? 1 : 0);
+                case LevelEnum.LEVEL_20:
+                    return 1 + (Math.random() < 0.5 ? 1 : 0);
+            }
+        } catch (e) {
+        }
+        return 0;
     }
 
     /**
      * Calcule l'expérience gagnée pour une récolte
      */
-    private async getExperience(job: Job, item: Ressource, guildId: string): Promise<number> {
+    private async getExperience(job: Job, item: Resource, guildId: string): Promise<number> {
         let percent = 100;
 
         const meteoName = await MeteoService.chargerMeteo(guildId);

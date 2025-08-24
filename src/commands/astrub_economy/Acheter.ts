@@ -70,7 +70,7 @@ class Acheter extends AbstractSubCommand {
         }
 
         const guild = interaction.guild
-        const userName = JobUtil.getUsername(user.id, guild)
+        const userName = await JobUtil.getUsername(user.id, guild)
 
         await interaction.reply({
             content: `**${userName}** a acheté ${quantity} x ${item} pour ${totalPrice} kamas`,

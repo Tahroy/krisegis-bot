@@ -1,4 +1,4 @@
-import {Ressources} from "./Ressource";
+import {Ressources} from "./Resource";
 import {Crafts} from "./Craft";
 import {ItemType} from "../../services/PlayerService";
 import {JobEnum} from "./Enums";

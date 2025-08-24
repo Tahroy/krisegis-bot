@@ -6,9 +6,9 @@ import {ItemType, PlayerService} from "./PlayerService";
 import {EmbedBuilder, User} from "discord.js";
 import KrisegisClient from "../models/KrisegisClient";
 import JobUtil from "./JobUtil";
-import {Ressources} from "../models/astrub_economy/Ressource";
+import {Ressources} from "../models/astrub_economy/Resource";
 import {Crafts} from "../models/astrub_economy/Craft";
-import {CraftEnum, RessourcesEnum} from "../models/astrub_economy/Enums";
+import {CraftEnum, ResourceEnum} from "../models/astrub_economy/Enums";
 import {MeteoService} from "./MeteoService";
 import {MeteosEnum} from "../models/astrub_economy/Meteo";
 import cron from "node-cron";
@@ -299,7 +299,7 @@ export class QuestService {
     static calculReward(quest: QuestTemplate) {
         let reward = 0;
         for (const [itemName, quantity] of Object.entries(quest.requiredItems)) {
-            const item = Ressources[itemName as RessourcesEnum] || Crafts[itemName as CraftEnum];
+            const item = Ressources[itemName as ResourceEnum] || Crafts[itemName as CraftEnum];
 
             if (item) {
                 reward += EconomyService.calculSell(item) * quantity;

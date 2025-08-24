@@ -136,8 +136,6 @@ class JobUtil {
                 return 40;
             case LevelEnum.LEVEL_20:
                 return 90;
-            default:
-                return 10;
         }
     }
 }
