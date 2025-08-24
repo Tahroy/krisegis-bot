@@ -264,18 +264,6 @@ export default class Statut extends AbstractSubCommand {
             for (const index in jobs) {
                 const playerId = jobs[index].userId;
 
-                const player = await Player.findOne({
-                    where: {
-                        id: playerId, guildId: interaction.guild?.id, lastHarvest: {
-                            [Op.gte]: new Date(Date.now() - 72 * 60 * 60 * 1000)
-                        }
-                    }
-                })
-
-                if (!player) {
-                    continue
-                }
-
                 const username = await JobUtil.getUsername(playerId, interaction.guild as Guild);
 
                 let first = ''
