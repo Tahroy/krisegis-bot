@@ -9,7 +9,7 @@ import AbstractSubCommand from "./AbstractSubCommand";
 abstract class AbstractCommand {
     abstract name: string;
     abstract description: string;
-    allowedGuildIds?: string[];
+    public: boolean = true;
     subCommands: Map<string, new () => AbstractSubCommand> = new Map();
 
     async execute(interaction: CommandInteraction): Promise<void> {

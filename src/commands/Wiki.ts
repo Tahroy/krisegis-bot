@@ -5,7 +5,7 @@ import Constantes from "../utils/Constantes";
 class Wiki extends AbstractCommand {
     description: string = 'Rechercher une page Wiki';
     name: string = 'wiki';
-    allowedGuildIds: string[] = Constantes.ALLOWED_GUILD_IDS;
+    public: boolean = false;
     protected addOptions(builder: SlashCommandBuilder) {
         builder.addStringOption(option =>
             option

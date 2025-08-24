@@ -5,7 +5,7 @@ import Constantes from "../utils/Constantes";
 class Pnj extends AbstractCommand {
     description: string = 'Rechercher un PNJ';
     name: string = 'pnj';
-    allowedGuildIds: string[] = Constantes.ALLOWED_GUILD_IDS;
+    public: boolean = false;
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {

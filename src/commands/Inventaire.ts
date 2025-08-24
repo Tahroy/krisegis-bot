@@ -7,7 +7,7 @@ import Constantes from "../utils/Constantes";
 class Inventaire extends AbstractCommand {
     description: string = 'Permet de consulter son inventaire';
     name: string = 'inventaire';
-    allowedGuildIds: string[] = Constantes.ALLOWED_GUILD_IDS;
+    public: boolean = false;
 
     private limit = 20;
 

@@ -13,7 +13,7 @@ import Constantes from "../utils/Constantes";
 class Dire extends AbstractCommand {
     description: string = "Faire parler Krisegis";
     name: string = "dire";
-    allowedGuildIds: string[] = Constantes.ALLOWED_GUILD_IDS;
+    public: boolean = false;
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {

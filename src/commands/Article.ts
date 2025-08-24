@@ -5,7 +5,7 @@ import Constantes from "../utils/Constantes";
 class Article extends AbstractCommand {
     description: string = 'Rechercher un article';
     name: string = 'article';
-    allowedGuildIds: string[] = Constantes.ALLOWED_GUILD_IDS;
+    public: boolean = false;
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {

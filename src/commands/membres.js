@@ -8,11 +8,7 @@ const config = {
 };
 
 module.exports = {
-    allowedGuildIds: [
-        '185464480346537984',   // Discord RP
-        '1113468001379962880',  // Discord test
-        '641999599099445279'    // Discord Nellonia
-    ],
+public: false,
     opts: {},
     data: new SlashCommandBuilder()
         .setName('membres')
