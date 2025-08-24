@@ -125,6 +125,9 @@ class JobUtil {
 
     static async getUsername(playerId: string, guild: Guild) {
         const member = await guild.members.fetch(playerId);
+        if (!member) {
+            return "Inconnu"
+        }
         return member.displayName;
     }
 
