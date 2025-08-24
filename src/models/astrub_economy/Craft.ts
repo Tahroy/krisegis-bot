@@ -1,7 +1,7 @@
 import BaseItem from "./BaseItem";
-import {ItemType} from "../../services/PlayerService";
 import {BuyEnum, CraftEnum, JobEnum, MultiplicatorEnum, ResourceEnum, SellEnum, XpEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
+import {ItemType} from "../../utils/Enums";
 
 /*
 Les formules sont les suivantes :
@@ -456,7 +456,7 @@ const Crafts: Record<CraftEnum, Craft> = {
         level: 20,
     },
 
-    // Pêcheur (armature bois pour la canne simple)
+    // Pêcheur
     [CraftEnum.CANNE_GOUJON]: {
         name: CraftEnum.CANNE_GOUJON,
         recipe: { [ResourceEnum.FRENE]: 10 },

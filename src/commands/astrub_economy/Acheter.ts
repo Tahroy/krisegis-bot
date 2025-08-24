@@ -1,11 +1,12 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/PlayerService";
+import {PlayerService} from "../../services/PlayerService";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "../../services/JobUtil";
 import ItemService from "../../services/ItemService";
 import EconomyService from "../../services/EconomyService";
+import {ItemType} from "../../utils/Enums";
 
 class Acheter extends AbstractSubCommand {
     description: string = 'Acheter un objet';
@@ -45,7 +46,7 @@ class Acheter extends AbstractSubCommand {
             }
         });
 
-        const baseItem = ItemService.getItem(item);
+        const baseItem = ItemService.getResource(item);
 
         if (!baseItem) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
@@ -116,13 +117,17 @@ class Acheter extends AbstractSubCommand {
 
         switch (focused.name) {
             case this.OPTION_ITEM:
-                const items = ItemService.getAllItems()
+                const items = ItemService.getAllResources()
 
                 for (let item of items) {
-                    if (retour.length >= 20) break;
+                    if (retour.length >= 20) {
+                        break;
+                    }
+
                     if (item.name === 'kamas') {
                         continue;
                     }
+
                     if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
                         const price = EconomyService.calculBuy(item);
 

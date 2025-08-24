@@ -3,9 +3,10 @@ import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import JobUtil from "../../services/JobUtil";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/PlayerService";
+import {PlayerService} from "../../services/PlayerService";
 import Job from "../../models/astrub_economy/Job";
 import ItemService from "../../services/ItemService";
+import {ItemType} from "../../utils/Enums";
 
 class Fabriquer extends AbstractSubCommand {
     description: string = 'Créer un object';

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, InteractionContextType} = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v8')
-const { PlayerService, ItemType } = require('../services/PlayerService')
+const { PlayerService } = require('../services/PlayerService')
+const {ItemType} = require("../utils/Enums");
 const Larve = require('../models/Larve').default
 
 const LARVES = {

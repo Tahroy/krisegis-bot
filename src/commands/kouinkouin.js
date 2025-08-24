@@ -4,7 +4,8 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discor
 const { ButtonStyle } = require('discord-api-types/v10')
 const { readdirSync } = require('node:fs')
 const { join, extname } = require('node:path')
-import { ItemType, PlayerService } from '../services/PlayerService'
+import { PlayerService } from '../services/PlayerService'
+import {ItemType} from "../utils/Enums";
 
 // Nous déclarons un tableau vide 'games'.
 let games = []

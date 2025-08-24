@@ -1,7 +1,9 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder, Guild, MessageFlags, User} from "discord.js";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/PlayerService";
+import {PlayerService} from "../../services/PlayerService";
+import ItemService from "../../services/ItemService";
+import {ItemType} from "../../utils/Enums";
 
 class Inventaire extends AbstractSubCommand {
     description: string = 'Permet de consulter son inventaire'
@@ -39,12 +41,24 @@ class Inventaire extends AbstractSubCommand {
 
         const items: PlayerItem[] = await PlayerService.getItems(
             user,
-            [ItemType.RESSOURCE, ItemType.FABRICATION],
+            [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL],
             guild
         );
 
         const rows = items.map(item => {
-            return `| ${item.name.padEnd(22)} | ${item.quantity.toString().padStart(8)} |`;
+            const hasDurability = item.durability ?? null;
+
+            let displayName: string;
+            if (hasDurability) {
+                const itemData = ItemService.getCraft(item.name)
+                const maxDurability = ItemService.getToolMaxDurability(itemData?.level ?? 0);
+                const durability = item.durability;
+                displayName = `${item.name} (${durability}/${maxDurability})`;
+            } else {
+                displayName = item.name;
+            }
+
+            return `| ${displayName.padEnd(22)} | ${item.quantity.toString().padStart(8)} |`;
         });
 
         return `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``

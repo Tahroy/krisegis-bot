@@ -9,10 +9,11 @@ import {
 import PlayerItem from "../../models/PlayerItem";
 import JobUtil from "../../services/JobUtil";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
-import {ItemType, PlayerService} from "../../services/PlayerService";
+import {PlayerService} from "../../services/PlayerService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
 import ItemService from "../../services/ItemService";
 import EconomyService from "../../services/EconomyService";
+import {ItemType} from "../../utils/Enums";
 
 class Vendre extends AbstractSubCommand {
     description: string = 'Vendre un objet';

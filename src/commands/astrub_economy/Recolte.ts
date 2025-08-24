@@ -3,13 +3,15 @@ import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
-import {ItemType, PlayerService} from "../../services/PlayerService";
+import {PlayerService} from "../../services/PlayerService";
 import Resource, {Ressources} from "../../models/astrub_economy/Resource";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import JobUtil from "../../services/JobUtil";
 import {MeteoService} from "../../services/MeteoService";
 import ItemService from "../../services/ItemService";
 import {LevelEnum} from "../../models/astrub_economy/Enums";
+import PlayerItem from "../../models/PlayerItem";
+import {ItemType} from "../../utils/Enums";
 
 class Recolte extends AbstractSubCommand {
     description: string = "Récolter des ressources (toutes les 15 minutes)";
@@ -78,11 +80,18 @@ class Recolte extends AbstractSubCommand {
         const user = interaction.user;
         const guild = interaction.guild
 
-        const {quantity, isJackpot} = await this.getQuantity(job, item?.level ?? 1, user, guild);
+        const {quantity, isJackpot, usedTool} = await this.getQuantity(job, item?.level ?? 1, user, guild);
         const xp: number = await this.getExperience(job, item, guildId);
         job.experience += xp;
 
         await PlayerService.addPlayerItem(interaction.user, ressource, ItemType.RESSOURCE, quantity, guildId)
+
+        // On retire 1 de durabilité à l'outil s'il y en a un
+        if (usedTool) {
+            const current = usedTool.durability ?? 1
+            usedTool.durability = Math.max((current ?? 0) - 1, 0);
+            await usedTool.save();
+        }
 
         await Player.update({lastHarvest: new Date()}, {
             where: {userId: interaction.user.id, guildId: guildId}
@@ -112,6 +121,9 @@ class Recolte extends AbstractSubCommand {
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const options = interaction.options
+        const focused = options.getFocused(true)
+        const search = focused.value
         const guildId = interaction.guild?.id;
         if (!guildId) {
             await interaction.respond([]);
@@ -122,6 +134,10 @@ class Recolte extends AbstractSubCommand {
         const responses = [];
         for (const ressource of ressources) {
             if (!ressource.job) {
+                continue;
+            }
+
+            if (search && !ressource.name.toLowerCase().includes(search.toLowerCase())) {
                 continue;
             }
 
@@ -147,7 +163,7 @@ class Recolte extends AbstractSubCommand {
      * Calcule la quantité de ressources récoltées
      */
     private async getQuantity(job: Job, itemLevel: number, user: User, guild: Guild): Promise<{
-        quantity: number, isJackpot: boolean
+        quantity: number, isJackpot: boolean, usedTool?: PlayerItem
     }> {
         let percent = 100;
 
@@ -166,15 +182,15 @@ class Recolte extends AbstractSubCommand {
 
         // On prend la base : job.level - ressource.level
         const baseAmount = jobLevel - itemLevel + 1;
+        const { bonus: extra, usedTool } = await this.getToolBonus(job.name, user, guild);
 
         // 5% de chance de jackpot (x2)
         if (Math.random() < 0.05) {
             const jackpot = baseAmount * 2;
-            const extra = await this.getToolBonus(job.name, user, guild);
             const final = Math.floor(jackpot * (percent / 100));
 
             return {
-                quantity: Math.max(final + extra, 1), isJackpot: true
+                quantity: Math.max(final + extra, 1), isJackpot: true, usedTool
             };
         }
 
@@ -184,22 +200,24 @@ class Recolte extends AbstractSubCommand {
         const random = Math.random() * (maxValue - minValue) + minValue
 
         const quantity = baseAmount * random;
-        const extra = await this.getToolBonus(job.name, user, guild);
         const final = Math.floor(quantity * (percent / 100));
 
         return {
-            quantity: Math.max(final + extra, 1), isJackpot: false
+            quantity: Math.max(final + extra, 1),
+            isJackpot: false,
+            usedTool: usedTool
         };
     }
 
-    private async getToolBonus(jobName: string, user: User, guild: Guild): Promise<number> {
+    private async getToolBonus(jobName: string, user: User, guild: Guild): Promise<{ bonus: number, usedTool?: PlayerItem }> {
         try {
             const tools = await PlayerService.getItems(user, [ItemType.OUTIL], guild);
-            if (tools.length === 0) {
-                return 0;
+            if (!tools || tools.length === 0) {
+                return {bonus: 0};
             }
 
-            let bestLevel = -1;
+            let best: { level: number, item: PlayerItem } | null = null;
+
             for (const item of tools) {
                 const craft = ItemService.getCraft(item.name);
                 if (!craft) {
@@ -209,23 +227,34 @@ class Recolte extends AbstractSubCommand {
                 if (!targetsJob) {
                     continue;
                 }
-                const lvl = craft.level ?? 0;
-                if (lvl > bestLevel) {
-                    bestLevel = lvl;
+
+                if (item.durability ?? 0 <= 0) {
+                    continue;
+                }
+
+                const level = craft.level ?? 0;
+                if (!best || level > best.level) {
+                    best = {
+                        level: level,
+                        item: item
+                    };
                 }
             }
 
-            switch (bestLevel) {
-                case LevelEnum.LEVEL_0:
-                    return 1;
-                case LevelEnum.LEVEL_10:
-                    return 1 + (Math.random() < 0.25 ? 1 : 0);
-                case LevelEnum.LEVEL_20:
-                    return 1 + (Math.random() < 0.5 ? 1 : 0);
+            if (!best) {
+                return {bonus: 0};
             }
+
+            if (best.level >= LevelEnum.LEVEL_20) {
+                return { bonus: 1 + (Math.random() < 0.5 ? 1 : 0), usedTool: best.item };
+            }
+            if (best.level >= LevelEnum.LEVEL_10) {
+                return { bonus: 1 + (Math.random() < 0.25 ? 1 : 0), usedTool: best.item };
+            }
+            return { bonus: 1, usedTool: best.item };
         } catch (e) {
+            return { bonus: 0 };
         }
-        return 0;
     }
 
     /**

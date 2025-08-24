@@ -2,19 +2,9 @@ import PlayerItem from '../models/PlayerItem';
 import {Guild, User} from 'discord.js';
 import {Op} from "sequelize";
 import {ReserveService} from "./ReserveService";
-import {CraftEnum, ResourceEnum} from "../models/astrub_economy/Enums";
-
-export enum ItemType {
-    KOUINKOUIN = 'kouinkouin',
-    POTION = 'potion',
-    LARVE = 'larve',
-    WABBIT = 'wabbit',
-    QUESTION = 'question',
-    MONSTRE = 'monstre',
-    RESSOURCE = 'ressource',
-    OUTIL = 'outil',
-    FABRICATION = 'fabrication'
-}
+import {CraftEnum, LevelEnum, ResourceEnum} from "../models/astrub_economy/Enums";
+import ItemService from "./ItemService";
+import {ItemType} from "../utils/Enums";
 
 /**
  * Service pour les joueurs
@@ -55,7 +45,31 @@ export class PlayerService {
                 },
             });
 
-            // Si l'item existe, on incrémente la quantité
+            // Si c'est un outil, on met en place une durabilité
+            if (type === ItemType.OUTIL) {
+                // Tenter de récupérer la définition de craft pour déterminer le palier
+                const craft = ItemService.getCraft(name);
+                const level = (craft?.level ?? 0) as LevelEnum;
+                const max = ItemService.getToolMaxDurability(level);
+
+                if (playerItem) {
+                    playerItem.type = type;
+                    playerItem.quantity = 1;
+                    playerItem.durability = max;
+                    await playerItem.save();
+                } else {
+                    await PlayerItem.create({
+                        name: name,
+                        userId: user?.id ?? ReserveService.RESERVE_USER_ID,
+                        quantity: 1,
+                        type: type,
+                        guildId: guildId,
+                        durability: max,
+                    });
+                }
+                return;
+            }
+
             if (playerItem) {
                 playerItem.quantity += quantity;
                 await playerItem.save();

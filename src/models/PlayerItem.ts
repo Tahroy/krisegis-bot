@@ -19,6 +19,7 @@ interface PlayerItemAttributes {
     quantity: number; // Quantité
     type: string;     // Type d'item
     guildId: string;
+    durability?: number | null;
 }
 
 // Interface pour la création (exclut `id` car il est auto-incrémenté)
@@ -32,6 +33,7 @@ class PlayerItem extends Model<PlayerItemAttributes, PlayerItemCreationAttribute
     public quantity!: number;
     public type!: string;
     public guildId!: string;
+    public durability?: number | null;
 
     public getPlayer!: BelongsToGetAssociationMixin<Player>;
     public setPlayer!: BelongsToSetAssociationMixin<Player, number>;
@@ -75,7 +77,10 @@ PlayerItem.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-
+        durability: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
     },
     {
         sequelize, // Instance Sequelize

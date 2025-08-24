@@ -1,8 +1,8 @@
 import {Ressources} from "./Resource";
 import {Crafts} from "./Craft";
-import {ItemType} from "../../services/PlayerService";
 import {JobEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
+import {ItemType} from "../../utils/Enums";
 
 interface BaseItem {
     type: ItemType;

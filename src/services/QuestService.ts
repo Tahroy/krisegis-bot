@@ -2,7 +2,7 @@ import Quest from "../models/astrub_economy/Quest";
 import {QuestEnum, QuestTemplate, QuestTemplates} from "../models/astrub_economy/QuestTemplate";
 import {PopulationService} from "./PopulationService";
 import PlayerItem from "../models/PlayerItem";
-import {ItemType, PlayerService} from "./PlayerService";
+import {PlayerService} from "./PlayerService";
 import {EmbedBuilder, User} from "discord.js";
 import KrisegisClient from "../models/KrisegisClient";
 import JobUtil from "./JobUtil";
@@ -13,6 +13,7 @@ import {MeteoService} from "./MeteoService";
 import {MeteosEnum} from "../models/astrub_economy/Meteo";
 import cron from "node-cron";
 import EconomyService from "./EconomyService";
+import {ItemType} from "../utils/Enums";
 
 export class QuestService {
     /**

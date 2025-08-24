@@ -1,6 +1,6 @@
 import Craft from "./Craft";
-import {ItemType} from "../../services/PlayerService";
 import {CraftEnum, JobEnum, ResourceEnum} from "./Enums";
+import {ItemType} from "../../utils/Enums";
 
 export enum ConsumablesEnum {
     PAIN_SUCRE = "Pain sucré",

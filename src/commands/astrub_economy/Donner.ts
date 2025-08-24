@@ -8,10 +8,11 @@ import {
 import {Op} from "sequelize";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import PlayerItem from "../../models/PlayerItem";
-import {ItemType, PlayerService} from "../../services/PlayerService";
+import {PlayerService} from "../../services/PlayerService";
 import BaseItem from "../../models/astrub_economy/BaseItem";
 import JobUtil from "../../services/JobUtil";
 import ItemService from "../../services/ItemService";
+import {ItemType} from "../../utils/Enums";
 
 class Donner extends AbstractSubCommand {
     description: string = "Donner des ressources";
