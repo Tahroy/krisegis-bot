@@ -228,7 +228,7 @@ class Recolte extends AbstractSubCommand {
                     continue;
                 }
 
-                if (item.durability ?? 0 <= 0) {
+                if ((item.durability ?? 0) <= 0) {
                     continue;
                 }
 
@@ -245,14 +245,17 @@ class Recolte extends AbstractSubCommand {
                 return {bonus: 0};
             }
 
-            if (best.level >= LevelEnum.LEVEL_20) {
-                return { bonus: 1 + (Math.random() < 0.5 ? 1 : 0), usedTool: best.item };
+            switch (best.level) {
+                default:
+                case LevelEnum.LEVEL_0:
+                    return { bonus: 1, usedTool: best.item };
+                case LevelEnum.LEVEL_10:
+                    return { bonus: 1 + (Math.random() < 0.25 ? 1 : 0), usedTool: best.item };
+                case LevelEnum.LEVEL_20:
+                    return { bonus: 1 + (Math.random() < 0.5 ? 1 : 0), usedTool: best.item };
             }
-            if (best.level >= LevelEnum.LEVEL_10) {
-                return { bonus: 1 + (Math.random() < 0.25 ? 1 : 0), usedTool: best.item };
-            }
-            return { bonus: 1, usedTool: best.item };
         } catch (e) {
+            console.error(e)
             return { bonus: 0 };
         }
     }
