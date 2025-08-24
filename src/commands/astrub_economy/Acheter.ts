@@ -7,6 +7,8 @@ import JobUtil from "../../services/JobUtil";
 import ItemService from "../../services/ItemService";
 import EconomyService from "../../services/EconomyService";
 import {ItemType} from "../../utils/Enums";
+import {CraftEnum} from "../../models/astrub_economy/Enums";
+import Craft from "../../models/astrub_economy/Craft";
 
 class Acheter extends AbstractSubCommand {
     description: string = 'Acheter un objet';
@@ -46,7 +48,7 @@ class Acheter extends AbstractSubCommand {
             }
         });
 
-        const baseItem = ItemService.getResource(item);
+        const baseItem = ItemService.getItem(item);
 
         if (!baseItem) {
             await interaction.reply({content: "Cet objet ne peut pas être acheté", flags: MessageFlags.Ephemeral})
@@ -117,7 +119,7 @@ class Acheter extends AbstractSubCommand {
 
         switch (focused.name) {
             case this.OPTION_ITEM:
-                const items = ItemService.getAllResources()
+                const items = ItemService.getAllItems()
 
                 for (let item of items) {
                     if (retour.length >= 20) {
