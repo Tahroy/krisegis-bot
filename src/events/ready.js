@@ -77,6 +77,7 @@ module.exports = async function (client) {
             const slashCommand = commandData.data
             const allowedGuildIds = commandData.allowedGuildIds ?? []
 
+            console.log(commandData)
             if (allowedGuildIds.length > 0) {
                 for (const guildId of allowedGuildIds) {
                     const list = guildCommandMap.get(guildId) || []

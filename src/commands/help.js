@@ -2,7 +2,11 @@ const { SlashCommandBuilder } = require('discord.js')
 const embedData = require('../utils/embed')
 const Constantes = require("../utils/Constantes");
 module.exports = {
-    allowedGuildIds: Constantes.allowedGuildIds,
+    allowedGuildIds: [
+        '185464480346537984',   // Discord RP
+        '1113468001379962880',  // Discord test
+        '641999599099445279'    // Discord Nellonia
+    ],
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('L\'aide pour utiliser le bot')
