@@ -252,7 +252,11 @@ export default class Statut extends AbstractSubCommand {
         for (const [key, jobName] of Object.entries(JobEnum)) {
             const jobs = await Job.findAll({
                 where: {
-                    guildId: interaction.guild?.id, name: jobName,
+                    guildId: interaction.guild?.id,
+                    name: jobName,
+                    level: {
+                        [Op.gte]: 1
+                    }
                 }, order: [['experience', 'DESC']]
             });
 
@@ -266,6 +270,9 @@ export default class Statut extends AbstractSubCommand {
 
                 const username = await JobUtil.getUsername(playerId, interaction.guild as Guild);
 
+                if (username === 'Inconnu') {
+                    continue
+                }
                 let first = ''
                 if (index === '0') {
                     first = '👑 '
