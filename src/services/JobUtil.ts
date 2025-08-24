@@ -124,11 +124,16 @@ class JobUtil {
     }
 
     static async getUsername(playerId: string, guild: Guild) {
-        const member = await guild.members.fetch(playerId);
-        if (!member) {
+        try {
+            const member = await guild.members.fetch(playerId);
+
+            if (!member) {
+                return "Inconnu"
+            }
+            return member.displayName;
+        } catch (error) {
             return "Inconnu"
         }
-        return member.displayName;
     }
 
     static getExperienceByLevel(level: LevelEnum) {
