@@ -211,7 +211,8 @@ class Recolte extends AbstractSubCommand {
             }
         }
 
-        const experienceBase = item.level === 10 ? 40 : 10;
+
+        const experienceBase = JobUtil.getExperienceByLevel(item.level)
 
         return Math.floor(experienceBase * (percent / 100));
     }

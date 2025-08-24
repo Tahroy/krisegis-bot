@@ -93,4 +93,10 @@ enum MultiplicatorEnum {
     SIMPLE_CRAFT = 1.1,
     COMPLEXE_CRAFT = 1.2
 }
-export {SellEnum, BuyEnum, MultiplicatorEnum, XpEnum}
+
+enum LevelEnum {
+    LEVEL_0 = 0,
+    LEVEL_10 = 10,
+    LEVEL_20 = 20,
+}
+export {SellEnum, BuyEnum, MultiplicatorEnum, XpEnum, LevelEnum};

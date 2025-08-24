@@ -1,40 +1,40 @@
 import BaseItem from "./BaseItem";
 import {ItemType} from "../../services/PlayerService";
-import {BuyEnum, JobEnum, RessourcesEnum, SellEnum} from "./Enums";
+import {BuyEnum, JobEnum, LevelEnum, RessourcesEnum, SellEnum} from "./Enums";
 
 interface Ressource extends BaseItem{
     sell: number;   // Prix de vente
     buy: number;    // Prix d'achat
     job?: string;
-    level: number;
+    level: LevelEnum;
 }
 
 
 // Exemple d'utilisation
 const Ressources: Record<RessourcesEnum, Ressource> = {
     // Ressources de niveau 1
-    [RessourcesEnum.BLE]: {name: RessourcesEnum.BLE, job: JobEnum.PAYSAN, level: 0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "ble"},
-    [RessourcesEnum.ORTIE]: {name: RessourcesEnum.ORTIE, job: JobEnum.ALCHIMISTE, level: 0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "ortie"},
-    [RessourcesEnum.GOUJON]: {name: RessourcesEnum.GOUJON, job: JobEnum.PECHEUR, level: 0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "goujon"},
-    [RessourcesEnum.FRENE]: {name: RessourcesEnum.FRENE, job: JobEnum.BUCHERON, level: 0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "frene"},
-    [RessourcesEnum.FER]: {name: RessourcesEnum.FER, job: JobEnum.MINEUR, level: 0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "fer"},
+    [RessourcesEnum.BLE]: {name: RessourcesEnum.BLE, job: JobEnum.PAYSAN, level: LevelEnum.LEVEL_0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "ble"},
+    [RessourcesEnum.ORTIE]: {name: RessourcesEnum.ORTIE, job: JobEnum.ALCHIMISTE, level: LevelEnum.LEVEL_0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "ortie"},
+    [RessourcesEnum.GOUJON]: {name: RessourcesEnum.GOUJON, job: JobEnum.PECHEUR, level: LevelEnum.LEVEL_0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "goujon"},
+    [RessourcesEnum.FRENE]: {name: RessourcesEnum.FRENE, job: JobEnum.BUCHERON, level: LevelEnum.LEVEL_0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "frene"},
+    [RessourcesEnum.FER]: {name: RessourcesEnum.FER, job: JobEnum.MINEUR, level: LevelEnum.LEVEL_0, sell: SellEnum.RESSOURCE_1, buy: BuyEnum.RESSOURCE_1, type: ItemType.RESSOURCE, emoji: "fer"},
 
     // Niveau 10
-    [RessourcesEnum.CHATAIGNIER]: {name: RessourcesEnum.CHATAIGNIER, job: JobEnum.BUCHERON, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "chataignier"},
-    [RessourcesEnum.CUIVRE]: {name: RessourcesEnum.CUIVRE, job: JobEnum.MINEUR, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "cuivre"},
-    [RessourcesEnum.SAUGE]: {name: RessourcesEnum.SAUGE, job: JobEnum.ALCHIMISTE, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "sauge"},
-    [RessourcesEnum.ORGE]: {name: RessourcesEnum.ORGE, job: JobEnum.PAYSAN, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "orge"},
-    [RessourcesEnum.GREUVETTE]: {name: RessourcesEnum.GREUVETTE, job: JobEnum.PECHEUR, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "greuvette"},
-    [RessourcesEnum.TRUITE]: {name: RessourcesEnum.TRUITE, job: JobEnum.PECHEUR, level: 10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "truite"},
+    [RessourcesEnum.CHATAIGNIER]: {name: RessourcesEnum.CHATAIGNIER, job: JobEnum.BUCHERON, level: LevelEnum.LEVEL_10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "chataignier"},
+    [RessourcesEnum.CUIVRE]: {name: RessourcesEnum.CUIVRE, job: JobEnum.MINEUR, level: LevelEnum.LEVEL_10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "cuivre"},
+    [RessourcesEnum.SAUGE]: {name: RessourcesEnum.SAUGE, job: JobEnum.ALCHIMISTE, level: LevelEnum.LEVEL_10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "sauge"},
+    [RessourcesEnum.ORGE]: {name: RessourcesEnum.ORGE, job: JobEnum.PAYSAN, level: LevelEnum.LEVEL_10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "orge"},
+    [RessourcesEnum.GREUVETTE]: {name: RessourcesEnum.GREUVETTE, job: JobEnum.PECHEUR, level: LevelEnum.LEVEL_10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "greuvette"},
+    [RessourcesEnum.TRUITE]: {name: RessourcesEnum.TRUITE, job: JobEnum.PECHEUR, level: LevelEnum.LEVEL_10, sell: SellEnum.RESSOURCE_10, buy: BuyEnum.RESSOURCE_10, type: ItemType.RESSOURCE, emoji: "truite"},
 
     // Ressources neutres
-    [RessourcesEnum.KAMAS]: {name: RessourcesEnum.KAMAS, job: undefined, level: 1, sell: 1, buy: 0, type: ItemType.RESSOURCE, emoji: "kamas"},
+    [RessourcesEnum.KAMAS]: {name: RessourcesEnum.KAMAS, job: undefined, level: LevelEnum.LEVEL_0, sell: 1, buy: 0, type: ItemType.RESSOURCE, emoji: "kamas"},
 
-    [RessourcesEnum.PIERRE]: {name: RessourcesEnum.PIERRE, job:undefined, level:0, sell:1, buy: 2.5, type: ItemType.RESSOURCE, emoji: "pierre"},
-    [RessourcesEnum.LAINE_DE_BOUFTOU]: {name: RessourcesEnum.LAINE_DE_BOUFTOU, job:undefined, level:0, sell:4, buy: 10, type: ItemType.RESSOURCE, emoji: "laine"},
-    [RessourcesEnum.CUIR]: {name: RessourcesEnum.CUIR, job:undefined, level:0, sell:6, buy: 15, type: ItemType.RESSOURCE, emoji: "cuir"},
-    [RessourcesEnum.TISSU]: {name: RessourcesEnum.TISSU, job:undefined, level:0, sell:6, buy: 15, type: ItemType.RESSOURCE, emoji: "tissu"},
-    [RessourcesEnum.OEUF]: {name: RessourcesEnum.OEUF, job:undefined, level:0, sell:4, buy: 10, type: ItemType.RESSOURCE}
+    [RessourcesEnum.PIERRE]: {name: RessourcesEnum.PIERRE, job:undefined, level: LevelEnum.LEVEL_0, sell:1, buy: 2.5, type: ItemType.RESSOURCE, emoji: "pierre"},
+    [RessourcesEnum.LAINE_DE_BOUFTOU]: {name: RessourcesEnum.LAINE_DE_BOUFTOU, job:undefined, level: LevelEnum.LEVEL_0, sell:4, buy: 10, type: ItemType.RESSOURCE, emoji: "laine"},
+    [RessourcesEnum.CUIR]: {name: RessourcesEnum.CUIR, job:undefined, level: LevelEnum.LEVEL_0, sell:6, buy: 15, type: ItemType.RESSOURCE, emoji: "cuir"},
+    [RessourcesEnum.TISSU]: {name: RessourcesEnum.TISSU, job:undefined, level: LevelEnum.LEVEL_0, sell:6, buy: 15, type: ItemType.RESSOURCE, emoji: "tissu"},
+    [RessourcesEnum.OEUF]: {name: RessourcesEnum.OEUF, job:undefined, level: LevelEnum.LEVEL_0, sell:4, buy: 10, type: ItemType.RESSOURCE}
 
 };
 

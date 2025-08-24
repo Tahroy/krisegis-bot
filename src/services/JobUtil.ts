@@ -47,8 +47,7 @@ class JobUtil {
     static async getPlayer(user: User, guildId: string): Promise<Player> {
         let player = await Player.findOne({
             where: {
-                userId: user.id,
-                guildId: guildId
+                userId: user.id, guildId: guildId
             }
         })
 
@@ -163,14 +162,12 @@ class JobUtil {
         return resetValues(building.recipe)
     }
 
-    static getChannel(client : KrisegisClient, guildId: any) {
+    static getChannel(client: KrisegisClient, guildId: any) {
         const guild = client.guilds.cache.get(guildId);
         if (!guild) {
             return;
         }
-        return guild.channels.cache.find(channel =>
-            (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie')
-        )
+        return guild.channels.cache.find(channel => (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie'))
     }
 
     public static async isBuildingConstructed(guildId: string, buildingName: string): Promise<boolean> {
@@ -205,7 +202,7 @@ class JobUtil {
 
     static calculBuy(ressource: BaseItem) {
         const sell = JobUtil.calculSell(ressource);
-        return Math.ceil(sell * 2.5) ;
+        return Math.ceil(sell * 2.5);
     }
 
     /**
@@ -225,6 +222,19 @@ class JobUtil {
     static async getUsername(playerId: string, guild: Guild) {
         const member = await guild.members.fetch(playerId);
         return member.displayName;
+    }
+
+    static getExperienceByLevel(level: number) {
+        switch (level) {
+            case 0:
+                return 10;
+            case 10:
+                return 40;
+            case 20:
+                return 90;
+            default:
+                return 10;
+        }
     }
 }
 
