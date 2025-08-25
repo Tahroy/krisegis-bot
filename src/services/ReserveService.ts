@@ -10,7 +10,7 @@ export class ReserveService {
     /**
      * Récupère tous les items de la réserve pour une guilde donnée
      */
-    static async getReserveItems(guild: Guild, types: ItemType[] = [ItemType.RESSOURCE, ItemType.FABRICATION]): Promise<PlayerItem[]> {
+    static async getReserveItems(guild: Guild, types: ItemType[] = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL]): Promise<PlayerItem[]> {
         return await PlayerItem.findAll({
             where: {
                 userId: this.RESERVE_USER_ID,

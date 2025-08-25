@@ -1,10 +1,10 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {
+    ApplicationCommandOptionChoiceData,
     AutocompleteInteraction,
     CommandInteraction,
     EmbedBuilder,
-    MessageFlags,
-    ApplicationCommandOptionChoiceData
+    MessageFlags
 } from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {PlayerService} from "../../services/PlayerService";
@@ -14,7 +14,6 @@ import {ReserveService} from "../../services/ReserveService";
 import {BuildingEnum} from "../../models/astrub_economy/Building";
 import ItemService from "../../services/ItemService";
 import {ItemType} from "../../utils/Enums";
-
 
 
 class Reserve extends AbstractSubCommand {
@@ -236,7 +235,11 @@ class Reserve extends AbstractSubCommand {
             return [];
         }
 
-        const playerItems = await PlayerService.getItems(user, [ItemType.RESSOURCE, ItemType.FABRICATION], interaction.guild)
+        const playerItems = await PlayerService.getItems(user, [
+            ItemType.RESSOURCE,
+            ItemType.FABRICATION,
+            ItemType.OUTIL
+        ], interaction.guild)
 
         const choices: ApplicationCommandOptionChoiceData[] = [];
 

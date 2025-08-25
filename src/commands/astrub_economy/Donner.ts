@@ -53,7 +53,7 @@ class Donner extends AbstractSubCommand {
             return;
         }
 
-        if (![ItemType.RESSOURCE, ItemType.FABRICATION].includes(playerItem.type as ItemType)) {
+        if (![ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL].includes(playerItem.type as ItemType)) {
             await interaction.reply({content: "Cet objet ne peut pas être donné", flags: MessageFlags.Ephemeral})
             return
         }
