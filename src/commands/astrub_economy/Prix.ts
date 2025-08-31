@@ -37,26 +37,32 @@ class Prix extends AbstractSubCommand {
     }
 
     private getHeader() {
-        const header = `Nom                     | Prix de vente | Prix d'achat`;
-        const separator = `------------------------|---------------|-------------`;
+        const header = `Nom                       | Prix de vente | Prix d'achat`;
+        const separator = `--------------------------|---------------|-------------`;
 
         return `${header}\n${separator}`;
     }
 
     private getAllRows() {
-        return Object.values(ItemService.getAllItems())
+        const table = Object.values(ItemService.getAllItems())
+            .filter(ressource => !!ressource.name)
             .map(ressource => {
-                if (!ressource.name) {
-                    return ''
-                }
+                const name = ressource.name as string;
+                const sell = EconomyService.calculSell(ressource);
+                const buy = EconomyService.calculBuy(ressource);
+                return { name, sell, buy };
+            });
 
-                const name = ressource.name;
-                const sell = String(EconomyService.calculSell(ressource));
-                const buy = String(EconomyService.calculBuy(ressource))
+        table.sort((a, b) => {
+            if (b.sell !== a.sell) return b.sell - a.sell;
+            return a.name.localeCompare(b.name);
+        });
 
-                return `${name.padEnd(23)} | ${sell.padStart(13)} | ${buy.padStart(12)}`;
-            })
-            .filter(row => row !== '');
+        return table.map(({ name, sell, buy }) => {
+            const sellStr = String(sell);
+            const buyStr = String(buy);
+            return `${name.padEnd(25)} | ${sellStr.padStart(13)} | ${buyStr.padStart(12)}`;
+        });
     }
 
     private getMessage(pageIndex: number): BaseMessageOptions {

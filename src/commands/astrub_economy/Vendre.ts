@@ -70,7 +70,7 @@ class Vendre extends AbstractSubCommand {
             return
         }
 
-        const userName = JobUtil.getUsername(user.id, guild)
+        const userName = await JobUtil.getUsername(user.id, guild)
 
         const totalPrice = Math.floor(price * quantity);
 

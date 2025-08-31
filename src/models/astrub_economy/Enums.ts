@@ -76,6 +76,14 @@ enum CraftEnum {
     PAIN_FLOCONS_AVOINE = "Pain flocons d'avoine",
     BATON_CRABE = "Bâton de crabe",
     POISSON_CHATON_FUME = "Poisson chaton fumé",
+    EBONITE = "Ébonite",
+    ALUMINITE = "Aluminite",
+
+    // Niveau 20 - Complexe
+    TABLE_NOYER = "Table en noyer",
+    SANDWICH_POISSON_CHATON = "Sandwich poisson chaton",
+    POISSON_CHATON_HERBES = "Poisson chaton aux herbes",
+    CRABE_SOURIMI_HERBES = "Crabe sourimi aux herbes",
 
     // OUTILS — Niveau 1 / 10 / 20 (simples)
     HACHE_FRENE = "Hache en frêne",
@@ -116,22 +124,10 @@ enum SellEnum {
     RESSOURCE_10 = 6,
     RESSOURCE_20 = 10,
 }
-
-enum BuyEnum {
-    RESSOURCE_1 = 5,
-    RESSOURCE_10 = 15,
-    RESSOURCE_20 = 25,
-}
-
 enum XpEnum {
     RESSOURCE_1 = 1,
     RESSOURCE_10 = 2,
     RESSOURCE_20 = 3
-}
-
-enum MultiplicatorEnum {
-    SIMPLE_CRAFT = 1.1,
-    COMPLEXE_CRAFT = 1.2
 }
 
 enum LevelEnum {
@@ -139,4 +135,4 @@ enum LevelEnum {
     LEVEL_10 = 10,
     LEVEL_20 = 20,
 }
-export {SellEnum, BuyEnum, MultiplicatorEnum, XpEnum, LevelEnum};
+export {SellEnum, XpEnum, LevelEnum};

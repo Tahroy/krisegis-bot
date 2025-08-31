@@ -1,10 +1,8 @@
 import BaseItem from "./BaseItem";
-import {BuyEnum, JobEnum, LevelEnum, ResourceEnum, SellEnum} from "./Enums";
+import {JobEnum, LevelEnum, ResourceEnum} from "./Enums";
 import {ItemType} from "../../utils/Enums";
 
 interface Resource extends BaseItem {
-    sell: number;   // Prix de vente
-    buy: number;    // Prix d'achat
     job?: string;
     level: LevelEnum;
 }
@@ -18,8 +16,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.BLE,
         job: JobEnum.PAYSAN,
         level: LevelEnum.LEVEL_0,
-        sell: SellEnum.RESSOURCE_1,
-        buy: BuyEnum.RESSOURCE_1,
         type: ItemType.RESSOURCE,
         emoji: "ble"
     },
@@ -27,8 +23,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.ORTIE,
         job: JobEnum.ALCHIMISTE,
         level: LevelEnum.LEVEL_0,
-        sell: SellEnum.RESSOURCE_1,
-        buy: BuyEnum.RESSOURCE_1,
         type: ItemType.RESSOURCE,
         emoji: "ortie"
     },
@@ -36,8 +30,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.GOUJON,
         job: JobEnum.PECHEUR,
         level: LevelEnum.LEVEL_0,
-        sell: SellEnum.RESSOURCE_1,
-        buy: BuyEnum.RESSOURCE_1,
         type: ItemType.RESSOURCE,
         emoji: "goujon"
     },
@@ -45,8 +37,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.FRENE,
         job: JobEnum.BUCHERON,
         level: LevelEnum.LEVEL_0,
-        sell: SellEnum.RESSOURCE_1,
-        buy: BuyEnum.RESSOURCE_1,
         type: ItemType.RESSOURCE,
         emoji: "frene"
     },
@@ -54,8 +44,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.FER,
         job: JobEnum.MINEUR,
         level: LevelEnum.LEVEL_0,
-        sell: SellEnum.RESSOURCE_1,
-        buy: BuyEnum.RESSOURCE_1,
         type: ItemType.RESSOURCE,
         emoji: "fer"
     },
@@ -65,8 +53,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.CHATAIGNIER,
         job: JobEnum.BUCHERON,
         level: LevelEnum.LEVEL_10,
-        sell: SellEnum.RESSOURCE_10,
-        buy: BuyEnum.RESSOURCE_10,
         type: ItemType.RESSOURCE,
         emoji: "chataignier"
     },
@@ -74,8 +60,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.CUIVRE,
         job: JobEnum.MINEUR,
         level: LevelEnum.LEVEL_10,
-        sell: SellEnum.RESSOURCE_10,
-        buy: BuyEnum.RESSOURCE_10,
         type: ItemType.RESSOURCE,
         emoji: "cuivre"
     },
@@ -83,8 +67,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.SAUGE,
         job: JobEnum.ALCHIMISTE,
         level: LevelEnum.LEVEL_10,
-        sell: SellEnum.RESSOURCE_10,
-        buy: BuyEnum.RESSOURCE_10,
         type: ItemType.RESSOURCE,
         emoji: "sauge"
     },
@@ -92,8 +74,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.ORGE,
         job: JobEnum.PAYSAN,
         level: LevelEnum.LEVEL_10,
-        sell: SellEnum.RESSOURCE_10,
-        buy: BuyEnum.RESSOURCE_10,
         type: ItemType.RESSOURCE,
         emoji: "orge"
     },
@@ -101,8 +81,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.GREUVETTE,
         job: JobEnum.PECHEUR,
         level: LevelEnum.LEVEL_10,
-        sell: SellEnum.RESSOURCE_10,
-        buy: BuyEnum.RESSOURCE_10,
         type: ItemType.RESSOURCE,
         emoji: "greuvette"
     },
@@ -110,8 +88,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.TRUITE,
         job: JobEnum.PECHEUR,
         level: LevelEnum.LEVEL_10,
-        sell: SellEnum.RESSOURCE_10,
-        buy: BuyEnum.RESSOURCE_10,
         type: ItemType.RESSOURCE,
         emoji: "truite"
     },
@@ -121,8 +97,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.AVOINE,
         job: JobEnum.PAYSAN,
         level: LevelEnum.LEVEL_20,
-        sell: SellEnum.RESSOURCE_20,
-        buy: BuyEnum.RESSOURCE_20,
         type: ItemType.RESSOURCE,
         emoji: "avoine"
     },
@@ -130,8 +104,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.TREFLE_CINQ_FEUILLES,
         job: JobEnum.ALCHIMISTE,
         level: LevelEnum.LEVEL_20,
-        sell: SellEnum.RESSOURCE_20,
-        buy: BuyEnum.RESSOURCE_20,
         type: ItemType.RESSOURCE,
         emoji: "trefle"
     },
@@ -139,8 +111,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.NOYER,
         job: JobEnum.BUCHERON,
         level: LevelEnum.LEVEL_20,
-        sell: SellEnum.RESSOURCE_20,
-        buy: BuyEnum.RESSOURCE_20,
         type: ItemType.RESSOURCE,
         emoji: "noyer"
     },
@@ -148,8 +118,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.BRONZE,
         job: JobEnum.MINEUR,
         level: LevelEnum.LEVEL_20,
-        sell: SellEnum.RESSOURCE_20,
-        buy: BuyEnum.RESSOURCE_20,
         type: ItemType.RESSOURCE,
         emoji: "bronze"
     },
@@ -157,8 +125,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.CRABE_SOURIMI,
         job: JobEnum.PECHEUR,
         level: LevelEnum.LEVEL_20,
-        sell: SellEnum.RESSOURCE_20,
-        buy: BuyEnum.RESSOURCE_20,
         type: ItemType.RESSOURCE,
         emoji: "crabe"
     },
@@ -166,8 +132,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.POISSON_CHATON,
         job: JobEnum.PECHEUR,
         level: LevelEnum.LEVEL_20,
-        sell: SellEnum.RESSOURCE_20,
-        buy: BuyEnum.RESSOURCE_20,
         type: ItemType.RESSOURCE,
         emoji: "poissonchaton"
     },
@@ -177,8 +141,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.KAMAS,
         job: undefined,
         level: LevelEnum.LEVEL_0,
-        sell: 1,
-        buy: 0,
         type: ItemType.RESSOURCE,
         emoji: "kamas"
     },
@@ -187,8 +149,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.PIERRE,
         job: undefined,
         level: LevelEnum.LEVEL_0,
-        sell: 1,
-        buy: 2.5,
         type: ItemType.RESSOURCE,
         emoji: "pierre"
     },
@@ -196,8 +156,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.LAINE_DE_BOUFTOU,
         job: undefined,
         level: LevelEnum.LEVEL_0,
-        sell: 4,
-        buy: 10,
         type: ItemType.RESSOURCE,
         emoji: "laine"
     },
@@ -205,8 +163,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.CUIR,
         job: undefined,
         level: LevelEnum.LEVEL_0,
-        sell: 6,
-        buy: 15,
         type: ItemType.RESSOURCE,
         emoji: "cuir"
     },
@@ -214,8 +170,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.TISSU,
         job: undefined,
         level: LevelEnum.LEVEL_0,
-        sell: 6,
-        buy: 15,
         type: ItemType.RESSOURCE,
         emoji: "tissu"
     },
@@ -223,8 +177,6 @@ const Ressources: Record<ResourceEnum, Resource> = {
         name: ResourceEnum.OEUF,
         job: undefined,
         level: LevelEnum.LEVEL_0,
-        sell: 4,
-        buy: 10,
         type: ItemType.RESSOURCE
     }
 

@@ -18,8 +18,6 @@ const Consumables: Record<ConsumablesEnum, Consumable> = {
     [ConsumablesEnum.PAIN_SUCRE]: {
         name: ConsumablesEnum.PAIN_SUCRE,
         recipe: {[CraftEnum.SUCRE_ORGE]: 1, [CraftEnum.PAIN_INCARNAM]: 2},
-        sell: 0,
-        buy: 0,
         type: ItemType.FABRICATION,
         experience: 0,
         jobs: [JobEnum.PAYSAN, JobEnum.ALCHIMISTE],
@@ -29,8 +27,6 @@ const Consumables: Record<ConsumablesEnum, Consumable> = {
     }, [ConsumablesEnum.FOUGASSE_BIERE]: {
         name: ConsumablesEnum.FOUGASSE_BIERE,
         recipe: {[CraftEnum.FOUGASSE]: 1, [CraftEnum.BIERE_ASTRUB]: 1},
-        sell: 0,
-        buy: 0,
         type: ItemType.FABRICATION,
         experience: 0,
         jobs: [],
@@ -40,8 +36,6 @@ const Consumables: Record<ConsumablesEnum, Consumable> = {
     }, [ConsumablesEnum.GALETTE_INCARNAM]: {
         name: ConsumablesEnum.GALETTE_INCARNAM,
         recipe: {[CraftEnum.PAIN_INCARNAM]:20, [ResourceEnum.OEUF]: 10},
-        sell: 0,
-        buy: 0,
         type: ItemType.FABRICATION,
         experience: 0,
         jobs: [],

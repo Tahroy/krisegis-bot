@@ -119,8 +119,7 @@ class Fabriquer extends AbstractSubCommand {
 
         const user = interaction.user;
         const guild = interaction.guild
-        const memberCatch = await guild?.members.fetch(user.id)
-        const userName = memberCatch?.nickname ?? user.globalName
+        const userName = await JobUtil.getUsername(user.id, guild);
 
         let textUp = '';
         // Expérience
@@ -155,7 +154,7 @@ class Fabriquer extends AbstractSubCommand {
         }
 
         await interaction.reply({
-            content: `${userName} a fabriqué ${craftQuantity} x ${itemName}` + (textUp ? `\n${textUp}` : '')
+            content: `**${userName}** a fabriqué ${craftQuantity} x ${itemName}` + (textUp ? `\n${textUp}` : '')
         })
 
     }

@@ -27,6 +27,7 @@ enum QuestEnum {
     POISSON_FRAIS = "Il n'est pas frais mon poisson ?!",
     CELEBRATION_SANCTUAIRE = "Célébration au sanctuaire",
     NOUVEAUX_AVENTURIERS = "Ils vont revenir vite",
+    NOUVEAUX_ARTISANS = "Ils débutent tout juste",
     
     // Quêtes liées à la météo
     COLLECTE_EAU_PLUIE = "Moi je fais tout à l'eau de pluie",
@@ -36,6 +37,17 @@ enum QuestEnum {
     ABRIS_VENT = "Le mulou souffle fort aujourd'hui !",
     ENGELURES = "J'ai mal quand j'appuie sur mon coude ou sur ma tête",
     BOIS_POUR_FEU = "Une bonne cheminée et un bon livre",
+
+    // Quêtes niveau 20
+    RENFORTS_MENUISERIE = "On veut du bois qui tient !",
+    FOURNEES_DE_BRONZE = "Ça sent le bronze chaud",
+    SOINS_AVANCES = "Il me faut une vraie potion là, ça tombe...",
+    FESTIN_DU_LAC = "Banquet au bord du lac",
+    OFFRANDES_TARDIVES = "Offrandes des moissons tardives",
+    PATROUILLE_MILICE = "Patrouille sur les routes d'Astrub",
+    DU_MUSCLE = "Du muscle, du muscle, du muscle !",
+    HEROS_DIXIEN = "Un nouveau héros",
+    TENTATIVES_CULINAIRES = "Tentatives culinaires",
 }
 
 const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
@@ -140,6 +152,12 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         requiredItems: {[CraftEnum.POTION_MINI_SOIN]: 50, [CraftEnum.POTION_RAPPEL]: 10},
         rewardType: 'kamas'
     },
+    [QuestEnum.NOUVEAUX_ARTISANS]: {
+        name: QuestEnum.NOUVEAUX_ARTISANS,
+        description: "De jeunes habitants d'Astrub ont décidé de devenir de grands artisans. Ils pensent que ce sont des métiers faciles et ont besoin de matériel",
+        requiredItems: {[CraftEnum.MARMITE]: 1, [CraftEnum.ATELIER_A_POISSON]:1, [CraftEnum.FOUR_A_PAIN]: 1},
+        rewardType: 'happiness'
+    },
     [QuestEnum.COLLECTE_EAU_PLUIE]: {
         name: QuestEnum.COLLECTE_EAU_PLUIE,
         description: "La pluie tombe sans interruption sur Astrub. Le Conseil des Dix a décidé de renforcer le système de récupération d'eau, afin de palier aux périodes de sécheresse.",
@@ -205,6 +223,83 @@ const QuestTemplates: Record<QuestEnum, QuestTemplate> = {
         rewardType: 'happiness',
         buildings: [BuildingEnum.MENUISERIE],
         weather: [MeteosEnum.VENT_FORT]
+    },
+
+    // Quête 20
+    [QuestEnum.RENFORTS_MENUISERIE]: {
+        name: QuestEnum.RENFORTS_MENUISERIE,
+        description: "Les habitants d'Astrub veulent désormais des meubles en noyer, reconnu pour sa solidité.",
+        requiredItems: { [CraftEnum.PLANCHE_NOYER]: 10 },
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.MENUISERIE]
+    },
+    [QuestEnum.FOURNEES_DE_BRONZE]: {
+        name: QuestEnum.FOURNEES_DE_BRONZE,
+        description: "Le bronze permet de forger de nouvelles armes et nouvelles décorations. Est-ce que ça vous intéresse vraiment ? En tout cas, ça se vend bien !",
+        requiredItems: { [CraftEnum.LINGOT_BRONZE]: 10 },
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.FONDERIE]
+    },
+    [QuestEnum.SOINS_AVANCES]: {
+        name: QuestEnum.SOINS_AVANCES,
+        description: "Les Eniripsas mettent au point de meilleurs traitements. Pour tenir face aux blessures graves, ils ont besoin de potions plus puissantes.",
+        requiredItems: { [CraftEnum.POTION_SOIN]: 10 },
+        rewardType: 'kamas'
+    },
+    [QuestEnum.DU_MUSCLE]: {
+        name: QuestEnum.DU_MUSCLE,
+        description: "Les Iops ont déboursé tous leurs kamas pour faire trouver l'ingrédient idéal du muscle : l'avoine. Ils en sont convaincus !",
+        requiredItems: {[CraftEnum.PAIN_FLOCONS_AVOINE]: 10},
+        rewardType: 'kamas',
+    },
+    [QuestEnum.TENTATIVES_CULINAIRES]: {
+        name: QuestEnum.TENTATIVES_CULINAIRES,
+        description: "Un jeune restaurateur souhaite tenter de nouveaux repas à base de poisson frais. Il espère attirer une nouvelle clientèle.",
+        requiredItems: {[CraftEnum.POISSON_CHATON_FUME]: 5, [CraftEnum.BATON_CRABE] : 5},
+        rewardType: 'kamas',
+    },
+    [QuestEnum.FESTIN_DU_LAC]: {
+        name: QuestEnum.FESTIN_DU_LAC,
+        description: "Le village organise un grand festin autour du lac ! Les habitants ont besoin de mets et de bière.",
+        requiredItems: {
+            [CraftEnum.POISSON_CHATON_FUME]: 5,
+            [CraftEnum.BATON_CRABE]: 5,
+            [CraftEnum.PAIN_FLOCONS_AVOINE]: 5,
+            [CraftEnum.BIERE_ASTRUB]: 20,
+        },
+        rewardType: 'happiness',
+        buildings: [BuildingEnum.TAVERNE]
+    },
+    [QuestEnum.OFFRANDES_TARDIVES]: {
+        name: QuestEnum.OFFRANDES_TARDIVES,
+        description: "La saison n'a pas été bonne. Les prêtres des Dix pensent que des offrandes au sanctuaire pourraient apporter la bénédiction des dieux.",
+        requiredItems: {
+            [ResourceEnum.AVOINE]: 20,
+            [ResourceEnum.TREFLE_CINQ_FEUILLES]: 20,
+            [ResourceEnum.NOYER]: 20,
+            [ResourceEnum.BRONZE]: 20,
+            [ResourceEnum.POISSON_CHATON]: 10,
+            [ResourceEnum.CRABE_SOURIMI]: 10
+        },
+        rewardType: 'happiness',
+        buildings: [BuildingEnum.SANCTUAIRE]
+    },
+    [QuestEnum.PATROUILLE_MILICE]: {
+        name: QuestEnum.PATROUILLE_MILICE,
+        description: "La milice sécurise les routes. Entre deux patrouilles, ils ont besoin de repas consistants et de soins.",
+        requiredItems: {
+            [CraftEnum.PAIN_FLOCONS_AVOINE]: 5,
+            [CraftEnum.POTION_SOIN]: 5
+        },
+        rewardType: 'kamas',
+        buildings: [BuildingEnum.MILICE]
+    },
+
+    [QuestEnum.HEROS_DIXIEN] : {
+        name: QuestEnum.HEROS_DIXIEN,
+        description: "Lors de la dernière attaque de monstres sur Astrub, un héros s'est démarqué des autres. Les habitants souhaitent lui rendre hommage par une belle statue.",
+        requiredItems: {[CraftEnum.LINGOT_BRONZE]: 10, },
+        rewardType: 'happiness'
     }
 };
 

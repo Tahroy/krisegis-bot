@@ -11,9 +11,10 @@ import {Crafts} from "../models/astrub_economy/Craft";
 import {CraftEnum, ResourceEnum} from "../models/astrub_economy/Enums";
 import {MeteoService} from "./MeteoService";
 import {MeteosEnum} from "../models/astrub_economy/Meteo";
-import cron from "node-cron";
 import EconomyService from "./EconomyService";
 import {ItemType} from "../utils/Enums";
+import Job from "../models/astrub_economy/Job";
+import {Op} from "sequelize";
 
 export class QuestService {
     /**
@@ -164,6 +165,54 @@ export class QuestService {
         return true;
     }
 
+    // Détermine les prérequis de métiers (job -> niveau minimal) pour un objet (ressource ou craft)
+    private static getJobRequirementsForItem(itemName: string, items: Set<string> = new Set()): Record<string, number> {
+        if (items.has(itemName)) {
+            return {};
+        }
+        items.add(itemName);
+
+        const jobs: Record<string, number> = {};
+
+        const resource = Ressources[itemName as ResourceEnum];
+        if (resource) {
+            if (resource.job) {
+                jobs[resource.job] = Math.max(jobs[resource.job] ?? 0, Number(resource.level));
+            }
+            return jobs;
+        }
+
+        const craft = Crafts[itemName as CraftEnum];
+        if (craft) {
+            const recipe = craft.recipe as Record<string, number>;
+            for (const ingredientName of Object.keys(recipe)) {
+                const subJobs = this.getJobRequirementsForItem(ingredientName, items);
+                for (const [jobName, lvl] of Object.entries(subJobs)) {
+                    jobs[jobName] = Math.max(jobs[jobName] ?? 0, lvl);
+                }
+            }
+        }
+
+        return jobs;
+    }
+
+    // Vérifie qu'au moins un joueur sur le serveur possède les métiers requis
+    private static async checkGuildJobsRequirements(guildId: string, jobsRequirements: Record<string, number>): Promise<boolean> {
+        for (const [jobName, minLevel] of Object.entries(jobsRequirements)) {
+            const found = await Job.findOne({
+                where: {
+                    guildId: guildId,
+                    name: jobName,
+                    level: { [Op.gte]: minLevel }
+                }
+            });
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static async generateRandomQuest(guildId: string): Promise<Quest|null> {
         // Pas plus de quêtes que de joueurs actifs
         const nbPlayers = await JobUtil.getNbActivesPlayers(guildId)
@@ -193,7 +242,7 @@ export class QuestService {
             if (existingQuest) {
                 continue;
             }
-            
+           
             // On vérifie s'il y a une condition de météo
             if (questTemplate.weather && questTemplate.weather.length > 0) {
                 if (!currentWeather || !questTemplate.weather.includes(currentWeather as MeteosEnum)) {
@@ -201,15 +250,18 @@ export class QuestService {
                 }
             }
 
-            // Vérifier les bâtiments requis
-            if (!questTemplate.buildings || questTemplate.buildings.length === 0) {
-                availableQuests.push(questName);
-                continue;
+            // Calcul des prérequis de métiers à partir des objets requis
+            const jobsRequirements: Record<string, number> = {};
+            for (const itemName of Object.keys(questTemplate.requiredItems)) {
+                const jobsRequirementsItem = this.getJobRequirementsForItem(itemName);
+                for (const [jobName, lvl] of Object.entries(jobsRequirementsItem)) {
+                    jobsRequirements[jobName] = Math.max(jobsRequirements[jobName] ?? 0, lvl as number);
+                }
             }
 
             // On vérifie que tous les bâtiments nécessaires sont construits
             let allBuildingsConstructed = true;
-            for (const buildingName of questTemplate.buildings) {
+            for (const buildingName of (questTemplate.buildings || [])) {
                 const isConstructed = await JobUtil.isBuildingConstructed(guildId, buildingName);
                 if (!isConstructed) {
                     allBuildingsConstructed = false;
@@ -217,7 +269,8 @@ export class QuestService {
                 }
             }
 
-            if (allBuildingsConstructed) {
+            // On vérifie que tous les métiers requis sont atteints
+            if (allBuildingsConstructed && await this.checkGuildJobsRequirements(guildId, jobsRequirements)) {
                 availableQuests.push(questName);
             }
         }
@@ -225,6 +278,7 @@ export class QuestService {
         if (!availableQuests.length) {
             return null;
         }
+
         // On fait une quête au hasard parmi les disponibles
         const randomQuestName = availableQuests[Math.floor(Math.random() * availableQuests.length)];
         return await this.createQuest(guildId, randomQuestName);
