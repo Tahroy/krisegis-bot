@@ -54,7 +54,7 @@ class Prix extends AbstractSubCommand {
             });
 
         table.sort((a, b) => {
-            if (b.sell !== a.sell) return b.sell - a.sell;
+            if (b.sell !== a.sell) return a.sell - b.sell;
             return a.name.localeCompare(b.name);
         });
 

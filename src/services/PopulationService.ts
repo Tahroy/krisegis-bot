@@ -123,7 +123,9 @@ export class PopulationService {
     public static getHappinessDescription(happiness: number): string {
         let description = '';
 
-        if (happiness < 20) {
+        if (happiness === 100) {
+            description = "🌟 La joie a rarement été aussi présente à Astrub, même les bouftous ont l'air d'avoir le sourire au visage. Brutas s'en reviendrait pas. Le mieux dans tout cela ? C'est grâce à vous !";
+        } else if (happiness < 20) {
             description = "😡 L'ambiance est au point mort à Astrub. Les habitants rentrent chez eux le soir, la taverne se vide, les aires de jeux pour enfants n'accueillent plus personne. Astrub a connu de meilleurs jours !";
         } else if (happiness < 40) {
             description = "😔 Astrub est morose aujourd'hui. Le marché est boudé de la population et les habitants se contentent de se rendre à la taverne pour espérer que demain soit meilleur.";

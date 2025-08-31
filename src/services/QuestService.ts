@@ -224,6 +224,10 @@ export class QuestService {
 
         // Récupérer la météo actuelle
         const currentWeather: string|null = await MeteoService.chargerMeteo(guildId);
+        // Récupérer la population actuelle
+        const currentPopulationModel = await PopulationService.getOrCreatePopulation(guildId);
+        const currentPopulation = currentPopulationModel.population;
+        const currentHappiness = currentPopulationModel.happiness;
 
         const allQuestNames = Object.values(QuestEnum);
         const availableQuests: QuestEnum[] = [];
@@ -248,6 +252,16 @@ export class QuestService {
                 if (!currentWeather || !questTemplate.weather.includes(currentWeather as MeteosEnum)) {
                     continue;
                 }
+            }
+
+            // Vérifier la condition de population minimale
+            if (questTemplate.minPopulation && currentPopulation < questTemplate.minPopulation) {
+                continue;
+            }
+
+            // Les quêtes de joie sont inutiles si joie = 100
+            if (questTemplate.rewardType === 'happiness' && currentHappiness === 100) {
+                continue;
             }
 
             // Calcul des prérequis de métiers à partir des objets requis
