@@ -248,6 +248,17 @@ export default class Statut extends AbstractSubCommand {
 
         await interaction.reply({content: "Voici les récolteurs !", flags: MessageFlags.Ephemeral});
 
+        const players = await Player.findAll({
+            where: {
+                guildId: interaction.guild?.id,
+                lastHarvest: {
+                    [Op.gte]: new Date(Date.now() - 72 * 60 * 60 * 1000)
+                }
+            }
+        })
+
+        const playersIds = players.map(player => player.id)
+
         // Actifs depuis 72 heures
         for (const [key, jobName] of Object.entries(JobEnum)) {
             const jobs = await Job.findAll({
@@ -256,7 +267,8 @@ export default class Statut extends AbstractSubCommand {
                     name: jobName,
                     level: {
                         [Op.gte]: 1
-                    }
+                    },
+                    userId: playersIds
                 }, order: [['experience', 'DESC']]
             });
 
