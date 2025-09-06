@@ -391,7 +391,7 @@ export class QuestService {
         await QuestService.deleteOldQuests(client, guildId);
 
         // Une chance sur 12 de déclencher une quête
-        const random = Math.random() * 8 < 1
+        const random = Math.random() * 12 < 1
 
         if (!random) {
             return;
