@@ -12,8 +12,8 @@ import {ItemType} from "../utils/Enums";
 export class PlayerService {
 
     // Ajoute un item pour le joueur
-    public static async getItems(user: User, types: ItemType[], guild: Guild): Promise<PlayerItem[]> {
-        return await PlayerItem.findAll({
+    public static async getItems(user: User, types: ItemType[], guild: Guild, search: string|null = null): Promise<PlayerItem[]> {
+        const allItems = await PlayerItem.findAll({
             where: {
                 userId: user.id,
                 type: {[Op.in]: types},
@@ -22,6 +22,21 @@ export class PlayerService {
             },
             order: [['type', 'ASC'], ['name', 'ASC']]
         });
+
+        let items: PlayerItem[] = [];
+
+        if (search) {
+            for (let item of allItems) {
+                if (item.name.toLowerCase().includes(search.toLowerCase())) {
+                    items.push(item)
+                }
+            }
+        } else {
+            items = allItems;
+        }
+
+        return items;
+
     }
 
     public static async getItem(user: User, name: ResourceEnum | CraftEnum | string, guild: Guild): Promise<PlayerItem | null> {

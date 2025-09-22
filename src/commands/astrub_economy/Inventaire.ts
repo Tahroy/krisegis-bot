@@ -39,11 +39,9 @@ class Inventaire extends AbstractSubCommand {
         const header    = `| Nom                        | Quantité |`;
         const separator = `|----------------------------|----------|`;
 
-        const items: PlayerItem[] = await PlayerService.getItems(
-            user,
-            [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL],
-            guild
-        );
+        const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
+
+        const items = await PlayerService.getItems(user, types, guild);
 
         const rows = items.map(item => {
             const hasDurability = item.durability ?? null;

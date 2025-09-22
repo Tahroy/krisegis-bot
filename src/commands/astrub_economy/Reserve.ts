@@ -229,29 +229,32 @@ class Reserve extends AbstractSubCommand {
     }
 
     private async getPlayerItemsOpts(interaction: AutocompleteInteraction, search: string): Promise<ApplicationCommandOptionChoiceData[]> {
-        const user = interaction.user;
         const guildId = interaction.guild?.id;
         if (!guildId) {
             return [];
         }
 
-        const playerItems = await PlayerService.getItems(user, [
-            ItemType.RESSOURCE,
-            ItemType.FABRICATION,
-            ItemType.OUTIL
-        ], interaction.guild)
+        const user = interaction.user;
+        const guild = interaction.guild;
+        const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
+
+        const items = await PlayerService.getItems(user, types, guild, search);
 
         const choices: ApplicationCommandOptionChoiceData[] = [];
 
-        for (const item of playerItems) {
-            if (choices.length >= 20) break;
-
-            if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
-                choices.push({
-                    name: `${item.name} (${item.quantity} maximum)`,
-                    value: item.name
-                });
+        for (const item of items) {
+            if (item.quantity < 1) {
+                continue;
             }
+
+            if (choices.length >= 20) {
+                break;
+            }
+
+            choices.push({
+                name: `${item.name} (${item.quantity} maximum)`,
+                value: item.name
+            });
         }
 
         return choices;
