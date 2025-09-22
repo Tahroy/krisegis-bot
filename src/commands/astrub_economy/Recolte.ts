@@ -129,7 +129,12 @@ class Recolte extends AbstractSubCommand {
             await interaction.respond([]);
             return;
         }
-        const ressources: Resource[] = Object.values(Ressources).sort((a, b) => a.name.localeCompare(b.name))
+        const ressources: Resource[] = Object.values(Ressources).sort((a, b) => {
+            const jobA  = a.job ?? "";
+            const jobB = b.job ?? "";
+
+            return jobA.localeCompare(jobB);
+        })
 
         const responses = [];
         for (const ressource of ressources) {
