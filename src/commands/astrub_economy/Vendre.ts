@@ -113,11 +113,22 @@ class Vendre extends AbstractSubCommand {
         const retour = [];
         switch (focused.name) {
             case Vendre.OPTION_ITEM:
-                const items = await this.getUserItems(interaction.user, search, interaction.guild)
-                items.sort((a, b) => a.name.localeCompare(b.name));
+                const user = interaction.user;
+                const guild = interaction.guild;
+                const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
+                const items = await PlayerService.getItems(user, types, guild, search);
 
                 for (let item of items) {
                     const price = EconomyService.calculSell(ItemService.getItem(item.name) as BaseItem)
+
+                    if (item.quantity < 1) {
+                        continue;
+                    }
+
+                    // On ne peut pas vendre de kamas :)
+                    if (item.name === 'kamas') {
+                        continue;
+                    }
 
                     if (retour.length >= 20) {
                         break;

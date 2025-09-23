@@ -25,6 +25,9 @@ export class ItemService {
         for (const category of Object.values(Items)) {
             items.push(...Object.values(category));
         }
+
+        items.sort((a, b) => a.name.localeCompare(b.name));
+
         return items;
     }
 

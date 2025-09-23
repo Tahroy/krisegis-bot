@@ -1,5 +1,6 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {
+    ApplicationCommandOptionChoiceData,
     AutocompleteInteraction,
     CommandInteraction,
     MessageFlags,
@@ -97,59 +98,38 @@ class Donner extends AbstractSubCommand {
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const options = interaction.options
-        const guild = interaction.guild;
-        if (!guild) {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
             await interaction.respond([]);
             return;
         }
 
-        const guildId = interaction.guild?.id;
         const focused = options.getFocused(true)
         const search = focused.value
 
-        const retour = [];
-        switch (focused.name) {
-            case this.OPTION_ITEM:
-                const items = await this.getUserItems(interaction.user, search, guildId)
+        const choices: ApplicationCommandOptionChoiceData[] = [];
 
-                for (let item of items) {
-                    if (item.quantity < 1) {
-                        continue;
-                    }
-                    if (retour.length >= 20) {
-                        break;
-                    }
+        const user = interaction.user;
+        const guild = interaction.guild;
+        const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
 
-                    retour.push({
-                        name: `${item.name} (${item.quantity} maximum)`,
-                        value: item.name
-                    })
-                }
-
-                break;
-        }
-
-        await interaction.respond(retour)
-    }
-
-    private async getUserItems(user: User, search: string, guildId: string): Promise<PlayerItem[]> {
-        const items = ItemService.getAllItems()
-
-        let sellablesItems: string [] = []
+        const items = await PlayerService.getItems(user, types, guild, search);
 
         for (let item of items) {
-            if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
-                sellablesItems.push(item.name)
+            if (item.quantity < 1) {
+                continue;
             }
+            if (choices.length >= 20) {
+                break;
+            }
+
+            choices.push({
+                name: `${item.name} (${item.quantity} maximum)`,
+                value: item.name
+            })
         }
 
-        return await PlayerItem.findAll({
-            where: {
-                userId: user.id,
-                name: {[Op.in]: sellablesItems,},
-                guildId: guildId
-            }
-        });
+        await interaction.respond(choices)
     }
 }
 

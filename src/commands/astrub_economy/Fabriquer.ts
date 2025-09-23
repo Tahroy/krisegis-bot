@@ -177,13 +177,10 @@ class Fabriquer extends AbstractSubCommand {
         const items = ItemService.getAllItems();
         const retour = [];
 
-        const playerItems = await PlayerItem.findAll({
-            where: {
-                userId: interaction.user.id,
-                guildId: guildId,
-                type: [ItemType.RESSOURCE, ItemType.FABRICATION]
-            }
-        });
+        const user = interaction.user;
+        const guild = interaction.guild;
+        const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
+        const playerItems = await PlayerService.getItems(user, types, guild, search);
 
         const playerItemsMap = new Map();
         for (const playerItem of playerItems) {
@@ -191,59 +188,60 @@ class Fabriquer extends AbstractSubCommand {
         }
 
         for (let item of items) {
-            if (retour.length >= 20) break;
-            if (item.name.toLowerCase().includes(search.toLowerCase()) || !search) {
-                if (typeof item.recipe !== 'object' || item.recipe === null) {
-                    continue;
+            if (retour.length >= 20) {
+                break;
+            }
+
+            if (typeof item.recipe !== 'object' || item.recipe === null) {
+                continue;
+            }
+
+            let canCraft = true;
+            let recipe = "";
+
+            for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+                recipe += `${ingredient} x ${quantity} `;
+                const playerQuantity = playerItemsMap.get(ingredient) || 0;
+                if (playerQuantity < quantity) {
+                    canCraft = false;
+                    break;
                 }
+            }
 
-                let canCraft = true;
-                let recipe = "";
+            if (canCraft && item.tool) {
+                const playerToolQuantity = playerItemsMap.get(item.tool) || 0;
+                if (playerToolQuantity < 1) {
+                    canCraft = false;
+                }
+            }
 
-                for (let [ingredient, quantity] of Object.entries(item.recipe)) {
-                    recipe += `${ingredient} x ${quantity} `;
-                    const playerQuantity = playerItemsMap.get(ingredient) || 0;
-                    if (playerQuantity < quantity) {
+            if (canCraft && item.buildings) {
+                for (let building of item.buildings) {
+                    const constructed = await JobUtil.isBuildingConstructed(guildId, building);
+                    if (!constructed) {
                         canCraft = false;
                         break;
                     }
                 }
-
-                if (canCraft && item.tool) {
-                    const playerToolQuantity = playerItemsMap.get(item.tool) || 0;
-                    if (playerToolQuantity < 1) {
-                        canCraft = false;
-                    }
-                }
-
-                if (canCraft && item.buildings) {
-                    for (let building of item.buildings) {
-                        const constructed = await JobUtil.isBuildingConstructed(guildId, building);
-                        if (!constructed) {
-                            canCraft = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (canCraft) {
-                    // On regarde combien on peut créer
-                    let quantite = null
-                    for (let [ingredient, quantity] of Object.entries(item.recipe)) {
-                        const playerQuantity = playerItemsMap.get(ingredient) || 0
-                        if (quantite === null) {
-                            quantite = Math.floor(playerQuantity / quantity)
-                        } else {
-                            quantite = Math.floor(Math.min(quantite, playerQuantity / quantity))
-                        }
-                    }
-
-                    retour.push({
-                        name: `${item.name} (${recipe}) - ${item.experience} xp (${quantite} maximum)`,
-                        value: item.name
-                    });
-                }
             }
+
+            if (canCraft) {
+                // On regarde combien on peut créer
+                let quantite = null
+                for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+                    const playerQuantity = playerItemsMap.get(ingredient) || 0
+                    if (quantite === null) {
+                        quantite = Math.floor(playerQuantity / quantity)
+                    } else {
+                        quantite = Math.floor(Math.min(quantite, playerQuantity / quantity))
+                    }
+                }
+
+                retour.push({
+                    name: `${item.name} (${recipe}) - ${item.experience} xp (${quantite} maximum)`, value: item.name
+                });
+            }
+
         }
 
         await interaction.respond(retour);

@@ -325,7 +325,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
         [
             {description: "", job: JobEnum.PAYSAN, value: 50}
         ],
-        true
+        false
     ),
     [MeteosEnum.MANIFESTATION_RAVAL]: new Meteo(MeteosEnum.MANIFESTATION_RAVAL,
         "Fidèle à sa tâche — aussi morbide soit-elle, le Protecteur de Septange soutire le fluide vital de tout ce qui croît.",
@@ -335,7 +335,7 @@ const Meteos: Record<MeteosEnum, Meteo> = {
             {description: "", job: JobEnum.ALCHIMISTE, value: -20},
             {description: "", job: JobEnum.PAYSAN, value: -20}
         ],
-        false
+        true
     ),
     [MeteosEnum.QUIETUDE_MAIMANE]: new Meteo(MeteosEnum.QUIETUDE_MAIMANE,
         "Les frimas de l'hiver poussent les bûcherons à redoubler d'ardeur. A moins qu'il ne s'agisse de fournir la matière première nécessaire à la sculpture des totems rituels ?",

@@ -105,7 +105,7 @@ module.exports = {
     },
 
     async executeButton (interaction, buttonName) {
-        const selectedAnswer = buttonName.replace('quiz-', '')
+        const selectedKey = buttonName.replace('quiz-', '')
         const currentChannelData = channelScores.get(interaction.channelId)
 
         if (!currentChannelData) {
@@ -125,6 +125,14 @@ module.exports = {
 
         if (currentQuestion.participations.has(interaction.user.id)) {
             return interaction.reply({ 'content': 'Vous avez répondu !', 'ephemeral': true })
+        }
+
+        let selectedAnswer = selectedKey
+        if (currentQuestion.optionMap) {
+            const resolved = currentQuestion.optionMap[selectedKey]
+            if (resolved) {
+                selectedAnswer = resolved
+            }
         }
 
         currentQuestion.participations.set(interaction.user.id, selectedAnswer)
@@ -160,15 +168,22 @@ module.exports = {
             }
 
             const availableQuestions = await getRandomQuestions()
-            //console.log(availableQuestions)
-            for (let i = 0; i < nombre; i++) {
+
+            if (!availableQuestions || availableQuestions.length === 0) {
+                return interaction.reply({content: 'Aucune question disponible pour lancer le quiz.', ephemeral: true })
+            }
+
+            const count = Math.min(nombre, availableQuestions.length)
+            for (let i = 0; i < count; i++) {
                 const randomIndex = Math.floor(Math.random() * availableQuestions.length)
-                let question = availableQuestions.splice(randomIndex, 1)[0]
+                const question = availableQuestions.splice(randomIndex, 1)[0]
+                if (!question) {
+                    continue
+                }
                 question.participations = new Map()
                 currentChannelData.questions.push(question)
             }
 
-            //console.log(currentChannelData)
             channelScores.set(interaction.channelId, currentChannelData)
         }
 
@@ -246,26 +261,28 @@ module.exports = {
             return interaction.reply({ 'content': 'La bonne reponse ne doit pas être dans les mauvaises !', 'ephemeral': true })
         }
 
-        if (answersArray.length < 4) {
-            return interaction.reply({ 'content': 'Il faut au moins 4 reponses !', 'ephemeral': true })
+        if (answersArray.length < 3) {
+            return interaction.reply({ 'content': 'Il faut au moins 3 mauvaises réponses !', 'ephemeral': true })
         }
 
         Question.update({
             question: questionString,
             answers: answersArray,
             correctAnswer: correctAnswer,
+        }, {
+            where: { question: questionString }
         })
-            .then((question) => {
-                console.log(`Question créée : ${question.question}`)
+            .then(() => {
+                console.log(`Question mise à jour : ${questionString}`)
                 return interaction.reply({
-                    'content': 'Question ajoutée !',
+                    'content': 'Question mise à jour !',
                     'ephemeral': true
                 })
             })
             .catch((error) => {
-                console.error('Erreur lors de la création de la question :', error)
+                console.error('Erreur lors de la mise à jour de la question :', error)
                 return interaction.reply({
-                    'content': 'Erreur lors de la création de la question !',
+                    'content': 'Erreur lors de la mise à jour de la question !',
                     'ephemeral': true
                 })
             })
@@ -321,16 +338,19 @@ function sendQuestion (interaction) {
     const selectedAnswers = shuffledAnswers.slice(0, 3);
 
     selectedAnswers.push(currentQuestion.correctAnswer);
-    console.log('avant', selectedAnswers)
     const finalAnswers = shuffleArray(selectedAnswers);
-    console.log('apres', finalAnswers)
 
-    const buttons = finalAnswers.map((answer) => {
+    const optionMap = {}
+    const buttons = finalAnswers.map((answer, idx) => {
+        const key = `o${idx}`
+        optionMap[key] = answer
         return new ButtonBuilder()
-            .setCustomId(`quiz-${answer}`)
+            .setCustomId(`quiz-${key}`)
             .setLabel(answer)
             .setStyle(ButtonStyle.Primary)
     })
+
+    currentQuestion.optionMap = optionMap
 
     const row = new ActionRowBuilder().addComponents(buttons)
 

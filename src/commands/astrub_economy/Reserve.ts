@@ -106,18 +106,37 @@ class Reserve extends AbstractSubCommand {
         const options = interaction.options;
         const focused = options.getFocused(true);
         const action = options.getString(Reserve.OPTION_ACTION);
-
+        const search = focused.value
+        
         if (focused.name !== Reserve.OPTION_ITEM) {
             await interaction.respond([]);
             return;
         }
 
-        let choices: ApplicationCommandOptionChoiceData[] = [];
-
+        let user = null;
         if (action === Reserve.ACTION_DEPOSE) {
-            choices = await this.getPlayerItemsOpts(interaction, focused.value);
-        } else if (action === Reserve.ACTION_TAKE) {
-            choices = await this.getReserveItemsOpts(interaction, focused.value);
+            user = interaction.user;
+        }
+
+        const guild = interaction.guild;
+        const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
+
+        const choices: ApplicationCommandOptionChoiceData[] = [];
+        const items = await PlayerService.getItems(user, types, guild, search)
+
+        for (const item of items) {
+            if (item.quantity < 1) {
+                continue;
+            }
+
+            if (choices.length >= 20) {
+                break;
+            }
+
+            choices.push({
+                name: `${item.name} (${item.quantity} maximum)`,
+                value: item.name
+            });
         }
 
         await interaction.respond(choices);
@@ -214,7 +233,6 @@ class Reserve extends AbstractSubCommand {
 
             await ReserveService.takeItem(user, itemName, item.type as ItemType, quantity, guildId);
 
-            const memberCatch = await interaction.guild.members.fetch(user.id);
             const userName = await JobUtil.getUsername(user.id, interaction.guild)
 
             await interaction.reply({
@@ -226,60 +244,6 @@ class Reserve extends AbstractSubCommand {
                 flags: MessageFlags.Ephemeral
             });
         }
-    }
-
-    private async getPlayerItemsOpts(interaction: AutocompleteInteraction, search: string): Promise<ApplicationCommandOptionChoiceData[]> {
-        const user = interaction.user;
-        const guildId = interaction.guild?.id;
-        if (!guildId) {
-            return [];
-        }
-
-        const playerItems = await PlayerService.getItems(user, [
-            ItemType.RESSOURCE,
-            ItemType.FABRICATION,
-            ItemType.OUTIL
-        ], interaction.guild)
-
-        const choices: ApplicationCommandOptionChoiceData[] = [];
-
-        for (const item of playerItems) {
-            if (choices.length >= 20) break;
-
-            if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
-                choices.push({
-                    name: `${item.name} (${item.quantity} maximum)`,
-                    value: item.name
-                });
-            }
-        }
-
-        return choices;
-    }
-
-    private async getReserveItemsOpts(interaction: AutocompleteInteraction, search: string): Promise<ApplicationCommandOptionChoiceData[]> {
-        const guild = interaction.guild;
-        if (!guild) {
-            return [];
-        }
-
-        // Récupérer tous les items de la réserve
-        const reserveItems = await ReserveService.getReserveItems(guild);
-
-        const choices: ApplicationCommandOptionChoiceData[] = [];
-
-        for (const item of reserveItems) {
-            if (choices.length >= 20) break;
-
-            if (!search || item.name.toLowerCase().includes(search.toLowerCase())) {
-                choices.push({
-                    name: `${item.name} (${item.quantity} maximum)`,
-                    value: item.name
-                });
-            }
-        }
-
-        return choices;
     }
 }
 
