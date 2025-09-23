@@ -2,7 +2,6 @@ const {SlashCommandBuilder} = require("discord.js");
 const Constantes = require("../utils/Constantes");
 
 module.exports = {
-public: false,
     opts: {},
     data: new SlashCommandBuilder()
         .setName('roll')

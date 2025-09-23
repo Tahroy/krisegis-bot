@@ -29,7 +29,6 @@ let games = []
  */
 module.exports = {
     // Définition de la commande slash avec son nom et sa description
-public: false,
     data: new SlashCommandBuilder()
         .setName('kouinkouin')
         .setDescription('Permet de pêcher un kouinkouin')
