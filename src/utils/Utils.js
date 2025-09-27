@@ -223,10 +223,12 @@ module.exports = {
                     }
                 }
 
-                let nickName = member.nickname || member.user.username
+                console.log(member, member.user)
+                let nickName = member.nickname || member.user.globalName || member.user.username
                 if (nickName.includes('[') && nickName.includes(']')) {
                     [, nickName] = nickName.split('] ', 2)
                 }
+                console.log(nickName)
 
                 console.log(`Tag : ${tag} | Nickname : ${nickName}`)
 
