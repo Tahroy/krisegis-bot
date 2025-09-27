@@ -15,7 +15,7 @@ export class PlayerService {
     public static async getItems(user: User|null, types: ItemType[], guild: Guild, search: string|null = null): Promise<PlayerItem[]> {
         const allItems = await PlayerItem.findAll({
             where: {
-                userId: user?.id ?? 0,
+                userId: user?.id ?? 'reserve',
                 type: {[Op.in]: types},
                 guildId: guild.id,
                 quantity: {[Op.gt]: 0}
