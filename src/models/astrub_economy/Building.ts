@@ -154,12 +154,17 @@ const Buildings: Record<BuildingEnum, Building> = {
     },
     [BuildingEnum.BOUFTONNERIE]: {
         name: BuildingEnum.BOUFTONNERIE,
-        description: "Une bouftonnerie habituée par un vieil homme en fin de carrière. Il a décidé de s'installer à Astrub et d'offrir son expertise à ceux qui viennent nourrir ses bêtes",
+        description: "Une bouftonnerie gardée par Guégon. Ancien combattant Osamodas ayant décidé de s'occuper des bêtes. Il accepte volontiers d'en garder d'autres, tant qu'ils sont nourris.",
         shortDescription: "Débloque les bouftous",
         recipe: {
-            [ResourceEnum.BLE]: 2500,
-            [ResourceEnum.PIERRE]: 1000,
-            [CraftEnum.PLANCHE_NOYER]: 100,
+            [ResourceEnum.PIERRE]: 500,
+            [ResourceEnum.BLE]: 1000,
+            [CraftEnum.PLANCHE_FRENE]: 100,
+            [CraftEnum.LINGOT_FER]: 100,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 75,
+            [CraftEnum.LINGOT_CUIVRE]: 75,
+            [CraftEnum.PLANCHE_NOYER]: 50,
+            [CraftEnum.LINGOT_BRONZE]: 50,
             [ResourceEnum.KAMAS]: 10000
         },
         image: 'bouftonnerie.png'
