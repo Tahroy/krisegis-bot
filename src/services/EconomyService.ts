@@ -42,7 +42,7 @@ export class EconomyService {
             [ResourceEnum.CUIR]: 6,
             [ResourceEnum.TISSU]: 6,
             [ResourceEnum.OEUF]: 4,
-            [ResourceEnum.BOUFTOU]: 5000
+            [ResourceEnum.BOUFTOU]: 1000
         };
 
         if (item.type === ItemType.RESSOURCE) {
