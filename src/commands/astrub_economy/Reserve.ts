@@ -144,32 +144,6 @@ class Reserve extends AbstractSubCommand {
         await interaction.respond(choices);
     }
 
-    private async viewReserve(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.guild) {
-            return;
-        }
-
-        const reserveItems = await ReserveService.getReserveItems(interaction.guild);
-
-        if (reserveItems.length === 0) {
-            await interaction.reply({
-                content: 'La réserve est vide.',
-                flags: MessageFlags.Ephemeral
-            });
-            return;
-        }
-
-        const table = this.formatReserveTable(reserveItems);
-
-        const embed = new EmbedBuilder()
-            .setTitle('Contenu de la Réserve Communautaire')
-            .setDescription(table)
-            .setColor('#0099ff')
-            .setTimestamp();
-
-        await interaction.reply({ embeds: [embed] });
-    }
-
     private formatReserveTable(items: PlayerItem[]): string {
         const header = `| Nom                    | Quantité |`;
         const separator = `|------------------------|----------|`;

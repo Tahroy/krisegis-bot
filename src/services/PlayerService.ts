@@ -12,15 +12,14 @@ import {ItemType} from "../utils/Enums";
 export class PlayerService {
 
     // Ajoute un item pour le joueur
-    public static async getItems(user: User|null, types: ItemType[], guild: Guild, search: string|null = null): Promise<PlayerItem[]> {
+    public static async getItems(user: User | null, types: ItemType[], guild: Guild, search: string | null = null): Promise<PlayerItem[]> {
         const allItems = await PlayerItem.findAll({
             where: {
                 userId: user?.id ?? 'reserve',
                 type: {[Op.in]: types},
                 guildId: guild.id,
                 quantity: {[Op.gt]: 0}
-            },
-            order: [['type', 'ASC'], ['name', 'ASC']]
+            }
         });
 
         let items: PlayerItem[] = [];
@@ -35,8 +34,26 @@ export class PlayerService {
             items = allItems;
         }
 
-        return items;
+        // Définir l'ordre de priorité des types
+        const typeOrder = {
+            [ItemType.RESSOURCE]: 1,
+            [ItemType.FABRICATION]: 2,
+            [ItemType.OUTIL]: 3
+        };
 
+        // Trier les items selon l'ordre des types puis par nom
+        items.sort((a, b) => {
+            const typeA = typeOrder[a.type as keyof typeof typeOrder] || 999;
+            const typeB = typeOrder[b.type as keyof typeof typeOrder] || 999;
+
+            if (typeA !== typeB) {
+                return typeA - typeB;
+            }
+        
+            return a.name.localeCompare(b.name);
+        });
+    
+        return items;
     }
 
     public static async getItem(user: User|null, name: ResourceEnum | CraftEnum | string, guild: Guild): Promise<PlayerItem | null> {
