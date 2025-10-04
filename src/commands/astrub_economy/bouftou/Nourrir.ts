@@ -69,18 +69,35 @@ class Nourrir extends AbstractSubCommand {
             return;
         }
 
+        const bouftouEmoji = await JobUtil.getEmojiByName(bouftou.emoji, interaction.client);
+        const bouftouName = `${bouftouEmoji} **${bouftou.name}**`;
+
         if (bouftou.feedCountToday >= 3) {
             await interaction.reply({
-                content: `${bouftou.name} a déjà mangé 3 fois aujourd'hui.`, flags: MessageFlags.Ephemeral
+                content: `${bouftouName} a déjà mangé 3 fois aujourd'hui.`, flags: MessageFlags.Ephemeral
             });
             return;
+        }
+
+        // Vérifier le temps écoulé depuis le dernier repas
+        if (bouftou.lastFeedAt) {
+            const ThreeHours = 3 * 60 * 60 * 1000;
+            const threeHoursAgo = new Date(Date.now() - ThreeHours);
+            if (bouftou.lastFeedAt > threeHoursAgo) {
+                const timeLeft = Math.ceil((bouftou.lastFeedAt.getTime() + ThreeHours) / (60 * 1000));
+                await interaction.reply({
+                    content: `${bouftouName} doit attendre encore ${timeLeft} minutes avant de pouvoir manger à nouveau.`,
+                    flags: MessageFlags.Ephemeral
+                });
+                return;
+            }
         }
 
         // Vérifier l'inventaire du joueur
         const item = await PlayerService.getItem(interaction.user, aliment, guild);
         if (!item || item.quantity < 10) {
             await interaction.reply({
-                content: `Il vous faut 10x ${aliment} pour nourrir ${bouftou.name}.`, flags: MessageFlags.Ephemeral
+                content: `Il vous faut 10x ${aliment} pour nourrir ${bouftouName}.`, flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -93,11 +110,10 @@ class Nourrir extends AbstractSubCommand {
         bouftou.lastFeedAt = new Date();
         await bouftou.save();
 
-        const bouftouEmoji = await JobUtil.getEmojiByName(bouftou.emoji, interaction.client);
         const alimentEmojiName = Ressources[aliment as ResourceEnum]?.emoji ?? '';
         const alimentEmoji = alimentEmojiName ? await JobUtil.getEmojiByName(alimentEmojiName, interaction.client) : '';
 
-        await interaction.reply({content: `${bouftouEmoji} **${bouftou.name}** a été nourri avec ${alimentEmoji} 10x ${aliment}. (${bouftou.feedCountToday}/3 aujourd'hui)`});
+        await interaction.reply({content: `${bouftouName} a été nourri avec ${alimentEmoji} 10x ${aliment}. (${bouftou.feedCountToday}/3 aujourd'hui)`});
     }
 
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

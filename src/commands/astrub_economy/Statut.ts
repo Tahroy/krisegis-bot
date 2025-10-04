@@ -338,10 +338,25 @@ export default class Statut extends AbstractSubCommand {
 
         const lines: string[] = [];
         for (const b of bouftous) {
+            let iconAlive = "";
+            if (!b.isAlive) {
+                iconAlive = ":skull:";
+            }
+
+            let dayWitoutFood = "";
+            let feedCountToday = "";
+
+            if (b.isAlive) {
+                feedCountToday = `— Repas aujourd'hui : ${b.feedCountToday}/3`;
+                if (b.daysWithoutFood > 0) {
+                    dayWitoutFood = `— Jours sans manger : ${b.daysWithoutFood}`;
+                }
+            }
+
             const emoji = await JobUtil.getEmojiByName(b.emoji, interaction.client);
-            lines.push(`- ${emoji} ${b.name} 
-            — Repas aujourd'hui : ${b.feedCountToday}/3 
-            — Jours sans manger : ${b.daysWithoutFood}`);
+            lines.push(`- ${emoji} ${b.name} ${iconAlive}
+            ${feedCountToday} 
+            ${dayWitoutFood}`);
         }
 
         const embed = new EmbedBuilder()
