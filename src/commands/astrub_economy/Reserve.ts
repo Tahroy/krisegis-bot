@@ -4,7 +4,7 @@ import {
     AutocompleteInteraction,
     CommandInteraction,
     EmbedBuilder,
-    MessageFlags
+    MessageFlags, User
 } from "discord.js";
 import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 import {PlayerService} from "../../services/PlayerService";
@@ -113,9 +113,11 @@ class Reserve extends AbstractSubCommand {
             return;
         }
 
-        let user = null;
-        if (action === Reserve.ACTION_DEPOSE) {
-            user = interaction.user;
+        // Par défaut, on propose l'inventaire du joueur pour le dépôt.
+        // Si l'action est "prendre", on bascule sur la réserve (user = null)
+        let user: User|null = interaction.user;
+        if (action === Reserve.ACTION_TAKE) {
+            user = null;
         }
 
         const guild = interaction.guild;
