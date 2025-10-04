@@ -4,7 +4,7 @@ import {
     AutocompleteInteraction,
     ChatInputCommandInteraction,
     CommandInteraction,
-    EmbedBuilder,
+    EmbedBuilder, Guild,
     MessageFlags,
     TextChannel
 } from "discord.js";
@@ -240,9 +240,15 @@ class Batiments extends AbstractSubCommand {
                 break;
             }
 
+
+
             if (ingredient.toLowerCase().startsWith(search.toLowerCase()) || !search) {
+                const playerItem = await PlayerService.getItem(interaction.user, ingredient, interaction.guild as Guild)
+                const playerQuantity = playerItem?.quantity || 0
+                const pluriel = playerQuantity > 1 ? "s" : ""
+
                 retour.push({
-                    name: `${ingredient}: ${contributionActuelle ?? 0} / ${quantity} `, value: ingredient,
+                    name: `${ingredient}: ${contributionActuelle ?? 0} / ${quantity} (${playerQuantity} possédé${pluriel})`, value: ingredient,
                 });
             }
         }

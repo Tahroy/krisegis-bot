@@ -24,7 +24,6 @@ export default class Quetes extends AbstractSubCommand {
     async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const focusedOption = interaction.options.getFocused(true);
 
-        const user = interaction.user;
         const guild = interaction.guild
 
         if (!guild) {
