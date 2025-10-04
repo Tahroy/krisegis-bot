@@ -13,11 +13,7 @@ const Ressources: Record<ResourceEnum, Resource> = {
 
     // Ressources de niveau 1
     [ResourceEnum.BLE]: {
-        name: ResourceEnum.BLE,
-        job: JobEnum.PAYSAN,
-        level: LevelEnum.LEVEL_0,
-        type: ItemType.RESSOURCE,
-        emoji: "ble"
+        name: ResourceEnum.BLE, job: JobEnum.PAYSAN, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "ble"
     },
     [ResourceEnum.ORTIE]: {
         name: ResourceEnum.ORTIE,
@@ -41,11 +37,7 @@ const Ressources: Record<ResourceEnum, Resource> = {
         emoji: "frene"
     },
     [ResourceEnum.FER]: {
-        name: ResourceEnum.FER,
-        job: JobEnum.MINEUR,
-        level: LevelEnum.LEVEL_0,
-        type: ItemType.RESSOURCE,
-        emoji: "fer"
+        name: ResourceEnum.FER, job: JobEnum.MINEUR, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "fer"
     },
 
     // Niveau 10
@@ -71,11 +63,7 @@ const Ressources: Record<ResourceEnum, Resource> = {
         emoji: "sauge"
     },
     [ResourceEnum.ORGE]: {
-        name: ResourceEnum.ORGE,
-        job: JobEnum.PAYSAN,
-        level: LevelEnum.LEVEL_10,
-        type: ItemType.RESSOURCE,
-        emoji: "orge"
+        name: ResourceEnum.ORGE, job: JobEnum.PAYSAN, level: LevelEnum.LEVEL_10, type: ItemType.RESSOURCE, emoji: "orge"
     },
     [ResourceEnum.GREUVETTE]: {
         name: ResourceEnum.GREUVETTE,
@@ -138,19 +126,11 @@ const Ressources: Record<ResourceEnum, Resource> = {
 
     // Ressources neutres
     [ResourceEnum.KAMAS]: {
-        name: ResourceEnum.KAMAS,
-        job: undefined,
-        level: LevelEnum.LEVEL_0,
-        type: ItemType.RESSOURCE,
-        emoji: "kamas"
+        name: ResourceEnum.KAMAS, job: undefined, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "kamas"
     },
 
     [ResourceEnum.PIERRE]: {
-        name: ResourceEnum.PIERRE,
-        job: undefined,
-        level: LevelEnum.LEVEL_0,
-        type: ItemType.RESSOURCE,
-        emoji: "pierre"
+        name: ResourceEnum.PIERRE, job: undefined, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "pierre"
     },
     [ResourceEnum.LAINE_DE_BOUFTOU]: {
         name: ResourceEnum.LAINE_DE_BOUFTOU,
@@ -160,26 +140,24 @@ const Ressources: Record<ResourceEnum, Resource> = {
         emoji: "laine"
     },
     [ResourceEnum.CUIR]: {
-        name: ResourceEnum.CUIR,
-        job: undefined,
-        level: LevelEnum.LEVEL_0,
-        type: ItemType.RESSOURCE,
-        emoji: "cuir"
+        name: ResourceEnum.CUIR, job: undefined, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "cuir"
     },
     [ResourceEnum.TISSU]: {
-        name: ResourceEnum.TISSU,
-        job: undefined,
-        level: LevelEnum.LEVEL_0,
-        type: ItemType.RESSOURCE,
-        emoji: "tissu"
+        name: ResourceEnum.TISSU, job: undefined, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "tissu"
     },
     [ResourceEnum.OEUF]: {
         name: ResourceEnum.OEUF,
         job: undefined,
         level: LevelEnum.LEVEL_0,
         type: ItemType.RESSOURCE
-    }
-
+    },
+    [ResourceEnum.BOUFTOU]: {
+        name: ResourceEnum.BOUFTOU,
+        job: undefined,
+        level: LevelEnum.LEVEL_0,
+        type: ItemType.RESSOURCE,
+        emoji: "bouftou"
+    },
 };
 
 export default Resource;

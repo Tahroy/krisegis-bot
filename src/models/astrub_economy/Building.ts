@@ -1,5 +1,4 @@
 import {CraftEnum, ResourceEnum} from "./Enums";
-import Craft from "./Craft";
 
 class Building {
     name!: string
@@ -156,11 +155,12 @@ const Buildings: Record<BuildingEnum, Building> = {
     [BuildingEnum.BOUFTONNERIE]: {
         name: BuildingEnum.BOUFTONNERIE,
         description: "Une bouftonnerie habituée par un vieil homme en fin de carrière. Il a décidé de s'installer à Astrub et d'offrir son expertise à ceux qui viennent nourrir ses bêtes",
+        shortDescription: "Débloque les bouftous",
         recipe: {
-            [RessourcesEnum.BLE]: 2500,
-            [RessourcesEnum.PIERRE]: 1000,
-            [CraftEnum.PLANCHE]: 1000,
-            [RessourcesEnum.KAMAS]: 10000
+            [ResourceEnum.BLE]: 2500,
+            [ResourceEnum.PIERRE]: 1000,
+            [CraftEnum.PLANCHE_NOYER]: 100,
+            [ResourceEnum.KAMAS]: 10000
         },
         image: 'bouftonnerie.png'
     }
