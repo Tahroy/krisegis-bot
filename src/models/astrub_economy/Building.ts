@@ -161,10 +161,10 @@ const Buildings: Record<BuildingEnum, Building> = {
             [ResourceEnum.BLE]: 1000,
             [CraftEnum.PLANCHE_FRENE]: 100,
             [CraftEnum.LINGOT_FER]: 100,
-            [CraftEnum.PLANCHE_CHATAIGNIER]: 75,
-            [CraftEnum.LINGOT_CUIVRE]: 75,
-            [CraftEnum.PLANCHE_NOYER]: 50,
-            [CraftEnum.LINGOT_BRONZE]: 50,
+            [CraftEnum.PLANCHE_CHATAIGNIER]: 50,
+            [CraftEnum.LINGOT_CUIVRE]: 50,
+            [CraftEnum.PLANCHE_NOYER]: 25,
+            [CraftEnum.LINGOT_BRONZE]: 25,
             [ResourceEnum.KAMAS]: 10000
         },
         image: 'bouftonnerie.png'
