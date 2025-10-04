@@ -257,7 +257,7 @@ export default class Statut extends AbstractSubCommand {
             }
         })
 
-        const playersIds = players.map(player => player.id)
+        const playersUserIds = players.map(player => player.userId)
 
         // Actifs depuis 72 heures
         for (const [key, jobName] of Object.entries(JobEnum)) {
@@ -268,7 +268,7 @@ export default class Statut extends AbstractSubCommand {
                     level: {
                         [Op.gte]: 1
                     },
-                    userId: playersIds
+                    userId: { [Op.in]: playersUserIds }
                 }, order: [['experience', 'DESC']]
             });
 
