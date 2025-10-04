@@ -12,11 +12,7 @@ export class BreedingService {
      * Calcule la production de laine selon le nombre de repas pris aujourd'hui
      */
     private static productionFor(feedCountToday: number): number {
-        if (!feedCountToday) {
-            return 0;
-        }
-
-        return 1 + Math.floor(Math.random() * feedCountToday);
+        return feedCountToday;
     }
 
     /**
