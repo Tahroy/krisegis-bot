@@ -7,16 +7,20 @@ export class MeteoService {
     public static async updateMeteo(guildId: string) {
         const meteos = Object.values(Meteos);
 
-        // On trie les météos pour avoir seulement celles avec active à true
-        const meteosActive = meteos.filter(m => m.active);
+        // On trie les météos disponibles pour le mois courant
+        const now = new Date();
+        const meteosDisponibles = meteos.filter(m => m.isAvailableFor(now));
 
-        let randomMeteo = meteosActive[Math.floor(Math.random() * meteosActive.length)];
+        // Si aucune météo n'est disponible selon les périodes, on retombe sur toutes (fallback)
+        const pool = meteosDisponibles.length > 0 ? meteosDisponibles : meteos;
+
+        let randomMeteo = pool[Math.floor(Math.random() * pool.length)];
 
         const currentWeather = await WeatherGuild.findOne({where: {guildId}});
 
-        // Si c'est la même météo, on relance UNE fois
+        // Si c'est la même météo, on relance UNE fois depuis le même pool
         if (currentWeather && currentWeather.name === randomMeteo.name) {
-            randomMeteo = meteosActive[Math.floor(Math.random() * meteosActive.length)];
+            randomMeteo = pool[Math.floor(Math.random() * pool.length)];
         }
 
         await MeteoService.sauvegarderMeteo(randomMeteo, guildId);

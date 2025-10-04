@@ -5,7 +5,7 @@ import Job from '../../models/astrub_economy/Job'
 import Player from "../../models/astrub_economy/Player";
 import {PlayerService} from "../../services/PlayerService";
 import Resource, {Ressources} from "../../models/astrub_economy/Resource";
-import {Meteos} from "../../models/astrub_economy/Meteo";
+import {Meteos, MeteosEnum} from "../../models/astrub_economy/Meteo";
 import JobUtil from "../../services/JobUtil";
 import {MeteoService} from "../../services/MeteoService";
 import ItemService from "../../services/ItemService";
@@ -50,9 +50,17 @@ class Recolte extends AbstractSubCommand {
         const player: Player = await JobUtil.getPlayer(interaction.user, guildId);
         const job: Job = await player.getJob(item.job ?? '');
 
-        // Si la dernière récolte était il y a moins de 15 min, on refuse
-        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, 15)) {
-            const timeBeforeNext = JobUtil.getTimeBeforeNextHarvest(player.lastHarvest, 15)
+        // On calcule le délai entre 2 récoltes (par défaut 15 min)
+        const meteoName = await MeteoService.chargerMeteo(guildId);
+        let cooldownMinutes = 15;
+        if (meteoName === MeteosEnum.IRE_DJAUL) {
+            // +10% => 16 minutes 30 secondes
+            cooldownMinutes = 16.5;
+        }
+
+        // Si la dernière récolte est trop récente, on refuse
+        if (player.lastHarvest && JobUtil.isLessThanXMinutesAgo(player.lastHarvest, cooldownMinutes)) {
+            const timeBeforeNext = JobUtil.getTimeBeforeNextHarvest(player.lastHarvest, cooldownMinutes)
 
             const minutes = Math.floor((timeBeforeNext % 3600000) / 60000)
             const seconds = Math.floor((timeBeforeNext % 60000) / 1000)
