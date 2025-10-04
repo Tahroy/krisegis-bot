@@ -1,28 +1,58 @@
+import {DataTypes, Model, Optional} from 'sequelize';
+import sequelize from '../../utils/database';
+
 interface BouftouAttributes {
     id: number;
-    name: string;
+    userId: string;
     guildId: string;
-    feedUntil: Date;
-    
+    name: string;
+    emoji: string;
+    isAlive: boolean;
+    feedCountToday: number; // 0..3
+    daysWithoutFood: number; // 0..3
+    lastFeedAt: Date | null; // dernière date de nourrissage
 }
 
-/*
-const Bouftou = sequelize.define('Bouftou', {
-    ownerId: {
-        type: DataTypes.STRING,
-        allowNull: false
+type BouftouCreationAttributes = Optional<BouftouAttributes, 'id' | 'isAlive' | 'feedCountToday' | 'daysWithoutFood' | 'lastFeedAt'>;
+
+class Bouftou extends Model<BouftouAttributes, BouftouCreationAttributes> implements BouftouAttributes {
+    public id!: number;
+    public userId!: string;
+    public guildId!: string;
+    public name!: string;
+    public emoji!: string;
+    public isAlive!: boolean;
+    public feedCountToday!: number;
+    public daysWithoutFood!: number;
+    public lastFeedAt!: Date | null;
+}
+
+Bouftou.init({
+    id: {
+        type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true,
+    }, userId: {
+        type: DataTypes.STRING, allowNull: false,
+    }, guildId: {
+        type: DataTypes.STRING, allowNull: false,
+    }, name: {
+        type: DataTypes.STRING(50), allowNull: false,
+    }, emoji: {
+        type: DataTypes.STRING(50), allowNull: false
+    }, isAlive: {
+        type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true,
+    }, feedCountToday: {
+        type: DataTypes.INTEGER, allowNull: false, defaultValue: 0,
+    }, daysWithoutFood: {
+        type: DataTypes.INTEGER, allowNull: false, defaultValue: 0,
+    }, lastFeedAt: {
+        type: DataTypes.DATE, allowNull: true, defaultValue: null,
     },
-    farmId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    feedUntil: {
-        type: DataTypes.DATE,
-        allowNull: true // Jusqu'à quand il est nourri
-    },
-    woolStock: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0 // Stock de laine cumulée
-    }
+}, {
+    sequelize,
+    modelName: 'Bouftou',
+    tableName: 'bouftous',
+    timestamps: true,
+    indexes: [{fields: ['guildId']}, {fields: ['userId']}, {unique: true, fields: ['guildId', 'name']},],
 });
- */
+
+export default Bouftou;

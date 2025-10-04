@@ -154,6 +154,7 @@ const Ressources: Record<ResourceEnum, Resource> = {
     [ResourceEnum.BOUFTOU]: {
         name: ResourceEnum.BOUFTOU,
         job: undefined,
+        buy: 5000,
         level: LevelEnum.LEVEL_0,
         type: ItemType.RESSOURCE,
         emoji: "bouftou"

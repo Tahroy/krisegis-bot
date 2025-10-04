@@ -135,13 +135,27 @@ module.exports = (client: KrisegisClient) => {
     };
 
     const gererModal = async (interaction: ModalSubmitInteraction) => {
-        const [commandName, modalName] = interaction.customId.split('-', 2);
+        const [rawCommandName, modalName] = interaction.customId.split('-', 2);
+        const [commandName] = rawCommandName.split('|');
 
+        // Legacy
         const command = client.commands?.get(commandName);
         try {
-            return await command?.gererModal(interaction, modalName);
+            if (command) {
+                return await command?.gererModal(interaction, modalName);
+            }
         } catch (error) {
             console.error(error);
+            return;
+        }
+
+        const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
+        if (typedCommand) {
+            try {
+                return await typedCommand.gererModal(interaction);
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 

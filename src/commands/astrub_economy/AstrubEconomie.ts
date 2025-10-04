@@ -15,6 +15,7 @@ import Acheter from "./Acheter";
 import {Prier} from "./Prier";
 import Quetes from "./Quetes";
 import Statut from "./Statut";
+import Bouftonnerie from "./Bouftonnerie";
 
 class AstrubEconomie extends AbstractCommand {
     description: string = "Jeu d'économie via Krisegis";
@@ -37,6 +38,7 @@ class AstrubEconomie extends AbstractCommand {
         this.subCommands.set('prier', Prier)
         this.subCommands.set('quetes', Quetes)
         this.subCommands.set('statut', Statut)
+        this.subCommands.set('bouftonnerie', Bouftonnerie)
     }
 
     protected addOptions(builder: SlashCommandBuilder) {

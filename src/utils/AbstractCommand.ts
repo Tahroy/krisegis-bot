@@ -53,7 +53,19 @@ abstract class AbstractCommand {
     };
 
     async gererModal(interaction: ModalSubmitInteraction): Promise<void> {
-        await interaction.reply({content: `Non implémenté`})
+        const customID = interaction.customId;
+        const split = customID.split('-');
+        const subCommandName = (split[0].split('|')[1] ?? null);
+
+        if (subCommandName) {
+            const subCommand = this.subCommands.get(subCommandName);
+            if (subCommand) {
+                const subCommandInstance = new subCommand();
+                await subCommandInstance.gererModal(interaction);
+                return;
+            }
+        }
+        await interaction.reply({content: 'Non implémenté'})
     }
 
     addSubCommands(builder: SlashCommandBuilder): void {

@@ -19,8 +19,9 @@ import {Op} from "sequelize";
 import {JobEnum} from "../../models/astrub_economy/Enums";
 import {Meteos} from "../../models/astrub_economy/Meteo";
 import {MeteoService} from "../../services/MeteoService";
-import {PlayerService} from "../../services/PlayerService";
 import Player from "../../models/astrub_economy/Player";
+import BouftonnerieState from "../../models/astrub_economy/BouftonnerieState";
+import Bouftou from "../../models/astrub_economy/Bouftou";
 
 export default class Statut extends AbstractSubCommand {
     name: string = 'statut';
@@ -33,6 +34,7 @@ export default class Statut extends AbstractSubCommand {
     readonly TYPE_POPULATION = 'population'
     readonly TYPE_RECOLTEURS = 'recolteurs';
     readonly TYPE_METEO = 'meteo';
+    readonly TYPE_BOUFTONNERIE = 'bouftonnerie';
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {
         builder.addStringOption(option => option
@@ -40,12 +42,13 @@ export default class Statut extends AbstractSubCommand {
             .setDescription('Type d\'information à afficher')
             .setRequired(true)
             .addChoices({name: 'Quêtes en cours', value: this.TYPE_QUESTS}, {
-                name: 'Bâtiments',
-                value: this.TYPE_BUILDINGS
+                name: 'Bâtiments', value: this.TYPE_BUILDINGS
             }, {name: 'Réserve communautaire', value: this.TYPE_RESERVE}, {
-                name: 'Population',
-                value: this.TYPE_POPULATION
-            }, {name: 'Récolteurs', value: this.TYPE_RECOLTEURS}, {name: 'Météo', value: this.TYPE_METEO}));
+                name: 'Population', value: this.TYPE_POPULATION
+            }, {name: 'Récolteurs', value: this.TYPE_RECOLTEURS}, {
+                name: 'Météo',
+                value: this.TYPE_METEO
+            }, {name: 'Bouftonnerie', value: this.TYPE_BOUFTONNERIE}));
     }
 
     public async execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -69,6 +72,9 @@ export default class Statut extends AbstractSubCommand {
                 break;
             case this.TYPE_METEO:
                 await this.showMeteo(interaction);
+                break;
+            case this.TYPE_BOUFTONNERIE:
+                await this.showBouftonnerie(interaction);
                 break;
             default:
                 await interaction.reply({
@@ -250,8 +256,7 @@ export default class Statut extends AbstractSubCommand {
 
         const players = await Player.findAll({
             where: {
-                guildId: interaction.guild?.id,
-                lastHarvest: {
+                guildId: interaction.guild?.id, lastHarvest: {
                     [Op.gte]: new Date(Date.now() - 72 * 60 * 60 * 1000)
                 }
             }
@@ -263,12 +268,9 @@ export default class Statut extends AbstractSubCommand {
         for (const [key, jobName] of Object.entries(JobEnum)) {
             const jobs = await Job.findAll({
                 where: {
-                    guildId: interaction.guild?.id,
-                    name: jobName,
-                    level: {
+                    guildId: interaction.guild?.id, name: jobName, level: {
                         [Op.gte]: 1
-                    },
-                    userId: { [Op.in]: playersUserIds }
+                    }, userId: {[Op.in]: playersUserIds}
                 }, order: [['experience', 'DESC']]
             });
 
@@ -304,6 +306,52 @@ export default class Statut extends AbstractSubCommand {
             const channel: SendableChannels = interaction.channel as SendableChannels;
             await channel.send({embeds: [embed]});
         }
+    }
+
+    private async showBouftonnerie(interaction: ChatInputCommandInteraction): Promise<void> {
+        const guildId = interaction.guild?.id as string;
+
+        // Vérifie si la Bouftonnerie est construite
+        const bouftonnerieBuilt = await BuildingGuild.findOne({
+            where: {guildId: guildId, name: 'Bouftonnerie', status: 'completed'}
+        });
+
+        if (!bouftonnerieBuilt) {
+            await interaction.reply({
+                content: "La Bouftonnerie n'est pas encore construite.",
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        // Récupération de la bouftonnerie
+        const [state] = await BouftonnerieState.findOrCreate({
+            where: {guildId}, defaults: {guildId, capacity: 3}
+        });
+
+        const bouftous = await Bouftou.findAll({
+            where: {guildId}, order: [['isAlive', 'DESC'], ['name', 'ASC']]
+        });
+
+        const aliveCount = bouftous.filter(b => b.isAlive).length;
+        const capacity = state.capacity;
+
+        const lines: string[] = [];
+        for (const b of bouftous) {
+            const emoji = await JobUtil.getEmojiByName(b.emoji, interaction.client);
+            lines.push(`- ${emoji} ${b.name} 
+            — Repas aujourd'hui : ${b.feedCountToday}/3 
+            — Jours sans manger : ${b.daysWithoutFood}`);
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle('État de la Bouftonnerie')
+            .setColor('#0099ff')
+            .setDescription(lines.join('\n'))
+            .addFields({name: 'Capacité', value: `${aliveCount} / ${capacity}`, inline: true},)
+            .setTimestamp();
+
+        await interaction.reply({embeds: [embed]});
     }
 
     private async showMeteo(interaction: ChatInputCommandInteraction): Promise<void> {

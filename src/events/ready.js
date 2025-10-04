@@ -10,14 +10,14 @@ const moment = require('moment/moment')
 const {readdirSync} = require("fs");
 const {join} = require("path");
 const Monster = require("../models/Monster").default;
-import JobUtil from '../services/JobUtil';
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
 import WeatherGuild from "../models/astrub_economy/WeatherGuild";
 import associate from "../models/associations";
 import Population from "../models/astrub_economy/Population";
 import Quest from "../models/astrub_economy/Quest";
-import Constantes from "../utils/Constantes";
 import NotificationService from "../services/NotificationService";
+import Bouftou from "../models/astrub_economy/Bouftou";
+import BouftonnerieState from "../models/astrub_economy/BouftonnerieState";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -35,8 +35,8 @@ const WelcomeMessage = require('../models/WelcomeMessage').default
 const Job = require('../models/astrub_economy/Job').default
 const Player = require('../models/astrub_economy/Player').default
 
-const eventReminderCheckInterval = 60 * 1000 // Intervalle de vérification des rappels (5 minutes dans cet exemple)
-const eventReminderTime = 60 * 60 * 1000 // Durée en millisecondes avant le rappel (1 heure dans cet exemple)
+const eventReminderCheckInterval = 60 * 1000
+const eventReminderTime = 60 * 60 * 1000
 
 module.exports = async function (client) {
     async function synchroBDD() {
@@ -61,6 +61,8 @@ module.exports = async function (client) {
         await WeatherGuild.sync();
         await Population.sync();
         await Quest.sync();
+        await Bouftou.sync();
+        await BouftonnerieState.sync();
         associate();
         console.log('BDD Synchro !')
     }

@@ -38,20 +38,22 @@ class JobUtil {
             return '';
         }
 
+        return this.getEmojiByName(item.emoji, client)
+    }
+
+    static async getEmojiByName(search:string, client: Client): Promise<string> {
         if (!client.application) {
             return '';
         }
 
-
         const clientApplicationEmojis = await client.application.emojis.fetch()
 
-        const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === item.emoji)
+        const searchEmoji = clientApplicationEmojis.find(emoji => emoji.name === search)
 
         if (!searchEmoji) {
             return '';
         }
         return `<:${searchEmoji.name}:${searchEmoji.id}>`
-
     }
 
     static async getBuildingsGuild(guild: Guild | null): Promise<string[]> {
