@@ -39,10 +39,10 @@ export class PlayerService {
 
     }
 
-    public static async getItem(user: User, name: ResourceEnum | CraftEnum | string, guild: Guild): Promise<PlayerItem | null> {
+    public static async getItem(user: User|null, name: ResourceEnum | CraftEnum | string, guild: Guild): Promise<PlayerItem | null> {
         return await PlayerItem.findOne({
             where: {
-                userId: user.id,
+                userId: user ? user.id : 'reserve',
                 guildId: guild.id,
                 name: name,
             },

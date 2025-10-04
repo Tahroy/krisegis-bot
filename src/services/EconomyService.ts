@@ -38,11 +38,11 @@ export class EconomyService {
         const neutralPrices: Partial<Record<ResourceEnum, number>> = {
             [ResourceEnum.KAMAS]: 1,
             [ResourceEnum.PIERRE]: 1,
-            [ResourceEnum.LAINE_DE_BOUFTOU]: 4,
+            [ResourceEnum.LAINE_DE_BOUFTOU]: 50,
             [ResourceEnum.CUIR]: 6,
             [ResourceEnum.TISSU]: 6,
             [ResourceEnum.OEUF]: 4,
-            [ResourceEnum.BOUFTOU]: 2000
+            [ResourceEnum.BOUFTOU]: 5000
         };
 
         if (item.type === ItemType.RESSOURCE) {

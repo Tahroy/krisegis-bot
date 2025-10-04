@@ -1,42 +1,34 @@
-import AbstractSubCommand from "../../utils/AbstractSubCommand";
+import AbstractSubCommand from "../../../utils/AbstractSubCommand";
 import {
     ActionRowBuilder,
+    ApplicationCommandOptionChoiceData,
+    AutocompleteInteraction,
     ChatInputCommandInteraction,
-    MessageFlags,
-    ModalBuilder,
-    TextInputBuilder,
-    TextInputStyle
+    MessageFlags, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle,
 } from "discord.js";
-import BuildingGuild from "../../models/astrub_economy/BuildingGuild";
-import {BuildingEnum} from "../../models/astrub_economy/Building";
-import BouftonnerieState from "../../models/astrub_economy/BouftonnerieState";
-import Bouftou from "../../models/astrub_economy/Bouftou";
-import JobUtil from "../../services/JobUtil";
-import {PlayerService} from "../../services/PlayerService";
-import {ResourceEnum} from "../../models/astrub_economy/Enums";
-import {ItemType} from "../../utils/Enums";
+import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
+import {BuildingEnum} from "../../../models/astrub_economy/Building";
+import JobUtil from "../../../services/JobUtil";
+import BouftouModel from "../../../models/astrub_economy/Bouftou";
+import {PlayerService} from "../../../services/PlayerService";
+import {ResourceEnum} from "../../../models/astrub_economy/Enums";
+import {ItemType} from "../../../utils/Enums";
+import {Ressources} from "../../../models/astrub_economy/Resource";
+import BouftonnerieState from "../../../models/astrub_economy/BouftonnerieState";
+import Bouftou from "../../../models/astrub_economy/Bouftou";
 
-const MODAL_ID_PREFIX = 'astrub_economie|bouftonnerie-ajouter_';
+const MODAL_ID_PREFIX = 'astrub_economie|bouftou|ajouter|';
 
-class Bouftonnerie extends AbstractSubCommand {
-    name: string = 'bouftonnerie';
-    description: string = "Gérer la bouftonnerie (ajouter un bouftou)";
+class Nourrir extends AbstractSubCommand {
+    name: string = 'ajouter';
+    description: string = "Ajouter un bouftou";
+
+    private readonly OPTION_NOM = 'nom';
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+
         const guild = interaction.guild;
         if (!guild) {
-            await interaction.reply({
-                content: 'Cette commande doit être utilisée dans un serveur.', flags: MessageFlags.Ephemeral
-            });
-            return;
-        }
-
-        // Vérifier que la Bouftonnerie est construite
-        const building = await BuildingGuild.findOne({where: {guildId: guild.id, name: BuildingEnum.BOUFTONNERIE}});
-        if (!building || building.status !== 'completed') {
-            await interaction.reply({
-                content: "La Bouftonnerie n'est pas encore construite.", flags: MessageFlags.Ephemeral
-            });
             return;
         }
 
@@ -57,12 +49,11 @@ class Bouftonnerie extends AbstractSubCommand {
         }
 
         // On vérifie que le joueur a un bouftou dans son inventaire
-        const playerItem = await PlayerService.getItem(interaction.user, ResourceEnum.BOUFTOU, interaction.guild)
+        const playerItem = await PlayerService.getItem(interaction.user, ResourceEnum.BOUFTOU, guild)
 
         if (!playerItem || playerItem.quantity < 1) {
             await interaction.reply({
-                content: `Vous devez acheter un bouftou pour en ajouter`,
-                flags: MessageFlags.Ephemeral
+                content: `Vous devez acheter un bouftou pour en ajouter`, flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -73,7 +64,7 @@ class Bouftonnerie extends AbstractSubCommand {
             .setTitle('Ajouter un bouftou');
 
         const nameInput = new TextInputBuilder()
-            .setCustomId('name')
+            .setCustomId(this.OPTION_NOM)
             .setLabel('Nom du bouftou')
             .setStyle(TextInputStyle.Short)
             .setMinLength(3)
@@ -86,7 +77,10 @@ class Bouftonnerie extends AbstractSubCommand {
         await interaction.showModal(modal);
     }
 
-    async gererModal(interaction: any): Promise<void> {
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    }
+
+    async gererModal(interaction: ModalSubmitInteraction): Promise<void> {
         if (!interaction.guild) {
             await interaction.reply({
                 content: 'Cette commande doit être utilisée dans un serveur.', flags: MessageFlags.Ephemeral
@@ -94,15 +88,10 @@ class Bouftonnerie extends AbstractSubCommand {
             return;
         }
 
-        const [, modalFull] = interaction.customId.split('-', 2);
-        if (!modalFull.startsWith('ajouter_')) {
-            return;
-        }
-
         const guildId = interaction.guild.id;
 
         // Validation du nom
-        const name: string = interaction.fields.getTextInputValue('name')?.trim();
+        const name: string = interaction.fields.getTextInputValue(this.OPTION_NOM)?.trim();
 
         // Re-check capacité et nom du bouftou dans le doute
         const state = await BouftonnerieState.findOne({where: {guildId}});
@@ -142,4 +131,4 @@ class Bouftonnerie extends AbstractSubCommand {
     }
 }
 
-export default Bouftonnerie;
+export default Nourrir;

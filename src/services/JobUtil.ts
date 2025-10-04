@@ -3,7 +3,7 @@ import {Client, Guild, User} from "discord.js";
 import Player from "../models/astrub_economy/Player";
 import KrisegisClient from "../models/KrisegisClient";
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
-import {Building, Buildings} from "../models/astrub_economy/Building";
+import {Building, BuildingEnum, Buildings} from "../models/astrub_economy/Building";
 import {LevelEnum} from "../models/astrub_economy/Enums";
 import {Op} from "sequelize";
 
@@ -100,7 +100,7 @@ class JobUtil {
         return guild.channels.cache.find(channel => (channel.name === 'Astrub Économie') || (channel.name === 'astrub-economie'))
     }
 
-    public static async isBuildingConstructed(guildId: string, buildingName: string): Promise<boolean> {
+    public static async isBuildingConstructed(guildId: string, buildingName: BuildingEnum): Promise<boolean> {
         const buildingGuild = await BuildingGuild.findOne({
             where: {
                 guildId: guildId,

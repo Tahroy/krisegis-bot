@@ -3,6 +3,7 @@ import KrisegisClient from "../models/KrisegisClient";
 import {MeteoService} from "./MeteoService";
 import {PopulationService} from "./PopulationService";
 import {QuestService} from "./QuestService";
+import BreedingService from "./BreedingService";
 
 /**
  * NotificationService
@@ -16,13 +17,14 @@ export class NotificationService {
      */
     static startSchedulers(client: KrisegisClient) {
         // Quotidien à 10:00
-        cron.schedule('0 10 * * *', async () => {
+        cron.schedule('* * * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await MeteoService.updateMeteo(guild.id);
                     await MeteoService.annoncerMeteo(client, guild.id);
                     await PopulationService.updatePopulation(guild.id);
                     await PopulationService.annoncePopulation(client, guild.id);
+                    await BreedingService.runDaily(client, guild);
                 } catch (error) {
                     console.error(error);
                 }
