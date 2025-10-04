@@ -17,7 +17,7 @@ export class NotificationService {
      */
     static startSchedulers(client: KrisegisClient) {
         // Quotidien à 10:00
-        cron.schedule('* * * * *', async () => {
+        cron.schedule('* 10 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await MeteoService.updateMeteo(guild.id);
