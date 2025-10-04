@@ -94,7 +94,6 @@ module.exports = {
         console.log(debugMessage)
 
         if (!guild) {
-            console.log('guild non trouvé')
             return
         }
 
@@ -105,7 +104,6 @@ module.exports = {
             }
         }).then(async (debugChannel) => {
             if (!debugChannel) {
-                console.log('debugChannel non trouvé')
                 return
             }
 
@@ -208,7 +206,7 @@ module.exports = {
         await interaction.respond(choices)
     },
 
-    checkTags (member) {
+    async checkTags (member) {
         Server.findAll({
             where: { guild: member.guild.id }
         }).then(async (servers) => {
@@ -225,10 +223,11 @@ module.exports = {
                     }
                 }
 
-                let nickName = member.nickname || member.user.username
+                let nickName = member.nickname || member.user.globalName || member.user.username
                 if (nickName.includes('[') && nickName.includes(']')) {
                     [, nickName] = nickName.split('] ', 2)
                 }
+                console.log(nickName)
 
                 console.log(`Tag : ${tag} | Nickname : ${nickName}`)
 
@@ -248,7 +247,7 @@ module.exports = {
 
     /**
      * @deprecated
-     * @use PlayerItemService.addPlayerItem
+     * @use PlayerService.addPlayerItem
      * @param user
      * @param name
      * @param type
@@ -258,7 +257,7 @@ module.exports = {
         let playerItem = await PlayerItem.findOne({
             where: {
                 name: name,
-                user_id: user.id
+                userId: user.id
             }
         })
 
@@ -268,7 +267,7 @@ module.exports = {
         } else {
             playerItem = await PlayerItem.create({
                 name: name,
-                user_id: user.id,
+                userId: user.id,
                 quantity: 1,
                 type: type
             })

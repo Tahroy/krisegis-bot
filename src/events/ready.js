@@ -10,8 +10,14 @@ const moment = require('moment/moment')
 const {readdirSync} = require("fs");
 const {join} = require("path");
 const Monster = require("../models/Monster").default;
-import JobUtil from '../commands/astrub_economy/JobUtil';
+import JobUtil from '../services/JobUtil';
 import BuildingGuild from "../models/astrub_economy/BuildingGuild";
+import WeatherGuild from "../models/astrub_economy/WeatherGuild";
+import associate from "../models/associations";
+import Population from "../models/astrub_economy/Population";
+import Quest from "../models/astrub_economy/Quest";
+import Constantes from "../utils/Constantes";
+import NotificationService from "../services/NotificationService";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -52,35 +58,87 @@ module.exports = async function (client) {
         await Player.sync();
         await PlayerHouse.sync();
         await BuildingGuild.sync()
+        await WeatherGuild.sync();
+        await Population.sync();
+        await Quest.sync();
+        associate();
         console.log('BDD Synchro !')
     }
 
     async function synchroCommands(rest) {
-        let slashCommands = []
+        let globalSlashCommands = []
+        const guildCommandMap = new Map()
 
-        // Commandes générales
+        const allowedGuildIds = [
+            '185464480346537984',   // Discord RP
+            '1113468001379962880',  // Discord test
+            '641999599099445279'    // Discord Nellonia
+        ];
+
+        // Vieilles commandes JS
         for (const command of client.commands) {
             const commandData = command[1]
 
             if (!commandData.description) {
                 commandData.description = '- Sans description'
             }
-            let slashCommand = commandData.data
-            slashCommands.push(slashCommand)
+            const slashCommand = commandData.data
+
+            if (commandData.public === false) {
+                for (const guildId of allowedGuildIds) {
+                    const list = guildCommandMap.get(guildId) || []
+                    list.push(slashCommand)
+                    guildCommandMap.set(guildId, list)
+                }
+            } else {
+                globalSlashCommands.push(slashCommand)
+            }
         }
 
+        // Nouvelles commandes
         for (const command of client.typedCommands) {
-            const commandData = command[1]
+            const commandInstance = command[1]
+            const slashCommand = commandInstance.getSlashCommandBuild()
 
-            let slashCommand = commandData.getSlashCommandBuild()
-            slashCommands.push(slashCommand)
+            if (commandInstance.public === false) {
+                for (const guildId of allowedGuildIds) {
+                    const list = guildCommandMap.get(guildId) || []
+                    list.push(slashCommand)
+                    guildCommandMap.set(guildId, list)
+                }
+            } else {
+                globalSlashCommands.push(slashCommand)
+            }
         }
 
-        slashCommands = slashCommands.map(command => command.toJSON())
+        // Conversion en JSON
+        globalSlashCommands = globalSlashCommands.map(command => command.toJSON())
+        for (const [guildId, commands] of guildCommandMap.entries()) {
+            const jsonCommands = commands.map(command => command.toJSON())
+            guildCommandMap.set(guildId, jsonCommands)
+        }
 
-        await rest.put(Routes.applicationCommands(client_id), {body: slashCommands},)
-            .then(() => console.log('Successfully registered application commands.'))
-            .catch(console.error)
+        // Enregistrement global
+        if (globalSlashCommands.length > 0) {
+            await rest.put(Routes.applicationCommands(client_id), {body: globalSlashCommands})
+                .then(() => console.log('Successfully registered global application commands.'))
+                .catch(console.error)
+        }
+
+        // Enregistrement par guilde
+        for (const [guildId, commands] of guildCommandMap.entries()) {
+            // Ne tenter l'enregistrement que si le bot est présent dans la guilde
+            if (!client.guilds.cache.has(guildId)) {
+                console.warn(`Accès interdit pour le serveur ${guildId}.`)
+                continue;
+            }
+
+            await rest.put(Routes.applicationGuildCommands(client_id, guildId), {body: commands})
+                .then(() => console.log(`Commandes sauvegardées pour le serveur ${guildId}.`))
+                .catch((err) => {
+                    console.error(err)
+                })
+        }
     }
 
     async function synchroEmojis(client) {
@@ -104,10 +162,52 @@ module.exports = async function (client) {
     }
 
     async function listGuilds() {
+        console.log("--------------------------------------------------");
+        console.log("Serveurs où le bot est présent:");
         for (const guild of client.guilds.cache.values()) {
-            console.log(`- ${guild.name} (ID: ${guild.id})`)
+            console.log(`- ${guild.name} (ID: ${guild.id})`);
+
+            // Fetch all members of the guild
+            try {
+                await guild.members.fetch();
+            } catch (error) {
+                console.error(`Error fetching members for guild ${guild.name} (ID: ${guild.id}):`, error);
+                continue; // Skip to the next guild if there's an error
+            }
+
+            // Find the owner of the guild
+            try {
+                const owner = await guild.fetchOwner();
+                console.log(`    - Propriétaire: ${owner.user.tag} (ID: ${owner.id})`);
+            } catch (error) {
+                console.error(`Error fetching owner for guild ${guild.name} (ID: ${guild.id}):`, error);
+            }
+
+            // Find administrators
+            const administrators = guild.members.cache.filter(member => member.permissions.has('Administrator'));
+            if (administrators.size > 0) {
+                console.log(`    - Administrateurs:`);
+                for (const admin of administrators.values()) {
+                    console.log(`        - ${admin.user.tag} (ID: ${admin.id})`);
+                }
+            }
+
+            // Find moderators (members with Manage Messages, Kick Members, or Ban Members permissions)
+            const moderators = guild.members.cache.filter(member =>
+                member.permissions.has('ManageMessages') ||
+                member.permissions.has('KickMembers') ||
+                member.permissions.has('BanMembers')
+            );
+            if (moderators.size > 0) {
+                console.log(`    - Modérateurs:`);
+                for (const moderator of moderators.values()) {
+                    console.log(`        - ${moderator.user.tag} (ID: ${moderator.id})`);
+                }
+            }
         }
+        console.log("--------------------------------------------------");
     }
+
     client.once('ready', async () => {
         console.log(`Krisegis V${version} prêt !`)
 
@@ -118,19 +218,21 @@ module.exports = async function (client) {
         await synchroEmojis(client);
         await listGuilds()
         await checkEventReminders()
-        const jobUtil = new JobUtil();
-        await jobUtil.startReminder(client);
-
+        await NotificationService.startSchedulers(client);
     })
 
     function checkEventReminders() {
-        const a = setInterval(async () => {
+        setInterval(async () => {
             const scheduledEvents = await getScheduledEventsFromDatabase()
 
             const now = Date.now()
             for (const event of scheduledEvents) {
 
                 const guild = client.guilds.cache.get(event.guild)
+                if (!guild) {
+                    continue;
+                }
+
                 if (!guild.scheduledEvents) {
                     continue
                 }

@@ -3,7 +3,7 @@ const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const fs = require('fs')
 const path = require('path')
-const { PlayerService, ItemType } = require('../services/playerItemService')
+const { PlayerService, ItemType } = require('../services/PlayerService')
 
 
 const WABBITS_NAMES = {
@@ -133,7 +133,7 @@ module.exports = {
 
             const wabbitName = WABBITS_NAMES[channelData.image]
 
-            await PlayerService.addPlayerItem(user, wabbitName, ItemType.WABBIT)
+            await PlayerService.addPlayerItem(user, wabbitName, ItemType.WABBIT, 1, interaction.guild.id ?? 0)
 
             return interaction.reply(`${userName} a capturé un ${wabbitName} ! Il a maintenant ${userScore} point${plural}`)
         }

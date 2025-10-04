@@ -1,20 +1,19 @@
 import {
     AutocompleteInteraction,
-    ButtonInteraction, Collection,
-    CommandInteraction, CommandInteractionOptionResolver,
+    ButtonInteraction, CommandInteraction, CommandInteractionOptionResolver,
     ModalSubmitInteraction,
     SlashCommandBuilder
 } from "discord.js";
 import AbstractSubCommand from "./AbstractSubCommand";
-import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
 
 abstract class AbstractCommand {
     abstract name: string;
     abstract description: string;
+    public: boolean = true;
     subCommands: Map<string, new () => AbstractSubCommand> = new Map();
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
             return;
         }
 
@@ -28,14 +27,25 @@ abstract class AbstractCommand {
     }
 
     async executeButton(interaction: ButtonInteraction): Promise<void> {
-        await interaction.reply({content: 'Not implemented', ephemeral: true})
+        const customID = interaction.customId;
+        const split = customID.split('-');
+        const subCommandName = split[0].split('|')[1] ?? null
+
+        if (subCommandName) {
+            const subCommand = this.subCommands.get(subCommandName);
+            if (subCommand) {
+                const subCommandInstance = new subCommand();
+                await subCommandInstance.executeButton(interaction);
+                return;
+            }
+        }
+        await interaction.reply({content: 'Non implémenté', ephemeral: true})
     };
 
-    async automplete(interaction: AutocompleteInteraction): Promise<void> {
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const command = interaction.options.getSubcommand();
 
         const subCommand = this.subCommands.get(command);
-     //   console.log(subCommand)
         if (subCommand) {
             const subCommandInstance = new subCommand();
             await subCommandInstance.autocomplete(interaction);
@@ -43,7 +53,7 @@ abstract class AbstractCommand {
     };
 
     async gererModal(interaction: ModalSubmitInteraction): Promise<void> {
-        await interaction.reply({content: `Not implemented`})
+        await interaction.reply({content: `Non implémenté`})
     }
 
     addSubCommands(builder: SlashCommandBuilder): void {

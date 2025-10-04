@@ -18,8 +18,6 @@ import {ButtonStyle} from 'discord-api-types/v10'
 import {Op} from 'sequelize'
 import {MonsterAPIResponse} from "../dofusdb/types/monster";
 import {fetchMonsters, fetchNpcs} from "../dofusdb/api";
-import {join} from "path";
-import {PicturesManager} from "../utils/PicturesManager";
 import sequelize from '../utils/database';
 import CaptureTrade from "../models/CaptureTrade";
 import {CommandCooldownError} from "../exceptions/CommandCooldownError";
@@ -35,7 +33,6 @@ const timeBetweenCaptures = 60 * 60 * 1000 * 3
 const timeBetweenResetRoll = 60 * 60 * 1000 * 3
 const numberOfRolls = 5
 
-const cooldowns = new Map<string, number>(); // Gérer les timestamps par utilisateur et commande
 
 const subCommandRoll = new SlashCommandSubcommandBuilder();
 subCommandRoll.setName('roll').setDescription('Roll des monstres');
@@ -45,7 +42,7 @@ subCommandCaptures.setName('captures').setDescription('Liste de vos captures');
 
 const subCommandView = new SlashCommandSubcommandBuilder();
 subCommandView.setName('view').setDescription('Voir un monstre').addIntegerOption(
-    option => option.setName('id').setDescription('Monstre').setAutocomplete(true));
+    option => option.setName('id').setDescription('Monstre').setAutocomplete(true).setRequired(true));
 
 const subCommandTimer = new SlashCommandSubcommandBuilder();
 subCommandTimer.setName('timer').setDescription('Voir le temps restant pour roll ou capturer un monstre');
@@ -96,7 +93,7 @@ module.exports = {
     ,
 
     async execute(interaction: CommandInteraction) {
-        if (!interaction.isCommand() || !(interaction.options instanceof CommandInteractionOptionResolver)) {
+        if (!interaction.isChatInputCommand()) {
             return;
         }
         // Vérifier que l'interaction contient des sous-commandes avant d'essayer de les récupérer
@@ -144,18 +141,6 @@ module.exports = {
             const user = interaction.user;
             const guild = interaction.guild
             const timestamp: number = Date.now()
-
-            const currentTime = Date.now();
-            const key = `${user.id}:roll`;
-            const lastUsage = cooldowns.get(key);
-
-            if (lastUsage && currentTime - lastUsage < 3000) {
-                const timeBeforeNextRoll = Math.floor(5 - (timestamp - lastUsage) / 1000)
-                const purial = timeBeforeNextRoll > 1 ? 's' : ''
-                throw new CommandCooldownError(
-                    `Vous ne pouvez faire qu'un roll toutes les 3s. veuillez patienter ${timeBeforeNextRoll} seconde${purial}.`)
-            }
-            cooldowns.set(key, currentTime);
 
             const conditions = {
                 createdAt: {
@@ -428,21 +413,10 @@ module.exports = {
             return
         }
 
-        const imgName = capture.monsterId ? `${capture.monsterId}.png` : `${capture.npcId}.png`;
+        const user = interaction.user
+        const view = await capture.getView(user)
 
-        let name: string = await capture.getName();
-        let file: string = await capture.getImage();
-
-        const dateFr = capture.catchDate.toLocaleDateString('fr-FR', {
-            day: '2-digit', month: '2-digit', year: 'numeric'
-        })
-
-        const embed = new EmbedBuilder()
-            .setTitle(`${name}`)
-            .setDescription(`Capturé le ${dateFr}`)
-            .setImage(`attachment://${imgName}`)
-
-        await interaction.reply({embeds: [embed], files: [file]})
+        await interaction.reply({embeds: view.embeds, files: view.files, components: view.components})
     },
 
     async release(interaction: CommandInteraction) {
@@ -491,7 +465,7 @@ module.exports = {
 
         console.log("Synchro monstres")
 
-        let hasMonsters = false;
+        let hasMonsters = true;
         let total = 0;
         while (hasMonsters) {
             const conditionRequest = `?$skip=${skip}&$limit=${limit}`
@@ -966,6 +940,25 @@ module.exports = {
 
         }
 
+        async function viewMonster(interaction: ButtonInteraction) {
+            const params = interaction.customId.split('-')
+            const paramsBis = params[2].split('_')
+            const id = paramsBis[1]
+
+            const capture: typeof Capture = await Capture.findOne({where: {id: id}})
+            const user = interaction.guild?.members.cache.get(capture.catchUserId)
+
+            if (!user) {
+                await interaction.reply({content: 'Utilisateur introuvable !', flags: MessageFlags.Ephemeral})
+                return
+            }
+
+            const view = await capture.getView(user)
+
+            await interaction.deferUpdate()
+            await interaction.message.edit({embeds: view.embeds, files: view.files, components: view.components})
+        }
+
         switch (split[1]) {
             case subCommandTrade.name:
                 await tradeMonster(interaction)
@@ -976,6 +969,10 @@ module.exports = {
             }
             case subCommandCaptures.name: {
                 await capturesMonster(interaction)
+                return;
+            }
+            case subCommandView.name: {
+                await viewMonster(interaction)
                 return;
             }
         }
@@ -1010,12 +1007,12 @@ module.exports = {
                         where: {
                             catchUserId: user.id, // Filtre sur le modèle Capture
                             [Op.or]: [
-                                { '$monster.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Monster.name
-                                { '$npc.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Npc.name
+                                {'$monster.name$': {[Op.like]: `%${search}%`}}, // Filtre sur Monster.name
+                                {'$npc.name$': {[Op.like]: `%${search}%`}}, // Filtre sur Npc.name
                             ],
                             guildId: interaction.guild?.id ?? 0
                         },
-                //        order: [[Capture, 'id', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                        //        order: [[Capture, 'id', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                         limit: 25, // Limite des résultats
                     };
                     const captures = await Capture.findAll(userCapturesConditions);
@@ -1053,12 +1050,12 @@ module.exports = {
                         where: {
                             catchUserId: user?.value, // Filtre sur le modèle Capture
                             [Op.or]: [
-                                { '$monster.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Monster.name
-                                { '$npc.name$': { [Op.like]: `%${search}%` } }, // Filtre sur Npc.name
+                                {'$monster.name$': {[Op.like]: `%${search}%`}}, // Filtre sur Monster.name
+                                {'$npc.name$': {[Op.like]: `%${search}%`}}, // Filtre sur Npc.name
                             ],
                             guildId: interaction.guild?.id ?? 0
                         },
-                    //    order: [[Capture, 'id', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
+                        //    order: [[Capture, 'id', 'DESC']], // Remplacement des alias compliqués par une syntaxe simple
                         limit: 25, // Limite des résultats
                     };
                     const userCaptures = await Capture.findAll(userCapturesConditions);
@@ -1098,8 +1095,8 @@ module.exports = {
                         catchUserId: user.id,
                         guildId: interaction.guild?.id ?? 0,
                         [Op.or]: [
-                            { '$monster.name$': { [Op.like]: `%${search}%` } },
-                            { '$npc.name$': { [Op.like]: `%${search}%` } },
+                            {'$monster.name$': {[Op.like]: `%${search}%`}},
+                            {'$npc.name$': {[Op.like]: `%${search}%`}},
                         ],
                     },
                     order: [['id', 'DESC']],

@@ -1,10 +1,11 @@
-// Nous importons les classes SlashCommandBuilder, ActionRowBuilder et ButtonBuilder de 'discord.js'
-// ainsi que ButtonStyle de 'discord-api-types/v8'.
+import Constantes from "../utils/Constantes";
+
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js')
 const { ButtonStyle } = require('discord-api-types/v10')
 const { readdirSync } = require('node:fs')
 const { join, extname } = require('node:path')
-import { ItemType, PlayerService } from '../services/playerItemService'
+import { PlayerService } from '../services/PlayerService'
+import {ItemType} from "../utils/Enums";
 
 // Nous déclarons un tableau vide 'games'.
 let games = []
@@ -98,7 +99,7 @@ module.exports = {
 
                     delete games[key]
 
-                }, 1200)
+                }, 1500)
 
             } else {
                 // Sinon on continue de décrémenter le timer
@@ -118,14 +119,6 @@ module.exports = {
 
         // On vérifie que la personne qui clique est bien celle qui a lancé la partie
 
-        /*
-        if (userID !== interactionUserID) {
-            return interaction.reply({
-                content: 'Ceci n\'est pas votre kouinkouin !',
-                ephemeral: true
-            })
-        }
-        */
         const key = interaction.guild.id + '-' + interaction.member.user.id
 
         // Si l'action est de 'catchkouinkouin', on marque la partie comme gagnée
@@ -164,7 +157,13 @@ module.exports = {
                     6: "Kouinkouin noir",
                     7: "Kouinkouin"
                 }
-                await PlayerService.addPlayerItem(catcher.user, KOUINKOUINS[kouinkouinID], ItemType.KOUINKOUIN)
+                await PlayerService.addPlayerItem(
+                    catcher.user,
+                    KOUINKOUINS[kouinkouinID],
+                    ItemType.KOUINKOUIN,
+                    1,
+                    interaction.guild.id
+                )
             }
             else {
                 interaction.reply('Raté !')

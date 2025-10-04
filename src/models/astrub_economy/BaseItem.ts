@@ -1,9 +1,8 @@
-import {Ressources} from "./Ressource";
-import {Tools} from "./Tool";
+import {Ressources} from "./Resource";
 import {Crafts} from "./Craft";
-import {ItemType} from "../../services/playerItemService";
 import {JobEnum} from "./Enums";
 import {BuildingEnum} from "./Building";
+import {ItemType} from "../../utils/Enums";
 
 interface BaseItem {
     type: ItemType;
@@ -22,7 +21,6 @@ interface BaseItem {
 
 const Items: Record<string, Record<string, BaseItem>> = {
     ressources: Ressources,
-    tools: Tools,
     crafts: Crafts
 }
 

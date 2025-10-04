@@ -1,4 +1,5 @@
 const {SlashCommandBuilder} = require("discord.js");
+const Constantes = require("../utils/Constantes");
 
 module.exports = {
     opts: {},

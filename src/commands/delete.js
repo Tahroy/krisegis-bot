@@ -1,9 +1,11 @@
 const {SlashCommandBuilder, PermissionsBitField} = require("discord.js");
 const {PermissionFlagsBits} = require("discord-api-types/v8");
+const Constantes = require("../utils/Constantes");
 module.exports = {
     opts: {
         admin:true
     },
+public: false,
     data: new SlashCommandBuilder()
         .setName('delete')
         .setDescription('Supprime X message(s) - Discord RP')

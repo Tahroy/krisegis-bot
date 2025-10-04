@@ -1,0 +1,251 @@
+import AbstractSubCommand from "../../utils/AbstractSubCommand";
+import {AutocompleteInteraction, CommandInteraction, MessageFlags} from "discord.js";
+import {SlashCommandSubcommandBuilder} from "@discordjs/builders";
+import JobUtil from "../../services/JobUtil";
+import PlayerItem from "../../models/PlayerItem";
+import {PlayerService} from "../../services/PlayerService";
+import Job from "../../models/astrub_economy/Job";
+import ItemService from "../../services/ItemService";
+import {ItemType} from "../../utils/Enums";
+
+class Fabriquer extends AbstractSubCommand {
+    description: string = 'Créer un object';
+    name: string = 'fabriquer';
+
+    OPTION_NAME = 'produit'
+    OPTION_QUANTITY = 'quantite';
+
+    async execute(interaction: CommandInteraction): Promise<void> {
+        if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.reply({
+                content: 'Cette commande ne peut être utilisée que dans un serveur',
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
+
+        const options = interaction.options;
+
+        const itemName: string | null = options.getString(this.OPTION_NAME);
+        const craftQuantity = options.getInteger(this.OPTION_QUANTITY);
+
+        if (!itemName || !craftQuantity) {
+            await interaction.reply({
+                content: "Commande incorrecte",
+                flags: MessageFlags.Ephemeral
+            })
+            return;
+        }
+
+        const item = ItemService.getItem(itemName);
+
+        if (!item) {
+            await interaction.reply({
+                content: "Cet objet ne peut pas être fabriqué",
+                flags: MessageFlags.Ephemeral
+            })
+            return
+        }
+
+        if (typeof item.recipe !== 'object' || item.recipe === null) {
+            await interaction.reply({content: "Commande incorrecte", flags: MessageFlags.Ephemeral})
+            return;
+        }
+
+        // Check des ingrédients
+        for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+            const playerItem = await PlayerItem.findOne({
+                where: {
+                    userId: interaction.user.id,
+                    name: ingredient,
+                    guildId: guildId
+                }
+            })
+
+            if (!playerItem || playerItem.quantity < (quantity * craftQuantity)) {
+                await interaction.reply({
+                    content: `Vous n'avez pas la quantité de ${ingredient} nécessaire pour fabriquer ${itemName}`,
+                    flags: MessageFlags.Ephemeral
+                })
+                return
+            }
+        }
+
+        // S'il y a un objet nécessaire, on vérifie que l'utilisateur l'a bien
+        if (item.tool) {
+            const playerTool = await PlayerItem.findOne({
+                where: {
+                    userId: interaction.user.id,
+                    name: item.tool,
+                    guildId: guildId
+                }
+            })
+
+            if (!playerTool || playerTool.quantity < 1) {
+                await interaction.reply({
+                    content: `Vous devez avoir un ${item.tool} pour fabriquer ${itemName}`,
+                    flags: MessageFlags.Ephemeral
+                })
+                return
+            }
+        }
+
+        // S'il y a un bâtiment nécessaire, on vérifie que la guilde le possède
+        if (item.buildings) {
+            for (let building of item.buildings) {
+                const constructed = await JobUtil.isBuildingConstructed(guildId, building)
+                if (!constructed) {
+                    await interaction.reply({
+                        content: `Vous devez avoir ${building} pour fabriquer ${itemName}`,
+                        flags: MessageFlags.Ephemeral
+                    })
+                    return
+                }
+            }
+        }
+
+        // Retrait des ingrédients
+        for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+            await PlayerService.addPlayerItem(interaction.user, ingredient, ItemType.RESSOURCE, -quantity * craftQuantity, guildId)
+        }
+
+        // Ajout de l'item
+        await PlayerService.addPlayerItem(interaction.user, itemName, item.type, craftQuantity, guildId)
+
+        const user = interaction.user;
+        const guild = interaction.guild
+        const userName = await JobUtil.getUsername(user.id, guild);
+
+        let textUp = '';
+        // Expérience
+        if (item.experience && item.jobs) {
+            const experience = item.experience / item.jobs.length * craftQuantity;
+
+            for (let job of item.jobs) {
+                let myJob = await Job.findOne({
+                    where: {
+                        name: job,
+                        userId: interaction.user.id,
+                        guildId: guildId
+                    }
+                })
+
+                if (!myJob) {
+                    myJob = await Job.create({name: job, userId: interaction.user.id, level: 1, experience: 0, guildId: guildId})
+                    continue
+                }
+
+                myJob.experience += experience
+
+                const level = PlayerService.getLevelFromXP(myJob.experience)
+
+                if (level != myJob.level) {
+                    textUp += `\n**${userName}** passe ${myJob.name} niveau ${level} !`
+                }
+
+                await myJob.update({experience: myJob.experience, level: level});
+            }
+
+        }
+
+        await interaction.reply({
+            content: `**${userName}** a fabriqué ${craftQuantity} x ${itemName}` + (textUp ? `\n${textUp}` : '')
+        })
+
+    }
+
+    protected addOptions(builder: SlashCommandSubcommandBuilder) {
+        builder.addStringOption(option => option.setName(this.OPTION_NAME).setDescription("Objet").setRequired(true).setAutocomplete(true));
+        builder.addIntegerOption(option => option.setName(this.OPTION_QUANTITY).setDescription("Quantité").setRequired(true));
+    }
+
+    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const guildId = interaction.guild?.id;
+        if (!guildId) {
+            await interaction.respond([]);
+            return;
+        }
+        const options = interaction.options;
+        const focused = options.getFocused(true);
+        const search = focused.value;
+
+        const items = ItemService.getAllItems();
+        const retour = [];
+
+        const user = interaction.user;
+        const guild = interaction.guild;
+        const types = [ItemType.RESSOURCE, ItemType.FABRICATION, ItemType.OUTIL];
+        const playerItems = await PlayerService.getItems(user, types, guild, search);
+
+        const playerItemsMap = new Map();
+        for (const playerItem of playerItems) {
+            playerItemsMap.set(playerItem.name, playerItem.quantity);
+        }
+
+        for (let item of items) {
+            if (retour.length >= 20) {
+                break;
+            }
+
+            if (typeof item.recipe !== 'object' || item.recipe === null) {
+                continue;
+            }
+
+            let canCraft = true;
+            let recipe = "";
+
+            for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+                recipe += `${ingredient} x ${quantity} `;
+                const playerQuantity = playerItemsMap.get(ingredient) || 0;
+                if (playerQuantity < quantity) {
+                    canCraft = false;
+                    break;
+                }
+            }
+
+            if (canCraft && item.tool) {
+                const playerToolQuantity = playerItemsMap.get(item.tool) || 0;
+                if (playerToolQuantity < 1) {
+                    canCraft = false;
+                }
+            }
+
+            if (canCraft && item.buildings) {
+                for (let building of item.buildings) {
+                    const constructed = await JobUtil.isBuildingConstructed(guildId, building);
+                    if (!constructed) {
+                        canCraft = false;
+                        break;
+                    }
+                }
+            }
+
+            if (canCraft) {
+                // On regarde combien on peut créer
+                let quantite = null
+                for (let [ingredient, quantity] of Object.entries(item.recipe)) {
+                    const playerQuantity = playerItemsMap.get(ingredient) || 0
+                    if (quantite === null) {
+                        quantite = Math.floor(playerQuantity / quantity)
+                    } else {
+                        quantite = Math.floor(Math.min(quantite, playerQuantity / quantity))
+                    }
+                }
+
+                retour.push({
+                    name: `${item.name} (${recipe}) - ${item.experience} xp (${quantite} maximum)`, value: item.name
+                });
+            }
+
+        }
+
+        await interaction.respond(retour);
+    }
+}
+
+export default Fabriquer;

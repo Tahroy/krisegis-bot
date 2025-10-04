@@ -1,6 +1,8 @@
 import AbstractSubCommand from "../../utils/AbstractSubCommand";
 import {CommandInteraction, EmbedBuilder} from "discord.js";
 import Job from "../../models/astrub_economy/Job";
+import JobUtil from "../../services/JobUtil";
+import {PlayerService} from "../../services/PlayerService";
 
 class Profil extends AbstractSubCommand {
     description: string = 'Vos métiers';
@@ -8,14 +10,33 @@ class Profil extends AbstractSubCommand {
 
     async execute(interaction: CommandInteraction): Promise<void> {
         const jobs = await Job.findAll({
-            where: {user_id: interaction.user.id},
+            where: {
+                userId: interaction.user.id,
+                guildId: interaction.guild?.id
+            },
             order: [['experience', 'DESC']]
         })
-        const header    = `| Nom        | Niveau | Expérience |`;
-        const separator = `|------------|--------|------------|`;
-
+        const header    = `| Nom        | Niveau | Expérience |   Progression   |`;
+        const separator = `|------------|--------|------------|-----------------|`;
+    
         const rows = jobs.map(job => {
-            return `| ${job.name.padEnd(10)} | ${job.level.toString().padStart(6)} | ${job.experience.toString().padStart(10)} |`;
+            const { level } = PlayerService.getLevelAndRemainingXP(job.experience);
+            const { currentLevelXP, nextLevelXP } = PlayerService.getCurrentLevelXP(job.experience);
+            
+            const progressPercentage = Math.max(0, Math.min(100, Math.floor((currentLevelXP / nextLevelXP) * 100)));
+            
+            const progressBarLength = 10;
+            const filledLength = Math.max(0, Math.min(progressBarLength, Math.floor((progressPercentage / 100) * progressBarLength)));
+            const emptyLength = progressBarLength - filledLength;
+            
+            const filled = filledLength > 0 ? '█'.repeat(filledLength) : '';
+            const empty = emptyLength > 0 ? '░'.repeat(emptyLength) : '';
+            const progressBar = filled + empty;
+            
+            const xpDisplayColumn = `${currentLevelXP}/${nextLevelXP}`;
+            const lastCol = `${progressBar} ${progressPercentage}%`.padEnd(15);
+            
+            return `| ${job.name.padEnd(10)} | ${level.toString().padStart(6)} | ${xpDisplayColumn.padStart(10)} | ${lastCol} |`;
         })
 
         const table = `\`\`\`\n${header}\n${separator}\n${rows.join('\n')}\n\`\`\``

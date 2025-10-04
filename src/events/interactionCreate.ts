@@ -11,20 +11,55 @@ import KrisegisClient from "../models/KrisegisClient";
 import AbstractCommand from "../utils/AbstractCommand";
 
 module.exports = (client: KrisegisClient) => {
+    function logCommand(interaction: CommandInteraction) {
+        if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
+        const userName = interaction.user.tag;
+
+        const options = interaction.options.data;
+        let optionsString = '';
+        const optionsArray = [];
+
+        for (const option of options) {
+            if (option.options) {
+                for (const subOption of option.options) {
+                    optionsArray.push(`- \`${subOption.name}\` = \`${subOption.value}\``);
+                }
+            } else {
+                optionsArray.push(`- \`${option.name}\` = \`${option.value}\``);
+            }
+        }
+
+        if (optionsArray.length > 0) {
+            optionsString = ` avec options :\n ${optionsArray.join('\n')}`;
+        }
+
+        let log;
+        if (interaction.options.getSubcommand(false)) {
+            const command = interaction.options.getSubcommand()
+            log = `\`${userName}\` a utilisé la subCommande \`${command}\`${optionsString}`;
+        } else {
+            const command = interaction.commandName;
+            log = `\`${userName}\` a utilisé la comand \`${command}\`${optionsString}`;
+        }
+
+        debugMessage(interaction.guild, log);
+
+    }
+
     const gererCommande = async (interaction: CommandInteraction) => {
         const {commandName} = interaction;
 
         const command = client.commands.get(commandName);
         if (command) {
             try {
-                const userName = interaction.user.tag;
-                const log = `\`${userName}\` a utilisé la commande \`${commandName}\``;
-                debugMessage(interaction.guild, log);
-
                 if (command?.opts?.admin && interaction.user.id !== owner) {
                     await interaction.reply('Vous ne pouvez pas utiliser cette commande !');
                     return;
                 }
+                logCommand(interaction);
                 await command.execute(interaction);
                 return
             } catch (error) {
@@ -35,11 +70,8 @@ module.exports = (client: KrisegisClient) => {
 
         const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
         if (typedCommand) {
-            const userName = interaction.user.tag;
-            const log = `\`${userName}\` a utilisé la commande \`${commandName}\``;
-            debugMessage(interaction.guild, log);
-
-            typedCommand.execute(interaction);
+            logCommand(interaction);
+            await typedCommand.execute(interaction);
             return
         }
 
@@ -48,7 +80,9 @@ module.exports = (client: KrisegisClient) => {
 
     const gererBouton = async (interaction: ButtonInteraction) => {
         const customID = interaction.customId;
-        const [commandName, buttonName] = customID.split('-', 2);
+        let [commandName, buttonName] = customID.split('-', 2);
+
+        [commandName] = commandName.split('|');
 
         const userName = interaction.user.tag;
         const command = client.commands?.get(commandName);
@@ -95,7 +129,7 @@ module.exports = (client: KrisegisClient) => {
         const typedCommand: AbstractCommand | undefined = client.typedCommands.get(commandName);
 
         if (typedCommand) {
-            await typedCommand.automplete(interaction);
+            await typedCommand.autocomplete(interaction);
             return
         }
     };

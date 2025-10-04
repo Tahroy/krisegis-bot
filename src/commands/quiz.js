@@ -1,0 +1,406 @@
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const { ButtonBuilder, ActionRowBuilder } = require('discord.js')
+const { ButtonStyle } = require('discord-api-types/v10')
+const Question = require('../models/Question').default
+const { createEmbed } = require('../utils/embed')
+const { PlayerService, ItemType } = require('../services/PlayerService')
+
+const channelScores = new Map()
+
+const adminsIds = [
+    "328239065918996481", // Astreius
+    "178147970385051649", // Tahroy
+    "266673171409666053", // Alba
+    "376674327405264908", // Soute
+    "136144773953093632",  // Nar8
+    "140022439936655370", // Wahn
+];
+
+module.exports = {
+    opts: {},
+    data: new SlashCommandBuilder()
+        .setName('quiz')
+        .setDescription('Lance un quiz !')
+        .addSubcommand(subcommmand => subcommmand
+            .setName('start')
+            .setDescription('Lance le quiz')
+            .addIntegerOption(
+                option => option
+                    .setName('nb_questions')
+                    .setDescription('Nombre de questions')
+                    .setRequired(true)
+                    .setMinValue(5)
+                    .setMaxValue(20)
+            )
+        )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('add')
+                .setDescription('Ajouter une question')
+                .addStringOption(
+                    option => option
+                        .setName('question')
+                        .setDescription('Question à poser')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('correct_answer')
+                        .setDescription('La bonne réponse')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('answers')
+                        .setDescription('Autres réponses séparées par des virgules')
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('edit')
+                .setDescription('editer une question')
+                .addStringOption(
+                    option => option
+                        .setName('question')
+                        .setDescription('Question à éditer')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('correct_answer')
+                        .setDescription('La bonne réponse')
+                        .setRequired(true)
+                )
+                .addStringOption(
+                    option => option
+                        .setName('answers')
+                        .setDescription('Réponses séparées par des virgules')
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand(
+            subcommand => subcommand
+                .setName('list')
+                .setDescription('Liste des questions')
+        ),
+
+    async execute (interaction) {
+        switch (interaction.options.getSubcommand()) {
+            case 'start':
+                await this.startQuizz(interaction)
+                return
+            case 'add':
+                this.addQuestion(interaction)
+                return
+            case 'edit':
+                await this.editQuestion(interaction)
+                return
+            case 'list':
+                await this.listQuestions(interaction)
+                return
+            default:
+                await interaction.reply({ content: 'Commande inconnue !', ephemeral: true })
+        }
+    },
+
+    async executeButton (interaction, buttonName) {
+        const selectedKey = buttonName.replace('quiz-', '')
+        const currentChannelData = channelScores.get(interaction.channelId)
+
+        if (!currentChannelData) {
+            return interaction.reply({ 'content': 'Aucun jeu en cours !', 'ephemeral': true })
+        }
+
+        const currentQuestion = currentChannelData.questions[currentChannelData.currentQuestionIndex]
+        const currentChannelScores = currentChannelData.scores
+
+        if (!currentChannelScores) {
+            return interaction.reply({ 'content': 'Aucun jeu en cours !', 'ephemeral': true })
+        }
+
+        if (!currentQuestion) {
+            return interaction.reply({ 'content': 'Aucune question en cours !', 'ephemeral': true })
+        }
+
+        if (currentQuestion.participations.has(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous avez répondu !', 'ephemeral': true })
+        }
+
+        let selectedAnswer = selectedKey
+        if (currentQuestion.optionMap) {
+            const resolved = currentQuestion.optionMap[selectedKey]
+            if (resolved) {
+                selectedAnswer = resolved
+            }
+        }
+
+        currentQuestion.participations.set(interaction.user.id, selectedAnswer)
+
+        const authorId = interaction.user.id
+        if (!currentChannelScores.has(authorId)) {
+            currentChannelScores.set(authorId, 0)
+        }
+
+        if (currentQuestion.correctAnswer === selectedAnswer) {
+            currentChannelScores.set(authorId, currentChannelScores.get(authorId) + 1)
+            await PlayerService.addPlayerItem(
+                interaction.user,
+                'point quiz',
+                ItemType.QUESTION,
+                1,
+                interaction.guild.id ?? 0
+            )
+        }
+
+        console.log(`${interaction.user.username} a répondu ${selectedAnswer}`)
+        await interaction.reply({ 'content': `Tu as répondu « ${selectedAnswer} »`, 'ephemeral': true })
+    },
+    async startQuizz (interaction) {
+
+        const nombre = interaction.options.getInteger('nb_questions')
+
+        if (!channelScores.has(interaction.channelId)) {
+            const currentChannelData = {
+                scores: new Map(),
+                currentQuestionIndex: 0,
+                questions: [],
+            }
+
+            const availableQuestions = await getRandomQuestions()
+
+            if (!availableQuestions || availableQuestions.length === 0) {
+                return interaction.reply({content: 'Aucune question disponible pour lancer le quiz.', ephemeral: true })
+            }
+
+            const count = Math.min(nombre, availableQuestions.length)
+            for (let i = 0; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * availableQuestions.length)
+                const question = availableQuestions.splice(randomIndex, 1)[0]
+                if (!question) {
+                    continue
+                }
+                question.participations = new Map()
+                currentChannelData.questions.push(question)
+            }
+
+            channelScores.set(interaction.channelId, currentChannelData)
+        }
+
+        sendQuestion(interaction)
+        interaction.reply({ 'content': 'Le quiz a commencé !', 'ephemeral': true })
+    },
+    addQuestion (interaction) {
+        if (!adminsIds.includes(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
+        }
+
+        const question = interaction.options.getString('question')
+        const answers = interaction.options.getString('answers')
+        const correctAnswer = interaction.options.getString('correct_answer')
+
+        // On met un trim et un unique sur l'array
+        const answersArray = answers.split(',')
+            .map(answer => answer.trim())
+            .filter((answer, index, self) => self.indexOf(answer) === index)
+
+        console.log(answersArray);
+
+        if (answersArray.includes(correctAnswer)) {
+            return interaction.reply({ 'content': 'La bonne reponse ne doit pas être dans les mauvaises !', 'ephemeral': true })
+        }
+
+        if (answersArray.length < 3) {
+            return interaction.reply({ 'content': 'Il faut au moins 4 reponses !', 'ephemeral': true })
+        }
+
+        Question.create({
+            question: question,
+            answers: answersArray,
+            correctAnswer: correctAnswer,
+        })
+            .then((question) => {
+                console.log(`Question créée : ${question.question}`)
+                return interaction.reply({
+                    'content': 'Question ajoutée !',
+                    'ephemeral': true
+                })
+            })
+            .catch((error) => {
+                console.error('Erreur lors de la création de la question :', error)
+                return interaction.reply({
+                    'content': 'Erreur lors de la création de la question !',
+                    'ephemeral': true
+                })
+            })
+    },
+    async editQuestion (interaction) {
+        // Si ce n'est pas un admin, on retourne une erreur
+        if (!adminsIds.includes(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
+        }
+
+        const questionString = interaction.options.getString('question')
+        const answers = interaction.options.getString('answers')
+        const correctAnswer = interaction.options.getString('correct_answer')
+
+        // On met un trim et un unique sur l'array
+        const answersArray = answers.split(',')
+            .map(answer => answer.trim())
+            .filter((answer, index, self) => self.indexOf(answer) === index)
+
+        const searchQuestion = await Question.findOne({
+            where: { question: questionString }
+        })
+
+        if (!searchQuestion) {
+            return interaction.reply({ 'content': 'La question n\'existe pas !', 'ephemeral': true })
+        }
+
+        if (answersArray.includes(correctAnswer)) {
+            return interaction.reply({ 'content': 'La bonne reponse ne doit pas être dans les mauvaises !', 'ephemeral': true })
+        }
+
+        if (answersArray.length < 3) {
+            return interaction.reply({ 'content': 'Il faut au moins 3 mauvaises réponses !', 'ephemeral': true })
+        }
+
+        Question.update({
+            question: questionString,
+            answers: answersArray,
+            correctAnswer: correctAnswer,
+        }, {
+            where: { question: questionString }
+        })
+            .then(() => {
+                console.log(`Question mise à jour : ${questionString}`)
+                return interaction.reply({
+                    'content': 'Question mise à jour !',
+                    'ephemeral': true
+                })
+            })
+            .catch((error) => {
+                console.error('Erreur lors de la mise à jour de la question :', error)
+                return interaction.reply({
+                    'content': 'Erreur lors de la mise à jour de la question !',
+                    'ephemeral': true
+                })
+            })
+    },
+    async listQuestions (interaction) {
+        // Si ce n'est pas un admin, on retourne une erreur
+        if (!adminsIds.includes(interaction.user.id)) {
+            return interaction.reply({ 'content': 'Vous n\'avez pas la permission de faire cela !', 'ephemeral': true })
+        }
+
+        await interaction.reply('Chargement...');
+        const questions = await Question.findAll()
+
+        let fields = [];
+
+        for (let i = 0; i < questions.length; i++) {
+            fields.push({
+                name: questions[i].question,
+                value: questions[i].answers.join(', ')
+            })
+            if ((i !== 0 && i % 10 === 0) || i === questions.length - 1) {
+                const embed = createEmbed(fields, {
+                    title: `Questions du Quizz`,
+                    description: "",
+                    author: ""
+                })
+                await interaction.channel.send({ embeds: embed.embeds, files: embed.files })
+                fields = [];
+            }
+        }
+
+        await interaction.deleteReply();
+    }
+}
+
+function sendQuestion (interaction) {
+    const currentChannelData = channelScores.get(interaction.channelId)
+
+    if (!currentChannelData) {
+        return interaction.reply({ 'content': 'Aucun jeu en cours !', 'ephemeral': true })
+    }
+
+    const currentQuestion = currentChannelData.questions[currentChannelData.currentQuestionIndex]
+
+    if (!currentQuestion) {
+        return interaction.reply({ 'content': 'Plus de questions disponibles !', 'ephemeral': true })
+    }
+
+    // Mélanger les réponses de manière aléatoire
+    const shuffledAnswers = shuffleArray(currentQuestion.answers);
+
+    // Sélectionner uniquement les trois premières réponses mélangées
+    const selectedAnswers = shuffledAnswers.slice(0, 3);
+
+    selectedAnswers.push(currentQuestion.correctAnswer);
+    const finalAnswers = shuffleArray(selectedAnswers);
+
+    const optionMap = {}
+    const buttons = finalAnswers.map((answer, idx) => {
+        const key = `o${idx}`
+        optionMap[key] = answer
+        return new ButtonBuilder()
+            .setCustomId(`quiz-${key}`)
+            .setLabel(answer)
+            .setStyle(ButtonStyle.Primary)
+    })
+
+    currentQuestion.optionMap = optionMap
+
+    const row = new ActionRowBuilder().addComponents(buttons)
+
+    interaction.channel.send({
+        content: currentQuestion.question,
+        components: [row],
+    })
+
+//    console.log(`Question envoyée ${currentQuestion.question}`)
+
+    setTimeout(async () => {
+        await interaction.channel.send(`Le temps est écoulé ! La réponse était « **${currentQuestion.correctAnswer}** »`)
+        currentChannelData.currentQuestionIndex++
+        if (currentChannelData.currentQuestionIndex < currentChannelData.questions.length) {
+            sendQuestion(interaction)
+        } else {
+            const currentChannelData = channelScores.get(interaction.channelId)
+            const currentChannelScores = currentChannelData.scores ?? new Map()
+            let scoreMessage = `Quizz terminé ! Scores :\n`
+            currentChannelScores.forEach((score, userId) => {
+                const user = interaction.guild.members.cache.get(userId)
+                const plurial = score > 1 ? 's' : ''
+                scoreMessage += `${user ? user.displayName : 'Utilisateur inconnu'} : ${score} point${plurial}\n`
+            })
+            channelScores.delete(interaction.channelId)
+            await interaction.channel.send(scoreMessage)
+        }
+    }, 15000)
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+async function getRandomQuestions () {
+    try {
+        const questions = await Question.findAll()
+
+        if (questions.length === 0) {
+            console.log('Aucune question trouvée.')
+            return []
+        }
+
+        return questions.sort(() => 0.5 - Math.random())
+    } catch (error) {
+        console.error('Erreur lors de la récupération des questions aléatoires :', error)
+        return []
+    }
+}

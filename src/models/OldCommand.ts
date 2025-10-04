@@ -5,6 +5,7 @@ interface Command {
         name: string;
     };
     execute: (interaction: CommandInteraction) => Promise<void>;
+    allowedGuildIds?: string[];
     [key: string]: any; // Pour des propriétés supplémentaires comme admin, cooldown, etc.
 }
 

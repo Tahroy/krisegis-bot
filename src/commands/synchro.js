@@ -6,9 +6,11 @@ const {
     sendLore
 } = require('../utils/Utils')
 const { api_lore } = require('../../config/config_bot.json')
+const Constantes = require("../utils/Constantes");
 const LoreElement = require('../models/LoreElement').default
 
 module.exports = {
+public: false,
     opts: {
         admin: true
     },
