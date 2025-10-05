@@ -18,6 +18,7 @@ import BouftonnerieState from "../../../models/astrub_economy/BouftonnerieState"
 import Bouftou from "../../../models/astrub_economy/Bouftou";
 
 const MODAL_ID_PREFIX = 'astrub_economie|bouftou|ajouter|';
+const bouftous = new Map<string, string>();
 
 class Nourrir extends AbstractSubCommand {
     name: string = 'ajouter';
@@ -58,14 +59,27 @@ class Nourrir extends AbstractSubCommand {
             return;
         }
 
+
+        const emojis = ['boufton_noir', 'bouftou', 'boufton_noir', 'bouloute', 'chef_de_guerre', 'boufette']
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+        bouftous.set(interaction.user.id, emoji);
+
+        // Remplace les underscores par des espaces
+        let type = emoji.replace(/_/g, " ");
+
+        // Met une majuscule à la première lettre
+        type = type.charAt(0).toUpperCase() + type.slice(1);
+
+        console.log(type);
         // Afficher la modal
         const modal = new ModalBuilder()
             .setCustomId(`${MODAL_ID_PREFIX}${interaction.user.id}`)
-            .setTitle('Ajouter un bouftou');
+            .setTitle(`Ajouter un bouftou`);
 
         const nameInput = new TextInputBuilder()
             .setCustomId(this.OPTION_NOM)
-            .setLabel('Nom du bouftou')
+            .setLabel(`Nom du bouftou (${type})`)
             .setStyle(TextInputStyle.Short)
             .setMinLength(3)
             .setMaxLength(20)
@@ -75,9 +89,6 @@ class Nourrir extends AbstractSubCommand {
         modal.addComponents(row);
 
         await interaction.showModal(modal);
-    }
-
-    async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
     }
 
     async gererModal(interaction: ModalSubmitInteraction): Promise<void> {
@@ -115,9 +126,9 @@ class Nourrir extends AbstractSubCommand {
             return;
         }
 
-        const emojis = ['boufton_noir', 'bouftou', 'boufton_noir', 'bouloute', 'chef_guerre', 'boufette']
+        const emoji = bouftous.get(interaction.user.id) as string;
 
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        bouftous.delete(interaction.user.id);
 
         const created = await Bouftou.create({
             guildId: guildId, userId: interaction.user.id, name: name, emoji: emoji
