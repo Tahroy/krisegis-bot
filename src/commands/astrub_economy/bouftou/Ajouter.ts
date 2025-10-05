@@ -115,7 +115,7 @@ class Nourrir extends AbstractSubCommand {
             return;
         }
 
-        const emojis = ['boufton_noir', 'bouftou', 'boufton_noir', 'bouloute', 'chef_guerre',]
+        const emojis = ['boufton_noir', 'bouftou', 'boufton_noir', 'bouloute', 'chef_guerre', 'boufette']
 
         const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
