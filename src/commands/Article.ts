@@ -5,7 +5,6 @@ import Constantes from "../utils/Constantes";
 class Article extends AbstractCommand {
     description: string = 'Rechercher un article';
     name: string = 'article';
-    public: boolean = false;
 
     async execute(interaction: CommandInteraction): Promise<void> {
         if (!interaction.isChatInputCommand()) {

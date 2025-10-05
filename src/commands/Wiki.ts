@@ -5,7 +5,6 @@ import Constantes from "../utils/Constantes";
 class Wiki extends AbstractCommand {
     description: string = 'Rechercher une page Wiki';
     name: string = 'wiki';
-    public: boolean = false;
     protected addOptions(builder: SlashCommandBuilder) {
         builder.addStringOption(option =>
             option
