@@ -9,11 +9,11 @@ interface BouftouAttributes {
     emoji: string;
     isAlive: boolean;
     feedCountToday: number; // 0..3
-    daysWithoutFood: number; // 0..3
+    livesLost: number; // 0..3
     lastFeedAt: Date | null; // dernière date de nourrissage
 }
 
-type BouftouCreationAttributes = Optional<BouftouAttributes, 'id' | 'isAlive' | 'feedCountToday' | 'daysWithoutFood' | 'lastFeedAt'>;
+type BouftouCreationAttributes = Optional<BouftouAttributes, 'id' | 'isAlive' | 'feedCountToday' | 'livesLost' | 'lastFeedAt'>;
 
 class Bouftou extends Model<BouftouAttributes, BouftouCreationAttributes> implements BouftouAttributes {
     public id!: number;
@@ -23,7 +23,7 @@ class Bouftou extends Model<BouftouAttributes, BouftouCreationAttributes> implem
     public emoji!: string;
     public isAlive!: boolean;
     public feedCountToday!: number;
-    public daysWithoutFood!: number;
+    public livesLost!: number;
     public lastFeedAt!: Date | null;
 }
 
@@ -42,7 +42,7 @@ Bouftou.init({
         type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true,
     }, feedCountToday: {
         type: DataTypes.INTEGER, allowNull: false, defaultValue: 0,
-    }, daysWithoutFood: {
+    }, livesLost: {
         type: DataTypes.INTEGER, allowNull: false, defaultValue: 0,
     }, lastFeedAt: {
         type: DataTypes.DATE, allowNull: true, defaultValue: null,

@@ -43,13 +43,13 @@ export class BreedingService {
 
             // Gestion de la faim et mort éventuelle
             if (bouftou.feedCountToday === 0) {
-                bouftou.daysWithoutFood += 1;
+                bouftou.livesLost += 1;
                 lostLives.push(`${emoji} ${bouftou.name}`);
             } else {
-                bouftou.daysWithoutFood = 0;
+                bouftou.livesLost = 0;
             }
 
-            if (bouftou.daysWithoutFood >= 3) {
+            if (bouftou.livesLost >= 3) {
                 bouftou.isAlive = false;
                 deaths.push(`${emoji} ${bouftou.name}`);
             }

@@ -348,8 +348,8 @@ export default class Statut extends AbstractSubCommand {
 
             if (b.isAlive) {
                 feedCountToday = `— Repas aujourd'hui : ${b.feedCountToday}/3`;
-                if (b.daysWithoutFood > 0) {
-                    dayWitoutFood = `— Jours sans manger : ${b.daysWithoutFood}`;
+                if (b.livesLost > 0) {
+                    dayWitoutFood = `— Jours sans manger : ${b.livesLost}`;
                 }
             }
 
