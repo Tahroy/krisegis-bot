@@ -84,7 +84,7 @@ class Nourrir extends AbstractSubCommand {
             const ThreeHours = 3 * 60 * 60 * 1000;
             const threeHoursAgo = new Date(Date.now() - ThreeHours);
             if (bouftou.lastFeedAt > threeHoursAgo) {
-                const timeLeft = Math.ceil((bouftou.lastFeedAt.getTime() + ThreeHours) / (60 * 1000));
+                const timeLeft = Math.ceil((bouftou.lastFeedAt.getTime() + ThreeHours - Date.now()) / (60 * 1000));
                 await interaction.reply({
                     content: `${bouftouName} doit attendre encore ${timeLeft} minutes avant de pouvoir manger à nouveau.`,
                     flags: MessageFlags.Ephemeral
