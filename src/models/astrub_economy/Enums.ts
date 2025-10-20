@@ -132,11 +132,13 @@ enum SellEnum {
     RESSOURCE_1= 2,
     RESSOURCE_10 = 6,
     RESSOURCE_20 = 10,
+    RESSOURCE_30 = 14,
 }
 enum XpEnum {
     RESSOURCE_1 = 1,
     RESSOURCE_10 = 2,
-    RESSOURCE_20 = 3
+    RESSOURCE_20 = 3,
+    Ressource_30 = 4,
 }
 
 enum LevelEnum {

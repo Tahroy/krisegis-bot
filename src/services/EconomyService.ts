@@ -59,6 +59,8 @@ export class EconomyService {
                     return SellEnum.RESSOURCE_10;
                 case LevelEnum.LEVEL_20:
                     return SellEnum.RESSOURCE_20;
+                case LevelEnum.LEVEL_30:
+                    return SellEnum.RESSOURCE_30;
                 default:
                     return 0;
             }
