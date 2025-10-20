@@ -124,6 +124,50 @@ const Ressources: Record<ResourceEnum, Resource> = {
         emoji: "poissonchaton"
     },
 
+    // Niveau 30
+    [ResourceEnum.CHENE]: {
+        name: ResourceEnum.CHENE,
+        job: JobEnum.BUCHERON,
+        level: LevelEnum.LEVEL_30,
+        type: ItemType.RESSOURCE,
+        emoji: "chene"
+    },
+    [ResourceEnum.KOBALTE]: {
+        name: ResourceEnum.KOBALTE,
+        job: JobEnum.MINEUR,
+        level: LevelEnum.LEVEL_30,
+        type: ItemType.RESSOURCE,
+        emoji: "kobalte"
+    },
+    [ResourceEnum.MENTHE_SAUVAGE]: {
+        name: ResourceEnum.MENTHE_SAUVAGE,
+        job: JobEnum.ALCHIMISTE,
+        level: LevelEnum.LEVEL_30,
+        type: ItemType.RESSOURCE,
+        emoji: "menthe"
+    },
+    [ResourceEnum.HOUBLON]: {
+        name: ResourceEnum.HOUBLON,
+        job: JobEnum.PAYSAN,
+        level: LevelEnum.LEVEL_30,
+        type: ItemType.RESSOURCE,
+        emoji: "houblon"
+    },
+    [ResourceEnum.POISSON_PANE]: {
+        name: ResourceEnum.POISSON_PANE,
+        job: JobEnum.PECHEUR,
+        level: LevelEnum.LEVEL_30,
+        type: ItemType.RESSOURCE,
+        emoji: "poissonpane"
+    },
+    [ResourceEnum.CARPE_DIEM]: {
+        name: ResourceEnum.CARPE_DIEM,
+        job: JobEnum.PECHEUR,
+        level: LevelEnum.LEVEL_30,
+        type: ItemType.RESSOURCE,
+        emoji: "carpe"
+    },
+
     // Ressources neutres
     [ResourceEnum.KAMAS]: {
         name: ResourceEnum.KAMAS, job: undefined, level: LevelEnum.LEVEL_0, type: ItemType.RESSOURCE, emoji: "kamas"

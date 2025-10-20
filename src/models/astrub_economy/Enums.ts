@@ -21,6 +21,14 @@ enum ResourceEnum {
     CRABE_SOURIMI = "Crabe sourimi",
     POISSON_CHATON = "Poisson chaton",
 
+    // Ressources niveau 30
+    CHENE = "Bois de Chêne",
+    KOBALTE = "Kobalte",
+    MENTHE_SAUVAGE = "Menthe sauvage",
+    HOUBLON = "Houblon",
+    POISSON_PANE = "Poisson pané",
+    CARPE_DIEM = "Carpe d'Iem",
+
     KAMAS = "Kamas",
 
     PIERRE = "Pierre",
@@ -135,5 +143,6 @@ enum LevelEnum {
     LEVEL_0 = 0,
     LEVEL_10 = 10,
     LEVEL_20 = 20,
+    LEVEL_30 = 30,
 }
 export {SellEnum, XpEnum, LevelEnum};
