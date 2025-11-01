@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/guillaume/bots/krisegis-bot || exit
+cd /home/krisqadw/krisegis-bot || exit
 
 # Effectuer un pull des dernières modifications depuis le repository Git
 echo "Récupération des dernières modifications depuis Git..."
