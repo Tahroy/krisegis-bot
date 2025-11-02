@@ -1,11 +1,10 @@
-import {token} from './../config/config_bot.json'; // Import du token
 import {readdirSync} from 'fs';
 import path from 'path';
 import loadCommands from './utils/commandsLoader';
 import KrisegisClient from "./models/KrisegisClient";
+import dotenv from 'dotenv';
 
-// Définir une interface pour les commandes
-
+dotenv.config();
 const client = new KrisegisClient();
 
 loadCommands(client);
@@ -28,5 +27,6 @@ for (const file of eventFiles) {
     }
 }
 
+const token = process.env.TOKEN;
 // Lancement du bot
 client.login(token).catch((err) => console.error('Erreur de connexion:', err));

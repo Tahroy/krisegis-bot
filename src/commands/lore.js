@@ -1,11 +1,9 @@
 const { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js')
-const { api_lore } = require('../../config/config_bot.json')
 const axios = require('axios')
 const { ButtonStyle } = require('discord-api-types/v8')
 const { escapeHTML, substringContent } = require('../utils/Utils')
 const embedData = require('../utils/embed')
 const { Op } = require('sequelize')
-const Constantes = require("../utils/Constantes");
 const LoreElement = require('../models/LoreElement').default
 
 const WIKI_RP = 'https://dofus-rp.fandom.com/fr/'

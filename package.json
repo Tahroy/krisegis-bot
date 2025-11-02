@@ -23,6 +23,7 @@
     "discord-api-types": "^0.37",
     "discord.js": "^14",
     "discord.js-buttons": "^1.0.0",
+    "dotenv": "^17.2.3",
     "jsdom": "^21.1.1",
     "moment": "^2.29.4",
     "mysql2": "^3.3.3",
@@ -34,7 +35,7 @@
   },
   "keywords": [],
   "devDependencies": {
-    "@types/node": "^22.9.1",
+    "@types/node": "^22.18.13",
     "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.9",
     "sequelize-cli": "^6.6.2",

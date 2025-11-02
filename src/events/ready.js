@@ -2,9 +2,7 @@ import Npc from "../models/Npc";
 
 import PlayerHouse from "../models/astrub_economy/PlayerHouse";
 
-const {version} = require('../../config/config_bot.json')
 const {REST} = require('@discordjs/rest')
-const {token, client_id} = require('../../config/config_bot.json')
 const {Routes} = require('discord-api-types/v10')
 const moment = require('moment/moment')
 const {readdirSync} = require("fs");
@@ -37,6 +35,9 @@ const Player = require('../models/astrub_economy/Player').default
 
 const eventReminderCheckInterval = 60 * 1000
 const eventReminderTime = 60 * 60 * 1000
+
+const token = process.env.TOKEN
+const client_id = process.env.CLIENT_ID
 
 module.exports = async function (client) {
     async function synchroBDD() {
@@ -211,7 +212,7 @@ module.exports = async function (client) {
     }
 
     client.once('ready', async () => {
-        console.log(`Krisegis V${version} prêt !`)
+        console.log(`Krisegis prêt !`)
 
         const rest = new REST({version: '10'}).setToken(token)
 
@@ -256,13 +257,12 @@ module.exports = async function (client) {
                     for (const participant of participants) {
                         const participantId = participant.id
                         try {
-                            const server = guild.roles.cache.get(event.server)
                             const user = await client.users.fetch(participantId)
                             moment.locale('fr') // Définir la locale sur français
                             const dateDebutFR = moment(guildEvent.scheduledStartTimestamp).format('HH:mm')
 
                             await user.send(`
-**__Rappel__** : L'événement **${guildEvent.name}** commence dans une heure sur **${server.name}** (**${dateDebutFR}**) !
+**__Rappel__** : L'événement **${guildEvent.name}** commence dans une heure sur **${event.serverName}** (**${dateDebutFR}**) !
 ${link}
 `)
                             console.log(`Message de rappel envoyé à ${user.tag} pour l'événement ${guildEvent.name} !`)

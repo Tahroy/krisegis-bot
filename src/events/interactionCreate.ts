@@ -1,14 +1,14 @@
 import {
-    Client,
     CommandInteraction,
     ButtonInteraction,
     AutocompleteInteraction,
     ModalSubmitInteraction, Interaction
 } from 'discord.js';
-import {owner} from '../../config/config_bot.json';
 import {debugMessage} from '../utils/Utils';
 import KrisegisClient from "../models/KrisegisClient";
 import AbstractCommand from "../utils/AbstractCommand";
+
+const owner = process.env.OWNER_ID;
 
 module.exports = (client: KrisegisClient) => {
     function logCommand(interaction: CommandInteraction) {

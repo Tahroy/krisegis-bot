@@ -1,6 +1,4 @@
 const { JSDOM } = require('jsdom')
-const axios = require('axios')
-const { api_lore } = require('../../config/config_bot.json')
 const { createEmbed } = require('./embed')
 const { Op } = require('sequelize')
 
@@ -10,13 +8,8 @@ const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
 
 function htmlToMarkdown (texteHTML) {
-    // Remplacer les balises de paragraphe par des sauts de ligne
     texteHTML = texteHTML.replace(/<p>/g, '\n')
     texteHTML = texteHTML.replace(/<\/p>/g, '')
-
-    // Remplacer les sauts de ligne forcés par des sauts de ligne
-    // texteHTML = texteHTML.replace(/<br\s*[/]?>/gi, "\n");
-
     return texteHTML
 
 }

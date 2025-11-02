@@ -1,13 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js')
 const axios = require('axios')
 const { PermissionFlagsBits } = require('discord-api-types/v8')
-const {
-    escapeHTML,
-    sendLore
-} = require('../utils/Utils')
-const { api_lore } = require('../../config/config_bot.json')
-const Constantes = require("../utils/Constantes");
 const LoreElement = require('../models/LoreElement').default
+
+const api_lore = process.env.API_LORE;
 
 module.exports = {
 public: false,

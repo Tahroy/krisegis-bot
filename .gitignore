@@ -14,3 +14,4 @@ ffmpeg
 /public
 
 meteo.json
+/.env
