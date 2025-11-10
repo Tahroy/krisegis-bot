@@ -246,6 +246,9 @@ module.exports = {
         } catch (error) {
             await transaction.rollback();
             console.error(error);
+            await interaction.editReply({
+                content: "Une erreur est survenue lors de la capture !"
+            })
             return
         }
 
@@ -295,12 +298,9 @@ module.exports = {
         const imgName = `${id}.png`;
 
         let file = null;
-        try {
-            file = await monster.getImage();
-            if (!file) {
-                throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
-            }
-        } catch (error) {
+
+        file = await monster.getImage();
+        if (!file) {
             throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
         }
 
@@ -357,12 +357,8 @@ module.exports = {
         const imgName = `${id}.png`;
 
         let file = null;
-        try {
-            file = await npc.getImage()
-            if (!file) {
-                throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
-            }
-        } catch (error) {
+        file = await npc.getImage()
+        if (!file) {
             throw new Error('Une erreur est survenue lors de la recherche de l\'image !');
         }
 
