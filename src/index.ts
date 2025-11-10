@@ -5,6 +5,16 @@ import KrisegisClient from "./models/KrisegisClient";
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Gestionnaires d'erreurs globaux
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+});
+
 const client = new KrisegisClient();
 
 loadCommands(client);
