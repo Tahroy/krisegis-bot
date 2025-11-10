@@ -47,8 +47,6 @@ class Recolte extends AbstractSubCommand {
 
         const emoji = await JobUtil.getEmoji(item, interaction.client) + ' '
 
-        await interaction.deferReply();
-
         const player: Player = await JobUtil.getPlayer(interaction.user, guildId);
         const job: Job = await player.getJob(item.job ?? '');
 
@@ -86,6 +84,8 @@ class Recolte extends AbstractSubCommand {
             })
             return
         }
+
+        await interaction.deferReply();
 
         const user = interaction.user;
         const guild = interaction.guild
