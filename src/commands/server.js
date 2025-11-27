@@ -120,12 +120,14 @@ public: false,
                 member.roles.remove(role);
             }
         })
-    }, sendWelcomeMessage(interaction) {
+    },
+    sendWelcomeMessage_old(interaction) {
         Variable.findOne({
-            where: {
-                name: 'welcomeChannel', server: interaction.guild.id
-            }
-        }).then(async (welcomeChannel) => {
+                             where: {
+                                 name: 'welcomeChannel',
+                                 server: interaction.guild.id
+                             }
+                         }).then(async (welcomeChannel) => {
             if (!welcomeChannel) {
                 console.log('welcomeChannel non trouvé')
                 return
@@ -141,6 +143,51 @@ public: false,
         }).catch((err) => {
             console.log(err)
         })
+    },
+    async sendWelcomeMessage(interaction) {
+        const where = {
+            where: {
+                name  : 'welcomeChannel',
+                server: interaction.guild.id
+            }
+        };
+
+        const welcomeChannel = await Variable.findOne(where);
+
+        if (!welcomeChannel) {
+            console.log('welcomeChannel non trouvé')
+            return
+        }
+
+        const message = await this.getRandomWelcomeMessage(interaction.member)
+
+        if (!message) {
+            console.log('Aucun message de bienvenue disponible')
+            return
+        }
+
+        const {client} = interaction;
+
+        if (!interaction.guildId) {
+            console.log('No guild found in the interaction.');
+            return;
+        }
+
+        const guild = await client.guilds.fetch(interaction.guildId);
+
+        if (!guild) {
+            console.log(`Guild with ID ${interaction.guildId} not found.`);
+            return;
+        }
+
+        const channel = await guild.channels.fetch(welcomeChannel.data);
+
+        if (!channel) {
+            console.log(`Channel with ID ${welcomeChannel.data} not found.`);
+            return;
+        }
+
+        await channel.send({content: message});
     },
 
     // Ajout / Retrait
@@ -172,7 +219,7 @@ public: false,
         // On ajoute le message d'accueil
 
         if (action === 'add' && rolesActuels.length === 1) {
-            this.sendWelcomeMessage(interaction)
+            await this.sendWelcomeMessage(interaction)
         }
 
         const userName = member.nickname || member.user.username
