@@ -85,6 +85,8 @@ class Recolte extends AbstractSubCommand {
             return
         }
 
+        await interaction.deferReply();
+
         const user = interaction.user;
         const guild = interaction.guild
 
@@ -121,7 +123,7 @@ class Recolte extends AbstractSubCommand {
 
         await job.update({experience: job.experience, level: level});
 
-        await interaction.reply({content: text,});
+        await interaction.editReply({content: text,});
     }
 
     protected addOptions(builder: SlashCommandSubcommandBuilder) {

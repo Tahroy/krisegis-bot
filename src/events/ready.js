@@ -219,7 +219,7 @@ module.exports = async function (client) {
         await synchroBDD();
         await synchroCommands(rest);
         await synchroEmojis(client);
-        await listGuilds()
+      //  await listGuilds()
         await checkEventReminders()
         await NotificationService.startSchedulers(client);
     })
