@@ -46,8 +46,8 @@ export class NotificationService {
             }
         });
 
-        // Toutes les 30 minutes pour Nowel
-        cron.schedule('*/30 * * * *', async () => {
+        // Toutes les 2 heures pour Nowel
+        cron.schedule('* */2 * * *', async () => {
             try {
                 // Récupération des joueurs ayant moins de 5 lancers
                 await Nowel.update(
