@@ -23,7 +23,7 @@ export default class Lancer extends AbstractSubCommand {
 
         const target = options.getUser(Lancer.OPTION_TARGET);
         if (!target) {
-            await interaction.reply({ content: "Il faut sélectionner un joueur !", flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: "Il faut sélectionner quelqu'un !", flags: MessageFlags.Ephemeral });
             return;
         }
 
@@ -51,7 +51,7 @@ export default class Lancer extends AbstractSubCommand {
         });
         
         if (targetNowel.remainingHP <= 0) {
-            await interaction.reply({ content: "Ce joueur n'a plus de points de vie !", flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: "Votre cible n'a plus de points de vie !", flags: MessageFlags.Ephemeral });
             return;
         }
 
@@ -66,16 +66,19 @@ export default class Lancer extends AbstractSubCommand {
         const targetName = memberTarget?.nickname ?? target.globalName ?? target.username;
 
         if (Math.random() < 0.5) {
-            await interaction.reply(`❄️ **${userName}** lance une boule de neige sur **${targetName}**, mais le rate !`);
+            await interaction.reply(`❄️ **${userName}** lance une boule de neige sur **${targetName}**, mais rate !`);
             return;
         }
 
         targetNowel.remainingHP -= 1;
         await targetNowel.save();
-        let message = `❄️ **${userName}** lance une boule de neige sur **<@!${target.id}>** et le touche ! Il lui reste ${targetNowel.remainingHP} points de vie.`;
+        let message = `❄️ **${userName}** lance une boule de neige sur **<@!${target.id}>** et touche !`;
         
         if (targetNowel.remainingHP <= 0) {
             message += `\n**<@!${target.id}>** est KO !`;
+        } else {
+            const pluriel = targetNowel.remainingHP > 1 ? 's' : '';
+            message += `\n${targetName} n'a plus que ${targetNowel.remainingHP} point${pluriel} de vie.`;
         }
         
         await interaction.reply(message);
