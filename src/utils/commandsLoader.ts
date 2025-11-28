@@ -12,7 +12,7 @@ import Document from "../commands/Document";
 import Objet from "../commands/Objet";
 import Pnj from "../commands/Pnj";
 import Wiki from "../commands/Wiki";
-
+import Nowel from '../commands/nowel/Nowel';
 
 // Fonction pour charger les commandes
 export default function loadCommands(client: KrisegisClient): void {
@@ -50,6 +50,7 @@ export default function loadCommands(client: KrisegisClient): void {
         new Objet(),
         new Pnj(),
         new Wiki(),
+        new Nowel(),
     ];
 
     for (const command of commands) {

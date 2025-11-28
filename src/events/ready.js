@@ -16,6 +16,7 @@ import Quest from "../models/astrub_economy/Quest";
 import NotificationService from "../services/NotificationService";
 import Bouftou from "../models/astrub_economy/Bouftou";
 import BouftonnerieState from "../models/astrub_economy/BouftonnerieState";
+import Nowel from "../models/nowel/Nowel";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -64,6 +65,7 @@ module.exports = async function (client) {
         await Quest.sync();
         await Bouftou.sync();
         await BouftonnerieState.sync();
+        await Nowel.sync();
         associate();
         console.log('BDD Synchro !')
     }

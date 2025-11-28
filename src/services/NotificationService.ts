@@ -4,6 +4,9 @@ import {MeteoService} from "./MeteoService";
 import {PopulationService} from "./PopulationService";
 import {QuestService} from "./QuestService";
 import BreedingService from "./BreedingService";
+import Nowel from "../models/nowel/Nowel";
+import { Op } from 'sequelize';
+import sequelize from '../utils/database';
 
 /**
  * NotificationService
@@ -14,6 +17,7 @@ export class NotificationService {
      * Démarre les tâches planifiées:
      * - Chaque jour à 10h : mise à jour/annonce météo et population
      * - Chaque heure : génération/annonce de quête
+     * - Toutes les 30 minutes : régénération des lancers et PV de Nowel
      */
     static startSchedulers(client: KrisegisClient) {
         // Quotidien à 10:00
@@ -39,6 +43,25 @@ export class NotificationService {
                 } catch (error) {
                     console.error(error);
                 }
+            }
+        });
+
+        // Toutes les 30 minutes pour Nowel
+        cron.schedule('*/30 * * * *', async () => {
+            try {
+                // Récupération des joueurs ayant moins de 5 lancers
+                await Nowel.update(
+                    { remainingThrows: 5 },
+                    { where: { remainingThrows: { [Op.lt]: 5 } } }
+                );
+
+                // Récupération des joueurs ayant moins de 5 PV
+                await Nowel.update(
+                    { remainingHP: sequelize.literal('remainingHP + 1') },
+                    { where: { remainingHP: { [Op.lt]: 5 } } }
+                );
+            } catch (error) {
+                console.error("Erreur lors de la régénération Nowel:", error);
             }
         });
     }
