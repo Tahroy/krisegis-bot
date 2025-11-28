@@ -58,22 +58,18 @@ export default class Lancer extends AbstractSubCommand {
         attackerNowel.remainingThrows -= 1;
         await attackerNowel.save();
 
+        const user = interaction.user;
+        const member = await interaction.guild?.members.fetch(user.id);
+        const userName = member?.nickname ?? user.globalName ?? user.username;
+
         if (Math.random() < 0.5) {
-            await interaction.reply(`❄️ ${interaction.user.username} lance une boule de neige sur ${target.username}, mais le rate !`);
+            await interaction.reply(`❄️ **${userName}** lance une boule de neige sur **<@!${target.id}>**, mais le rate !`);
             return;
         }
 
         targetNowel.remainingHP -= 1;
         await targetNowel.save();
-
-        const user = interaction.user;
-        const member = await interaction.guild?.members.fetch(user.id);
-        const userName = member?.nickname ?? user.globalName ?? user.username;
-
-        const memberTarget = await interaction.guild?.members.fetch(user.id);
-        const userNameTarget = memberTarget?.nickname ?? user.globalName ?? user.username;
-
-        let message = `❄️ **${userName}** lance une boule de neige sur **${userNameTarget}** et le touche ! Il lui reste ${targetNowel.remainingHP} points de vie.`;
+        let message = `❄️ **${userName}** lance une boule de neige sur **<@!${target.id}>** et le touche ! Il lui reste ${targetNowel.remainingHP} points de vie.`;
         
         if (targetNowel.remainingHP <= 0) {
             message += `\n${target.username} est KO !`;
