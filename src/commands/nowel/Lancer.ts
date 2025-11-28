@@ -62,8 +62,11 @@ export default class Lancer extends AbstractSubCommand {
         const member = await interaction.guild?.members.fetch(user.id);
         const userName = member?.nickname ?? user.globalName ?? user.username;
 
+        const memberTarget = await interaction.guild?.members.fetch(target.id);
+        const targetName = memberTarget?.nickname ?? target.globalName ?? target.username;
+
         if (Math.random() < 0.5) {
-            await interaction.reply(`❄️ **${userName}** lance une boule de neige sur **<@!${target.id}>**, mais le rate !`);
+            await interaction.reply(`❄️ **${userName}** lance une boule de neige sur **${targetName}**, mais le rate !`);
             return;
         }
 
