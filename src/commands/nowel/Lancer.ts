@@ -72,7 +72,7 @@ export default class Lancer extends AbstractSubCommand {
         let message = `❄️ **${userName}** lance une boule de neige sur **<@!${target.id}>** et le touche ! Il lui reste ${targetNowel.remainingHP} points de vie.`;
         
         if (targetNowel.remainingHP <= 0) {
-            message += `\n${target.username} est KO !`;
+            message += `\n**<@!${target.id}>** est KO !`;
         }
         
         await interaction.reply(message);
