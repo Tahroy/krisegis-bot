@@ -16,8 +16,8 @@ export class NotificationService {
     /**
      * Démarre les tâches planifiées:
      * - Chaque jour à 10h : mise à jour/annonce météo et population
-     * - Chaque heure : génération/annonce de quête
-     * - Toutes les 30 minutes : régénération des lancers et PV de Nowel
+     * - Chaque heure : génération/annonce de quête et régénération des PV de Nowel
+     * - Toutes les 30 minutes : régénération des lancers de Nowel
      */
     static startSchedulers(client: KrisegisClient) {
         // Quotidien à 10:00
@@ -37,6 +37,7 @@ export class NotificationService {
 
         // Toutes les heures
         cron.schedule('0 * * * *', async () => {
+            // Quests
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await QuestService.generateAndAnnounceQuest(client, guild.id);
@@ -44,24 +45,29 @@ export class NotificationService {
                     console.error(error);
                 }
             }
-        });
 
-        // Toutes les 2 heures pour Nowel
-        cron.schedule('* */2 * * *', async () => {
+            // Nowel HP Regeneration
             try {
-                // Récupération des joueurs ayant moins de 5 lancers
-                await Nowel.update(
-                    { remainingThrows: 5 },
-                    { where: { remainingThrows: { [Op.lt]: 5 } } }
-                );
-
-                // Récupération des joueurs ayant moins de 5 PV
+                // Régénère 1 PV pour les joueurs ayant moins de 5 PV
                 await Nowel.update(
                     { remainingHP: sequelize.literal('remainingHP + 1') },
                     { where: { remainingHP: { [Op.lt]: 5 } } }
                 );
             } catch (error) {
-                console.error("Erreur lors de la régénération Nowel:", error);
+                console.error("Erreur lors de la régénération des PV de Nowel:", error);
+            }
+        });
+
+        // Toutes les 30 minutes
+        cron.schedule('*/30 * * * *', async () => {
+            try {
+                // Régénère 1 lancer pour les joueurs ayant moins de 10 lancers
+                await Nowel.update(
+                    { remainingThrows: sequelize.literal('remainingThrows + 1') },
+                    { where: { remainingThrows: { [Op.lt]: 5 } } }
+                );
+            } catch (error) {
+                console.error("Erreur lors de la régénération des lancers de Nowel:", error);
             }
         });
     }
