@@ -9,12 +9,18 @@ export default class Lancer extends AbstractSubCommand {
     private static readonly OPTION_TARGET = 'cible';
 
     public async execute(interaction: CommandInteraction): Promise<void> {
+
+        if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
         if (!interaction.guildId) {
             await interaction.reply({ content: "Cette commande doit être utilisée dans un serveur.", flags: MessageFlags.Ephemeral });
             return;
         }
 
-        const options = interaction.options as CommandInteractionOptionResolver;
+        const options = interaction.options;
+
         const target = options.getUser(Lancer.OPTION_TARGET);
         if (!target) {
             await interaction.reply({ content: "Il faut sélectionner un joueur !", flags: MessageFlags.Ephemeral });
