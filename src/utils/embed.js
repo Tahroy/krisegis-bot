@@ -1,6 +1,5 @@
 const {AttachmentBuilder, EmbedBuilder, Colors} = require("discord.js");
 const appRoot = require('app-root-path');
-const {version} = require(`${appRoot}/config/config_bot.json`);
 
 module.exports = {
 	createEmbed(fields, options) {
@@ -13,7 +12,7 @@ module.exports = {
 			.setAuthor({name: 'Krisegis', iconURL: 'attachment://krisegis-point.png', url: 'https://krisegis.fr'})
 			.addFields(fields)
 			.setTimestamp(new Date())
-			.setFooter({text: `Krisegis ${version}`, iconURL: 'attachment://krisegis.png'});
+			.setFooter({text: `Krisegis`, iconURL: 'attachment://krisegis.png'});
 
 		if (options) {
 			if (options.title) {
