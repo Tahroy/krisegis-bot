@@ -1,4 +1,6 @@
-const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.js')
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder,
+    MessageFlags
+} = require('discord.js')
 const {ButtonStyle} = require('discord-api-types/v10')
 const {PermissionFlagsBits} = require('discord-api-types/v8')
 const {debugMessage, checkTags} = require('../utils/Utils')
@@ -443,7 +445,7 @@ public: false,
         });
 
         if (messages.length === 0) {
-            return null; 
+            return null;
         }
 
         const randomIndex = Math.floor(Math.random() * messages.length);
@@ -477,12 +479,16 @@ public: false,
 
     }, async addRemoveRole(member, role, interaction) {
 
-        const hasRole = await member.roles.cache.find(roleSearch => roleSearch.id === role.id)
+        await interaction.deferReply({ephemeral: true});
+
+        const freshMember = await interaction.guild.members.fetch(member.id).catch(() => member);
+        const hasRole = freshMember.roles.cache.has(role.id);
+        console.log(hasRole)
 
         if (hasRole) {
             await member.roles.remove(role)
             try {
-                await interaction.reply({
+                await interaction.editReply({
                     content: `Le rôle ${role.name} a été retiré`, ephemeral: true
                 })
                 debugMessage(interaction.guild, 'Rôle ``' + role.name + '`` retiré pour ``' + interaction.user.tag + '``')
@@ -493,9 +499,7 @@ public: false,
         } else {
             await member.roles.add(role)
             try {
-                await interaction.reply({
-                    content: `Le rôle ${role.name} a été ajouté`, ephemeral: true
-                })
+                await interaction.editReply({content: `Le rôle ${role.name} a été ajouté`, ephemeral: true});
                 debugMessage(interaction.guild, 'Rôle ``' + role.name + '`` ajouté pour ``' + interaction.user.tag + '``')
                 return "add";
             } catch (error) {
