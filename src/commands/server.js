@@ -468,7 +468,7 @@ public: false,
             .setLabel('Access the INT. channel. EN/ES/PT/Other')
             .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
             .setCustomId('server-calendrier_snowy')
-            .setLabel('Calendrier de Snowy')
+            .setLabel('Ami(e) de Snowy')
             .setStyle(ButtonStyle.Secondary))
 
         await interaction.channel.send({
