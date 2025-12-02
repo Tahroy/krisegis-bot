@@ -75,7 +75,7 @@ public: false,
         const command = commands[subCommand] || commands.default
         await command()
     }, async executeButton(interaction, buttonName) {
-        const rolesRP = ['horskrosmoz', 'hrp', 'event_server', 'event_all', 'rp_server', 'rp_all', 'international'];
+        const rolesRP = ['horskrosmoz', 'hrp', 'event_server', 'event_all', 'rp_server', 'rp_all', 'international', 'calendrier_snowy'];
         if (rolesRP.includes(buttonName)) {
             await this.addRemoveRP(interaction, buttonName)
             return;
@@ -402,6 +402,10 @@ public: false,
                 roleKey = 'role_international'
                 break
             }
+            case 'calendrier_snowy': {
+                roleKey = 'role_calendrier_snowy'
+                break
+            }
         }
 
         let roleID = await Variable.findOne({where: {name: roleKey}})
@@ -462,6 +466,9 @@ public: false,
             .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
             .setCustomId('server-international')
             .setLabel('Access the INT. channel. EN/ES/PT/Other')
+            .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
+            .setCustomId('server-calendrier_snowy')
+            .setLabel('Calendrier de Snowy')
             .setStyle(ButtonStyle.Secondary))
 
         await interaction.channel.send({
