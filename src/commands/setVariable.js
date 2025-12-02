@@ -28,7 +28,7 @@ public: false,
                       {name: "Rôle HRP", value: "role_hrp"},
                       {name: "Rôle Hors Krosmoz", value: "role_horskrosmoz"},
                       {name: "Rôle International", value: "role_international"},
-                      {name: "Ami(e) de Snowy", value: "calendrier_snowy"},
+                      {name: "Ami(e) de Snowy", value: "role_calendrier_snowy"},
                   )
         )
         .addStringOption(option =>
