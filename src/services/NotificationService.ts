@@ -30,7 +30,7 @@ export class NotificationService {
                     await PopulationService.updatePopulation(guild.id);
                     await PopulationService.annoncePopulation(client, guild.id);
                     await BreedingService.runDaily(client, guild);
-                    await SmashPassService.postDaily(guild, 'npc');
+                   // await SmashPassService.postDaily(guild, 'npc');
                 } catch (error) {
                     console.error(error);
                 }
@@ -72,6 +72,16 @@ export class NotificationService {
                 console.error("Erreur lors de la régénération des lancers de Nowel : ", error);
             }
         });
+
+        cron.schedule('10 10 * * *', async () => {
+            for (const guild of client.guilds.cache.values()) {
+                try {
+                    await SmashPassService.postDaily(guild, 'npc');
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        })
 
         cron.schedule('* 18 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
