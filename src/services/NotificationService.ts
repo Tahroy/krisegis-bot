@@ -73,7 +73,7 @@ export class NotificationService {
             }
         });
 
-        cron.schedule('10 11 * * *', async () => {
+        cron.schedule('0 9 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     console.log(`Smash or pass pour ${guild.id}`)
@@ -84,7 +84,7 @@ export class NotificationService {
             }
         })
 
-        cron.schedule('* 18 * * *', async () => {
+        cron.schedule('0 17 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await SmashPassService.postDaily(guild, 'monster');
