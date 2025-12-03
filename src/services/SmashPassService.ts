@@ -156,10 +156,12 @@ export default class SmashPassService {
         let channelVar = await Variable.findOne({ where: { name: 'channel_smash_or_pass', server: guild.id } });
 
         if (!channelVar) {
+            console.log(`Pas de canal smash or pass pour ${guild.id}`);
             return;
         }
-        const channel = guild.channels.cache.get(channelVar.data) as Channel | null;
+        const channel = await guild.channels.fetch(channelVar.data);
         if (!channel || !channel.isSendable()) {
+            console.log(`Impossible d'écrire dans le canal smash or pass pour ${guild.id}`);
             return;
         }
 
