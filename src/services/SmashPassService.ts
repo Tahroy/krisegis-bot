@@ -108,7 +108,9 @@ export default class SmashPassService {
 
         if (type === 'npc') {
             const npc = await this.getRandomNpc(guild.id);
-            if (!npc) return;
+            if (!npc) {
+                return;
+            }
             const imagePath = await npc.getImage();
             attachment = new AttachmentBuilder(imagePath, { name: `${npc.id}.png` });
             embedImage = `attachment://${npc.id}.png`;

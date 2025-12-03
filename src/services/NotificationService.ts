@@ -73,7 +73,7 @@ export class NotificationService {
             }
         });
 
-        cron.schedule('25 10 * * *', async () => {
+        cron.schedule('* 11 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     console.log(`Smash or pass pour ${guild.id}`)
