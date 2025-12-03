@@ -49,10 +49,10 @@ export default class SmashPassService {
     /**
      * Annonce le résultat du dernier round
      */
-    static async announceLastResult(guild: Guild, channel: TextChannel) {
+    static async announceLastResult(guild: Guild, channel: TextChannel, type: 'monster' | 'npc') {
         try {
             const lastRound = await SmashPassRound.findOne({
-                where: { guildId: guild.id },
+                where: { guildId: guild.id,  subjectType: type},
                 order: [['createdAt', 'DESC']],
             });
             if (!lastRound) {
@@ -112,7 +112,7 @@ export default class SmashPassService {
             const imagePath = await npc.getImage();
             attachment = new AttachmentBuilder(imagePath, { name: `${npc.id}.png` });
             embedImage = `attachment://${npc.id}.png`;
-            title = `Smash or Pass: ${npc.name}`;
+            title = `Smash or Pass : ${npc.name}`;
             roundData.subjectType = 'npc';
             roundData.npcId = npc.id;
             roundData.monsterId = null;
@@ -124,7 +124,7 @@ export default class SmashPassService {
             const imagePath = await monster.getImage();
             attachment = new AttachmentBuilder(imagePath, { name: `${monster.id}.png` });
             embedImage = `attachment://${monster.id}.png`;
-            title = `Smash or Pass: ${monster.name}`;
+            title = `Smash or Pass : ${monster.name}`;
             roundData.subjectType = 'monster';
             roundData.monsterId = monster.id;
             roundData.npcId = null;
@@ -163,8 +163,8 @@ export default class SmashPassService {
             return;
         }
 
-        await this.announceLastResult(guild, channel as TextChannel);
-        await this.presentNewRound(guild, channel as TextChannel, 'monster');
+        await this.announceLastResult(guild, channel as TextChannel, type);
+        await this.presentNewRound(guild, channel as TextChannel, type);
     }
 
     static async handleButton(interaction: ButtonInteraction) {
