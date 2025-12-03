@@ -14,6 +14,7 @@ import Pnj from "../commands/Pnj";
 import Wiki from "../commands/Wiki";
 import Nowel from '../commands/nowel/Nowel';
 import Kouinkouin from "../commands/kouinkouin";
+import SmashPass from "../commands/SmashPass";
 
 // Fonction pour charger les commandes
 export default function loadCommands(client: KrisegisClient): void {
@@ -52,7 +53,8 @@ export default function loadCommands(client: KrisegisClient): void {
         new Pnj(),
         new Wiki(),
         new Nowel(),
-        new Kouinkouin()
+        new Kouinkouin(),
+        new SmashPass()
     ];
 
     for (const command of commands) {

@@ -7,6 +7,7 @@ import BreedingService from "./BreedingService";
 import Nowel from "../models/nowel/Nowel";
 import { Op } from 'sequelize';
 import sequelize from '../utils/database';
+import SmashPassService from "./SmashPassService";
 
 /**
  * NotificationService
@@ -29,6 +30,7 @@ export class NotificationService {
                     await PopulationService.updatePopulation(guild.id);
                     await PopulationService.annoncePopulation(client, guild.id);
                     await BreedingService.runDaily(client, guild);
+                    await SmashPassService.postDaily(guild, 'npc');
                 } catch (error) {
                     console.error(error);
                 }
@@ -67,9 +69,19 @@ export class NotificationService {
                     { where: { remainingThrows: { [Op.lt]: 5 } } }
                 );
             } catch (error) {
-                console.error("Erreur lors de la régénération des lancers de Nowel:", error);
+                console.error("Erreur lors de la régénération des lancers de Nowel : ", error);
             }
         });
+
+        cron.schedule('* 18 * * *', async () => {
+            for (const guild of client.guilds.cache.values()) {
+                try {
+                    await SmashPassService.postDaily(guild, 'monster');
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        })
     }
 }
 

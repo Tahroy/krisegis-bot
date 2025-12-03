@@ -3,8 +3,6 @@ import sequelize from '../utils/database';
 import {PicturesManager} from "../utils/PicturesManager";
 import {join} from "path";
 
-const url_look = process.env.URL_LOOK;
-
 interface NpcAttributes {
     id: number;
     name: string;
@@ -17,8 +15,9 @@ class Npc extends Model<NpcAttributes> implements NpcAttributes {
     public look!: string;
 
     async getImage() {
+        const url_look = process.env.URL_LOOK;
         const hex = Buffer.from(this.look, 'utf8').toString('hex');
-
+        
         const img = `${url_look}/${hex}`
 
         await PicturesManager.fetchImageIfNeeded(img, `${this.id}.png`, '/npcs/');

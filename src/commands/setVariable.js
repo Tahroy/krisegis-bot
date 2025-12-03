@@ -29,6 +29,7 @@ public: false,
                       {name: "Rôle Hors Krosmoz", value: "role_horskrosmoz"},
                       {name: "Rôle International", value: "role_international"},
                       {name: "Ami(e) de Snowy", value: "role_calendrier_snowy"},
+                      {name: "Canal Smash or Pass", value: "channel_smash_or_pass"}
                   )
         )
         .addStringOption(option =>

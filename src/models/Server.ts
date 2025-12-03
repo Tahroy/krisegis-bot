@@ -43,9 +43,9 @@ Server.init({
         type: DataTypes.STRING, allowNull: true,
     },
 }, {
-    sequelize, // Instance Sequelize
-    modelName: 'Server', // Nom du modèle
-    timestamps: true, // Ajoute automatiquement createdAt et updatedAt
+    sequelize,
+    modelName: 'Server',
+    timestamps: true,
 });
 
 export default Server;

@@ -33,6 +33,8 @@ const Variable = require('../models/Variable').default
 const WelcomeMessage = require('../models/WelcomeMessage').default
 const Job = require('../models/astrub_economy/Job').default
 const Player = require('../models/astrub_economy/Player').default
+const SmashPassRound = require('../models/SmashPassRound').default
+const SmashPassVote = require('../models/SmashPassVote').default
 
 const eventReminderCheckInterval = 60 * 1000
 const eventReminderTime = 60 * 60 * 1000
@@ -66,6 +68,8 @@ module.exports = async function (client) {
         await Bouftou.sync();
         await BouftonnerieState.sync();
         await Nowel.sync();
+        await SmashPassRound.sync();
+        await SmashPassVote.sync();
         associate();
         console.log('BDD Synchro !')
     }
