@@ -108,7 +108,9 @@ export default class SmashPassService {
 
         if (type === 'npc') {
             const npc = await this.getRandomNpc(guild.id);
-            if (!npc) return;
+            if (!npc) {
+                return;
+            }
             const imagePath = await npc.getImage();
             attachment = new AttachmentBuilder(imagePath, { name: `${npc.id}.png` });
             embedImage = `attachment://${npc.id}.png`;
@@ -156,10 +158,12 @@ export default class SmashPassService {
         let channelVar = await Variable.findOne({ where: { name: 'channel_smash_or_pass', server: guild.id } });
 
         if (!channelVar) {
+            console.log(`Pas de canal smash or pass pour ${guild.id}`);
             return;
         }
-        const channel = guild.channels.cache.get(channelVar.data) as Channel | null;
+        const channel = await guild.channels.fetch(channelVar.data);
         if (!channel || !channel.isSendable()) {
+            console.log(`Impossible d'écrire dans le canal smash or pass pour ${guild.id}`);
             return;
         }
 

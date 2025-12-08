@@ -30,7 +30,7 @@ export class NotificationService {
                     await PopulationService.updatePopulation(guild.id);
                     await PopulationService.annoncePopulation(client, guild.id);
                     await BreedingService.runDaily(client, guild);
-                    await SmashPassService.postDaily(guild, 'npc');
+                   // await SmashPassService.postDaily(guild, 'npc');
                 } catch (error) {
                     console.error(error);
                 }
@@ -73,7 +73,18 @@ export class NotificationService {
             }
         });
 
-        cron.schedule('* 18 * * *', async () => {
+        cron.schedule('0 9 * * *', async () => {
+            for (const guild of client.guilds.cache.values()) {
+                try {
+                    console.log(`Smash or pass pour ${guild.id}`)
+                    await SmashPassService.postDaily(guild, 'npc');
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        })
+
+        cron.schedule('0 17 * * *', async () => {
             for (const guild of client.guilds.cache.values()) {
                 try {
                     await SmashPassService.postDaily(guild, 'monster');
