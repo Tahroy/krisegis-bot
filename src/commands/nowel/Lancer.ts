@@ -65,7 +65,20 @@ export default class Lancer extends AbstractSubCommand {
         const memberTarget = await interaction.guild?.members.fetch(target.id);
         const targetName = memberTarget?.nickname ?? target.globalName ?? target.username;
 
-        if (Math.random() < 0.5) {
+        // Gestion des tricheurs ;)
+        const cheaters = process.env.CHEATERS?.split(',').map(id => id.trim()) || [];
+        const isAttackerCheater = cheaters.includes(interaction.user.id);
+        const isTargetCheater = cheaters.includes(target.id);
+
+        let successChance = 0.5;
+        if (isAttackerCheater) {
+            successChance = 0.75;
+        }
+        if (isTargetCheater) {
+            successChance = 0.25;
+        }
+
+        if (Math.random() >= successChance) {
             await interaction.reply(`❄️ **${userName}** lance une boule de neige sur **${targetName}**, mais rate !`);
             return;
         }
