@@ -18,20 +18,20 @@
     "@discordjs/rest": "^2.0.0",
     "@types/node-cron": "^3.0.11",
     "app-root-path": "^3.0.0",
-    "axios": "^1.13.1",
+    "axios": "^1.15.0",
     "axios-extensions": "^3.1.6",
     "discord-api-types": "^0.37",
     "discord.js": "^14",
     "discord.js-buttons": "^1.0.0",
     "dotenv": "^17.2.3",
-    "jsdom": "^21.1.1",
+    "jsdom": "^29.0.2",
     "moment": "^2.29.4",
     "mysql2": "^3.3.3",
     "node-cron": "^3.0.0",
     "pm2": "^6.0.13",
     "sequelize": "^6.37.5",
     "sequelize-typescript": "^2.1.6",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^6.0.1"
   },
   "keywords": [],
   "devDependencies": {
