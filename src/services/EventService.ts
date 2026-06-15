@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs, { type Dayjs } from 'dayjs';
 import type {Guild, GuildScheduledEvent, Role, TextChannel, User} from 'discord.js';
 import type KrisegisClient from '../models/KrisegisClient';
 import Event from '../models/Event';
@@ -11,7 +11,7 @@ export default class EventService {
     private client: KrisegisClient;
 
     // Liste avec ID event en clef et timestamp en valeur (anti-spam)
-    private derniersEvenements: Record<string, moment.Moment> = {};
+    private derniersEvenements: Record<string, Dayjs> = {};
 
     constructor(client: KrisegisClient) {
         this.client = client;
@@ -186,7 +186,7 @@ export default class EventService {
 
         // On vérifie qu'il n'est pas déjà dans derniersEvenements
         if (this.derniersEvenements[eventId]) {
-            const secondsAgo = moment().diff(this.derniersEvenements[eventId], 'seconds');
+            const secondsAgo = dayjs().diff(this.derniersEvenements[eventId], 'seconds');
             if (secondsAgo < 30) {
                 console.log(`[UPDATE EVENT] Ignorer - événement ${eventId} traité il y a ${secondsAgo} secondes`);
                 return;
@@ -195,7 +195,7 @@ export default class EventService {
         }
 
         // On marque l'événement comme traité avant de continuer
-        this.derniersEvenements[eventId] = moment();
+        this.derniersEvenements[eventId] = dayjs();
 
         // On cherche l'évènement en BDD
         await Event.findOne({where: {guild: guild.id, id: guildScheduledEvent.id}}).then(async (event) => {
@@ -287,7 +287,7 @@ export default class EventService {
         const dateDebut = Math.floor((guildScheduledEvent.scheduledStartTimestamp ?? 0) / 1000);
         const dateFin = Math.floor((guildScheduledEvent.scheduledEndTimestamp ?? 0) / 1000);
 
-        moment.locale('fr');
+
 
         const dateDebutFR = `<t:${dateDebut}:F>`;
         const dateFinFR = `<t:${dateFin}:F>`;

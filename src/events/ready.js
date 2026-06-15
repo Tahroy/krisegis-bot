@@ -4,7 +4,7 @@ import PlayerHouse from "../models/astrub_economy/PlayerHouse";
 
 const {REST} = require('@discordjs/rest')
 const {Routes} = require('discord-api-types/v10')
-const moment = require('moment/moment')
+const dayjs = require('dayjs')
 const {readdirSync} = require("fs");
 const {join} = require("path");
 const Monster = require("../models/Monster").default;
@@ -264,8 +264,7 @@ module.exports = async function (client) {
                         const participantId = participant.id
                         try {
                             const user = await client.users.fetch(participantId)
-                            moment.locale('fr') // Définir la locale sur français
-                            const dateDebutFR = moment(guildEvent.scheduledStartTimestamp).format('HH:mm')
+                            const dateDebutFR = dayjs(guildEvent.scheduledStartTimestamp).format('HH:mm')
 
                             await user.send(`
 **__Rappel__** : L'événement **${guildEvent.name}** commence dans une heure sur **${event.serverName}** (**${dateDebutFR}**) !

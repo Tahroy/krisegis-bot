@@ -9,90 +9,147 @@ import { Op } from 'sequelize';
 import sequelize from '../utils/database';
 import SmashPassService from "./SmashPassService";
 
-/**
- * NotificationService
- * - Gère les rappels/notifications planifiés pour Astrub Économie
- */
+interface SchedulerConfig {
+    name: string;
+    cronExpression: string;
+    enabled: boolean;
+    handler: () => Promise<void>;
+}
+
 export class NotificationService {
+
     /**
-     * Démarre les tâches planifiées:
-     * - Chaque jour à 10h : mise à jour/annonce météo et population
-     * - Chaque heure : génération/annonce de quête et régénération des PV de Nowel
-     * - Toutes les 30 minutes : régénération des lancers de Nowel
+     * Astrub Économie - Nouvelle journée (chaque jour à 10h)
      */
-    static startSchedulers(client: KrisegisClient) {
-        // Quotidien à 10:00
-        cron.schedule('0 10 * * *', async () => {
-            for (const guild of client.guilds.cache.values()) {
-                try {
-                    await MeteoService.updateMeteo(guild.id);
-                    await MeteoService.annoncerMeteo(client, guild.id);
-                    await PopulationService.updatePopulation(guild.id);
-                    await PopulationService.annoncePopulation(client, guild.id);
-                    await BreedingService.runDaily(client, guild);
-                   // await SmashPassService.postDaily(guild, 'npc');
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        });
-
-        // Toutes les heures
-        cron.schedule('0 * * * *', async () => {
-            // Quests
-            for (const guild of client.guilds.cache.values()) {
-                try {
-                    await QuestService.generateAndAnnounceQuest(client, guild.id);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-
-            // Nowel HP Regeneration
+    private static async astrubEconomyNewDay(client: KrisegisClient): Promise<void> {
+        for (const guild of client.guilds.cache.values()) {
             try {
-                // Régénère 1 PV pour les joueurs ayant moins de 5 PV
-                await Nowel.update(
-                    { remainingHP: sequelize.literal('remainingHP + 1') },
-                    { where: { remainingHP: { [Op.lt]: 5 } } }
-                );
+                await MeteoService.updateMeteo(guild.id);
+                await MeteoService.annoncerMeteo(client, guild.id);
+                await PopulationService.updatePopulation(guild.id);
+                await PopulationService.annoncePopulation(client, guild.id);
+                await BreedingService.runDaily(client, guild);
             } catch (error) {
-                console.error("Erreur lors de la régénération des PV de Nowel:", error);
+                console.error(`[DailyMorning] Erreur pour la guilde ${guild.id}:`, error);
             }
-        });
+        }
+    }
 
-        // Toutes les 30 minutes
-        cron.schedule('*/30 * * * *', async () => {
+    /**
+     * Astrub Économie - Quêtes (toutes les heures)
+     */
+    private static async astrubEconomyQuests(client: KrisegisClient): Promise<void> {
+        for (const guild of client.guilds.cache.values()) {
             try {
-                // Régénère 1 lancer pour les joueurs ayant moins de 10 lancers
-                await Nowel.update(
-                    { remainingThrows: sequelize.literal('remainingThrows + 1') },
-                    { where: { remainingThrows: { [Op.lt]: 5 } } }
-                );
+                await QuestService.generateAndAnnounceQuest(client, guild.id);
             } catch (error) {
-                console.error("Erreur lors de la régénération des lancers de Nowel : ", error);
+                console.error(`[HourlyQuests] Erreur pour la guilde ${guild.id}:`, error);
             }
-        });
+        }
+    }
 
-        cron.schedule('0 9 * * *', async () => {
-            for (const guild of client.guilds.cache.values()) {
-                try {
-                    console.log(`Smash or pass pour ${guild.id}`)
-                    await SmashPassService.postDaily(guild, 'npc');
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        })
+    /**
+     * Nowel - Régénération des PV (toutes les heures)
+     */
+    private static async nowelHPRegen(): Promise<void> {
+        try {
+            await Nowel.update(
+                { remainingHP: sequelize.literal('remainingHP + 1') },
+                { where: { remainingHP: { [Op.lt]: 5 } } }
+            );
+        } catch (error) {
+            console.error("[NowelHPRegen] Erreur lors de la régénération des PV:", error);
+        }
+    }
 
-        cron.schedule('0 17 * * *', async () => {
-            for (const guild of client.guilds.cache.values()) {
-                try {
-                    await SmashPassService.postDaily(guild, 'monster');
-                } catch (error) {
-                    console.error(error);
-                }
+    /**
+     * Nowel - Nouvelles boules (toutes les 30 minutes)
+     */
+    private static async nowelThrowsRegen(): Promise<void> {
+        try {
+            await Nowel.update(
+                { remainingThrows: sequelize.literal('remainingThrows + 1') },
+                { where: { remainingThrows: { [Op.lt]: 5 } } }
+            );
+        } catch (error) {
+            console.error("[NowelThrowsRegen] Erreur lors de la régénération des lancers:", error);
+        }
+    }
+
+    /**
+     * Smash or Pass - PNJ (10h chaque jour)
+     */
+    private static async smashPassNPC(client: KrisegisClient): Promise<void> {
+        for (const guild of client.guilds.cache.values()) {
+            try {
+                console.log(`[SmashPassNPC] Smash or pass pour ${guild.id}`);
+                await SmashPassService.postDaily(guild, 'npc');
+            } catch (error) {
+                console.error(`[SmashPassNPC] Erreur pour la guilde ${guild.id}:`, error);
             }
-        })
+        }
+    }
+
+    /**
+     * Smash or Pass - Monstres (18h chaque jour)
+     */
+    private static async smashPassMonster(client: KrisegisClient): Promise<void> {
+        for (const guild of client.guilds.cache.values()) {
+            try {
+                await SmashPassService.postDaily(guild, 'monster');
+            } catch (error) {
+                console.error(`[SmashPassMonster] Erreur pour la guilde ${guild.id}:`, error);
+            }
+        }
+    }
+
+    static startSchedulers(client: KrisegisClient): void {
+        const schedulers: SchedulerConfig[] = [
+            {
+                name: 'AstrubEconomyNewDay',
+                cronExpression: '0 10 * * *',
+                enabled: false,
+                handler: () => this.astrubEconomyNewDay(client),
+            },
+            {
+                name: 'AstrubEconomyQuests',
+                cronExpression: '0 * * * *',
+                enabled: false,
+                handler: () => this.astrubEconomyQuests(client),
+            },
+            {
+                name: 'NowelHPRegen',
+                cronExpression: '0 * * * *',
+                enabled: true,
+                handler: () => this.nowelHPRegen(),
+            },
+            {
+                name: 'NowelThrowsRegen',
+                cronExpression: '*/30 * * * *',
+                enabled: true,
+                handler: () => this.nowelThrowsRegen(),
+            },
+            {
+                name: 'SmashPassNPC',
+                cronExpression: '0 9 * * *',
+                enabled: true,
+                handler: () => this.smashPassNPC(client),
+            },
+            {
+                name: 'SmashPassMonster',
+                cronExpression: '0 17 * * *',
+                enabled: true,
+                handler: () => this.smashPassMonster(client),
+            },
+        ];
+
+        for (const scheduler of schedulers) {
+            if (!scheduler.enabled) {
+                continue;
+            }
+
+            cron.schedule(scheduler.cronExpression, scheduler.handler);
+        }
     }
 }
 
