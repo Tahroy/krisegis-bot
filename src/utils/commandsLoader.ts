@@ -15,6 +15,7 @@ import Wiki from "../commands/Wiki";
 import Nowel from '../commands/nowel/Nowel';
 import Kouinkouin from "../commands/kouinkouin";
 import SmashPass from "../commands/SmashPass";
+import Familier from "../commands/tamagotchi/Familier";
 
 // Fonction pour charger les commandes
 export default function loadCommands(client: KrisegisClient): void {
@@ -54,7 +55,8 @@ export default function loadCommands(client: KrisegisClient): void {
         new Wiki(),
         new Nowel(),
         new Kouinkouin(),
-        new SmashPass()
+        new SmashPass(),
+        new Familier()
     ];
 
     for (const command of commands) {

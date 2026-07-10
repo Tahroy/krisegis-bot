@@ -17,6 +17,7 @@ import NotificationService from "../services/NotificationService";
 import Bouftou from "../models/astrub_economy/Bouftou";
 import BouftonnerieState from "../models/astrub_economy/BouftonnerieState";
 import Nowel from "../models/nowel/Nowel";
+import Pet from "../models/Pet";
 
 // Capture transpilé en JavaScript après compilation TypeScript
 const Capture = require('../models/Capture').default
@@ -70,6 +71,7 @@ module.exports = async function (client) {
         await Nowel.sync();
         await SmashPassRound.sync();
         await SmashPassVote.sync();
+        await Pet.sync();
         associate();
         console.log('BDD Synchro !')
     }
