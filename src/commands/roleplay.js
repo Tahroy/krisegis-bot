@@ -2,10 +2,9 @@ const { SlashCommandBuilder } = require('discord.js')
 const Server = require('../models/Server').default
 const Variable = require('../models/Variable').default
 const { debugMessage } = require('../utils/Utils')
-const Constantes = require("../utils/Constantes");
 
 module.exports = {
-public: false,
+    public: false,
     opts: {},
     data: new SlashCommandBuilder()
         .setName('roleplay')
@@ -23,58 +22,53 @@ public: false,
             .setRequired(true)
         ),
     async execute (interaction) {
+        await interaction.deferReply({ ephemeral: true });
+
         await this.sendGeneral(interaction);
         await this.sendServeur(interaction);
 
-        await interaction.reply(`Annonce RP envoyée o/`, { ephemeral: true })
+        await interaction.editReply({ content: `Annonce RP envoyée o/` });
     },
     async autocomplete (interaction) {
         const guild = interaction.guild
         const serverString = interaction.options.getString('serveur')
 
-        if (!serverString || serverString.length < 3) {
+        if (!serverString) {
             await interaction.respond([])
             return
         }
 
-        let retour = []
+        const servers = await Server.findAll({ where: { guild: guild.id } })
+        const retour = []
 
-        await Server.findAll({
-            where: { guild: guild.id, }
-        }).then(async servers => {
-            for (const server of servers) {
-                const role = await guild.roles.cache.find(role => role.id === server.id)
-                if (role.name && role.name.includes(serverString)) {
-                    retour.push({
-                        name: role.name,
-                        value: role.name
-                    })
-                }
+        for (const server of servers) {
+            const role = guild.roles.cache.get(server.id)
+            const name = server.name || role?.name
+            if (name && name.toLowerCase().includes(serverString.toLowerCase())) {
+                retour.push({ name, value: name })
             }
-        })
+        }
 
-        await interaction.respond(retour)
+        await interaction.respond(retour.slice(0, 25))
     },
     async sendGeneral (interaction) {
         const guild = interaction.guild
         const serveur = interaction.options.getString('serveur')
 
         const roleRPID = await Variable.findOne({ where: { name: 'alerte_rp_generale', server: guild.id } })
-
         if (!roleRPID) {
             debugMessage(interaction.guild, "Pas de rôle RP général");
             return;
         }
 
         const channelID = await Variable.findOne({ where: { name: 'rp_channel', server: guild.id } });
-
         if (!channelID) {
             debugMessage(interaction.guild, "Pas de rôle channel général");
             return;
         }
 
-        const roleRP = await guild.roles.cache.find(role => role.id === roleRPID.data)
-        const channelRP = await guild.channels.cache.find(channel => channel.id === channelID.data)
+        const roleRP = guild.roles.cache.get(roleRPID.data) || await guild.roles.fetch(roleRPID.data).catch(() => null);
+        const channelRP = guild.channels.cache.get(channelID.data) || await guild.channels.fetch(channelID.data).catch(() => null);
 
         if (!roleRP || !channelRP) {
             debugMessage(interaction.guild, "Pas de rôle channel général");
@@ -82,37 +76,39 @@ public: false,
         }
 
         const message = interaction.options.getString('message');
-        channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** !\n ${message}`)
+        await channelRP.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** !\n ${message}`);
     },
     async sendServeur (interaction) {
         const guild = interaction.guild
         const serveur = interaction.options.getString('serveur')
 
         const roleRPID = await Variable.findOne({ where: { name: 'alerte_rp_serveur', server: guild.id } })
-
         if (!roleRPID) {
             debugMessage(interaction.guild, "Pas de rôle RP serveur");
             return;
         }
 
-        const roleServer = await guild.roles.cache.find(role => role.name === serveur);
-        const server = await Server.findOne({ where: { id: roleServer.id } });
-        const channel = guild.channels.cache.find(channel => channel.id === server.channel);
+        const server = await Server.findOne({ where: { guild: guild.id, name: serveur } })
+            || await Server.findOne({ where: { id: serveur } });
 
-        if (!channel) {
-            debugMessage(interaction.guild, `Pas de rôle channel serveur pour ${channelName}`);
+        if (!server || !server.channel) {
+            debugMessage(interaction.guild, `Pas de configuration serveur pour ${serveur}`);
             return;
         }
 
-        const roleRP = await guild.roles.cache.find(role => role.id === roleRPID.data)
+        const channel = guild.channels.cache.get(server.channel) || await guild.channels.fetch(server.channel).catch(() => null);
+        if (!channel) {
+            debugMessage(interaction.guild, `Pas de channel serveur trouvé pour ${serveur}`);
+            return;
+        }
 
+        const roleRP = guild.roles.cache.get(roleRPID.data) || await guild.roles.fetch(roleRPID.data).catch(() => null);
         if (!roleRP) {
             debugMessage(interaction.guild, "Pas de rôle RP serveur");
             return;
         }
 
         const message = interaction.options.getString('message');
-
-        channel.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** !\n ${message}`)
+        await channel.send(`Hey ${roleRP}, il y a du RP en cours sur **${serveur}** !\n ${message}`);
     }
 }
